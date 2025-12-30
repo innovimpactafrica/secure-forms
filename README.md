@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Secure Link
 
 Une application mobile Flutter pour la gestion sécurisée de connexions et de liens.
@@ -126,3 +127,7 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 ## Support
 
 Pour toute question ou problème, veuillez ouvrir une issue sur GitHub.
+=======
+# secure-link-mobile
+Application mobile Flutter pour la gestion sécurisée de connexions et liens
+>>>>>>> ab7394afd4035afeb12d51f52f969ffb147a5a0f
