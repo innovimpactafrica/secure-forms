@@ -89,9 +89,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               top: 150,
               left: 24,
               right: 24,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              bottom: 250,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   // Titre
                   Text(
                     'Code de vérification',
@@ -191,7 +193,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       ),
                     ),
                   ),
-                ],
+                  ],
+                ),
               ),
             ),
             // Texte légal

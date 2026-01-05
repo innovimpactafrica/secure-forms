@@ -12,6 +12,14 @@ import 'pages/client/client_methode_screen.dart';
 import 'pages/client/nouvelle_demande/nouvelle_demande_steps_7_12.dart';
 import 'pages/client/nouvelle_demande/nouvelle_demande_step_8.dart';
 import 'pages/client/nouvelle_demande/nouvelle_demande_step_9.dart';
+import 'pages/client/detail_demande/detail_demande_screen.dart';
+import 'pages/client/detail_demande/detail_virement_screen.dart';
+import 'pages/client/detail_demande/detail_acte_vente_screen.dart';
+import 'pages/client/detail_demande/detail_pret_screen.dart';
+import 'pages/client/detail_demande/detail_ouverture_compte_screen.dart';
+import 'pages/client/detail_demande/detail_ouverture_compte_brouillon_screen.dart';
+import 'pages/client/client_profil_screen.dart';
+import 'pages/client/detail_demande/detail_ouverture_compte_continuer_screen.dart';
 import 'utils/app_routes.dart';
 
 void main() {
@@ -44,6 +52,14 @@ class SecureLinkApp extends StatelessWidget {
         AppRoutes.nouvelleDemandeStep7: (context) => const NouvelleDemandeStep7Screen(),
         AppRoutes.nouvelleDemandeStep8: (context) => const NouvelleDemandeStep8Screen(),
         AppRoutes.nouvelleDemandeStep9: (context) => const NouvelleDemandeStep9Screen(),
+        AppRoutes.detailDemande: (context) => const DetailDemandeScreen(),
+        AppRoutes.detailVirement: (context) => const DetailVirementScreen(),
+        AppRoutes.detailActeVente: (context) => const DetailActeVenteScreen(),
+        AppRoutes.detailPret: (context) => const DetailPretScreen(),
+        AppRoutes.detailOuvertureCompte: (context) => const DetailOuvertureCompteScreen(),
+        AppRoutes.detailOuvertureCompteBrouillon: (context) => const DetailOuvertureCompteBrouillonScreen(),
+        AppRoutes.clientProfil: (context) => const ClientProfilScreen(),
+        '/detail-ouverture-compte-continuer': (context) => const DetailOuvertureCompteContinuerScreen(),
       },
     );
   }

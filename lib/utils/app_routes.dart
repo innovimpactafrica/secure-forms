@@ -29,6 +29,12 @@ class AppRoutes {
   static const String nouvelleDemandeStep12 = '/nouvelle-demande-step-12';
   
   // Détails demande (différents statuts)
+  static const String detailDemande = '/detail-demande';
+  static const String detailVirement = '/detail-virement';
+  static const String detailActeVente = '/detail-acte-vente';
+  static const String detailPret = '/detail-pret';
+  static const String detailOuvertureCompte = '/detail-ouverture-compte';
+  static const String detailOuvertureCompteBrouillon = '/detail-ouverture-compte-brouillon';
   static const String detailDemandeRejet = '/detail-demande-rejet';
   static const String detailDemandeAttente = '/detail-demande-attente';
   static const String detailDemandeEnCours = '/detail-demande-en-cours';

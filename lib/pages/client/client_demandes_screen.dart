@@ -274,352 +274,377 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
                 child: Column(
                   children: [
                     // Card 1 - Ouverture de compte
-                    Container(
-                      height: 79,
-                      padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0x14FFFFFF)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0x0F000000),
-                            blurRadius: 48,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/logo.svg',
-                            width: 36,
-                            height: 36,
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Ouverture de compte',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    color: const Color(0xFF212121),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  'Banque Nationale • 18/12/2025',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 12,
-                                    color: const Color(0xFF6B7280),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushNamed(AppRoutes.detailOuvertureCompte);
+                      },
+                      child: Container(
+                        height: 79,
+                        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0x14FFFFFF)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0x0F000000),
+                              blurRadius: 48,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF2F5F9),
-                              borderRadius: BorderRadius.circular(999),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/icons/logo.svg',
+                              width: 36,
+                              height: 36,
                             ),
-                            child: Text(
-                              'Brouillon',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12,
-                                height: 1.0,
-                                color: const Color(0xFF6B7280),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Ouverture de compte',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: const Color(0xFF212121),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    'Banque Nationale • 18/12/2025',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 12,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF2F5F9),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                'Brouillon',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 12,
+                                  height: 1.0,
+                                  color: const Color(0xFF6B7280),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     // Card 2 - Demande de virement
-                    Container(
-                      height: 79,
-                      padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0x14FFFFFF)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0x0F000000),
-                            blurRadius: 48,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/logo (1).svg',
-                            width: 36,
-                            height: 36,
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Demande de virement',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    color: const Color(0xFF212121),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  'Banque Nationale • 12/12/2025',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 12,
-                                    color: const Color(0xFF6B7280),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushNamed(AppRoutes.detailVirement);
+                      },
+                      child: Container(
+                        height: 79,
+                        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0x14FFFFFF)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0x0F000000),
+                              blurRadius: 48,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0x1AF39C12),
-                              borderRadius: BorderRadius.circular(999),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/icons/logo (1).svg',
+                              width: 36,
+                              height: 36,
                             ),
-                            child: Text(
-                              'En attente',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12,
-                                height: 1.0,
-                                color: const Color(0xFFF39C12),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Demande de virement',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: const Color(0xFF212121),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    'Banque Nationale • 12/12/2025',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 12,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0x1AF39C12),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                'En attente',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 12,
+                                  height: 1.0,
+                                  color: const Color(0xFFF39C12),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     // Card 3 - Acte de vente
-                    Container(
-                      height: 79,
-                      padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0x14FFFFFF)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0x0F000000),
-                            blurRadius: 48,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/logo.svg',
-                            width: 36,
-                            height: 36,
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Acte de vente',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    color: const Color(0xFF212121),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  'Notaire X • 05/12/2025',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 12,
-                                    color: const Color(0xFF6B7280),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushNamed(AppRoutes.detailActeVente);
+                      },
+                      child: Container(
+                        height: 79,
+                        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0x14FFFFFF)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0x0F000000),
+                              blurRadius: 48,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0x0F3B83F6),
-                              borderRadius: BorderRadius.circular(999),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/icons/logo.svg',
+                              width: 36,
+                              height: 36,
                             ),
-                            child: Text(
-                              'En cours',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12,
-                                height: 1.0,
-                                color: const Color(0xFF3B83F6),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Acte de vente',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: const Color(0xFF212121),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    'Notaire X • 05/12/2025',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 12,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0x0F3B83F6),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                'En cours',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 12,
+                                  height: 1.0,
+                                  color: const Color(0xFF3B83F6),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     // Card 4 - Demande de prêt
-                    Container(
-                      height: 79,
-                      padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0x14FFFFFF)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0x0F000000),
-                            blurRadius: 48,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/logo.svg',
-                            width: 36,
-                            height: 36,
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Demande de prêt',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    color: const Color(0xFF212121),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  'Crédit Moderne • 12/11/2025',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 12,
-                                    color: const Color(0xFF6B7280),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushNamed(AppRoutes.detailPret);
+                      },
+                      child: Container(
+                        height: 79,
+                        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0x14FFFFFF)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0x0F000000),
+                              blurRadius: 48,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0x1A23A3A6),
-                              borderRadius: BorderRadius.circular(999),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/icons/logo.svg',
+                              width: 36,
+                              height: 36,
                             ),
-                            child: Text(
-                              'Validé',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12,
-                                height: 1.0,
-                                color: const Color(0xFF23A3A6),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Demande de prêt',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: const Color(0xFF212121),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    'Crédit Moderne • 12/11/2025',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 12,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0x1A23A3A6),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                'Validé',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 12,
+                                  height: 1.0,
+                                  color: const Color(0xFF23A3A6),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     // Card 5 - Carte de l'opposition
-                    Container(
-                      height: 79,
-                      padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0x14FFFFFF)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0x0F000000),
-                            blurRadius: 48,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/logo.svg',
-                            width: 36,
-                            height: 36,
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Carte de l\'opposition',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    color: const Color(0xFF212121),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  'Banque Nationale • 04/11/2025',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 12,
-                                    color: const Color(0xFF6B7280),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushNamed(AppRoutes.detailDemande);
+                      },
+                      child: Container(
+                        height: 79,
+                        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0x14FFFFFF)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0x0F000000),
+                              blurRadius: 48,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0x0FEF4444),
-                              borderRadius: BorderRadius.circular(999),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/icons/logo.svg',
+                              width: 36,
+                              height: 36,
                             ),
-                            child: Text(
-                              'Rejeté',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12,
-                                height: 1.0,
-                                color: const Color(0xFFEF4444),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Carte de l\'opposition',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: const Color(0xFF212121),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    'Banque Nationale • 04/11/2025',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 12,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0x0FEF4444),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                'Rejeté',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 12,
+                                  height: 1.0,
+                                  color: const Color(0xFFEF4444),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
