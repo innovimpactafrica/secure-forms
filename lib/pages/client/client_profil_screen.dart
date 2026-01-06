@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'client_informations_personnelles_screen.dart';
 import 'mes_beneficiaires_screen.dart';
 import 'mes_documents_screen.dart';
+import '../../utils/responsive_utils.dart';
 
 class ClientProfilScreen extends StatefulWidget {
   const ClientProfilScreen({super.key});
@@ -18,31 +19,31 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: 430,
-        height: 932,
+        width: ResponsiveUtils.getScreenWidth(context),
+        height: ResponsiveUtils.getScreenHeight(context),
         color: const Color(0xFF0B3C5C),
         child: Stack(
           children: [
             // Bouton retour
             Positioned(
-              top: 70,
-              left: 24,
+              top: ResponsiveUtils.getResponsiveHeight(context, 70),
+              left: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: GestureDetector(
                 onTap: () {
                   Navigator.of(context).pop();
                 },
                 child: Container(
-                  width: 50,
-                  height: 50,
+                  width: ResponsiveUtils.getResponsiveWidth(context, 50),
+                  height: ResponsiveUtils.getResponsiveHeight(context, 50),
                   decoration: BoxDecoration(
                     color: const Color(0x14FFFFFF),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 12)),
                   ),
                   child: Center(
                     child: Icon(
                       Icons.arrow_back,
                       color: Colors.white,
-                      size: 21.4,
+                      size: ResponsiveUtils.getResponsiveValue(context, 21.4),
                     ),
                   ),
                 ),
@@ -50,7 +51,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
             ),
             // Titre "Mon compte"
             Positioned(
-              top: 85,
+              top: ResponsiveUtils.getResponsiveHeight(context, 85),
               left: 0,
               right: 0,
               child: Text(
@@ -58,7 +59,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontWeight: FontWeight.w700,
-                  fontSize: 20,
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
                   height: 1.0,
                   color: Colors.white,
                 ),
@@ -651,35 +652,35 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        height: 280,
-        margin: EdgeInsets.symmetric(horizontal: 8),
+        height: ResponsiveUtils.getResponsiveHeight(context, 280),
+        margin: EdgeInsets.symmetric(horizontal: ResponsiveUtils.getResponsiveWidth(context, 8)),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 24)),
         ),
         child: Stack(
           children: [
             // Handle de la modal
             Positioned(
-              top: 12,
+              top: ResponsiveUtils.getResponsiveHeight(context, 12),
               left: 0,
               right: 0,
               child: Center(
                 child: Container(
-                  width: 40,
-                  height: 4,
+                  width: ResponsiveUtils.getResponsiveWidth(context, 40),
+                  height: ResponsiveUtils.getResponsiveHeight(context, 4),
                   decoration: BoxDecoration(
                     color: const Color(0x80212121),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 999)),
                   ),
                 ),
               ),
             ),
             // Titre "Changer la langue" avec icône fermeture
             Positioned(
-              top: 40,
-              left: 24,
-              right: 24,
+              top: ResponsiveUtils.getResponsiveHeight(context, 40),
+              left: ResponsiveUtils.getResponsiveWidth(context, 24),
+              right: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -688,7 +689,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                     style: TextStyle(
                       fontFamily: 'Inter',
                       fontWeight: FontWeight.w600,
-                      fontSize: 20,
+                      fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
                       height: 32 / 20,
                       letterSpacing: 0,
                       color: const Color(0xFF212121),
@@ -700,7 +701,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                     },
                     child: Icon(
                       Icons.close,
-                      size: 24,
+                      size: ResponsiveUtils.getResponsiveValue(context, 24),
                       color: Color(0xFF6B7280),
                     ),
                   ),
@@ -863,14 +864,14 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        height: 240,
-        margin: EdgeInsets.symmetric(horizontal: 8),
+        height: ResponsiveUtils.getResponsiveHeight(context, 240),
+        margin: EdgeInsets.symmetric(horizontal: ResponsiveUtils.getResponsiveWidth(context, 8)),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 24)),
         ),
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: EdgeInsets.all(ResponsiveUtils.getResponsiveValue(context, 24)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -879,25 +880,25 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontWeight: FontWeight.w600,
-                  fontSize: 24,
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 24),
                   height: 32 / 24,
                   letterSpacing: 0,
                   color: Color(0xFF212121),
                 ),
               ),
-              SizedBox(height: 12),
+              SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 12)),
               Text(
                 'Êtes-vous sûr de vouloir vous déconnectez ?',
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontWeight: FontWeight.w400,
-                  fontSize: 18,
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 18),
                   height: 32 / 18,
                   letterSpacing: 0,
                   color: Color(0xFF4F4F4F),
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 20)),
               Row(
                 children: [
                   Expanded(
@@ -906,10 +907,10 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                         Navigator.of(context).pop();
                       },
                       child: Container(
-                        height: 44,
+                        height: ResponsiveUtils.getResponsiveHeight(context, 44),
                         decoration: BoxDecoration(
                           color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 8)),
                         ),
                         child: Center(
                           child: Text(
@@ -917,7 +918,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                             style: TextStyle(
                               fontFamily: 'Inter',
                               fontWeight: FontWeight.w500,
-                              fontSize: 16,
+                              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                               color: Color(0xFF6B7280),
                             ),
                           ),
@@ -926,8 +927,8 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                     ),
                   ),
                   Container(
-                    width: 2,
-                    height: 20,
+                    width: ResponsiveUtils.getResponsiveWidth(context, 2),
+                    height: ResponsiveUtils.getResponsiveHeight(context, 20),
                     color: Color(0xFFD9D9D9),
                   ),
                   Expanded(
@@ -940,10 +941,10 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                         );
                       },
                       child: Container(
-                        height: 44,
+                        height: ResponsiveUtils.getResponsiveHeight(context, 44),
                         decoration: BoxDecoration(
                           color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 8)),
                         ),
                         child: Center(
                           child: Text(
@@ -951,7 +952,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                             style: TextStyle(
                               fontFamily: 'Inter',
                               fontWeight: FontWeight.w500,
-                              fontSize: 16,
+                              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                               color: Color(0xFF23A3A6),
                             ),
                           ),

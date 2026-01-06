@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../utils/app_routes.dart';
+import '../../utils/responsive_utils.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,41 +18,47 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SizedBox(
-        width: 430,
-        height: 932,
+        width: ResponsiveUtils.getScreenWidth(context),
+        height: ResponsiveUtils.getScreenHeight(context),
         child: Stack(
           children: [
             // Bouton retour
             Positioned(
-              top: 50,
-              left: 24,
+              top: ResponsiveUtils.getResponsiveHeight(context, 50),
+              left: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Container(
-                  width: 44,
-                  height: 44,
+                  width: ResponsiveUtils.getResponsiveWidth(context, 44),
+                  height: ResponsiveUtils.getResponsiveHeight(context, 44),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(22),
+                    borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 22)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.03),
-                        blurRadius: 32,
-                        offset: const Offset(-3, -3),
+                        blurRadius: ResponsiveUtils.getResponsiveValue(context, 32),
+                        offset: Offset(
+                          ResponsiveUtils.getResponsiveValue(context, -3),
+                          ResponsiveUtils.getResponsiveValue(context, -3),
+                        ),
                       ),
                       BoxShadow(
                         color: Colors.black.withOpacity(0.03),
-                        blurRadius: 32,
-                        offset: const Offset(3, 3),
+                        blurRadius: ResponsiveUtils.getResponsiveValue(context, 32),
+                        offset: Offset(
+                          ResponsiveUtils.getResponsiveValue(context, 3),
+                          ResponsiveUtils.getResponsiveValue(context, 3),
+                        ),
                       ),
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(7.54),
+                    padding: EdgeInsets.all(ResponsiveUtils.getResponsiveValue(context, 7.54)),
                     child: SvgPicture.asset(
                       'assets/icons/arrow-left.svg',
-                      width: 30.17,
-                      height: 30.17,
+                      width: ResponsiveUtils.getResponsiveWidth(context, 30.17),
+                      height: ResponsiveUtils.getResponsiveHeight(context, 30.17),
                     ),
                   ),
                 ),
@@ -59,20 +66,20 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             // Logo
             Positioned(
-              top: 56,
-              right: 24,
+              top: ResponsiveUtils.getResponsiveHeight(context, 56),
+              right: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: Image.asset(
                 'assets/images/securelink.png',
-                width: 131,
-                height: 32,
+                width: ResponsiveUtils.getResponsiveWidth(context, 131),
+                height: ResponsiveUtils.getResponsiveHeight(context, 32),
                 fit: BoxFit.contain,
               ),
             ),
             // Contenu principal
             Positioned(
-              top: 150,
-              left: 24,
-              right: 24,
+              top: ResponsiveUtils.getResponsiveHeight(context, 150),
+              left: ResponsiveUtils.getResponsiveWidth(context, 24),
+              right: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -82,81 +89,84 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(
                       fontFamily: 'Sofia Sans',
                       fontWeight: FontWeight.w600,
-                      fontSize: 24,
+                      fontSize: ResponsiveUtils.getResponsiveFontSize(context, 24),
                       height: 32 / 24,
                       color: const Color(0xFF0F1A14),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 16)),
                   // Texte explicatif
                   Text(
                     'Veuillez saisir votre numéro de téléphone.\nNous vous enverrons un code pour nous assurer que c\'est bien vous.',
                     style: TextStyle(
                       fontFamily: 'Sofia Sans',
                       fontWeight: FontWeight.w400,
-                      fontSize: 16,
+                      fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                       height: 24 / 16,
                       color: const Color(0xFF6B7280),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 24)),
                   // Champ téléphone
                   Container(
                     width: double.infinity,
-                    height: 54,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                    height: ResponsiveUtils.getResponsiveHeight(context, 54),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: ResponsiveUtils.getResponsiveWidth(context, 20),
+                      vertical: ResponsiveUtils.getResponsiveHeight(context, 15),
+                    ),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
+                      borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 100)),
                       border: Border.all(color: const Color(0xFFCBD5E1)),
                     ),
                     child: Row(
                       children: [
                         // Drapeau
                         Container(
-                          width: 24,
-                          height: 24,
+                          width: ResponsiveUtils.getResponsiveWidth(context, 24),
+                          height: ResponsiveUtils.getResponsiveHeight(context, 24),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 12)),
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 12)),
                             child: Image.asset(
                               'assets/images/flag_sn-1x1.png',
-                              width: 24,
-                              height: 24,
+                              width: ResponsiveUtils.getResponsiveWidth(context, 24),
+                              height: ResponsiveUtils.getResponsiveHeight(context, 24),
                               fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 8)),
                         // Chevron down
                         SvgPicture.asset(
                           'assets/icons/mdi-light_chevron-down.svg',
-                          width: 20,
-                          height: 20,
+                          width: ResponsiveUtils.getResponsiveWidth(context, 20),
+                          height: ResponsiveUtils.getResponsiveHeight(context, 20),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 8)),
                         // Séparateur
                         Container(
-                          width: 1,
-                          height: 16,
+                          width: ResponsiveUtils.getResponsiveWidth(context, 1),
+                          height: ResponsiveUtils.getResponsiveHeight(context, 16),
                           decoration: BoxDecoration(
                             color: const Color(0xFFD9D9D9),
-                            borderRadius: BorderRadius.circular(100),
+                            borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 100)),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 8)),
                         // Code pays
                         Text(
                           '+221',
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontWeight: FontWeight.w400,
-                            fontSize: 16,
+                            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                             color: const Color(0xFF333333),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 12)),
                         // Champ de saisie
                         Expanded(
                           child: TextField(
@@ -167,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               hintStyle: TextStyle(
                                 fontFamily: 'Inter',
                                 fontWeight: FontWeight.w400,
-                                fontSize: 16,
+                                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                                 color: const Color(0xFF9C9AA5),
                               ),
                               border: InputBorder.none,
@@ -178,7 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: TextStyle(
                               fontFamily: 'Inter',
                               fontWeight: FontWeight.w400,
-                              fontSize: 16,
+                              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                               color: const Color(0xFF333333),
                             ),
                           ),
@@ -191,15 +201,15 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             // Texte légal
             Positioned(
-              bottom: 170,
-              left: 24,
-              right: 24,
+              bottom: ResponsiveUtils.getResponsiveHeight(context, 170),
+              left: ResponsiveUtils.getResponsiveWidth(context, 24),
+              right: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: RichText(
                 text: TextSpan(
                   style: TextStyle(
                     fontFamily: 'Sofia Sans',
                     fontWeight: FontWeight.w400,
-                    fontSize: 14,
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                     color: const Color(0xFF6B7280),
                   ),
                   children: [
@@ -225,15 +235,15 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             // Bouton Suivant
             Positioned(
-              bottom: 80,
-              left: 24,
-              right: 24,
+              bottom: ResponsiveUtils.getResponsiveHeight(context, 80),
+              left: ResponsiveUtils.getResponsiveWidth(context, 24),
+              right: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: GestureDetector(
                 onTap: () {
                   Navigator.of(context).pushNamed(AppRoutes.otpVerification);
                 },
                 child: Container(
-                  height: 64,
+                  height: ResponsiveUtils.getResponsiveHeight(context, 64),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0B3C5C),
                     borderRadius: BorderRadius.circular(100),
