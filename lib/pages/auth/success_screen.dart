@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../utils/app_routes.dart';
+import '../../utils/responsive_utils.dart';
 
 class SuccessScreen extends StatefulWidget {
   const SuccessScreen({super.key});
@@ -27,12 +28,19 @@ class _SuccessScreenState extends State<SuccessScreen> {
       backgroundColor: const Color(0xFF424242),
       body: Center(
         child: Container(
-          width: 390,
-          height: 264,
-          padding: const EdgeInsets.fromLTRB(24, 50, 24, 50),
+          width: ResponsiveUtils.getResponsiveWidth(context, 390),
+          height: ResponsiveUtils.getResponsiveHeight(context, 264),
+          padding: EdgeInsets.fromLTRB(
+            ResponsiveUtils.getResponsiveWidth(context, 24),
+            ResponsiveUtils.getResponsiveHeight(context, 50),
+            ResponsiveUtils.getResponsiveWidth(context, 24),
+            ResponsiveUtils.getResponsiveHeight(context, 50),
+          ),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(
+              ResponsiveUtils.getResponsiveValue(context, 16),
+            ),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -40,38 +48,38 @@ class _SuccessScreenState extends State<SuccessScreen> {
               // Icône de validation
               SvgPicture.asset(
                 'assets/icons/Vector (16).svg',
-                width: 64,
-                height: 64,
+                width: ResponsiveUtils.getResponsiveWidth(context, 64),
+                height: ResponsiveUtils.getResponsiveHeight(context, 64),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 32)),
               // Titre "Compte créé"
               SizedBox(
-                width: 112,
-                height: 26,
+                width: ResponsiveUtils.getResponsiveWidth(context, 112),
+                height: ResponsiveUtils.getResponsiveHeight(context, 26),
                 child: Text(
                   'Compte créé',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: 'Sofia Sans',
                     fontWeight: FontWeight.w600,
-                    fontSize: 20,
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
                     height: 1.3,
                     color: const Color(0xFF212121),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 16)),
               // Sous-titre "Bienvenue sur votre espace"
               SizedBox(
-                width: 342,
-                height: 24,
+                width: ResponsiveUtils.getResponsiveWidth(context, 342),
+                height: ResponsiveUtils.getResponsiveHeight(context, 24),
                 child: Text(
                   'Bienvenue sur votre espace',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: 'Sofia Sans',
                     fontWeight: FontWeight.w400,
-                    fontSize: 18,
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 18),
                     height: 24 / 18,
                     color: const Color(0xFF0F1A14),
                   ),

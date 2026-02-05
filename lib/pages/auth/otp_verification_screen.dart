@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../utils/app_routes.dart';
+import '../../utils/responsive_utils.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   const OtpVerificationScreen({super.key});
@@ -32,42 +33,52 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SizedBox(
-        width: 430,
-        height: 932,
+        width: ResponsiveUtils.getScreenWidth(context),
+        height: ResponsiveUtils.getScreenHeight(context),
         child: Stack(
           children: [
             // Contenu principal de la page OTP
             // Bouton retour
             Positioned(
-              top: 50,
-              left: 24,
+              top: ResponsiveUtils.getResponsiveHeight(context, 50),
+              left: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Container(
-                  width: 44,
-                  height: 44,
+                  width: ResponsiveUtils.getResponsiveWidth(context, 44),
+                  height: ResponsiveUtils.getResponsiveHeight(context, 44),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(22),
+                    borderRadius: BorderRadius.circular(
+                      ResponsiveUtils.getResponsiveValue(context, 22),
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.03),
-                        blurRadius: 32,
-                        offset: const Offset(-3, -3),
+                        blurRadius: ResponsiveUtils.getResponsiveValue(context, 32),
+                        offset: Offset(
+                          ResponsiveUtils.getResponsiveValue(context, -3),
+                          ResponsiveUtils.getResponsiveValue(context, -3),
+                        ),
                       ),
                       BoxShadow(
                         color: Colors.black.withOpacity(0.03),
-                        blurRadius: 32,
-                        offset: const Offset(3, 3),
+                        blurRadius: ResponsiveUtils.getResponsiveValue(context, 32),
+                        offset: Offset(
+                          ResponsiveUtils.getResponsiveValue(context, 3),
+                          ResponsiveUtils.getResponsiveValue(context, 3),
+                        ),
                       ),
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(7.54),
+                    padding: EdgeInsets.all(
+                      ResponsiveUtils.getResponsiveValue(context, 7.54),
+                    ),
                     child: SvgPicture.asset(
                       'assets/icons/arrow-left.svg',
-                      width: 30.17,
-                      height: 30.17,
+                      width: ResponsiveUtils.getResponsiveWidth(context, 30.17),
+                      height: ResponsiveUtils.getResponsiveHeight(context, 30.17),
                     ),
                   ),
                 ),
@@ -75,21 +86,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             ),
             // Logo
             Positioned(
-              top: 56,
-              right: 24,
+              top: ResponsiveUtils.getResponsiveHeight(context, 56),
+              right: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: Image.asset(
                 'assets/images/securelink.png',
-                width: 131,
-                height: 32,
+                width: ResponsiveUtils.getResponsiveWidth(context, 131),
+                height: ResponsiveUtils.getResponsiveHeight(context, 32),
                 fit: BoxFit.contain,
               ),
             ),
             // Contenu principal
             Positioned(
-              top: 150,
-              left: 24,
-              right: 24,
-              bottom: 250,
+              top: ResponsiveUtils.getResponsiveHeight(context, 150),
+              left: ResponsiveUtils.getResponsiveWidth(context, 24),
+              right: ResponsiveUtils.getResponsiveWidth(context, 24),
+              bottom: ResponsiveUtils.getResponsiveHeight(context, 250),
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,24 +111,24 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     style: TextStyle(
                       fontFamily: 'Sofia Sans',
                       fontWeight: FontWeight.w600,
-                      fontSize: 24,
+                      fontSize: ResponsiveUtils.getResponsiveFontSize(context, 24),
                       height: 32 / 24,
                       color: const Color(0xFF0F1A14),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 16)),
                   // Texte explicatif
                   Text(
                     'Saisissez le code à 4 chiffres envoyé par téléphone au 77... .. 67',
                     style: TextStyle(
                       fontFamily: 'Sofia Sans',
                       fontWeight: FontWeight.w400,
-                      fontSize: 16,
+                      fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                       height: 24 / 16,
                       color: const Color(0xFF6B7280),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 40)),
                   // Champs OTP
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -127,11 +138,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       bool isFilled = _otpControllers[index].text.isNotEmpty;
                       
                       return Container(
-                        width: 60,
-                        height: 60,
+                        width: ResponsiveUtils.getResponsiveWidth(context, 60),
+                        height: ResponsiveUtils.getResponsiveHeight(context, 60),
                         decoration: BoxDecoration(
                           color: isActive ? const Color(0x1423A3A6) : const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(
+                            ResponsiveUtils.getResponsiveValue(context, 12),
+                          ),
                           border: isActive ? Border.all(color: const Color(0xFF23A3A6), width: 1) : null,
                         ),
                         child: TextField(
@@ -143,7 +156,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           style: TextStyle(
                             fontFamily: 'Sofia Sans',
                             fontWeight: FontWeight.w600,
-                            fontSize: 24,
+                            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 24),
                             color: const Color(0xFF0F1A14),
                           ),
                           decoration: InputDecoration(
@@ -163,7 +176,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       );
                     }),
                   ),
-                  const SizedBox(height: 40),
+                  SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 40)),
                   // Texte "Vous n'avez pas reçu de code ?"
                   Center(
                     child: Text(
@@ -171,12 +184,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       style: TextStyle(
                         fontFamily: 'Sofia Sans',
                         fontWeight: FontWeight.w400,
-                        fontSize: 16,
+                        fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                         color: const Color(0xFF6B7280),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 8)),
                   // Texte "Renvoyer le code"
                   Center(
                     child: Opacity(
@@ -186,7 +199,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w500,
-                          fontSize: 16,
+                          fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                           height: 1.0,
                           color: const Color(0xFF23A3A6),
                         ),
@@ -199,15 +212,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             ),
             // Texte légal
             Positioned(
-              bottom: 170,
-              left: 24,
-              right: 24,
+              bottom: ResponsiveUtils.getResponsiveHeight(context, 170),
+              left: ResponsiveUtils.getResponsiveWidth(context, 24),
+              right: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: RichText(
                 text: TextSpan(
                   style: TextStyle(
                     fontFamily: 'Sofia Sans',
                     fontWeight: FontWeight.w400,
-                    fontSize: 14,
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                     color: const Color(0xFF6B7280),
                   ),
                   children: [
@@ -233,24 +246,26 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             ),
             // Bouton Vérifier
             Positioned(
-              bottom: 80,
-              left: 24,
-              right: 24,
+              bottom: ResponsiveUtils.getResponsiveHeight(context, 80),
+              left: ResponsiveUtils.getResponsiveWidth(context, 24),
+              right: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: GestureDetector(
                 onTap: _showSuccess,
                 child: Container(
-                  height: 64,
+                  height: ResponsiveUtils.getResponsiveHeight(context, 64),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0B3C5C),
-                    borderRadius: BorderRadius.circular(100),
+                    borderRadius: BorderRadius.circular(
+                      ResponsiveUtils.getResponsiveValue(context, 100),
+                    ),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
                       'Vérifier',
                       style: TextStyle(
                         fontFamily: 'Sofia Sans',
                         fontWeight: FontWeight.w500,
-                        fontSize: 18,
+                        fontSize: ResponsiveUtils.getResponsiveFontSize(context, 18),
                         color: Colors.white,
                       ),
                     ),
@@ -261,21 +276,31 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             // Modal Success
             if (_showSuccessModal)
               Positioned(
-                bottom: 50,
-                left: 20,
-                right: 20,
+                bottom: ResponsiveUtils.getResponsiveHeight(context, 50),
+                left: ResponsiveUtils.getResponsiveWidth(context, 20),
+                right: ResponsiveUtils.getResponsiveWidth(context, 20),
                 child: Container(
-                  width: 390,
-                  height: 264,
-                  padding: const EdgeInsets.fromLTRB(24, 50, 24, 50),
+                  width: ResponsiveUtils.getResponsiveWidth(context, 390),
+                  height: ResponsiveUtils.getResponsiveHeight(context, 264),
+                  padding: EdgeInsets.fromLTRB(
+                    ResponsiveUtils.getResponsiveWidth(context, 24),
+                    ResponsiveUtils.getResponsiveHeight(context, 50),
+                    ResponsiveUtils.getResponsiveWidth(context, 24),
+                    ResponsiveUtils.getResponsiveHeight(context, 50),
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(
+                      ResponsiveUtils.getResponsiveValue(context, 16),
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
+                        blurRadius: ResponsiveUtils.getResponsiveValue(context, 10),
+                        offset: Offset(
+                          0,
+                          ResponsiveUtils.getResponsiveValue(context, 5),
+                        ),
                       ),
                     ],
                   ),
@@ -285,38 +310,38 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       // Icône de validation
                       SvgPicture.asset(
                         'assets/icons/Vector (16).svg',
-                        width: 64,
-                        height: 64,
+                        width: ResponsiveUtils.getResponsiveWidth(context, 64),
+                        height: ResponsiveUtils.getResponsiveHeight(context, 64),
                       ),
-                      const SizedBox(height: 32),
+                      SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 32)),
                       // Titre "Compte créé"
                       SizedBox(
-                        width: 112,
-                        height: 26,
+                        width: ResponsiveUtils.getResponsiveWidth(context, 112),
+                        height: ResponsiveUtils.getResponsiveHeight(context, 26),
                         child: Text(
                           'Compte créé',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Sofia Sans',
                             fontWeight: FontWeight.w600,
-                            fontSize: 20,
+                            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
                             height: 1.3,
                             color: const Color(0xFF212121),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 16)),
                       // Sous-titre "Bienvenue sur votre espace"
                       SizedBox(
-                        width: 342,
-                        height: 24,
+                        width: ResponsiveUtils.getResponsiveWidth(context, 342),
+                        height: ResponsiveUtils.getResponsiveHeight(context, 24),
                         child: Text(
                           'Bienvenue sur votre espace',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Sofia Sans',
                             fontWeight: FontWeight.w400,
-                            fontSize: 18,
+                            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 18),
                             height: 24 / 18,
                             color: const Color(0xFF0F1A14),
                           ),

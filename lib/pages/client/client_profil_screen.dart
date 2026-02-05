@@ -68,28 +68,32 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
             ),
             // Avatar "LD"
             Positioned(
-              top: 140,
+              top: ResponsiveUtils.getResponsiveHeight(context, 140),
               left: 0,
               right: 0,
               child: Center(
                 child: Container(
-                  width: 100,
-                  height: 100,
+                  width: ResponsiveUtils.getResponsiveWidth(context, 100),
+                  height: ResponsiveUtils.getResponsiveHeight(context, 100),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(125),
+                    borderRadius: BorderRadius.circular(
+                      ResponsiveUtils.getResponsiveValue(context, 125),
+                    ),
                   ),
                   child: Stack(
                     children: [
                       Positioned(
-                        top: 4,
-                        left: 4,
+                        top: ResponsiveUtils.getResponsiveHeight(context, 4),
+                        left: ResponsiveUtils.getResponsiveWidth(context, 4),
                         child: Container(
-                          width: 92,
-                          height: 92,
+                          width: ResponsiveUtils.getResponsiveWidth(context, 92),
+                          height: ResponsiveUtils.getResponsiveHeight(context, 92),
                           decoration: BoxDecoration(
                             color: const Color(0xFF23A3A6),
-                            borderRadius: BorderRadius.circular(125),
+                            borderRadius: BorderRadius.circular(
+                              ResponsiveUtils.getResponsiveValue(context, 125),
+                            ),
                             border: Border.all(color: const Color(0xFF0B3C5C), width: 4),
                           ),
                           child: Center(
@@ -98,7 +102,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                               style: TextStyle(
                                 fontFamily: 'Sofia Sans',
                                 fontWeight: FontWeight.w700,
-                                fontSize: 36,
+                                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 36),
                                 height: 1.0,
                                 color: Colors.white,
                               ),
@@ -113,7 +117,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
             ),
             // Nom utilisateur "Lamine DIEME"
             Positioned(
-              top: 260,
+              top: ResponsiveUtils.getResponsiveHeight(context, 260),
               left: 0,
               right: 0,
               child: Text(
@@ -121,7 +125,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                 style: TextStyle(
                   fontFamily: 'Sofia Sans',
                   fontWeight: FontWeight.w700,
-                  fontSize: 24,
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 24),
                   height: 1.0,
                   letterSpacing: 0,
                   color: Colors.white,
@@ -131,7 +135,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
             ),
             // Numéro de téléphone
             Positioned(
-              top: 285,
+              top: ResponsiveUtils.getResponsiveHeight(context, 285),
               left: 0,
               right: 0,
               child: Text(
@@ -139,7 +143,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                 style: TextStyle(
                   fontFamily: 'Sofia Sans',
                   fontWeight: FontWeight.w400,
-                  fontSize: 16,
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                   height: 30 / 16,
                   letterSpacing: 0,
                   color: Colors.white.withOpacity(0.7),
@@ -149,128 +153,150 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
             ),
             // Cartes container
             Positioned(
-              top: 330,
-              left: 24,
-              right: 24,
+              top: ResponsiveUtils.getResponsiveHeight(context, 330),
+              left: ResponsiveUtils.getResponsiveWidth(context, 24),
+              right: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Container(
-                    width: 170,
-                    height: 82,
-                    padding: EdgeInsets.fromLTRB(12, 16, 12, 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Color(0xFFE8EEE7), width: 1),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0x08000000),
-                          offset: Offset(3, 3),
-                          blurRadius: 3,
+                  Expanded(
+                    child: Container(
+                      height: ResponsiveUtils.getResponsiveHeight(context, 82),
+                      padding: EdgeInsets.fromLTRB(
+                        ResponsiveUtils.getResponsiveWidth(context, 12),
+                        ResponsiveUtils.getResponsiveHeight(context, 16),
+                        ResponsiveUtils.getResponsiveWidth(context, 12),
+                        ResponsiveUtils.getResponsiveHeight(context, 16),
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveUtils.getResponsiveValue(context, 8),
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Total demandes',
-                                style: TextStyle(
-                                  fontFamily: 'Sofia Sans',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
-                                  height: 1.0,
-                                  letterSpacing: 0,
-                                  color: Color(0xFF6B7280),
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                '12',
-                                style: TextStyle(
-                                  fontFamily: 'Sofia Sans',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 20,
-                                  height: 1.2,
-                                  letterSpacing: 0,
-                                  color: Color(0xFF212121),
-                                ),
-                              ),
-                            ],
+                        border: Border.all(color: Color(0xFFE8EEE7), width: 1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0x08000000),
+                            offset: Offset(
+                              ResponsiveUtils.getResponsiveValue(context, 3),
+                              ResponsiveUtils.getResponsiveValue(context, 3),
+                            ),
+                            blurRadius: ResponsiveUtils.getResponsiveValue(context, 3),
                           ),
-                        ),
-                        SvgPicture.asset(
-                          'assets/icons/logo.svg',
-                          width: 32,
-                          height: 32,
-                        ),
-                      ],
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Total demandes',
+                                  style: TextStyle(
+                                    fontFamily: 'Sofia Sans',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                                    height: 1.0,
+                                    letterSpacing: 0,
+                                    color: Color(0xFF6B7280),
+                                  ),
+                                ),
+                                SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 4)),
+                                Text(
+                                  '12',
+                                  style: TextStyle(
+                                    fontFamily: 'Sofia Sans',
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
+                                    height: 1.2,
+                                    letterSpacing: 0,
+                                    color: Color(0xFF212121),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SvgPicture.asset(
+                            'assets/icons/logo.svg',
+                            width: ResponsiveUtils.getResponsiveWidth(context, 32),
+                            height: ResponsiveUtils.getResponsiveHeight(context, 32),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  Container(
-                    width: 170,
-                    height: 82,
-                    padding: EdgeInsets.fromLTRB(12, 16, 12, 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Color(0xFFE8EEE7), width: 1),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0x08000000),
-                          offset: Offset(3, 3),
-                          blurRadius: 3,
+                  SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 16)),
+                  Expanded(
+                    child: Container(
+                      height: ResponsiveUtils.getResponsiveHeight(context, 82),
+                      padding: EdgeInsets.fromLTRB(
+                        ResponsiveUtils.getResponsiveWidth(context, 12),
+                        ResponsiveUtils.getResponsiveHeight(context, 16),
+                        ResponsiveUtils.getResponsiveWidth(context, 12),
+                        ResponsiveUtils.getResponsiveHeight(context, 16),
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveUtils.getResponsiveValue(context, 8),
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'En cours',
-                                style: TextStyle(
-                                  fontFamily: 'Sofia Sans',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
-                                  height: 1.0,
-                                  letterSpacing: 0,
-                                  color: Color(0xFF6B7280),
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                '10',
-                                style: TextStyle(
-                                  fontFamily: 'Sofia Sans',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 20,
-                                  height: 1.2,
-                                  letterSpacing: 0,
-                                  color: Color(0xFF212121),
-                                ),
-                              ),
-                            ],
+                        border: Border.all(color: Color(0xFFE8EEE7), width: 1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0x08000000),
+                            offset: Offset(
+                              ResponsiveUtils.getResponsiveValue(context, 3),
+                              ResponsiveUtils.getResponsiveValue(context, 3),
+                            ),
+                            blurRadius: ResponsiveUtils.getResponsiveValue(context, 3),
                           ),
-                        ),
-                        SvgPicture.asset(
-                          'assets/icons/bi_clock-history.svg',
-                          width: 24,
-                          height: 24,
-                          colorFilter: ColorFilter.mode(
-                            Color(0xFF3B83F6),
-                            BlendMode.srcIn,
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'En cours',
+                                  style: TextStyle(
+                                    fontFamily: 'Sofia Sans',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                                    height: 1.0,
+                                    letterSpacing: 0,
+                                    color: Color(0xFF6B7280),
+                                  ),
+                                ),
+                                SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 4)),
+                                Text(
+                                  '10',
+                                  style: TextStyle(
+                                    fontFamily: 'Sofia Sans',
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
+                                    height: 1.2,
+                                    letterSpacing: 0,
+                                    color: Color(0xFF212121),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                          SvgPicture.asset(
+                            'assets/icons/bi_clock-history.svg',
+                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
+                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
+                            colorFilter: ColorFilter.mode(
+                              Color(0xFF3B83F6),
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -278,128 +304,150 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
             ),
             // Deuxième rangée de cartes
             Positioned(
-              top: 428,
-              left: 24,
-              right: 24,
+              top: ResponsiveUtils.getResponsiveHeight(context, 428),
+              left: ResponsiveUtils.getResponsiveWidth(context, 24),
+              right: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Container(
-                    width: 170,
-                    height: 82,
-                    padding: EdgeInsets.fromLTRB(12, 16, 12, 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Color(0xFFE8EEE7), width: 1),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0x08000000),
-                          offset: Offset(3, 3),
-                          blurRadius: 3,
+                  Expanded(
+                    child: Container(
+                      height: ResponsiveUtils.getResponsiveHeight(context, 82),
+                      padding: EdgeInsets.fromLTRB(
+                        ResponsiveUtils.getResponsiveWidth(context, 12),
+                        ResponsiveUtils.getResponsiveHeight(context, 16),
+                        ResponsiveUtils.getResponsiveWidth(context, 12),
+                        ResponsiveUtils.getResponsiveHeight(context, 16),
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveUtils.getResponsiveValue(context, 8),
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Brouillons',
-                                style: TextStyle(
-                                  fontFamily: 'Sofia Sans',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
-                                  height: 1.0,
-                                  letterSpacing: 0,
-                                  color: Color(0xFF6B7280),
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                '01',
-                                style: TextStyle(
-                                  fontFamily: 'Sofia Sans',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 20,
-                                  height: 1.2,
-                                  letterSpacing: 0,
-                                  color: Color(0xFF212121),
-                                ),
-                              ),
-                            ],
+                        border: Border.all(color: Color(0xFFE8EEE7), width: 1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0x08000000),
+                            offset: Offset(
+                              ResponsiveUtils.getResponsiveValue(context, 3),
+                              ResponsiveUtils.getResponsiveValue(context, 3),
+                            ),
+                            blurRadius: ResponsiveUtils.getResponsiveValue(context, 3),
                           ),
-                        ),
-                        SvgPicture.asset(
-                          'assets/icons/carbon_rule-draft.svg',
-                          width: 24,
-                          height: 24,
-                          colorFilter: ColorFilter.mode(
-                            Colors.black.withOpacity(0.8),
-                            BlendMode.srcIn,
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Brouillons',
+                                  style: TextStyle(
+                                    fontFamily: 'Sofia Sans',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                                    height: 1.0,
+                                    letterSpacing: 0,
+                                    color: Color(0xFF6B7280),
+                                  ),
+                                ),
+                                SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 4)),
+                                Text(
+                                  '01',
+                                  style: TextStyle(
+                                    fontFamily: 'Sofia Sans',
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
+                                    height: 1.2,
+                                    letterSpacing: 0,
+                                    color: Color(0xFF212121),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                          SvgPicture.asset(
+                            'assets/icons/carbon_rule-draft.svg',
+                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
+                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
+                            colorFilter: ColorFilter.mode(
+                              Colors.black.withOpacity(0.8),
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  Container(
-                    width: 170,
-                    height: 82,
-                    padding: EdgeInsets.fromLTRB(12, 16, 12, 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Color(0xFFE8EEE7), width: 1),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0x08000000),
-                          offset: Offset(3, 3),
-                          blurRadius: 3,
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Container(
+                      height: ResponsiveUtils.getResponsiveHeight(context, 82),
+                      padding: EdgeInsets.fromLTRB(
+                        ResponsiveUtils.getResponsiveWidth(context, 12),
+                        ResponsiveUtils.getResponsiveHeight(context, 16),
+                        ResponsiveUtils.getResponsiveWidth(context, 12),
+                        ResponsiveUtils.getResponsiveHeight(context, 16),
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveUtils.getResponsiveValue(context, 8),
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Complétés',
-                                style: TextStyle(
-                                  fontFamily: 'Sofia Sans',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
-                                  height: 1.0,
-                                  letterSpacing: 0,
-                                  color: Color(0xFF6B7280),
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                '10',
-                                style: TextStyle(
-                                  fontFamily: 'Sofia Sans',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 20,
-                                  height: 1.2,
-                                  letterSpacing: 0,
-                                  color: Color(0xFF212121),
-                                ),
-                              ),
-                            ],
+                        border: Border.all(color: Color(0xFFE8EEE7), width: 1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0x08000000),
+                            offset: Offset(
+                              ResponsiveUtils.getResponsiveValue(context, 3),
+                              ResponsiveUtils.getResponsiveValue(context, 3),
+                            ),
+                            blurRadius: ResponsiveUtils.getResponsiveValue(context, 3),
                           ),
-                        ),
-                        SvgPicture.asset(
-                          'assets/icons/bi_check2-circle (1).svg',
-                          width: 24,
-                          height: 24,
-                        ),
-                      ],
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Complétés',
+                                  style: TextStyle(
+                                    fontFamily: 'Sofia Sans',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                                    height: 1.0,
+                                    letterSpacing: 0,
+                                    color: Color(0xFF6B7280),
+                                  ),
+                                ),
+                                SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 4)),
+                                Text(
+                                  '10',
+                                  style: TextStyle(
+                                    fontFamily: 'Sofia Sans',
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
+                                    height: 1.2,
+                                    letterSpacing: 0,
+                                    color: Color(0xFF212121),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SvgPicture.asset(
+                            'assets/icons/bi_check2-circle (1).svg',
+                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
+                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -407,20 +455,22 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
             ),
             // Nouveau container en bas
             Positioned(
-              top: 523,
-              left: 24,
-              right: 24,
+              top: ResponsiveUtils.getResponsiveHeight(context, 523),
+              left: ResponsiveUtils.getResponsiveWidth(context, 24),
+              right: ResponsiveUtils.getResponsiveWidth(context, 24),
               child: Container(
-                height: 250,
-                padding: EdgeInsets.all(24),
+                height: ResponsiveUtils.getResponsiveHeight(context, 250),
+                padding: EdgeInsets.all(ResponsiveUtils.getResponsiveValue(context, 24)),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(
+                    ResponsiveUtils.getResponsiveValue(context, 8),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 8),
+                    SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 8)),
                     // Informations personnelles
                     GestureDetector(
                       onTap: () {
@@ -435,21 +485,21 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                         children: [
                           SvgPicture.asset(
                             'assets/icons/bi_person-circle.svg',
-                            width: 24,
-                            height: 24,
+                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
+                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
                             colorFilter: ColorFilter.mode(
                               Color(0xFF23A3A6),
                               BlendMode.srcIn,
                             ),
                           ),
-                          SizedBox(width: 16),
+                          SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 16)),
                           Expanded(
                             child: Text(
                               'Informations personnelles',
                               style: TextStyle(
                                 fontFamily: 'Sofia Sans',
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                                 color: Color(0xFF374151),
                               ),
                             ),
@@ -457,12 +507,12 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                           Icon(
                             Icons.chevron_right,
                             color: Color(0xFF9CA3AF),
-                            size: 20,
+                            size: ResponsiveUtils.getResponsiveValue(context, 20),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 32),
+                    SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 32)),
                     // Mes bénéficiaires
                     GestureDetector(
                       onTap: () {
@@ -477,21 +527,21 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                         children: [
                           SvgPicture.asset(
                             'assets/icons/bi_people (3).svg',
-                            width: 24,
-                            height: 24,
+                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
+                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
                             colorFilter: ColorFilter.mode(
                               Color(0xFF23A3A6),
                               BlendMode.srcIn,
                             ),
                           ),
-                          SizedBox(width: 16),
+                          SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 16)),
                           Expanded(
                             child: Text(
                               'Mes bénéficiaires',
                               style: TextStyle(
                                 fontFamily: 'Sofia Sans',
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                                 color: Color(0xFF374151),
                               ),
                             ),
@@ -499,12 +549,12 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                           Icon(
                             Icons.chevron_right,
                             color: Color(0xFF9CA3AF),
-                            size: 20,
+                            size: ResponsiveUtils.getResponsiveValue(context, 20),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 32),
+                    SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 32)),
                     // Mes documents
                     GestureDetector(
                       onTap: () {
@@ -519,21 +569,21 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                         children: [
                           SvgPicture.asset(
                             'assets/icons/bi_file-earmark-text.svg',
-                            width: 24,
-                            height: 24,
+                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
+                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
                             colorFilter: ColorFilter.mode(
                               Color(0xFF23A3A6),
                               BlendMode.srcIn,
                             ),
                           ),
-                          SizedBox(width: 16),
+                          SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 16)),
                           Expanded(
                             child: Text(
                               'Mes documents',
                               style: TextStyle(
                                 fontFamily: 'Sofia Sans',
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                                 color: Color(0xFF374151),
                               ),
                             ),
@@ -541,12 +591,12 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                           Icon(
                             Icons.chevron_right,
                             color: Color(0xFF9CA3AF),
-                            size: 20,
+                            size: ResponsiveUtils.getResponsiveValue(context, 20),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 32),
+                    SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 32)),
                     // Langue
                     GestureDetector(
                       onTap: () {
@@ -556,21 +606,21 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                         children: [
                           SvgPicture.asset(
                             'assets/icons/material-symbols-light_language.svg',
-                            width: 24,
-                            height: 24,
+                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
+                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
                             colorFilter: ColorFilter.mode(
                               Color(0xFF23A3A6),
                               BlendMode.srcIn,
                             ),
                           ),
-                          SizedBox(width: 16),
+                          SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 16)),
                           Expanded(
                             child: Text(
                               'Langue',
                               style: TextStyle(
                                 fontFamily: 'Sofia Sans',
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                                 color: Color(0xFF374151),
                               ),
                             ),
@@ -580,15 +630,15 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                             style: TextStyle(
                               fontFamily: 'Sofia Sans',
                               fontWeight: FontWeight.w400,
-                              fontSize: 14,
+                              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                               color: Color(0xFF9CA3AF),
                             ),
                           ),
-                          SizedBox(width: 8),
+                          SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 8)),
                           Icon(
                             Icons.chevron_right,
                             color: Color(0xFF9CA3AF),
-                            size: 20,
+                            size: ResponsiveUtils.getResponsiveValue(context, 20),
                           ),
                         ],
                       ),
@@ -599,38 +649,40 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
             ),
             // Bouton de déconnexion
             Positioned(
-              top: 783,
-              left: 20,
-              right: 20,
+              top: ResponsiveUtils.getResponsiveHeight(context, 783),
+              left: ResponsiveUtils.getResponsiveWidth(context, 20),
+              right: ResponsiveUtils.getResponsiveWidth(context, 20),
               child: GestureDetector(
                 onTap: () {
                   _showDeconnexionModal(context);
                 },
                 child: Container(
-                  height: 60,
-                  padding: EdgeInsets.all(20),
+                  height: ResponsiveUtils.getResponsiveHeight(context, 60),
+                  padding: EdgeInsets.all(ResponsiveUtils.getResponsiveValue(context, 20)),
                   decoration: BoxDecoration(
                     color: Color(0xFF0A324A),
-                    borderRadius: BorderRadius.circular(100),
+                    borderRadius: BorderRadius.circular(
+                      ResponsiveUtils.getResponsiveValue(context, 100),
+                    ),
                   ),
                   child: Row(
                     children: [
                       SvgPicture.asset(
                         'assets/icons/bi_box-arrow-left.svg',
-                        width: 24,
-                        height: 24,
+                        width: ResponsiveUtils.getResponsiveWidth(context, 24),
+                        height: ResponsiveUtils.getResponsiveHeight(context, 24),
                         colorFilter: ColorFilter.mode(
                           Color(0xFF23A3A6),
                           BlendMode.srcIn,
                         ),
                       ),
-                      SizedBox(width: 12),
+                      SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 12)),
                       Text(
                         'Se déconnecter',
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w500,
-                          fontSize: 16,
+                          fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                           height: 1.0,
                           letterSpacing: 0,
                           color: Colors.white,
@@ -723,132 +775,134 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                     ),
                   ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: [
-                      // Option Français
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedLanguage = 'Français';
-                          });
-                          Navigator.of(context).pop();
-                        },
-                        child: Container(
-                          height: 56,
-                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                          decoration: BoxDecoration(
-                            color: selectedLanguage == 'Français' ? Color(0xFFF0FDFA) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: selectedLanguage == 'Français' ? Color(0xFF23A3A6) : Color(0xFFE5E7EB),
-                              width: 1,
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        // Option Français
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedLanguage = 'Français';
+                            });
+                            Navigator.of(context).pop();
+                          },
+                          child: Container(
+                            height: 56,
+                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: selectedLanguage == 'Français' ? Color(0xFFF0FDFA) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: selectedLanguage == 'Français' ? Color(0xFF23A3A6) : Color(0xFFE5E7EB),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Image.asset(
+                                  'assets/images/image 2.png',
+                                  width: 24,
+                                  height: 24,
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Français',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                      color: Color(0xFF374151),
+                                    ),
+                                  ),
+                                ),
+                                if (selectedLanguage == 'Français')
+                                  Icon(
+                                    Icons.check_circle,
+                                    color: Color(0xFF23A3A6),
+                                    size: 20,
+                                  )
+                                else
+                                  Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Color(0xFFD1D5DB),
+                                        width: 2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              Image.asset(
-                                'assets/images/image 2.png',
-                                width: 24,
-                                height: 24,
-                              ),
-                              SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  'Français',
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16,
-                                    color: Color(0xFF374151),
-                                  ),
-                                ),
-                              ),
-                              if (selectedLanguage == 'Français')
-                                Icon(
-                                  Icons.check_circle,
-                                  color: Color(0xFF23A3A6),
-                                  size: 20,
-                                )
-                              else
-                                Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: Color(0xFFD1D5DB),
-                                      width: 2,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                            ],
-                          ),
                         ),
-                      ),
-                      SizedBox(height: 12),
-                      // Option Anglais
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedLanguage = 'Anglais';
-                          });
-                          Navigator.of(context).pop();
-                        },
-                        child: Container(
-                          height: 56,
-                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                          decoration: BoxDecoration(
-                            color: selectedLanguage == 'Anglais' ? Color(0xFFF0FDFA) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: selectedLanguage == 'Anglais' ? Color(0xFF23A3A6) : Color(0xFFE5E7EB),
-                              width: 1,
+                        SizedBox(height: 12),
+                        // Option Anglais
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedLanguage = 'Anglais';
+                            });
+                            Navigator.of(context).pop();
+                          },
+                          child: Container(
+                            height: 56,
+                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: selectedLanguage == 'Anglais' ? Color(0xFFF0FDFA) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: selectedLanguage == 'Anglais' ? Color(0xFF23A3A6) : Color(0xFFE5E7EB),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Image.asset(
+                                  'assets/images/image 3.png',
+                                  width: 24,
+                                  height: 24,
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Anglais',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                      color: Color(0xFF374151),
+                                    ),
+                                  ),
+                                ),
+                                if (selectedLanguage == 'Anglais')
+                                  Icon(
+                                    Icons.check_circle,
+                                    color: Color(0xFF23A3A6),
+                                    size: 20,
+                                  )
+                                else
+                                  Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Color(0xFFD1D5DB),
+                                        width: 2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              Image.asset(
-                                'assets/images/image 3.png',
-                                width: 24,
-                                height: 24,
-                              ),
-                              SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  'Anglais',
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16,
-                                    color: Color(0xFF374151),
-                                  ),
-                                ),
-                              ),
-                              if (selectedLanguage == 'Anglais')
-                                Icon(
-                                  Icons.check_circle,
-                                  color: Color(0xFF23A3A6),
-                                  size: 20,
-                                )
-                              else
-                                Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: Color(0xFFD1D5DB),
-                                      width: 2,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                            ],
-                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
