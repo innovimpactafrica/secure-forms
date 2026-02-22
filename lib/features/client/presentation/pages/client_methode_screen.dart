@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class ClientMethodeScreen extends StatefulWidget {
   const ClientMethodeScreen({super.key});
@@ -17,25 +19,25 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          width: 430,
-          height: 932,
-          color: const Color(0xFF0B3C5C),
+          width: AppConstants.screenWidth,
+          height: AppConstants.screenHeight,
+          color: AppColors.background,
           child: Stack(
             children: [
               // Bouton retour
               Positioned(
                 top: 70,
-                left: 24,
+                left: AppConstants.paddingXLarge,
                 child: GestureDetector(
                   onTap: () {
                     Navigator.of(context).pop();
                   },
                   child: Container(
-                    width: 50,
-                    height: 50,
+                    width: AppConstants.backButtonSize,
+                    height: AppConstants.backButtonSize,
                     decoration: BoxDecoration(
-                      color: const Color(0x14FFFFFF),
-                      borderRadius: BorderRadius.circular(12),
+                      color: AppColors.whiteOverlay,
+                      borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                     ),
                     child: Center(
                       child: SvgPicture.asset(
@@ -55,8 +57,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                   'Ouverture de compte',
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
-                    fontSize: 20,
-                    color: Colors.white,
+                    fontSize: AppConstants.fontSizeXXLarge,
+                    color: AppColors.white,
                   ),
                 ),
               ),
@@ -67,35 +69,35 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                 child: Text(
                   'Banque Nationale',
                   style: TextStyle(
-                    fontFamily: 'Sofia Sans',
+                    fontFamily: AppConstants.fontFamilySofiaSans,
                     fontWeight: FontWeight.w500,
-                    fontSize: 12,
+                    fontSize: AppConstants.fontSizeRegular,
                     height: 1.0,
                     letterSpacing: 0,
-                    color: Colors.white.withValues(alpha:0.6),
+                    color: AppColors.whiteOpacity(0.6),
                   ),
                 ),
               ),
               // Barre de progression
               Positioned(
                 top: 140,
-                left: 24,
+                left: AppConstants.paddingXLarge,
                 child: Stack(
                   children: [
                     Container(
-                      width: 320,
-                      height: 4,
+                      width: AppConstants.progressBarWidth,
+                      height: AppConstants.progressBarHeight,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFDEE8EE),
-                        borderRadius: BorderRadius.circular(100),
+                        color: AppColors.progressBar,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                       ),
                     ),
                     Container(
                       width: 128,
-                      height: 4,
+                      height: AppConstants.progressBarHeight,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF23A3A6),
-                        borderRadius: BorderRadius.circular(100),
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                       ),
                     ),
                   ],
@@ -108,12 +110,12 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                 child: Text(
                   '2/5',
                   style: TextStyle(
-                    fontFamily: 'Inter',
+                    fontFamily: AppConstants.fontFamilyInter,
                     fontWeight: FontWeight.w500,
-                    fontSize: 14,
+                    fontSize: AppConstants.fontSizeMedium,
                     height: 1.0,
                     letterSpacing: 0,
-                    color: const Color(0xFF6F8A99),
+                    color: AppColors.textLightGray,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -121,35 +123,35 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
               // Titre principal
               Positioned(
                 top: 180,
-                left: 24,
+                left: AppConstants.paddingXLarge,
                 child: Text(
                   'Comment souhaitez-vous remplir le formulaire ?',
                   style: TextStyle(
-                    fontFamily: 'Inter',
+                    fontFamily: AppConstants.fontFamilyInter,
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
                     height: 24 / 15,
                     letterSpacing: 0,
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 ),
               ),
               // Sous-titre descriptif
               Positioned(
                 top: 207,
-                left: 24,
+                left: AppConstants.paddingXLarge,
                 child: SizedBox(
                   width: 332,
                   height: 24,
                   child: Text(
                     'Choisissez la méthode qui vous convient le mieux.',
                     style: TextStyle(
-                      fontFamily: 'Inter',
+                      fontFamily: AppConstants.fontFamilyInter,
                       fontWeight: FontWeight.w400,
-                      fontSize: 14,
+                      fontSize: AppConstants.fontSizeMedium,
                       height: 24 / 14,
                       letterSpacing: 0,
-                      color: const Color(0xFFFFFFFF).withValues(alpha:0.7),
+                      color: AppColors.whiteOpacity(0.7),
                     ),
                   ),
                 ),
@@ -157,22 +159,27 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
               // Container principal des options
               Positioned(
                 top: 255,
-                left: 24,
-                right: 24,
+                left: AppConstants.paddingXLarge,
+                right: AppConstants.paddingXLarge,
                 child: Container(
                   height: 568,
-                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                  padding: EdgeInsets.fromLTRB(
+                    AppConstants.paddingLarge,
+                    AppConstants.paddingXLarge,
+                    AppConstants.paddingLarge,
+                    AppConstants.paddingXLarge,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                     border: Border.all(
-                      color: const Color(0xFFE8EEE7),
-                      width: 1,
+                      color: AppColors.border,
+                      width: AppConstants.borderWidthThin,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0x08000000),
-                        blurRadius: 3,
+                        color: AppColors.shadowDark,
+                        blurRadius: AppConstants.elevationMedium,
                         offset: const Offset(3, 3),
                       ),
                     ],
@@ -191,11 +198,11 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                           height: 244,
                           padding: const EdgeInsets.fromLTRB(17, 20, 17, 20),
                           decoration: BoxDecoration(
-                            color: selectedOption == 1 ? const Color(0x1423A3A6) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
+                            color: selectedOption == 1 ? AppColors.primaryLight : Colors.transparent,
+                            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
                             border: Border.all(
-                              color: selectedOption == 1 ? const Color(0xFF23A3A6) : const Color(0xFFCBD5E1),
-                              width: selectedOption == 1 ? 1.5 : 1,
+                              color: selectedOption == 1 ? AppColors.primary : AppColors.borderGray,
+                              width: selectedOption == 1 ? AppConstants.borderWidthMedium : AppConstants.borderWidthThin,
                             ),
                           ),
                           child: Column(
@@ -203,11 +210,11 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                             children: [
                               // Icône crayon
                               Container(
-                                width: 40,
-                                height: 40,
+                                width: AppConstants.iconSizeHuge,
+                                height: AppConstants.iconSizeHuge,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF3F4F6),
-                                  borderRadius: BorderRadius.circular(8.16),
+                                  color: AppColors.gray,
+                                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
                                 ),
                                 child: Stack(
                                   children: [
@@ -216,107 +223,107 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                                       left: 12,
                                       child: SvgPicture.asset(
                                         'assets/icons/bi_pencil (1).svg',
-                                        width: 16,
-                                        height: 16,
+                                        width: AppConstants.iconSizeSmall,
+                                        height: AppConstants.iconSizeSmall,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: AppConstants.paddingLarge),
                               // Titre
                               Text(
                                 'Remplir en ligne',
                                 style: TextStyle(
-                                  fontFamily: 'Inter',
+                                  fontFamily: AppConstants.fontFamilyInter,
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 18,
+                                  fontSize: AppConstants.fontSizeXLarge,
                                   height: 24 / 18,
                                   letterSpacing: 0,
-                                  color: const Color(0xFF111827),
+                                  color: AppColors.textBlack,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: AppConstants.paddingSmall),
                               // Description
                               Text(
                                 'Remplissez le formulaire directement dans votre navigateur grâce à notre éditeur sécurisé.',
                                 style: TextStyle(
-                                  fontFamily: 'Inter',
+                                  fontFamily: AppConstants.fontFamilyInter,
                                   fontWeight: FontWeight.w400,
-                                  fontSize: 12,
+                                  fontSize: AppConstants.fontSizeRegular,
                                   height: 16 / 12,
                                   letterSpacing: 0,
-                                  color: const Color(0xFF6B7280),
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: AppConstants.paddingLarge),
                               // Avantages
                               Row(
                                 children: [
                                   SvgPicture.asset(
                                     'assets/icons/bi_check2-circle (1).svg',
-                                    width: 16,
-                                    height: 16,
+                                    width: AppConstants.iconSizeSmall,
+                                    height: AppConstants.iconSizeSmall,
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: AppConstants.paddingSmall),
                                   Expanded(
                                     child: Text(
                                       'Expérience guidée',
                                       style: TextStyle(
-                                        fontFamily: 'Inter',
+                                        fontFamily: AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 12,
+                                        fontSize: AppConstants.fontSizeRegular,
                                         height: 16 / 12,
                                         letterSpacing: 0,
-                                        color: const Color(0xFF6B7280),
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: AppConstants.paddingSmall),
                               Row(
                                 children: [
                                   SvgPicture.asset(
                                     'assets/icons/bi_check2-circle (1).svg',
-                                    width: 16,
-                                    height: 16,
+                                    width: AppConstants.iconSizeSmall,
+                                    height: AppConstants.iconSizeSmall,
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: AppConstants.paddingSmall),
                                   Expanded(
                                     child: Text(
                                       'Sauvegarde automatique de la progression',
                                       style: TextStyle(
-                                        fontFamily: 'Inter',
+                                        fontFamily: AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 12,
+                                        fontSize: AppConstants.fontSizeRegular,
                                         height: 16 / 12,
                                         letterSpacing: 0,
-                                        color: const Color(0xFF6B7280),
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: AppConstants.paddingSmall),
                               Row(
                                 children: [
                                   SvgPicture.asset(
                                     'assets/icons/bi_check2-circle (1).svg',
-                                    width: 16,
-                                    height: 16,
+                                    width: AppConstants.iconSizeSmall,
+                                    height: AppConstants.iconSizeSmall,
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: AppConstants.paddingSmall),
                                   Expanded(
                                     child: Text(
                                       'Signature électronique instantanée',
                                       style: TextStyle(
-                                        fontFamily: 'Inter',
+                                        fontFamily: AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 12,
+                                        fontSize: AppConstants.fontSizeRegular,
                                         height: 16 / 12,
                                         letterSpacing: 0,
-                                        color: const Color(0xFF6B7280),
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
                                   ),
@@ -326,7 +333,7 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: AppConstants.paddingMedium),
                       // Card 2 - Télécharger hors ligne
                       GestureDetector(
                         onTap: () {
@@ -339,11 +346,11 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                           height: 244,
                           padding: const EdgeInsets.fromLTRB(17, 20, 17, 20),
                           decoration: BoxDecoration(
-                            color: selectedOption == 2 ? const Color(0x1423A3A6) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
+                            color: selectedOption == 2 ? AppColors.primaryLight : Colors.transparent,
+                            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
                             border: Border.all(
-                              color: selectedOption == 2 ? const Color(0xFF23A3A6) : const Color(0xFFCBD5E1),
-                              width: selectedOption == 2 ? 1.5 : 1,
+                              color: selectedOption == 2 ? AppColors.primary : AppColors.borderGray,
+                              width: selectedOption == 2 ? AppConstants.borderWidthMedium : AppConstants.borderWidthThin,
                             ),
                           ),
                           child: Column(
@@ -351,11 +358,11 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                             children: [
                               // Icône téléchargement
                               Container(
-                                width: 40,
-                                height: 40,
+                                width: AppConstants.iconSizeHuge,
+                                height: AppConstants.iconSizeHuge,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF3F4F6),
-                                  borderRadius: BorderRadius.circular(8.16),
+                                  color: AppColors.gray,
+                                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
                                 ),
                                 child: Stack(
                                   children: [
@@ -364,107 +371,107 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                                       left: 12,
                                       child: SvgPicture.asset(
                                         'assets/icons/Group (1).svg',
-                                        width: 16,
-                                        height: 16,
+                                        width: AppConstants.iconSizeSmall,
+                                        height: AppConstants.iconSizeSmall,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: AppConstants.paddingLarge),
                               // Titre
                               Text(
                                 'Téléchargez et remplissez hors ligne',
                                 style: TextStyle(
-                                  fontFamily: 'Inter',
+                                  fontFamily: AppConstants.fontFamilyInter,
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                                  fontSize: AppConstants.fontSizeMedium,
                                   height: 24 / 14,
                                   letterSpacing: 0,
-                                  color: const Color(0xFF111827),
+                                  color: AppColors.textBlack,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: AppConstants.paddingSmall),
                               // Description
                               Text(
                                 'Téléchargez le PDF officiel, remplissez-le à votre rythme et téléchargez-le en toute sécurité.',
                                 style: TextStyle(
-                                  fontFamily: 'Inter',
+                                  fontFamily: AppConstants.fontFamilyInter,
                                   fontWeight: FontWeight.w400,
-                                  fontSize: 12,
+                                  fontSize: AppConstants.fontSizeRegular,
                                   height: 16 / 12,
                                   letterSpacing: 0,
-                                  color: const Color(0xFF6B7280),
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: AppConstants.paddingLarge),
                               // Avantages
                               Row(
                                 children: [
                                   SvgPicture.asset(
                                     'assets/icons/bi_check2-circle (1).svg',
-                                    width: 16,
-                                    height: 16,
+                                    width: AppConstants.iconSizeSmall,
+                                    height: AppConstants.iconSizeSmall,
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: AppConstants.paddingSmall),
                                   Expanded(
                                     child: Text(
                                       'Format PDF officiel',
                                       style: TextStyle(
-                                        fontFamily: 'Inter',
+                                        fontFamily: AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 12,
+                                        fontSize: AppConstants.fontSizeRegular,
                                         height: 16 / 12,
                                         letterSpacing: 0,
-                                        color: const Color(0xFF6B7280),
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: AppConstants.paddingSmall),
                               Row(
                                 children: [
                                   SvgPicture.asset(
                                     'assets/icons/bi_check2-circle (1).svg',
-                                    width: 16,
-                                    height: 16,
+                                    width: AppConstants.iconSizeSmall,
+                                    height: AppConstants.iconSizeSmall,
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: AppConstants.paddingSmall),
                                   Expanded(
                                     child: Text(
                                       'Remplir sans internet',
                                       style: TextStyle(
-                                        fontFamily: 'Inter',
+                                        fontFamily: AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 12,
+                                        fontSize: AppConstants.fontSizeRegular,
                                         height: 16 / 12,
                                         letterSpacing: 0,
-                                        color: const Color(0xFF6B7280),
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: AppConstants.paddingSmall),
                               Row(
                                 children: [
                                   SvgPicture.asset(
                                     'assets/icons/bi_check2-circle (1).svg',
-                                    width: 16,
-                                    height: 16,
+                                    width: AppConstants.iconSizeSmall,
+                                    height: AppConstants.iconSizeSmall,
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: AppConstants.paddingSmall),
                                   Expanded(
                                     child: Text(
                                       'Vérification OTP sécurisée',
                                       style: TextStyle(
-                                        fontFamily: 'Inter',
+                                        fontFamily: AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 12,
+                                        fontSize: AppConstants.fontSizeRegular,
                                         height: 16 / 12,
                                         letterSpacing: 0,
-                                        color: const Color(0xFF6B7280),
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
                                   ),
@@ -481,8 +488,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
               // Bouton Continuer
               Positioned(
                 top: 850,
-                left: 24,
-                right: 24,
+                left: AppConstants.paddingXLarge,
+                right: AppConstants.paddingXLarge,
                 child: GestureDetector(
                   onTap: selectedOption > 0 ? () {
                     if (selectedOption == 1) {
@@ -492,22 +499,22 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                     }
                   } : null,
                   child: Container(
-                    height: 56,
-                    padding: const EdgeInsets.all(12),
+                    height: AppConstants.buttonHeight,
+                    padding: EdgeInsets.all(AppConstants.paddingMedium),
                     decoration: BoxDecoration(
-                      color: selectedOption > 0 ? const Color(0xFF23A3A6) : const Color(0xFF0A324A),
-                      borderRadius: BorderRadius.circular(100),
+                      color: selectedOption > 0 ? AppColors.primary : AppColors.primaryDarker,
+                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                     ),
                     child: Center(
                       child: Text(
                         selectedOption == 1 ? 'Continuer' : 'Télécharger et compléter plus tard',
                         style: TextStyle(
-                          fontFamily: 'Sofia Sans',
+                          fontFamily: AppConstants.fontFamilySofiaSans,
                           fontWeight: FontWeight.w500,
-                          fontSize: 16,
+                          fontSize: AppConstants.fontSizeLarge,
                           height: 1.5,
                           letterSpacing: 0,
-                          color: selectedOption > 0 ? Colors.white : const Color(0xFF6F8A99),
+                          color: selectedOption > 0 ? AppColors.white : AppColors.textLightGray,
                         ),
                         textAlign: TextAlign.center,
                       ),

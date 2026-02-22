@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../../../core/utils/app_colors.dart';
+import '../../../../core/utils/app_constants.dart';
 
 class MesDocumentsScreen extends StatefulWidget {
   const MesDocumentsScreen({super.key});
@@ -15,30 +17,30 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: 430,
-        height: 932,
-        color: const Color(0xFF0B3C5C),
+        width: AppConstants.screenWidth,
+        height: AppConstants.screenHeight,
+        color: AppColors.background,
         child: Stack(
           children: [
             // Bouton retour
             Positioned(
               top: 70,
-              left: 24,
+              left: AppConstants.paddingXLarge,
               child: GestureDetector(
                 onTap: () {
                   Navigator.of(context).pop();
                 },
                 child: Container(
-                  width: 50,
-                  height: 50,
+                  width: AppConstants.backButtonSize,
+                  height: AppConstants.backButtonSize,
                   decoration: BoxDecoration(
-                    color: const Color(0x14FFFFFF),
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.whiteOverlay,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                   ),
                   child: Center(
                     child: Icon(
                       Icons.arrow_back,
-                      color: Colors.white,
+                      color: AppColors.white,
                       size: 21.4,
                     ),
                   ),
@@ -49,15 +51,15 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
             Positioned(
               top: 85,
               left: 60,
-              right: 24,
+              right: AppConstants.paddingXLarge,
               child: Text(
                 'Mes documents',
                 style: TextStyle(
-                  fontFamily: 'Inter',
+                  fontFamily: AppConstants.fontFamilyInter,
                   fontWeight: FontWeight.w700,
-                  fontSize: 20,
+                  fontSize: AppConstants.fontSizeXXLarge,
                   height: 1.0,
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -65,25 +67,25 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
             // Container blanc principal
             Positioned(
               top: 160,
-              left: 24,
-              right: 24,
+              left: AppConstants.paddingXLarge,
+              right: AppConstants.paddingXLarge,
               child: Container(
                 height: 222,
-                padding: EdgeInsets.fromLTRB(16, 24, 16, 24),
+                padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.paddingXLarge, AppConstants.paddingLarge, AppConstants.paddingXLarge),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                 ),
                 child: Column(
                   children: [
                     // Premier document
                     Container(
                       width: 350,
-                      height: 79,
-                      padding: EdgeInsets.all(20),
+                      height: AppConstants.cardHeight,
+                      padding: EdgeInsets.all(AppConstants.fontSizeXXLarge),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Color(0xFFDEE8EE), width: 1),
+                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        border: Border.all(color: AppColors.progressBar, width: AppConstants.borderWidthThin),
                       ),
                       child: Row(
                         children: [
@@ -95,12 +97,12 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                                 Text(
                                   'Certificat de résidence',
                                   style: TextStyle(
-                                    fontFamily: 'Inter',
+                                    fontFamily: AppConstants.fontFamilyInter,
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 16,
+                                    fontSize: AppConstants.fontSizeLarge,
                                     height: 1.0,
                                     letterSpacing: 0,
-                                    color: Color(0xFF343741),
+                                    color: AppColors.cardSubtext,
                                   ),
                                 ),
                                 SizedBox(height: 4),
@@ -109,10 +111,10 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                                   style: TextStyle(
                                     fontFamily: 'Geist',
                                     fontWeight: FontWeight.w500,
-                                    fontSize: 14,
+                                    fontSize: AppConstants.fontSizeMedium,
                                     height: 1.0,
                                     letterSpacing: 0,
-                                    color: Color(0xFF6B7280),
+                                    color: AppColors.textSecondary,
                                   ),
                                 ),
                               ],
@@ -120,21 +122,21 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                           ),
                           SvgPicture.asset(
                             'assets/icons/Vector (20).svg',
-                            width: 20,
-                            height: 20,
+                            width: AppConstants.iconSizeMedium,
+                            height: AppConstants.iconSizeMedium,
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 16),
+                    SizedBox(height: AppConstants.paddingLarge),
                     // Deuxième document
                     Container(
                       width: 350,
-                      height: 79,
-                      padding: EdgeInsets.all(20),
+                      height: AppConstants.cardHeight,
+                      padding: EdgeInsets.all(AppConstants.fontSizeXXLarge),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Color(0xFFDEE8EE), width: 1),
+                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        border: Border.all(color: AppColors.progressBar, width: AppConstants.borderWidthThin),
                       ),
                       child: Row(
                         children: [
@@ -146,12 +148,12 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                                 Text(
                                   'CNI',
                                   style: TextStyle(
-                                    fontFamily: 'Inter',
+                                    fontFamily: AppConstants.fontFamilyInter,
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 16,
+                                    fontSize: AppConstants.fontSizeLarge,
                                     height: 1.0,
                                     letterSpacing: 0,
-                                    color: Color(0xFF343741),
+                                    color: AppColors.cardSubtext,
                                   ),
                                 ),
                                 SizedBox(height: 4),
@@ -160,10 +162,10 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                                   style: TextStyle(
                                     fontFamily: 'Geist',
                                     fontWeight: FontWeight.w500,
-                                    fontSize: 14,
+                                    fontSize: AppConstants.fontSizeMedium,
                                     height: 1.0,
                                     letterSpacing: 0,
-                                    color: Color(0xFF6B7280),
+                                    color: AppColors.textSecondary,
                                   ),
                                 ),
                               ],
@@ -171,8 +173,8 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                           ),
                           SvgPicture.asset(
                             'assets/icons/Vector (20).svg',
-                            width: 20,
-                            height: 20,
+                            width: AppConstants.iconSizeMedium,
+                            height: AppConstants.iconSizeMedium,
                           ),
                         ],
                       ),
@@ -186,38 +188,38 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
       ),
       floatingActionButton: Container(
         width: 382,
-        height: 64,
+        height: AppConstants.buttonHeightLarge,
         margin: EdgeInsets.only(bottom: 0),
         child: GestureDetector(
           onTap: () {
             _showAjouterDocumentModal(context);
           },
           child: Container(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.all(AppConstants.paddingMedium),
             decoration: BoxDecoration(
-              color: Color(0xFF23A3A6),
-              borderRadius: BorderRadius.circular(100),
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(AppConstants.radiusRound),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SvgPicture.asset(
                   'assets/icons/bi_file-earmark-text.svg',
-                  width: 20,
-                  height: 20,
+                  width: AppConstants.iconSizeMedium,
+                  height: AppConstants.iconSizeMedium,
                   colorFilter: ColorFilter.mode(
-                    Colors.white,
+                    AppColors.white,
                     BlendMode.srcIn,
                   ),
                 ),
-                SizedBox(width: 12),
+                SizedBox(width: AppConstants.paddingMedium),
                 Text(
                   'Ajouter un document',
                   style: TextStyle(
-                    fontFamily: 'Inter',
+                    fontFamily: AppConstants.fontFamilyInter,
                     fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                    color: Colors.white,
+                    fontSize: AppConstants.fontSizeLarge,
+                    color: AppColors.white,
                   ),
                 ),
               ],
@@ -234,23 +236,23 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        width: 430,
+        width: AppConstants.screenWidth,
         height: 500,
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppConstants.fontSizeTitle),
         ),
         child: Stack(
           children: [
             // Handle de la modal
             Positioned(
-              top: 12,
-              left: (430 - 40) / 2,
+              top: AppConstants.paddingMedium,
+              left: (AppConstants.screenWidth - AppConstants.modalHandleWidth) / 2,
               child: Container(
-                width: 40,
-                height: 4,
+                width: AppConstants.modalHandleWidth,
+                height: AppConstants.modalHandleHeight,
                 decoration: BoxDecoration(
-                  color: const Color(0x80212121),
+                  color: AppColors.modalHandle,
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -258,20 +260,20 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
             // Titre "Ajouter un bénéficiaire" avec icône fermeture
             Positioned(
               top: 40,
-              left: 24,
-              right: 24,
+              left: AppConstants.paddingXLarge,
+              right: AppConstants.paddingXLarge,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Ajouter un document',
                     style: TextStyle(
-                      fontFamily: 'Inter',
+                      fontFamily: AppConstants.fontFamilyInter,
                       fontWeight: FontWeight.w600,
-                      fontSize: 20,
+                      fontSize: AppConstants.fontSizeXXLarge,
                       height: 32 / 20,
                       letterSpacing: 0,
-                      color: const Color(0xFF212121),
+                      color: AppColors.textDark,
                     ),
                   ),
                   GestureDetector(
@@ -280,8 +282,8 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                     },
                     child: SvgPicture.asset(
                       'assets/icons/Vector (18).svg',
-                      width: 16,
-                      height: 16,
+                      width: AppConstants.iconSizeSmall,
+                      height: AppConstants.iconSizeSmall,
                     ),
                   ),
                 ],
@@ -297,13 +299,13 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
-                      color: const Color(0xFFE5E5E5),
-                      width: 1,
+                      color: AppColors.borderE5,
+                      width: AppConstants.borderWidthThin,
                     ),
                   ),
                 ),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(AppConstants.paddingXLarge),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -313,13 +315,13 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                         style: TextStyle(
                           fontFamily: 'Geist',
                           fontWeight: FontWeight.w500,
-                          fontSize: 14,
+                          fontSize: AppConstants.fontSizeMedium,
                           height: 1.0,
                           letterSpacing: 0,
-                          color: const Color(0xFF343741),
+                          color: AppColors.cardSubtext,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: AppConstants.paddingSmall),
                       // Dropdown Sélectionner
                       Container(
                         width: 382,
@@ -327,8 +329,8 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(7.96),
                           border: Border.all(
-                            color: const Color(0xFFDEE8EE),
-                            width: 1,
+                            color: AppColors.progressBar,
+                            width: AppConstants.borderWidthThin,
                           ),
                         ),
                         child: Padding(
@@ -339,34 +341,34 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                                 child: Text(
                                   'Sélectionner',
                                   style: TextStyle(
-                                    fontFamily: 'Inter',
+                                    fontFamily: AppConstants.fontFamilyInter,
                                     fontWeight: FontWeight.w400,
-                                    fontSize: 12,
+                                    fontSize: AppConstants.fontSizeRegular,
                                     height: 1.0,
                                     letterSpacing: 0,
-                                    color: const Color(0xFF6B7280),
+                                    color: AppColors.textSecondary,
                                   ),
                                 ),
                               ),
                               Icon(
                                 Icons.keyboard_arrow_down,
-                                color: Color(0xFF9CA3AF),
-                                size: 16,
+                                color: AppColors.iconGray,
+                                size: AppConstants.iconSizeSmall,
                               ),
                             ],
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: AppConstants.paddingXLarge),
                       // Zone de téléchargement
                       Container(
                         width: 382,
-                        height: 120,
+                        height: AppConstants.cardActionHeight,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
                           border: Border.all(
-                            color: const Color(0xFF23A3A6),
-                            width: 2,
+                            color: AppColors.primary,
+                            width: AppConstants.borderWidthThick,
                             style: BorderStyle.solid,
                           ),
                         ),
@@ -375,35 +377,35 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                           children: [
                             SvgPicture.asset(
                               'assets/icons/bi_cloud-upload.svg',
-                              width: 24,
-                              height: 24,
+                              width: AppConstants.iconSizeLarge,
+                              height: AppConstants.iconSizeLarge,
                               colorFilter: ColorFilter.mode(
-                                Color(0xFF23A3A6),
+                                AppColors.primary,
                                 BlendMode.srcIn,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: AppConstants.paddingSmall),
                             Text(
                               'Cliquez pour télécharger',
                               style: TextStyle(
-                                fontFamily: 'Inter',
+                                fontFamily: AppConstants.fontFamilyInter,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                                fontSize: AppConstants.fontSizeMedium,
                                 height: 1.0,
                                 letterSpacing: 0,
-                                color: const Color(0xFF212121),
+                                color: AppColors.textDark,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               'PDF, JPG, PNG jusqu\'à 10 Mo',
                               style: TextStyle(
-                                fontFamily: 'Inter',
+                                fontFamily: AppConstants.fontFamilyInter,
                                 fontWeight: FontWeight.w400,
-                                fontSize: 12,
+                                fontSize: AppConstants.fontSizeRegular,
                                 height: 1.0,
                                 letterSpacing: 0,
-                                color: const Color(0xFF6B7280),
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           ],
@@ -416,24 +418,24 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                           Navigator.of(context).pop();
                         },
                         child: Container(
-                          margin: const EdgeInsets.only(left: 10, right: 24),
+                          margin: EdgeInsets.only(left: 10, right: AppConstants.paddingXLarge),
                           width: 382,
-                          height: 64,
-                          padding: const EdgeInsets.all(12),
+                          height: AppConstants.buttonHeightLarge,
+                          padding: EdgeInsets.all(AppConstants.paddingMedium),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF23A3A6),
-                            borderRadius: BorderRadius.circular(100),
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                           ),
                           child: Center(
                             child: Text(
                               'Ajouter',
                               style: TextStyle(
-                                fontFamily: 'Sofia Sans',
+                                fontFamily: AppConstants.fontFamilySofiaSans,
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                                fontSize: AppConstants.fontSizeLarge,
                                 height: 1.5,
                                 letterSpacing: 0,
-                                color: Colors.white,
+                                color: AppColors.white,
                               ),
                               textAlign: TextAlign.center,
                             ),

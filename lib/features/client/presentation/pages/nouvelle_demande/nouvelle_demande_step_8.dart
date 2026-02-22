@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class NouvelleDemandeStep8Screen extends StatelessWidget {
   const NouvelleDemandeStep8Screen({super.key});
@@ -8,30 +10,30 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: 430,
-        height: 932,
-        color: const Color(0xFF0B3C5C),
+        width: AppConstants.screenWidth,
+        height: AppConstants.screenHeight,
+        color: AppColors.primaryDark,
         child: Stack(
           children: [
             // Bouton retour
             Positioned(
               top: 70,
-              left: 24,
+              left: AppConstants.paddingXLarge,
               child: GestureDetector(
                 onTap: () {
                   Navigator.of(context).pop();
                 },
                 child: Container(
-                  width: 50,
-                  height: 50,
+                  width: AppConstants.backButtonSize,
+                  height: AppConstants.backButtonSize,
                   decoration: BoxDecoration(
-                    color: const Color(0x14FFFFFF),
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.whiteOverlay,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                   ),
                   child: Center(
                     child: Icon(
                       Icons.arrow_back,
-                      color: Colors.white,
+                      color: AppColors.white,
                       size: 21.4,
                     ),
                   ),
@@ -46,8 +48,8 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
                 'Ouverture de compte',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  fontSize: 20,
-                  color: Colors.white,
+                  fontSize: AppConstants.fontSizeXXLarge,
+                  color: AppColors.white,
                 ),
               ),
             ),
@@ -58,35 +60,35 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
               child: Text(
                 'Banque Nationale',
                 style: TextStyle(
-                  fontFamily: 'Sofia Sans',
+                  fontFamily: AppConstants.fontFamilySofiaSans,
                   fontWeight: FontWeight.w500,
-                  fontSize: 12,
+                  fontSize: AppConstants.fontSizeRegular,
                   height: 1.0,
                   letterSpacing: 0,
-                  color: Colors.white.withValues(alpha:0.6),
+                  color: AppColors.whiteOpacity(0.6),
                 ),
               ),
             ),
             // Barre de progression
             Positioned(
               top: 140,
-              left: 24,
+              left: AppConstants.paddingXLarge,
               child: Stack(
                 children: [
                   Container(
-                    width: 320,
-                    height: 4,
+                    width: AppConstants.progressBarWidth,
+                    height: AppConstants.progressBarHeight,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDEE8EE),
-                      borderRadius: BorderRadius.circular(100),
+                      color: AppColors.progressBar,
+                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                     ),
                   ),
                   Container(
                     width: 256,
-                    height: 4,
+                    height: AppConstants.progressBarHeight,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF23A3A6),
-                      borderRadius: BorderRadius.circular(100),
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                     ),
                   ),
                 ],
@@ -99,12 +101,12 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
               child: Text(
                 '4/5',
                 style: TextStyle(
-                  fontFamily: 'Inter',
+                  fontFamily: AppConstants.fontFamilyInter,
                   fontWeight: FontWeight.w500,
-                  fontSize: 14,
+                  fontSize: AppConstants.fontSizeMedium,
                   height: 1.0,
                   letterSpacing: 0,
-                  color: const Color(0xFF6F8A99),
+                  color: AppColors.textLightGray,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -112,16 +114,16 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
             // Container d'information
             Positioned(
               top: 175,
-              left: 24,
-              right: 24,
+              left: AppConstants.paddingXLarge,
+              right: AppConstants.paddingXLarge,
               child: Container(
                 height: 64,
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(AppConstants.paddingMedium),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: const Color(0xFFD17C00),
-                    width: 1,
+                    width: AppConstants.borderWidthThin,
                   ),
                   color: const Color(0x14FFFAF1),
                 ),
@@ -132,7 +134,7 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
                       child: Text(
                         'Formats acceptés : PDF, JPG, PNG — Taille max : 5 Mo par document',
                         style: TextStyle(
-                          fontFamily: 'Inter',
+                          fontFamily: AppConstants.fontFamilyInter,
                           fontWeight: FontWeight.w500,
                           fontSize: 13,
                           height: 20 / 13,
@@ -150,37 +152,37 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
             // Titre "Téléverser des documents"
             Positioned(
               top: 265,
-              left: 24,
+              left: AppConstants.paddingXLarge,
               child: Text(
                 'Téléverser des documents',
                 style: TextStyle(
-                  fontFamily: 'Inter',
+                  fontFamily: AppConstants.fontFamilyInter,
                   fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                  fontSize: AppConstants.fontSizeLarge,
                   height: 24 / 16,
                   letterSpacing: 0,
-                  color: const Color(0xFFFFFFFF).withValues(alpha:0.7),
+                  color: AppColors.whiteOpacity(0.7),
                 ),
               ),
             ),
             // Container principal des documents
             Positioned(
               top: 310,
-              left: 24,
-              right: 24,
+              left: AppConstants.paddingXLarge,
+              right: AppConstants.paddingXLarge,
               child: Container(
                 height: 271.33331298828125,
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.paddingXLarge, AppConstants.paddingLarge, AppConstants.paddingXLarge),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                   border: Border.all(
-                    color: const Color(0xFFE8EEE7),
-                    width: 1,
+                    color: AppColors.border,
+                    width: AppConstants.borderWidthThin,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0x08000000),
+                      color: AppColors.shadowDark,
                       blurRadius: 3,
                       offset: const Offset(3, 3),
                     ),
@@ -332,7 +334,10 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
                                       'assets/icons/iconamoon_trash.svg',
                                       width: 16,
                                       height: 16,
-                                      color: const Color(0xFFF44336),
+                                      colorFilter: ColorFilter.mode(
+                                        const Color(0xFFF44336),
+                                        BlendMode.srcIn,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -403,30 +408,30 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
             // Bouton Continuer
             Positioned(
               top: 780,
-              left: 24,
-              right: 24,
+              left: AppConstants.paddingXLarge,
+              right: AppConstants.paddingXLarge,
               child: GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/nouvelle-demande-step-9');
                 },
                 child: Container(
                   width: 382,
-                  height: 56,
-                  padding: const EdgeInsets.all(12),
+                  height: AppConstants.buttonHeight,
+                  padding: EdgeInsets.all(AppConstants.paddingMedium),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF23A3A6),
-                    borderRadius: BorderRadius.circular(100),
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                   ),
                   child: Center(
                     child: Text(
                       'Continuer',
                       style: TextStyle(
-                        fontFamily: 'Sofia Sans',
+                        fontFamily: AppConstants.fontFamilySofiaSans,
                         fontWeight: FontWeight.w500,
-                        fontSize: 16,
+                        fontSize: AppConstants.fontSizeLarge,
                         height: 1.5,
                         letterSpacing: 0,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                       textAlign: TextAlign.center,
                     ),

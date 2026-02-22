@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 import '../../../../utils/responsive_utils.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -13,7 +15,6 @@ class WelcomeScreen extends StatelessWidget {
         height: ResponsiveUtils.getScreenHeight(context),
         child: Stack(
           children: [
-            // Image de fond
             Container(
               width: ResponsiveUtils.getScreenWidth(context),
               height: ResponsiveUtils.getScreenHeight(context),
@@ -24,7 +25,6 @@ class WelcomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            // Gradient overlay
             Container(
               width: ResponsiveUtils.getScreenWidth(context),
               height: ResponsiveUtils.getScreenHeight(context),
@@ -39,14 +39,12 @@ class WelcomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            // Contenu
             Positioned(
               bottom: ResponsiveUtils.getResponsiveHeight(context, 80),
               left: ResponsiveUtils.getResponsiveWidth(context, 12),
               right: ResponsiveUtils.getResponsiveWidth(context, 12),
               child: Column(
                 children: [
-                  // Titre SECURELINK
                   SizedBox(
                     width: ResponsiveUtils.getResponsiveWidth(context, 406),
                     height: ResponsiveUtils.getResponsiveHeight(context, 38),
@@ -54,16 +52,15 @@ class WelcomeScreen extends StatelessWidget {
                       'SECURELINK',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontFamily: 'Sofia Sans',
+                        fontFamily: AppConstants.fontFamilySofiaSans,
                         fontWeight: FontWeight.w700,
                         fontSize: ResponsiveUtils.getResponsiveFontSize(context, 32),
                         height: 1.0,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                     ),
                   ),
                   SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 16)),
-                  // Texte descriptif
                   SizedBox(
                     width: ResponsiveUtils.getResponsiveWidth(context, 406),
                     height: ResponsiveUtils.getResponsiveHeight(context, 56),
@@ -71,16 +68,15 @@ class WelcomeScreen extends StatelessWidget {
                       'Lorem Ipsum is simply dummy text of the printing and typesetting industry',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontFamily: 'Sofia Sans',
+                        fontFamily: AppConstants.fontFamilySofiaSans,
                         fontWeight: FontWeight.w400,
                         fontSize: ResponsiveUtils.getResponsiveFontSize(context, 18),
                         height: 28 / 18,
-                        color: Colors.white.withValues(alpha:0.7),
+                        color: AppColors.whiteOpacity(0.7),
                       ),
                     ),
                   ),
                   SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 32)),
-                  // Bouton Commencer
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context).pushReplacementNamed(AppRoutes.login);
@@ -93,20 +89,18 @@ class WelcomeScreen extends StatelessWidget {
                         vertical: ResponsiveUtils.getResponsiveHeight(context, 16),
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0B3C5C),
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveUtils.getResponsiveValue(context, 100),
-                        ),
+                        color: AppColors.primaryDark,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                       ),
                       child: Center(
                         child: Text(
                           'Commencer',
                           style: TextStyle(
-                            fontFamily: 'Sofia Sans',
+                            fontFamily: AppConstants.fontFamilySofiaSans,
                             fontWeight: FontWeight.w500,
                             fontSize: ResponsiveUtils.getResponsiveFontSize(context, 18),
                             height: 1.0,
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         ),
                       ),

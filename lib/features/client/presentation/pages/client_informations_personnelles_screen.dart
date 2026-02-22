@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class ClientInformationsPersonnellesScreen extends StatefulWidget {
   const ClientInformationsPersonnellesScreen({super.key});
@@ -15,30 +17,30 @@ class _ClientInformationsPersonnellesScreenState extends State<ClientInformation
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: 430,
-        height: 932,
-        color: const Color(0xFF0B3C5C),
+        width: AppConstants.screenWidth,
+        height: AppConstants.screenHeight,
+        color: AppColors.primaryDark,
         child: Stack(
           children: [
             // Bouton retour
             Positioned(
               top: 70,
-              left: 24,
+              left: AppConstants.paddingXLarge,
               child: GestureDetector(
                 onTap: () {
                   Navigator.of(context).pop();
                 },
                 child: Container(
-                  width: 50,
-                  height: 50,
+                  width: AppConstants.backButtonSize,
+                  height: AppConstants.backButtonSize,
                   decoration: BoxDecoration(
-                    color: const Color(0x14FFFFFF),
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.whiteOverlay,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                   ),
                   child: Center(
                     child: Icon(
                       Icons.arrow_back,
-                      color: Colors.white,
+                      color: AppColors.white,
                       size: 21.4,
                     ),
                   ),
@@ -233,10 +235,12 @@ class _ClientInformationsPersonnellesScreenState extends State<ClientInformation
                             size: 16,
                           ),
                           SizedBox(width: 8),
-                          Container(
+                          SizedBox(
                             width: 1,
                             height: 20,
-                            color: Color(0xFFE5E7EB),
+                            child: Container(
+                              color: Color(0xFFE5E7EB),
+                            ),
                           ),
                           SizedBox(width: 8),
                           Text(
@@ -293,7 +297,7 @@ class _ClientInformationsPersonnellesScreenState extends State<ClientInformation
                             ),
                           ),
                           SizedBox(width: 10),
-                          Container(
+                          SizedBox(
                             width: 205,
                             height: 19,
                             child: Text(

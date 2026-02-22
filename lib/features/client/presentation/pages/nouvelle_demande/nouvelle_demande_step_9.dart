@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class NouvelleDemandeStep9Screen extends StatefulWidget {
   const NouvelleDemandeStep9Screen({super.key});
@@ -17,11 +19,11 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
       isDismissible: false,
       builder: (context) => Container(
         width: 342,
-        margin: const EdgeInsets.all(24),
-        padding: const EdgeInsets.all(24),
+        margin: EdgeInsets.all(AppConstants.paddingXLarge),
+        padding: EdgeInsets.all(AppConstants.paddingXLarge),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -32,29 +34,29 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
               width: 70,
               height: 70,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppConstants.paddingLarge),
             // Titre
             Text(
               'Demande envoyé',
               style: TextStyle(
-                fontFamily: 'Inter',
+                fontFamily: AppConstants.fontFamilyInter,
                 fontWeight: FontWeight.w600,
-                fontSize: 18,
-                color: Colors.black,
+                fontSize: AppConstants.fontSizeXLarge,
+                color: AppColors.textBlack,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppConstants.paddingSmall),
             // Message de confirmation
             Text(
               'Votre demande a été envoyé avec succès',
               style: TextStyle(
-                fontFamily: 'Inter',
+                fontFamily: AppConstants.fontFamilyInter,
                 fontWeight: FontWeight.w400,
-                fontSize: 16,
+                fontSize: AppConstants.fontSizeLarge,
                 height: 32 / 16,
                 letterSpacing: 0,
-                color: const Color(0xFF4F4F4F),
+                color: AppColors.textGray,
               ),
               textAlign: TextAlign.center,
             ),
@@ -64,10 +66,11 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
     );
     
     // Redirection après 1.5 secondes
+    final navigator = Navigator.of(context);
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (!mounted) return;
-      Navigator.of(context).pop(); // Fermer la modal
-      Navigator.of(context).pushReplacementNamed(AppRoutes.clientDemandes);
+      navigator.pop(); // Fermer la modal
+      navigator.pushReplacementNamed(AppRoutes.clientDemandes);
     });
   }
 
@@ -75,30 +78,30 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: 430,
-        height: 932,
-        color: const Color(0xFF0B3C5C),
+        width: AppConstants.screenWidth,
+        height: AppConstants.screenHeight,
+        color: AppColors.primaryDark,
         child: Stack(
           children: [
             // Bouton retour
             Positioned(
               top: 70,
-              left: 24,
+              left: AppConstants.paddingXLarge,
               child: GestureDetector(
                 onTap: () {
                   Navigator.of(context).pop();
                 },
                 child: Container(
-                  width: 50,
-                  height: 50,
+                  width: AppConstants.backButtonSize,
+                  height: AppConstants.backButtonSize,
                   decoration: BoxDecoration(
-                    color: const Color(0x14FFFFFF),
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.whiteOverlay,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                   ),
                   child: Center(
                     child: Icon(
                       Icons.arrow_back,
-                      color: Colors.white,
+                      color: AppColors.white,
                       size: 21.4,
                     ),
                   ),
@@ -113,8 +116,8 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
                 'Ouverture de compte',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  fontSize: 20,
-                  color: Colors.white,
+                  fontSize: AppConstants.fontSizeXXLarge,
+                  color: AppColors.white,
                 ),
               ),
             ),
@@ -125,35 +128,35 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
               child: Text(
                 'Banque Nationale',
                 style: TextStyle(
-                  fontFamily: 'Sofia Sans',
+                  fontFamily: AppConstants.fontFamilySofiaSans,
                   fontWeight: FontWeight.w500,
-                  fontSize: 12,
+                  fontSize: AppConstants.fontSizeRegular,
                   height: 1.0,
                   letterSpacing: 0,
-                  color: Colors.white.withValues(alpha:0.6),
+                  color: AppColors.whiteOpacity(0.6),
                 ),
               ),
             ),
             // Barre de progression
             Positioned(
               top: 140,
-              left: 24,
+              left: AppConstants.paddingXLarge,
               child: Stack(
                 children: [
                   Container(
-                    width: 320,
-                    height: 4,
+                    width: AppConstants.progressBarWidth,
+                    height: AppConstants.progressBarHeight,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDEE8EE),
-                      borderRadius: BorderRadius.circular(100),
+                      color: AppColors.progressBar,
+                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                     ),
                   ),
                   Container(
-                    width: 320,
-                    height: 4,
+                    width: AppConstants.progressBarWidth,
+                    height: AppConstants.progressBarHeight,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF23A3A6),
-                      borderRadius: BorderRadius.circular(100),
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                     ),
                   ),
                 ],
@@ -166,12 +169,12 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
               child: Text(
                 '5/5',
                 style: TextStyle(
-                  fontFamily: 'Inter',
+                  fontFamily: AppConstants.fontFamilyInter,
                   fontWeight: FontWeight.w500,
-                  fontSize: 14,
+                  fontSize: AppConstants.fontSizeMedium,
                   height: 1.0,
                   letterSpacing: 0,
-                  color: const Color(0xFF6F8A99),
+                  color: AppColors.textLightGray,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -193,12 +196,12 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
               child: Text(
                 'Prêt à soumettre ?',
                 style: TextStyle(
-                  fontFamily: 'Inter',
+                  fontFamily: AppConstants.fontFamilyInter,
                   fontWeight: FontWeight.w600,
-                  fontSize: 20,
+                  fontSize: AppConstants.fontSizeXXLarge,
                   height: 1.3,
                   letterSpacing: 0,
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -206,17 +209,17 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
             // Description
             Positioned(
               top: 330,
-              left: 24,
-              right: 24,
+              left: AppConstants.paddingXLarge,
+              right: AppConstants.paddingXLarge,
               child: Text(
                 'Veuillez vérifier votre demande. Une fois soumise, vous recevrez un courriel de confirmation.',
                 style: TextStyle(
-                  fontFamily: 'Inter',
+                  fontFamily: AppConstants.fontFamilyInter,
                   fontWeight: FontWeight.w400,
-                  fontSize: 14,
+                  fontSize: AppConstants.fontSizeMedium,
                   height: 24 / 14,
                   letterSpacing: 0,
-                  color: const Color(0xFFDEE8EE),
+                  color: AppColors.borderLight,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -224,14 +227,14 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
             // Container de récapitulatif
             Positioned(
               top: 413,
-              left: 24,
-              right: 24,
+              left: AppConstants.paddingXLarge,
+              right: AppConstants.paddingXLarge,
               child: Container(
                 height: 142.404052734375,
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(AppConstants.paddingMedium),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: const Color(0xFFF5F6FA),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                  color: AppColors.cardBackground,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -330,30 +333,30 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
             // Bouton Soumettre
             Positioned(
               top: 780,
-              left: 24,
-              right: 24,
+              left: AppConstants.paddingXLarge,
+              right: AppConstants.paddingXLarge,
               child: GestureDetector(
                 onTap: () {
                   _showSuccessModal(context);
                 },
                 child: Container(
                   width: 382,
-                  height: 56,
-                  padding: const EdgeInsets.all(12),
+                  height: AppConstants.buttonHeight,
+                  padding: EdgeInsets.all(AppConstants.paddingMedium),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF23A3A6),
-                    borderRadius: BorderRadius.circular(100),
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                   ),
                   child: Center(
                     child: Text(
                       'Soumettre',
                       style: TextStyle(
-                        fontFamily: 'Sofia Sans',
+                        fontFamily: AppConstants.fontFamilySofiaSans,
                         fontWeight: FontWeight.w500,
-                        fontSize: 16,
+                        fontSize: AppConstants.fontSizeLarge,
                         height: 1.5,
                         letterSpacing: 0,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                       textAlign: TextAlign.center,
                     ),

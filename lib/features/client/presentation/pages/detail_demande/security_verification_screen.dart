@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class SecurityVerificationScreen extends StatefulWidget {
   const SecurityVerificationScreen({super.key});
@@ -13,64 +15,64 @@ class _SecurityVerificationScreenState extends State<SecurityVerificationScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B3C5C),
+      backgroundColor: AppColors.primaryDark,
       body: SafeArea(
         child: Column(
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(AppConstants.paddingXLarge),
               child: Row(
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: AppConstants.progressStepSize,
+                      height: AppConstants.progressStepSize,
                       decoration: BoxDecoration(
-                        color: const Color(0x14FFFFFF),
-                        borderRadius: BorderRadius.circular(8),
+                        color: AppColors.whiteOverlay,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
                       ),
-                      child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                      child: Icon(Icons.arrow_back, color: AppColors.white, size: AppConstants.iconSizeMedium),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: AppConstants.paddingLarge),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            const Text(
+                            Text(
                               'Ouverture de compte',
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: AppConstants.fontSizeXLarge,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                color: AppColors.white,
                               ),
                             ),
                             const Spacer(),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              padding: EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium, vertical: 4),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF2F5F9),
-                                borderRadius: BorderRadius.circular(12),
+                                color: AppColors.statusDraftLight,
+                                borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Brouillon',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: AppConstants.fontSizeRegular,
                                   fontWeight: FontWeight.w500,
-                                  color: Color(0xFF6B7280),
+                                  color: AppColors.statusDraft,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        const Text(
+                        Text(
                           'Banque Nationale • 18/12/2025',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: AppConstants.fontSizeMedium,
                             color: Color(0xFFB0BEC5),
                           ),
                         ),
@@ -82,15 +84,15 @@ class _SecurityVerificationScreenState extends State<SecurityVerificationScreen>
             ),
             // Progress bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: EdgeInsets.symmetric(horizontal: AppConstants.paddingXLarge),
               child: Row(
                 children: [
                   Expanded(
                     flex: 3,
                     child: Container(
-                      height: 4,
+                      height: AppConstants.progressBarHeight,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF23A3A6),
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -98,20 +100,20 @@ class _SecurityVerificationScreenState extends State<SecurityVerificationScreen>
                   Expanded(
                     flex: 2,
                     child: Container(
-                      height: 4,
+                      height: AppConstants.progressBarHeight,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFDEE8EE),
+                        color: AppColors.progressBar,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  const Text(
+                  SizedBox(width: AppConstants.paddingSmall),
+                  Text(
                     '3/5',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: AppConstants.fontSizeMedium,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF6F8A99),
+                      color: AppColors.textLightGray,
                     ),
                   ),
                 ],
@@ -122,29 +124,29 @@ class _SecurityVerificationScreenState extends State<SecurityVerificationScreen>
             Expanded(
               child: Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(AppConstants.paddingXLarge)),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(AppConstants.paddingXLarge),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Vérification de sécurité',
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: AppConstants.fontSizeTitle,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF0F1A14),
+                          color: AppColors.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      const Text(
+                      SizedBox(height: AppConstants.paddingLarge),
+                      Text(
                         'Nous avons envoyé un code à 4 chiffres se terminant par **88 à votre appareil mobile pour sceller ce document.',
                         style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF6B7280),
+                          fontSize: AppConstants.fontSizeLarge,
+                          color: AppColors.textSecondary,
                           height: 1.5,
                         ),
                       ),
@@ -154,21 +156,21 @@ class _SecurityVerificationScreenState extends State<SecurityVerificationScreen>
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: List.generate(4, (index) {
                           return Container(
-                            width: 60,
-                            height: 60,
+                            width: AppConstants.otpBoxSize,
+                            height: AppConstants.otpBoxSize,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(12),
+                              color: AppColors.gray,
+                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                             ),
                             child: TextField(
                               controller: _otpControllers[index],
                               textAlign: TextAlign.center,
                               keyboardType: TextInputType.number,
                               maxLength: 1,
-                              style: const TextStyle(
-                                fontSize: 24,
+                              style: TextStyle(
+                                fontSize: AppConstants.fontSizeTitle,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF0F1A14),
+                                color: AppColors.textPrimary,
                               ),
                               decoration: const InputDecoration(
                                 counterText: '',
@@ -186,12 +188,12 @@ class _SecurityVerificationScreenState extends State<SecurityVerificationScreen>
                         }),
                       ),
                       const SizedBox(height: 40),
-                      const Center(
+                      Center(
                         child: Text(
                           'Vous n\'avez pas reçu de code ?',
                           style: TextStyle(
-                            fontSize: 16,
-                            color: Color(0xFF6B7280),
+                            fontSize: AppConstants.fontSizeLarge,
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ),

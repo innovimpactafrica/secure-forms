@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class NouvelleDemandeStep7Screen extends StatefulWidget {
   const NouvelleDemandeStep7Screen({super.key});
@@ -15,30 +17,30 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: 430,
-        height: 932,
-        color: const Color(0xFF0B3C5C),
+        width: AppConstants.screenWidth,
+        height: AppConstants.screenHeight,
+        color: AppColors.primaryDark,
         child: Stack(
           children: [
             // Bouton retour
             Positioned(
               top: 70,
-              left: 24,
+              left: AppConstants.paddingXLarge,
               child: GestureDetector(
                 onTap: () {
                   Navigator.of(context).pop();
                 },
                 child: Container(
-                  width: 50,
-                  height: 50,
+                  width: AppConstants.backButtonSize,
+                  height: AppConstants.backButtonSize,
                   decoration: BoxDecoration(
-                    color: const Color(0x14FFFFFF),
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.whiteOverlay,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                   ),
                   child: Center(
                     child: Icon(
                       Icons.arrow_back,
-                      color: Colors.white,
+                      color: AppColors.white,
                       size: 21.4,
                     ),
                   ),
@@ -220,7 +222,10 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                                   'assets/icons/mdi-light_chevron-down.svg',
                                   width: 20,
                                   height: 20,
-                                  color: const Color(0xFF000000),
+                                  colorFilter: ColorFilter.mode(
+                                    Colors.black,
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
                               ),
                             ],

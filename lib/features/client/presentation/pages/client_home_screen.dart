@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class ClientHomeScreen extends StatelessWidget {
   const ClientHomeScreen({super.key});
@@ -8,480 +10,773 @@ class ClientHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: 430,
-        height: 932,
-        color: const Color(0xFF0B3C5C),
-        child: Stack(
-          children: [
-            // Logo SECURE LINK à gauche
-            Positioned(
-              top: 70,
-              left: 24,
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(33.33),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(33.33),
-                  child: Image.asset(
-                    'assets/images/img (3).png',
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+      backgroundColor: AppColors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              _HomeHeader(),
+              _WelcomeSection(),
+              _ProfileProgressSection(),
+              _StatsGrid(),
+              _SearchBarSection(),
+              _RecentDemandesSection(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// HEADER: Logo | Bell + Avatar
+// ─────────────────────────────────────────────────────────────────
+class _HomeHeader extends StatelessWidget {
+  const _HomeHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // SecureLink logo
+          SizedBox(
+            width: 54,
+            height: 54,
+            child: Image.asset(
+              'assets/images/SLLOGO.png',
+              width: 44,
+              height: 44,
+              fit: BoxFit.contain,
             ),
-            // Avatar "LD" à droite
-            Positioned(
-              top: 70,
-              right: 24,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pushNamed(AppRoutes.clientProfil);
-                },
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(125),
+          ),
+          // Right side: notification bell + avatar
+          Row(
+            children: [
+              // Bell with notification badge
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(
+                    Icons.notifications_outlined,
+                    size: 26,
+                    color: AppColors.textBlack87,
                   ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: 2,
-                        left: 2,
-                        child: Container(
-                          width: 46,
-                          height: 46,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF23A3A6),
-                            borderRadius: BorderRadius.circular(125),
-                            border: Border.all(color: const Color(0xFF0B3C5C), width: 2),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'LD',
-                              style: TextStyle(
-                                fontFamily: 'Sofia Sans',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 20,
-                                height: 1.0,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            // Salutation "Bonjour, Lamine"
-            Positioned(
-              top: 78,
-              left: 90,
-              child: SizedBox(
-                width: 209,
-                height: 22,
-                child: Text(
-                  'Bonjour, Lamine',
-                  style: TextStyle(
-                    fontFamily: 'Sofia Sans',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18,
-                    height: 1.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            // Sous-titre "Bienvenue, sur votre tableau de bord"
-            Positioned(
-              top: 102,
-              left: 90,
-              child: Text(
-                'Bienvenue, sur votre tableau de bord',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w400,
-                  fontSize: 12,
-                  height: 1.0,
-                  color: Colors.white.withValues(alpha:0.6),
-                ),
-              ),
-            ),
-            // Section barre de recherche
-            Positioned(
-              top: 150,
-              left: 24,
-              right: 24,
-              child: Container(
-                height: 56,
-                padding: const EdgeInsets.fromLTRB(12, 12, 6, 12),
-                decoration: BoxDecoration(
-                  color: const Color(0x1AF8FBF9),
-                  borderRadius: BorderRadius.circular(100),
-                  border: Border.all(color: const Color(0x1AE8EEE7), width: 1),
-                ),
-                child: Row(
-                  children: [
-                    // Icône loupe
-                    Icon(
-                      Icons.search,
-                      size: 28,
-                      color: Colors.white.withValues(alpha:0.6),
-                    ),
-                    const SizedBox(width: 12),
-                    // Texte placeholder
-                    Expanded(
-                      child: Text(
-                        'Rechercher une banque, notaire....',
-                        style: TextStyle(
-                          fontFamily: 'SF Pro',
-                          fontWeight: FontWeight.w400,
-                          fontSize: 14,
-                          height: 20 / 14,
-                          color: const Color(0xFF9CA3AF),
-                        ),
-                      ),
-                    ),
-                    // Bouton flèche à droite
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF23A3A6),
+                  Positioned(
+                    top: -3,
+                    right: -3,
+                    child: Container(
+                      width: 15,
+                      height: 15,
+                      decoration: const BoxDecoration(
+                        color: AppColors.statusRejected,
                         shape: BoxShape.circle,
                       ),
                       child: Center(
-                        child: Icon(
-                          Icons.arrow_forward,
-                          size: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // Cards d'actions
-            Positioned(
-              top: 230,
-              left: 24,
-              right: 24,
-              child: Row(
-                children: [
-                  // Card 1 - Nouvelle demande
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pushNamed(AppRoutes.clientBanques);
-                      },
-                      child: Container(
-                        height: 120,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Icône plus
-                            SvgPicture.asset(
-                              'assets/icons/bi_plus-circle.svg',
-                              width: 28,
-                              height: 28,
-                            ),
-                            const SizedBox(height: 16),
-                            // Titre "Nouvelle demande"
-                            Text(
-                              'Nouvelle demande',
-                              style: TextStyle(
-                                fontFamily: 'Sofia Sans',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                                height: 1.0,
-                                color: const Color(0xFF222222),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Sous-titre "Banque, notaire..."
-                            Text(
-                              'Banque, notaire...',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w400,
-                                fontSize: 12,
-                                height: 1.0,
-                                color: const Color(0xFF6B7280),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Card 2 - Mes demandes
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pushNamed(AppRoutes.clientDemandes);
-                      },
-                      child: Container(
-                        height: 120,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Icône historique
-                            SvgPicture.asset(
-                              'assets/icons/solar_history-bold.svg',
-                              width: 28,
-                              height: 28,
-                            ),
-                            const SizedBox(height: 16),
-                            // Titre "Mes demandes"
-                            Text(
-                              'Mes demandes',
-                              style: TextStyle(
-                                fontFamily: 'Sofia Sans',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                                height: 1.0,
-                                color: const Color(0xFF222222),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Sous-titre "Voir mes historiques"
-                            Text(
-                              'Voir mes historiques',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w400,
-                                fontSize: 12,
-                                height: 1.0,
-                                color: const Color(0xFF6B7280),
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          '2',
+                          style: TextStyle(
+                            color: AppColors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
-            // Titre "Demandes récentes"
-            Positioned(
-              top: 380,
-              left: 24,
-              child: Text(
-                'Demandes récentes',
-                style: TextStyle(
-                  fontFamily: 'Sofia Sans',
-                  fontWeight: FontWeight.w500,
-                  fontSize: 24,
-                  height: 24 / 24,
-                  color: Colors.white,
+              const SizedBox(width: 14),
+              // Avatar circle
+              GestureDetector(
+                onTap: () =>
+                    Navigator.of(context).pushNamed(AppRoutes.clientProfil),
+                child: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryDark,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'LD',
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        fontFamily: AppConstants.fontFamilySofiaSans,
+                      ),
+                    ),
+                  ),
                 ),
               ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// WELCOME: "Bonjour Lamine," + "Bienvenue sur secure Forms"
+// ─────────────────────────────────────────────────────────────────
+class _WelcomeSection extends StatelessWidget {
+  const _WelcomeSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Bonjour Lamine,',
+            style: TextStyle(
+              fontFamily: AppConstants.fontFamilySofiaSans,
+              fontWeight: FontWeight.w700,
+              fontSize: 24,
+              color: AppColors.textBlack87,
             ),
-            // Lien "Tout voir" avec flèche
-            Positioned(
-              top: 388,
-              right: 24,
+          ),
+          const SizedBox(height: 2),
+          RichText(
+            text: TextSpan(
+              style: const TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+              ),
+              children: [
+                TextSpan(
+                  text: 'Bienvenue sur ',
+                  style: TextStyle(color: AppColors.textBlack54),
+                ),
+                TextSpan(
+                  text: 'secure ',
+                  style: TextStyle(
+                    color: AppColors.textBlack87,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                TextSpan(
+                  text: 'Forms',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// PROFILE PROGRESS: label + progress bar + CTA button
+// ─────────────────────────────────────────────────────────────────
+class _ProfileProgressSection extends StatelessWidget {
+  const _ProfileProgressSection();
+
+  static const double _progressValue = 0.30;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // "Complétez votre profil" label
+          Text(
+            'Complétez votre profil',
+            style: TextStyle(
+              fontFamily: AppConstants.fontFamilySofiaSans,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: 10),
+          // Progress bar: track + fill
+          Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              Container(
+                height: 7,
+                decoration: BoxDecoration(
+                  color: AppColors.progressTrack,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              FractionallySizedBox(
+                widthFactor: _progressValue,
+                child: Container(
+                  height: 7,
+                  decoration: BoxDecoration(
+                    color: AppColors.progressFill,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          // "30%" label right-aligned
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '30%',
+              style: TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.progressFill,
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          // CTA: "Commencer maintenant"
+          GestureDetector(
+            onTap: () => Navigator.of(context)
+                .pushNamed(AppRoutes.clientCompleteProfile),
+            child: Container(
+              height: 46,
+              decoration: BoxDecoration(
+                color: AppColors.primaryDark,
+                borderRadius: BorderRadius.circular(23),
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  const SizedBox(width: 20),
                   Text(
-                    'Tout voir',
+                    'Commencer maintenant',
                     style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.bold,
+                      fontFamily: AppConstants.fontFamilySofiaSans,
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w600,
                       fontSize: 14,
-                      height: 1.0,
-                      color: const Color(0xFF23A3A6),
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 10,
-                    color: const Color(0xFF23A3A6),
+                  const SizedBox(width: 12),
+                  Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: AppColors.ctaButtonOverlay,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward,
+                      color: AppColors.white,
+                      size: 16,
+                    ),
                   ),
+                  const SizedBox(width: 8),
                 ],
               ),
             ),
-            // Cards des demandes récentes
-            Positioned(
-              top: 430,
-              left: 24,
-              right: 24,
-              child: Column(
-                children: [
-                  // Card 1 - Ouverture de compte
-                  Container(
-                    height: 79,
-                    padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0x14FFFFFF)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0x0F000000),
-                          blurRadius: 48,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        SvgPicture.asset(
-                          'assets/icons/logo.svg',
-                          width: 36,
-                          height: 36,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Ouverture de compte',
-                                style: TextStyle(
-                                  fontFamily: 'Sofia Sans',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                  color: const Color(0xFF212121),
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                'Banque Nationale • 18/12/2025',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 12,
-                                  color: const Color(0xFF6B7280),
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF2F5F9),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            'Brouillon',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12,
-                              height: 1.0,
-                              color: const Color(0xFF6B7280),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// STATS GRID: 2×2 cards
+// ─────────────────────────────────────────────────────────────────
+class _StatsGrid extends StatelessWidget {
+  const _StatsGrid();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+  child: _StatCard(
+    label: 'Total demandes',
+    value: '12',
+    iconPath: 'assets/icons/logo.svg',
+    iconColor: AppColors.textBlack45,
+    borderColor: AppColors.progressTrack,
+    applyColorFilter: false,  
+  ),
+),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _StatCard(
+                  label: 'En cours',
+                  value: '10',
+                  iconPath: 'assets/icons/bi_clock-history.svg',
+                  iconColor: AppColors.primary,
+                  borderColor: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  label: 'En attente',
+                  value: '01',
+                  iconPath: 'assets/icons/carbon_rule-draft.svg',
+                  iconColor: AppColors.statusEnAttente,
+                  borderColor: AppColors.statusEnAttente,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _StatCard(
+                  label: 'Validé',
+                  value: '10',
+                  iconPath: 'assets/icons/bi_check2-circle (1).svg',
+                  iconColor: AppColors.statusValideGreen,
+                  borderColor: AppColors.statusValideGreen,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final String iconPath;
+  final Color iconColor;
+  final Color borderColor;
+   final bool applyColorFilter;
+
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.iconPath,
+    required this.iconColor,
+    required this.borderColor,
+     this.applyColorFilter = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 90,
+      padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: 1.2),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontSize: 11,
+                  color: AppColors.textBlack54,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              Text(
+                value,
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontSize: 30,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textBlack87,
+                ),
+              ),
+            ],
+          ),
+          SvgPicture.asset(
+            iconPath,
+            width: 22,
+            height: 22,
+          colorFilter: applyColorFilter
+                ? ColorFilter.mode(iconColor, BlendMode.srcIn)
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/*Widget _buildStatCard(
+    BuildContext context,
+    String label,
+    String value,
+    String iconPath,
+    double iconSize, {
+    Color? iconColor,
+  }) {
+    return Container(
+      height: ResponsiveUtils.getResponsiveHeight(context, AppConstants.profileCardHeight),
+      padding: EdgeInsets.fromLTRB(
+        ResponsiveUtils.getResponsiveWidth(context, AppConstants.paddingMedium),
+        ResponsiveUtils.getResponsiveHeight(context, AppConstants.paddingLarge),
+        ResponsiveUtils.getResponsiveWidth(context, AppConstants.paddingMedium),
+        ResponsiveUtils.getResponsiveHeight(context, AppConstants.paddingLarge),
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(
+          ResponsiveUtils.getResponsiveValue(context, AppConstants.radiusSmall),
+        ),
+        border: Border.all(color: AppColors.border, width: AppConstants.borderWidthThin),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowDark,
+            offset: Offset(
+              ResponsiveUtils.getResponsiveValue(context, AppConstants.elevationMedium),
+              ResponsiveUtils.getResponsiveValue(context, AppConstants.elevationMedium),
+            ),
+            blurRadius: ResponsiveUtils.getResponsiveValue(context, AppConstants.elevationMedium),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontFamily: AppConstants.fontFamilySofiaSans,
+                    fontWeight: FontWeight.w500,
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, AppConstants.fontSizeRegular),
+                    height: 1.0,
+                    letterSpacing: 0,
+                    color: AppColors.textSecondary,
                   ),
-                  const SizedBox(height: 16),
-                  // Card 2 - Demande de virement
-                  Container(
-                    height: 79,
-                    padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0x14FFFFFF)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0x0F000000),
-                          blurRadius: 48,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        SvgPicture.asset(
-                          'assets/icons/logo (1).svg',
-                          width: 36,
-                          height: 36,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Demande de virement',
-                                style: TextStyle(
-                                  fontFamily: 'Sofia Sans',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                  color: const Color(0xFF212121),
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                'Banque Nationale • 12/12/2025',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 12,
-                                  color: const Color(0xFF6B7280),
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0x1AF39C12),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            'En attente',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12,
-                              height: 1.0,
-                              color: const Color(0xFFF39C12),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                ),
+                SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 4)),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontFamily: AppConstants.fontFamilySofiaSans,
+                    fontWeight: FontWeight.w600,
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, AppConstants.fontSizeXXLarge),
+                    height: 1.2,
+                    letterSpacing: 0,
+                    color: AppColors.textDark,
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+          SvgPicture.asset(
+            iconPath,
+            width: ResponsiveUtils.getResponsiveWidth(context, iconSize),
+            height: ResponsiveUtils.getResponsiveHeight(context, iconSize),
+            colorFilter: iconColor != null
+                ? ColorFilter.mode(iconColor, BlendMode.srcIn)
+                : null,
+          ),
+        ],
+      ),
+    );
+  }*/
+
+// ─────────────────────────────────────────────────────────────────
+// SEARCH BAR
+// ─────────────────────────────────────────────────────────────────
+class _SearchBarSection extends StatelessWidget {
+  const _SearchBarSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+      child: Container(
+        height: 52,
+        decoration: BoxDecoration(
+          color: AppColors.greyShade100,
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: AppColors.greyShade200),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 14),
+            Icon(Icons.search, color: AppColors.greyShade500, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Rechercher une banque, notaire....',
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontSize: AppConstants.fontSizeMedium,
+                  color: AppColors.greyShade500,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(6),
+              child: Container(
+                width: 38,
+                height: 38,
+                decoration: const BoxDecoration(
+                  color: AppColors.primaryDark,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_forward,
+                  color: AppColors.white,
+                  size: 18,
+                ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// RECENT DEMANDES — cards conservées identiques à l'original
+// ─────────────────────────────────────────────────────────────────
+class _RecentDemandesSection extends StatelessWidget {
+  const _RecentDemandesSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      child: Column(
+        children: [
+          // Section header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Demandes récentes',
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontWeight: FontWeight.w500,
+                  fontSize: AppConstants.fontSizeTitle,
+                  color: AppColors.textBlack87,
+                ),
+              ),
+              GestureDetector(
+                onTap: () =>
+                    Navigator.of(context).pushNamed(AppRoutes.clientDemandes),
+                child: Row(
+                  children: [
+                    Text(
+                      'Tout voir',
+                      style: TextStyle(
+                        fontFamily: AppConstants.fontFamilyInter,
+                        fontWeight: FontWeight.bold,
+                        fontSize: AppConstants.fontSizeMedium,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: AppConstants.fontSizeSmall,
+                      color: AppColors.primary,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // ── Card 1: Ouverture de compte ──
+          GestureDetector(
+            onTap: () => Navigator.of(context)
+                .pushNamed(AppRoutes.clientDemandeDetail),
+            child: Container(
+              height: AppConstants.cardDemandeHeight,
+              padding: EdgeInsets.fromLTRB(
+                  AppConstants.paddingLarge, 10, AppConstants.paddingSmall, 10),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius:
+                    BorderRadius.circular(AppConstants.radiusMedium),
+                border: Border.all(color: AppColors.whiteOverlay),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadowLight,
+                    blurRadius: 48,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  SvgPicture.asset(
+                    'assets/icons/logo.svg',
+                    width: AppConstants.cardIconSize,
+                    height: AppConstants.cardIconSize,
+                  ),
+                  SizedBox(width: AppConstants.paddingLarge),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Ouverture de compte',
+                          style: TextStyle(
+                            fontFamily: AppConstants.fontFamilySofiaSans,
+                            fontWeight: FontWeight.w600,
+                            fontSize: AppConstants.fontSizeLarge,
+                            color: AppColors.textDark,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          'Banque Nationale • 18/12/2025',
+                          style: TextStyle(
+                            fontFamily: AppConstants.fontFamilyInter,
+                            fontWeight: FontWeight.w400,
+                            fontSize: AppConstants.fontSizeRegular,
+                            color: AppColors.textSecondary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: AppConstants.paddingSmall, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.statusPendingLight,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      'En attente',
+                      style: TextStyle(
+                        fontFamily: AppConstants.fontFamilyInter,
+                        fontWeight: FontWeight.w500,
+                        fontSize: AppConstants.fontSizeRegular,
+                        height: 1.0,
+                        color: AppColors.statusPending,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          SizedBox(height: AppConstants.paddingLarge),
+
+          // ── Card 2: Demande de virement ──
+          GestureDetector(
+            onTap: () => Navigator.of(context)
+                .pushNamed(AppRoutes.clientDemandeDetail),
+            child: Container(
+              height: AppConstants.cardDemandeHeight,
+              padding: EdgeInsets.fromLTRB(
+                  AppConstants.paddingLarge, 10, AppConstants.paddingSmall, 10),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius:
+                    BorderRadius.circular(AppConstants.radiusMedium),
+                border: Border.all(color: AppColors.whiteOverlay),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadowLight,
+                    blurRadius: 48,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  SvgPicture.asset(
+                    'assets/icons/logo (1).svg',
+                    width: AppConstants.cardIconSize,
+                    height: AppConstants.cardIconSize,
+                  ),
+                  SizedBox(width: AppConstants.paddingLarge),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Demande de virement',
+                          style: TextStyle(
+                            fontFamily: AppConstants.fontFamilySofiaSans,
+                            fontWeight: FontWeight.w600,
+                            fontSize: AppConstants.fontSizeLarge,
+                            color: AppColors.textDark,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          'Banque Nationale • 12/12/2025',
+                          style: TextStyle(
+                            fontFamily: AppConstants.fontFamilyInter,
+                            fontWeight: FontWeight.w400,
+                            fontSize: AppConstants.fontSizeRegular,
+                            color: AppColors.textSecondary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: AppConstants.paddingSmall, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.statusValidatedLight,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      'Validé',
+                      style: TextStyle(
+                        fontFamily: AppConstants.fontFamilyInter,
+                        fontWeight: FontWeight.w500,
+                        fontSize: AppConstants.fontSizeRegular,
+                        height: 1.0,
+                        color: AppColors.statusValidated,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

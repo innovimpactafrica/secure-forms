@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/responsive_utils.dart';
+import '../core/utils/app_colors.dart';
+import '../core/utils/app_constants.dart';
 
 class ResponsiveModal extends StatelessWidget {
   final Widget child;
@@ -23,9 +25,9 @@ class ResponsiveModal extends StatelessWidget {
         horizontal: ResponsiveUtils.getResponsiveWidth(context, 8),
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(
-          ResponsiveUtils.getResponsiveValue(context, 24),
+          ResponsiveUtils.getResponsiveValue(context, AppConstants.fontSizeTitle),
         ),
       ),
       child: Stack(
@@ -37,10 +39,10 @@ class ResponsiveModal extends StatelessWidget {
               right: 0,
               child: Center(
                 child: Container(
-                  width: ResponsiveUtils.getResponsiveWidth(context, 40),
-                  height: ResponsiveUtils.getResponsiveHeight(context, 4),
+                  width: ResponsiveUtils.getResponsiveWidth(context, AppConstants.modalHandleWidth),
+                  height: ResponsiveUtils.getResponsiveHeight(context, AppConstants.modalHandleHeight),
                   decoration: BoxDecoration(
-                    color: const Color(0x80212121),
+                    color: AppColors.modalHandle,
                     borderRadius: BorderRadius.circular(
                       ResponsiveUtils.getResponsiveValue(context, 999),
                     ),
@@ -95,10 +97,10 @@ class ResponsiveButton extends StatelessWidget {
           child: Text(
             text,
             style: TextStyle(
-              fontFamily: 'Inter',
+              fontFamily: AppConstants.fontFamilyInter,
               fontWeight: FontWeight.w500,
-              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-              color: textColor ?? const Color(0xFF6B7280),
+              fontSize: ResponsiveUtils.getResponsiveFontSize(context, AppConstants.fontSizeLarge),
+              color: textColor ?? AppColors.textSecondary,
             ),
           ),
         ),

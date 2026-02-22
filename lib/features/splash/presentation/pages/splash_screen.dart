@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -53,30 +54,18 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: AppColors.white,
       body: AnimatedBuilder(
         animation: _fadeAnimation,
         builder: (context, child) {
           return Opacity(
             opacity: _fadeAnimation.value,
-            child: SizedBox(
-              width: 430,
-              height: 932,
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 426,
-                    left: 51,
-                    child: SizedBox(
-                      width: 327.27,
-                      height: 80,
-                      child: Image.asset(
-                        'assets/images/securelink.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ),
-                ],
+            child: Center(
+              child: Image.asset(
+                'assets/images/securelink.png',
+                width: 327.27,
+                height: 80,
+                fit: BoxFit.contain,
               ),
             ),
           );

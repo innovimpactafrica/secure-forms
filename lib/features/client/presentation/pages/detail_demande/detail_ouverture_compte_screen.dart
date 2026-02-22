@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class DetailOuvertureCompteScreen extends StatelessWidget {
-  const DetailOuvertureCompteScreen({Key? key}) : super(key: key);
+  const DetailOuvertureCompteScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,25 +13,25 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              width: 430,
-              height: 932,
-              color: const Color(0xFF0B3C5C),
+              width: AppConstants.screenWidth,
+              height: AppConstants.screenHeight,
+              color: AppColors.primaryDark,
               child: Stack(
                 children: [
                   // Bouton retour
                   Positioned(
                     top: 70,
-                    left: 24,
+                    left: AppConstants.paddingLarge + 8,
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pop();
                       },
                       child: Container(
-                        width: 50,
-                        height: 50,
+                        width: AppConstants.backButtonSize,
+                        height: AppConstants.backButtonSize,
                         decoration: BoxDecoration(
-                          color: const Color(0x14FFFFFF),
-                          borderRadius: BorderRadius.circular(12),
+                          color: AppColors.whiteOverlay,
+                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                         ),
                         child: Center(
                           child: SvgPicture.asset(
@@ -49,8 +51,8 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                       'Ouverture de compte',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 20,
-                        color: Colors.white,
+                        fontSize: AppConstants.fontSizeXXLarge,
+                        color: AppColors.white,
                       ),
                     ),
                   ),
@@ -62,30 +64,30 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                       'Banque Nationale • 18/12/2025',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha:0.6),
+                        fontSize: AppConstants.fontSizeRegular,
+                        color: AppColors.whiteOpacity(0.6),
                       ),
                     ),
                   ),
                   // Badge "Brouillon"
                   Positioned(
                     top: 78,
-                    right: 24,
+                    right: AppConstants.paddingLarge + 8,
                     child: Container(
                       width: 60,
                       height: 20,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF2F5F9),
+                        color: AppColors.statusDraftLight,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Center(
                         child: Text(
                           'Brouillon',
                           style: TextStyle(
-                            fontFamily: 'Inter',
+                            fontFamily: AppConstants.fontFamilyInter,
                             fontWeight: FontWeight.w500,
-                            fontSize: 10,
-                            color: const Color(0xFF6B7280),
+                            fontSize: AppConstants.fontSizeSmall,
+                            color: AppColors.statusDraft,
                           ),
                         ),
                       ),
@@ -94,13 +96,13 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                   // Container blanc en bas du header
                   Positioned(
                     top: 150,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingLarge + 8,
+                    right: AppConstants.paddingLarge + 8,
                     child: Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(AppConstants.paddingLarge),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,41 +110,41 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                           Text(
                             'REQ-2024-004',
                             style: TextStyle(
-                              fontFamily: 'Inter',
+                              fontFamily: AppConstants.fontFamilyInter,
                               fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                              fontSize: AppConstants.fontSizeMedium,
                               height: 1.0,
                               letterSpacing: 0.03,
-                              color: const Color(0xFF1F2937),
+                              color: AppColors.textDarkGray,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 'Soumis le 15/12, 10h00',
                                 style: TextStyle(
-                                  fontFamily: 'Inter',
+                                  fontFamily: AppConstants.fontFamilyInter,
                                   fontWeight: FontWeight.w500,
-                                  fontSize: 12,
+                                  fontSize: AppConstants.fontSizeRegular,
                                   height: 1.0,
-                                  color: const Color(0xFF6B7280),
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                               Text(
                                 'Estimé : 17/12',
                                 style: TextStyle(
-                                  fontFamily: 'Inter',
+                                  fontFamily: AppConstants.fontFamilyInter,
                                   fontWeight: FontWeight.w500,
-                                  fontSize: 12,
+                                  fontSize: AppConstants.fontSizeRegular,
                                   height: 1.0,
-                                  color: const Color(0xFF6B7280),
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: AppConstants.paddingXLarge),
                           // Barre de progression
                           Row(
                             children: [
@@ -150,30 +152,33 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                               Column(
                                 children: [
                                   Container(
-                                    width: 40,
-                                    height: 40,
+                                    width: AppConstants.progressStepSize,
+                                    height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF0B3C5C),
-                                      borderRadius: BorderRadius.circular(20),
+                                      color: AppColors.primaryDark,
+                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/bi_pencil (1).svg',
-                                        width: 20,
-                                        height: 20,
-                                        color: Colors.white,
+                                        width: AppConstants.iconSizeMedium,
+                                        height: AppConstants.iconSizeMedium,
+                                        colorFilter: ColorFilter.mode(
+                                          AppColors.white,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: AppConstants.paddingSmall),
                                   Text(
                                     'Enregistré',
                                     style: TextStyle(
-                                      fontFamily: 'Inter',
+                                      fontFamily: AppConstants.fontFamilyInter,
                                       fontWeight: FontWeight.w500,
-                                      fontSize: 12,
+                                      fontSize: AppConstants.fontSizeRegular,
                                       height: 1.0,
-                                      color: const Color(0xFF6B7280),
+                                      color: AppColors.textSecondary,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -182,11 +187,11 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                               // Ligne de progression 1
                               Expanded(
                                 child: Container(
-                                  height: 6,
-                                  margin: const EdgeInsets.only(bottom: 32),
+                                  height: AppConstants.progressLineHeight,
+                                  margin: EdgeInsets.only(bottom: 32),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFD9D9D9),
-                                    borderRadius: BorderRadius.circular(100),
+                                    color: AppColors.divider,
+                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                                   ),
                                 ),
                               ),
@@ -194,30 +199,33 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                               Column(
                                 children: [
                                   Container(
-                                    width: 40,
-                                    height: 40,
+                                    width: AppConstants.progressStepSize,
+                                    height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFE5E7EB),
-                                      borderRadius: BorderRadius.circular(20),
+                                      color: AppColors.borderDivider,
+                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/bi_clock-history.svg',
-                                        width: 20,
-                                        height: 20,
-                                        color: const Color(0xFF9CA3AF),
+                                        width: AppConstants.iconSizeMedium,
+                                        height: AppConstants.iconSizeMedium,
+                                        colorFilter: ColorFilter.mode(
+                                          AppColors.textLight,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: AppConstants.paddingSmall),
                                   Text(
                                     'En cours',
                                     style: TextStyle(
-                                      fontFamily: 'Inter',
+                                      fontFamily: AppConstants.fontFamilyInter,
                                       fontWeight: FontWeight.w500,
-                                      fontSize: 12,
+                                      fontSize: AppConstants.fontSizeRegular,
                                       height: 1.0,
-                                      color: const Color(0xFF6B7280),
+                                      color: AppColors.textSecondary,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -226,11 +234,11 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                               // Ligne de progression 2
                               Expanded(
                                 child: Container(
-                                  height: 6,
-                                  margin: const EdgeInsets.only(bottom: 32),
+                                  height: AppConstants.progressLineHeight,
+                                  margin: EdgeInsets.only(bottom: 32),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFD9D9D9),
-                                    borderRadius: BorderRadius.circular(100),
+                                    color: AppColors.divider,
+                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                                   ),
                                 ),
                               ),
@@ -238,30 +246,33 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                               Column(
                                 children: [
                                   Container(
-                                    width: 40,
-                                    height: 40,
+                                    width: AppConstants.progressStepSize,
+                                    height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFE5E7EB),
-                                      borderRadius: BorderRadius.circular(20),
+                                      color: AppColors.borderDivider,
+                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/ep_check.svg',
-                                        width: 20,
-                                        height: 20,
-                                        color: const Color(0xFF9CA3AF),
+                                        width: AppConstants.iconSizeMedium,
+                                        height: AppConstants.iconSizeMedium,
+                                        colorFilter: ColorFilter.mode(
+                                          AppColors.textLight,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: AppConstants.paddingSmall),
                                   Text(
                                     'Finalisé',
                                     style: TextStyle(
-                                      fontFamily: 'Inter',
+                                      fontFamily: AppConstants.fontFamilyInter,
                                       fontWeight: FontWeight.w500,
-                                      fontSize: 12,
+                                      fontSize: AppConstants.fontSizeRegular,
                                       height: 1.0,
-                                      color: const Color(0xFF6B7280),
+                                      color: AppColors.textSecondary,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -276,19 +287,27 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                   // Nouveau container
                   Positioned(
                     top: 320,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingLarge + 8,
+                    right: AppConstants.paddingLarge + 8,
                     child: Container(
-                      height: 204,
-                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                      height: AppConstants.documentContainerHeight,
+                      padding: EdgeInsets.fromLTRB(
+                        AppConstants.paddingLarge,
+                        AppConstants.paddingXLarge,
+                        AppConstants.paddingLarge,
+                        AppConstants.paddingXLarge,
+                      ),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE8EEE7), width: 1),
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        border: Border.all(
+                          color: AppColors.border,
+                          width: AppConstants.borderWidthThin,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0x08000000),
-                            offset: const Offset(3, 3),
+                            color: AppColors.shadowDark,
+                            offset: Offset(3, 3),
                             blurRadius: 3,
                             spreadRadius: 0,
                           ),
@@ -296,33 +315,33 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          const SizedBox(height: 40),
+                          SizedBox(height: AppConstants.iconSizeHuge),
                           SvgPicture.asset(
                             'assets/icons/hugeicons_files-02.svg',
-                            width: 24,
-                            height: 24,
+                            width: AppConstants.iconSizeLarge,
+                            height: AppConstants.iconSizeLarge,
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: AppConstants.paddingLarge),
                           Text(
                             'Aucun document fourni',
                             style: TextStyle(
-                              fontFamily: 'Inter',
+                              fontFamily: AppConstants.fontFamilyInter,
                               fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                              fontSize: AppConstants.fontSizeMedium,
                               height: 1.0,
-                              color: const Color(0xFF343A40),
+                              color: AppColors.cardSubtext,
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: AppConstants.paddingSmall),
                           Text(
                             'Merci de téléverser le formulaire rempli.',
                             style: TextStyle(
-                              fontFamily: 'Inter',
+                              fontFamily: AppConstants.fontFamilyInter,
                               fontWeight: FontWeight.w500,
-                              fontSize: 12,
+                              fontSize: AppConstants.fontSizeRegular,
                               height: 1.0,
-                              color: const Color(0xFF6B7280),
+                              color: AppColors.textSecondary,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -333,34 +352,37 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                   // Bouton en bas
                   Positioned(
                     bottom: 80,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingLarge + 8,
+                    right: AppConstants.paddingLarge + 8,
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pushNamed('/detail-ouverture-compte-brouillon');
                       },
                       child: Container(
-                        height: 64,
-                        padding: const EdgeInsets.all(12),
+                        height: AppConstants.buttonHeightLarge,
+                        padding: EdgeInsets.all(AppConstants.paddingMedium),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF23A3A6),
-                          borderRadius: BorderRadius.circular(100),
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SvgPicture.asset(
                               'assets/icons/bi_pencil (1).svg',
-                              width: 16,
-                              height: 16,
-                              color: Colors.white,
+                              width: AppConstants.iconSizeSmall,
+                              height: AppConstants.iconSizeSmall,
+                              colorFilter: ColorFilter.mode(
+                                AppColors.white,
+                                BlendMode.srcIn,
+                              ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: AppConstants.paddingSmall),
                             Text(
                               'Compléter les informations',
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
+                                color: AppColors.white,
+                                fontSize: AppConstants.fontSizeLarge,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

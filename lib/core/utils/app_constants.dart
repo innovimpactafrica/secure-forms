@@ -62,4 +62,38 @@ class AppConstants {
   
   // Filter Height
   static const double filterHeight = 40.0;
+  
+  // Dimensions spécifiques
+  static const double screenWidth = 430.0;
+  static const double screenHeight = 932.0;
+  static const double backButtonSize = 50.0;
+  static const double logoWidth = 131.0;
+  static const double logoHeight = 32.0;
+  static const double inputHeight = 54.0;
+  static const double flagSize = 24.0;
+  static const double chevronSize = 20.0;
+  static const double separatorWidth = 1.0;
+  static const double separatorHeight = 16.0;
+  static const double otpBoxSize = 60.0;
+  static const double successModalHeight = 264.0;
+  static const double successModalWidth = 390.0;
+  static const double successIconSize = 64.0;
+  static const double cardIconSize = 36.0;
+  static const double cardActionHeight = 120.0;
+  static const double cardDemandeHeight = 79.0;
+  static const double profileAvatarSize = 100.0;
+  static const double profileAvatarInner = 92.0;
+  static const double profileCardHeight = 82.0;
+  static const double profileContainerHeight = 250.0;
+  static const double logoutButtonHeight = 60.0;
+  static const double modalLangueHeight = 280.0;
+  static const double modalDeconnexionHeight = 240.0;
+  static const double modalHandleWidth = 40.0;
+  static const double modalHandleHeight = 4.0;
+  static const double languageOptionHeight = 56.0;
+  static const double progressStepSize = 40.0;
+  static const double progressLineHeight = 6.0;
+  static const double documentContainerHeight = 204.0;
+  static const double floatingButtonSize = 52.0;
+  static const double floatingButtonBorder = 4.0;
 }

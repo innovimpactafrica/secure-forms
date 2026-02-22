@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class DetailVirementScreen extends StatelessWidget {
   const DetailVirementScreen({super.key});
@@ -11,25 +13,25 @@ class DetailVirementScreen extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              width: 430,
-              height: 932,
-              color: const Color(0xFF0B3C5C),
+              width: AppConstants.screenWidth,
+              height: AppConstants.screenHeight,
+              color: AppColors.primaryDark,
               child: Stack(
                 children: [
                   // Bouton retour
                   Positioned(
                     top: 70,
-                    left: 24,
+                    left: AppConstants.paddingXLarge,
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pop();
                       },
                       child: Container(
-                        width: 50,
-                        height: 50,
+                        width: AppConstants.backButtonSize,
+                        height: AppConstants.backButtonSize,
                         decoration: BoxDecoration(
-                          color: const Color(0x14FFFFFF),
-                          borderRadius: BorderRadius.circular(12),
+                          color: AppColors.whiteOverlay,
+                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                         ),
                         child: Center(
                           child: SvgPicture.asset(
@@ -49,8 +51,8 @@ class DetailVirementScreen extends StatelessWidget {
                       'Demande de virement',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 20,
-                        color: Colors.white,
+                        fontSize: AppConstants.fontSizeXXLarge,
+                        color: AppColors.white,
                       ),
                     ),
                   ),
@@ -62,30 +64,30 @@ class DetailVirementScreen extends StatelessWidget {
                       'Banque Nationale • 04/11/2025',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha:0.6),
+                        fontSize: AppConstants.fontSizeRegular,
+                        color: AppColors.whiteOpacity(0.6),
                       ),
                     ),
                   ),
                   // Badge "En attente"
                   Positioned(
                     top: 78,
-                    right: 24,
+                    right: AppConstants.paddingXLarge,
                     child: Container(
                       width: 65,
                       height: 20,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF39C12),
+                        color: AppColors.statusPending,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Center(
                         child: Text(
                           'En attente',
                           style: TextStyle(
-                            fontFamily: 'Inter',
+                            fontFamily: AppConstants.fontFamilyInter,
                             fontWeight: FontWeight.w500,
-                            fontSize: 10,
-                            color: Colors.white,
+                            fontSize: AppConstants.fontSizeSmall,
+                            color: AppColors.white,
                           ),
                         ),
                       ),
@@ -94,13 +96,13 @@ class DetailVirementScreen extends StatelessWidget {
                   // Container blanc en bas du header
                   Positioned(
                     top: 150,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingXLarge,
+                    right: AppConstants.paddingXLarge,
                     child: Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(AppConstants.paddingLarge),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,12 +110,12 @@ class DetailVirementScreen extends StatelessWidget {
                           Text(
                             'REQ-2024-001',
                             style: TextStyle(
-                              fontFamily: 'Inter',
+                              fontFamily: AppConstants.fontFamilyInter,
                               fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                              fontSize: AppConstants.fontSizeMedium,
                               height: 1.0,
                               letterSpacing: 0.03,
-                              color: const Color(0xFF1F2937),
+                              color: AppColors.textDarkGray,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -123,26 +125,26 @@ class DetailVirementScreen extends StatelessWidget {
                               Text(
                                 'Soumis le 15/12, 10h00',
                                 style: TextStyle(
-                                  fontFamily: 'Inter',
+                                  fontFamily: AppConstants.fontFamilyInter,
                                   fontWeight: FontWeight.w500,
-                                  fontSize: 12,
+                                  fontSize: AppConstants.fontSizeRegular,
                                   height: 1.0,
-                                  color: const Color(0xFF6B7280),
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                               Text(
                                 'Estimé : 17/12',
                                 style: TextStyle(
-                                  fontFamily: 'Inter',
+                                  fontFamily: AppConstants.fontFamilyInter,
                                   fontWeight: FontWeight.w500,
-                                  fontSize: 12,
+                                  fontSize: AppConstants.fontSizeRegular,
                                   height: 1.0,
-                                  color: const Color(0xFF6B7280),
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: AppConstants.paddingXLarge),
                           // Barre de progression
                           Row(
                             children: [
@@ -150,30 +152,30 @@ class DetailVirementScreen extends StatelessWidget {
                               Column(
                                 children: [
                                   Container(
-                                    width: 40,
-                                    height: 40,
+                                    width: AppConstants.progressStepSize,
+                                    height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF23A3A6),
-                                      borderRadius: BorderRadius.circular(20),
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/bi_pencil (1).svg',
-                                        width: 20,
-                                        height: 20,
-                                        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                        width: AppConstants.iconSizeMedium,
+                                        height: AppConstants.iconSizeMedium,
+                                        colorFilter: ColorFilter.mode(AppColors.white, BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: AppConstants.paddingSmall),
                                   Text(
                                     'Soumis',
                                     style: TextStyle(
-                                      fontFamily: 'Inter',
+                                      fontFamily: AppConstants.fontFamilyInter,
                                       fontWeight: FontWeight.w500,
-                                      fontSize: 12,
+                                      fontSize: AppConstants.fontSizeRegular,
                                       height: 1.0,
-                                      color: const Color(0xFF6B7280),
+                                      color: AppColors.textSecondary,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -182,11 +184,11 @@ class DetailVirementScreen extends StatelessWidget {
                               // Ligne de progression 1
                               Expanded(
                                 child: Container(
-                                  height: 6,
+                                  height: AppConstants.progressLineHeight,
                                   margin: const EdgeInsets.only(bottom: 32),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFD9D9D9),
-                                    borderRadius: BorderRadius.circular(100),
+                                    color: AppColors.divider,
+                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                                   ),
                                 ),
                               ),
@@ -194,30 +196,30 @@ class DetailVirementScreen extends StatelessWidget {
                               Column(
                                 children: [
                                   Container(
-                                    width: 40,
-                                    height: 40,
+                                    width: AppConstants.progressStepSize,
+                                    height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFE5E7EB),
-                                      borderRadius: BorderRadius.circular(20),
+                                      color: AppColors.borderDivider,
+                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/bi_clock-history.svg',
-                                        width: 20,
-                                        height: 20,
-                                        colorFilter: const ColorFilter.mode(Color(0xFF9CA3AF), BlendMode.srcIn),
+                                        width: AppConstants.iconSizeMedium,
+                                        height: AppConstants.iconSizeMedium,
+                                        colorFilter: ColorFilter.mode(AppColors.textLight, BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: AppConstants.paddingSmall),
                                   Text(
                                     'En cours',
                                     style: TextStyle(
-                                      fontFamily: 'Inter',
+                                      fontFamily: AppConstants.fontFamilyInter,
                                       fontWeight: FontWeight.w500,
-                                      fontSize: 12,
+                                      fontSize: AppConstants.fontSizeRegular,
                                       height: 1.0,
-                                      color: const Color(0xFF6B7280),
+                                      color: AppColors.textSecondary,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -226,11 +228,11 @@ class DetailVirementScreen extends StatelessWidget {
                               // Ligne de progression 2
                               Expanded(
                                 child: Container(
-                                  height: 6,
+                                  height: AppConstants.progressLineHeight,
                                   margin: const EdgeInsets.only(bottom: 32),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFD9D9D9),
-                                    borderRadius: BorderRadius.circular(100),
+                                    color: AppColors.divider,
+                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                                   ),
                                 ),
                               ),
@@ -238,30 +240,30 @@ class DetailVirementScreen extends StatelessWidget {
                               Column(
                                 children: [
                                   Container(
-                                    width: 40,
-                                    height: 40,
+                                    width: AppConstants.progressStepSize,
+                                    height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFE5E7EB),
-                                      borderRadius: BorderRadius.circular(20),
+                                      color: AppColors.borderDivider,
+                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/ep_check.svg',
-                                        width: 20,
-                                        height: 20,
-                                        colorFilter: const ColorFilter.mode(Color(0xFF9CA3AF), BlendMode.srcIn),
+                                        width: AppConstants.iconSizeMedium,
+                                        height: AppConstants.iconSizeMedium,
+                                        colorFilter: ColorFilter.mode(AppColors.textLight, BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: AppConstants.paddingSmall),
                                   Text(
                                     'Finalisé',
                                     style: TextStyle(
-                                      fontFamily: 'Inter',
+                                      fontFamily: AppConstants.fontFamilyInter,
                                       fontWeight: FontWeight.w500,
-                                      fontSize: 12,
+                                      fontSize: AppConstants.fontSizeRegular,
                                       height: 1.0,
-                                      color: const Color(0xFF6B7280),
+                                      color: AppColors.textSecondary,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -276,17 +278,17 @@ class DetailVirementScreen extends StatelessWidget {
                   // Deuxième container
                   Positioned(
                     top: 320,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingXLarge,
+                    right: AppConstants.paddingXLarge,
                     child: Container(
-                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                      padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.paddingXLarge, AppConstants.paddingLarge, AppConstants.paddingXLarge),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE8EEE7), width: 1),
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        border: Border.all(color: AppColors.border, width: AppConstants.borderWidthThin),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0x08000000),
+                            color: AppColors.shadowDark,
                             offset: const Offset(3, 3),
                             blurRadius: 3,
                             spreadRadius: 0,

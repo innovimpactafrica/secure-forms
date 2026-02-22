@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class DetailOuvertureCompteContinuerScreen extends StatefulWidget {
-  const DetailOuvertureCompteContinuerScreen({Key? key}) : super(key: key);
+  const DetailOuvertureCompteContinuerScreen({super.key});
 
   @override
   State<DetailOuvertureCompteContinuerScreen> createState() => _DetailOuvertureCompteContinuerScreenState();
@@ -32,25 +34,25 @@ class _DetailOuvertureCompteContinuerScreenState extends State<DetailOuvertureCo
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: 430,
-        height: 932,
-        color: const Color(0xFF0B3C5C),
+        width: AppConstants.screenWidth,
+        height: AppConstants.screenHeight,
+        color: AppColors.primaryDark,
         child: Stack(
                 children: [
                   // Bouton retour
                   Positioned(
                     top: 70,
-                    left: 24,
+                    left: AppConstants.paddingXLarge,
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pop();
                       },
                       child: Container(
-                        width: 50,
-                        height: 50,
+                        width: AppConstants.backButtonSize,
+                        height: AppConstants.backButtonSize,
                         decoration: BoxDecoration(
-                          color: const Color(0x14FFFFFF),
-                          borderRadius: BorderRadius.circular(12),
+                          color: AppColors.whiteOverlay,
+                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                         ),
                         child: Center(
                           child: SvgPicture.asset(
@@ -70,8 +72,8 @@ class _DetailOuvertureCompteContinuerScreenState extends State<DetailOuvertureCo
                       'Ouverture de compte',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 20,
-                        color: Colors.white,
+                        fontSize: AppConstants.fontSizeXXLarge,
+                        color: AppColors.white,
                       ),
                     ),
                   ),
@@ -83,30 +85,30 @@ class _DetailOuvertureCompteContinuerScreenState extends State<DetailOuvertureCo
                       'Banque Nationale • 18/12/2025',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: AppConstants.fontSizeRegular,
+                        color: AppColors.whiteOpacity(0.6),
                       ),
                     ),
                   ),
                   // Badge "Brouillon"
                   Positioned(
                     top: 78,
-                    right: 24,
+                    right: AppConstants.paddingXLarge,
                     child: Container(
                       width: 60,
                       height: 20,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF2F5F9),
+                        color: AppColors.statusDraftLight,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Center(
                         child: Text(
                           'Brouillon',
                           style: TextStyle(
-                            fontFamily: 'Inter',
+                            fontFamily: AppConstants.fontFamilyInter,
                             fontWeight: FontWeight.w500,
-                            fontSize: 10,
-                            color: const Color(0xFF6B7280),
+                            fontSize: AppConstants.fontSizeSmall,
+                            color: AppColors.statusDraft,
                           ),
                         ),
                       ),
@@ -115,23 +117,23 @@ class _DetailOuvertureCompteContinuerScreenState extends State<DetailOuvertureCo
                   // Barre de progression 3/5
                   Positioned(
                     top: 140,
-                    left: 24,
+                    left: AppConstants.paddingXLarge,
                     child: Stack(
                       children: [
                         Container(
-                          width: 320,
-                          height: 4,
+                          width: AppConstants.progressBarWidth,
+                          height: AppConstants.progressBarHeight,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFDEE8EE),
-                            borderRadius: BorderRadius.circular(100),
+                            color: AppColors.progressBar,
+                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                           ),
                         ),
                         Container(
                           width: 192,
-                          height: 4,
+                          height: AppConstants.progressBarHeight,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF23A3A6),
-                            borderRadius: BorderRadius.circular(100),
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                           ),
                         ),
                       ],
@@ -144,12 +146,12 @@ class _DetailOuvertureCompteContinuerScreenState extends State<DetailOuvertureCo
                     child: Text(
                       '3/5',
                       style: TextStyle(
-                        fontFamily: 'Inter',
+                        fontFamily: AppConstants.fontFamilyInter,
                         fontWeight: FontWeight.w500,
-                        fontSize: 14,
+                        fontSize: AppConstants.fontSizeMedium,
                         height: 1.0,
                         letterSpacing: 0,
-                        color: const Color(0xFF6F8A99),
+                        color: AppColors.textLightGray,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -157,51 +159,51 @@ class _DetailOuvertureCompteContinuerScreenState extends State<DetailOuvertureCo
                   // Titre "Vérification de sécurité"
                   Positioned(
                     top: 165,
-                    left: 24,
+                    left: AppConstants.paddingXLarge,
                     child: Text(
                       'Vérification de sécurité',
                       style: TextStyle(
-                        fontFamily: 'Inter',
+                        fontFamily: AppConstants.fontFamilyInter,
                         fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                        fontSize: AppConstants.fontSizeLarge,
                         height: 24 / 16,
                         letterSpacing: 0,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                     ),
                   ),
                   // Description
                   Positioned(
                     top: 190,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingXLarge,
+                    right: AppConstants.paddingXLarge,
                     child: Text(
                       'Nous avons envoyé un code à 4 chiffres se terminant par **88 à votre appareil mobile pour sceller ce document.',
                       style: TextStyle(
-                        fontFamily: 'Inter',
+                        fontFamily: AppConstants.fontFamilyInter,
                         fontWeight: FontWeight.w400,
                         fontSize: 13,
                         height: 24 / 14,
                         letterSpacing: 0,
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: AppColors.whiteOpacity(0.7),
                       ),
                     ),
                   ),
                   // Container principal
                   Positioned(
                     top: 258,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingXLarge,
+                    right: AppConstants.paddingXLarge,
                     child: Container(
                       height: 211,
-                      padding: const EdgeInsets.fromLTRB(16, 32, 16, 32),
+                      padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, 32, AppConstants.paddingLarge, 32),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE8EEE7), width: 1),
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        border: Border.all(color: AppColors.border, width: AppConstants.borderWidthThin),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0x08000000),
+                            color: AppColors.shadowDark,
                             offset: const Offset(3, 3),
                             blurRadius: 3,
                             spreadRadius: 0,
@@ -216,12 +218,12 @@ class _DetailOuvertureCompteContinuerScreenState extends State<DetailOuvertureCo
                             children: List.generate(4, (index) {
                               bool isActive = _currentIndex == index;
                               return Container(
-                                width: 60,
-                                height: 60,
+                                width: AppConstants.otpBoxSize,
+                                height: AppConstants.otpBoxSize,
                                 decoration: BoxDecoration(
-                                  color: isActive ? const Color(0x1423A3A6) : const Color(0xFFF1F5F9),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: isActive ? Border.all(color: const Color(0xFF23A3A6), width: 1) : null,
+                                  color: isActive ? AppColors.primaryLight : AppColors.gray,
+                                  borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                                  border: isActive ? Border.all(color: AppColors.primary, width: AppConstants.borderWidthThin) : null,
                                 ),
                                 child: TextField(
                                   controller: _otpControllers[index],
@@ -229,11 +231,11 @@ class _DetailOuvertureCompteContinuerScreenState extends State<DetailOuvertureCo
                                   textAlign: TextAlign.center,
                                   keyboardType: TextInputType.number,
                                   maxLength: 1,
-                                  style: const TextStyle(
-                                    fontFamily: 'Sofia Sans',
+                                  style: TextStyle(
+                                    fontFamily: AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 24,
-                                    color: Color(0xFF0F1A14),
+                                    fontSize: AppConstants.fontSizeTitle,
+                                    color: AppColors.textPrimary,
                                   ),
                                   decoration: const InputDecoration(
                                     counterText: '',
@@ -256,10 +258,10 @@ class _DetailOuvertureCompteContinuerScreenState extends State<DetailOuvertureCo
                           Text(
                             'Vous n\'avez pas reçu de code ?',
                             style: TextStyle(
-                              fontFamily: 'Sofia Sans',
+                              fontFamily: AppConstants.fontFamilySofiaSans,
                               fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              color: const Color(0xFF6B7280),
+                              fontSize: AppConstants.fontSizeLarge,
+                              color: AppColors.textSecondary,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -269,11 +271,11 @@ class _DetailOuvertureCompteContinuerScreenState extends State<DetailOuvertureCo
                             child: Text(
                               'Renvoyer le code dans 00:29',
                               style: TextStyle(
-                                fontFamily: 'Inter',
+                                fontFamily: AppConstants.fontFamilyInter,
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                                fontSize: AppConstants.fontSizeLarge,
                                 height: 1.0,
-                                color: const Color(0xFF23A3A6),
+                                color: AppColors.primary,
                               ),
                             ),
                           ),
@@ -284,28 +286,28 @@ class _DetailOuvertureCompteContinuerScreenState extends State<DetailOuvertureCo
                   // Bouton "Vérifier le document"
                   Positioned(
                     bottom: 40,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingXLarge,
+                    right: AppConstants.paddingXLarge,
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pushNamed(AppRoutes.nouvelleDemandeStep8);
                       },
                       child: Container(
-                        height: 56,
-                        padding: const EdgeInsets.all(12),
+                        height: AppConstants.buttonHeight,
+                        padding: EdgeInsets.all(AppConstants.paddingMedium),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF23A3A6),
-                          borderRadius: BorderRadius.circular(100),
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                         ),
                         child: Center(
                           child: Text(
                             'Vérifier le document',
                             style: TextStyle(
-                              fontFamily: 'Sofia Sans',
+                              fontFamily: AppConstants.fontFamilySofiaSans,
                               fontWeight: FontWeight.w500,
-                              fontSize: 16,
+                              fontSize: AppConstants.fontSizeLarge,
                               height: 1.5,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           ),
                         ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/utils/responsive_utils.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -16,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: SizedBox(
         width: ResponsiveUtils.getScreenWidth(context),
         height: ResponsiveUtils.getScreenHeight(context),
@@ -32,11 +34,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: ResponsiveUtils.getResponsiveWidth(context, 44),
                   height: ResponsiveUtils.getResponsiveHeight(context, 44),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 22)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha:0.03),
+                        color: AppColors.shadowDark,
                         blurRadius: ResponsiveUtils.getResponsiveValue(context, 32),
                         offset: Offset(
                           ResponsiveUtils.getResponsiveValue(context, -3),
@@ -44,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       BoxShadow(
-                        color: Colors.black.withValues(alpha:0.03),
+                        color: AppColors.shadowDark,
                         blurRadius: ResponsiveUtils.getResponsiveValue(context, 32),
                         offset: Offset(
                           ResponsiveUtils.getResponsiveValue(context, 3),
@@ -87,11 +89,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Numéro de téléphone',
                     style: TextStyle(
-                      fontFamily: 'Sofia Sans',
+                      fontFamily: AppConstants.fontFamilySofiaSans,
                       fontWeight: FontWeight.w600,
                       fontSize: ResponsiveUtils.getResponsiveFontSize(context, 24),
                       height: 32 / 24,
-                      color: const Color(0xFF0F1A14),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 16)),
@@ -99,11 +101,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Veuillez saisir votre numéro de téléphone.\nNous vous enverrons un code pour nous assurer que c\'est bien vous.',
                     style: TextStyle(
-                      fontFamily: 'Sofia Sans',
+                      fontFamily: AppConstants.fontFamilySofiaSans,
                       fontWeight: FontWeight.w400,
                       fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                       height: 24 / 16,
-                      color: const Color(0xFF6B7280),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 24)),
@@ -117,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 100)),
-                      border: Border.all(color: const Color(0xFFCBD5E1)),
+                      border: Border.all(color: AppColors.borderGray),
                     ),
                     child: Row(
                       children: [
@@ -151,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: ResponsiveUtils.getResponsiveWidth(context, 1),
                           height: ResponsiveUtils.getResponsiveHeight(context, 16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFD9D9D9),
+                            color: AppColors.divider,
                             borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 100)),
                           ),
                         ),
@@ -160,10 +162,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         Text(
                           '+221',
                           style: TextStyle(
-                            fontFamily: 'Inter',
+                            fontFamily: AppConstants.fontFamilyInter,
                             fontWeight: FontWeight.w400,
                             fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                            color: const Color(0xFF333333),
+                            color: AppColors.textMediumGray,
                           ),
                         ),
                         SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 12)),
@@ -175,10 +177,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             decoration: InputDecoration(
                               hintText: '77 123 45 67',
                               hintStyle: TextStyle(
-                                fontFamily: 'Inter',
+                                fontFamily: AppConstants.fontFamilyInter,
                                 fontWeight: FontWeight.w400,
                                 fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                                color: const Color(0xFF9C9AA5),
+                                color: AppColors.hintText,
                               ),
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.zero,
@@ -186,10 +188,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             keyboardType: TextInputType.phone,
                             style: TextStyle(
-                              fontFamily: 'Inter',
+                              fontFamily: AppConstants.fontFamilyInter,
                               fontWeight: FontWeight.w400,
                               fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                              color: const Color(0xFF333333),
+                              color: AppColors.textMediumGray,
                             ),
                           ),
                         ),
@@ -207,17 +209,17 @@ class _LoginScreenState extends State<LoginScreen> {
               child: RichText(
                 text: TextSpan(
                   style: TextStyle(
-                    fontFamily: 'Sofia Sans',
+                    fontFamily: AppConstants.fontFamilySofiaSans,
                     fontWeight: FontWeight.w400,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                    color: const Color(0xFF6B7280),
+                    color: AppColors.textSecondary,
                   ),
                   children: [
                     const TextSpan(text: 'En continuant, vous confirmez avoir lu et accepté les '),
                     TextSpan(
                       text: 'conditions générales',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: AppColors.textBlack,
                         decoration: TextDecoration.underline,
                       ),
                     ),
@@ -225,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextSpan(
                       text: 'politique de confidentialité.',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: AppColors.textBlack,
                         decoration: TextDecoration.underline,
                       ),
                     ),
@@ -245,17 +247,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Container(
                   height: ResponsiveUtils.getResponsiveHeight(context, 64),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0B3C5C),
-                    borderRadius: BorderRadius.circular(100),
+                    color: AppColors.primaryDark,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
                       'Suivant',
                       style: TextStyle(
-                        fontFamily: 'Sofia Sans',
+                        fontFamily: AppConstants.fontFamilySofiaSans,
                         fontWeight: FontWeight.w500,
-                        fontSize: 18,
-                        color: Colors.white,
+                        fontSize: AppConstants.fontSizeXLarge,
+                        color: AppColors.white,
                       ),
                     ),
                   ),

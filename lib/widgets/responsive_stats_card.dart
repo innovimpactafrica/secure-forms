@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/responsive_utils.dart';
+import '../core/utils/app_colors.dart';
+import '../core/utils/app_constants.dart';
 
 class ResponsiveStatsCard extends StatelessWidget {
   final String title;
@@ -24,25 +26,25 @@ class ResponsiveStatsCard extends StatelessWidget {
 
     return Container(
       width: cardWidth,
-      height: ResponsiveUtils.getResponsiveHeight(context, 82),
+      height: ResponsiveUtils.getResponsiveHeight(context, AppConstants.profileCardHeight),
       padding: EdgeInsets.fromLTRB(
-        ResponsiveUtils.getResponsiveWidth(context, 12),
-        ResponsiveUtils.getResponsiveHeight(context, 16),
-        ResponsiveUtils.getResponsiveWidth(context, 12),
-        ResponsiveUtils.getResponsiveHeight(context, 16),
+        ResponsiveUtils.getResponsiveWidth(context, AppConstants.paddingMedium),
+        ResponsiveUtils.getResponsiveHeight(context, AppConstants.paddingLarge),
+        ResponsiveUtils.getResponsiveWidth(context, AppConstants.paddingMedium),
+        ResponsiveUtils.getResponsiveHeight(context, AppConstants.paddingLarge),
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(
-          ResponsiveUtils.getResponsiveValue(context, 8),
+          ResponsiveUtils.getResponsiveValue(context, AppConstants.radiusSmall),
         ),
         border: Border.all(
-          color: const Color(0xFFE8EEE7),
-          width: ResponsiveUtils.getResponsiveValue(context, 1),
+          color: AppColors.border,
+          width: ResponsiveUtils.getResponsiveValue(context, AppConstants.borderWidthThin),
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0x08000000),
+            color: AppColors.shadowDark,
             offset: Offset(
               ResponsiveUtils.getResponsiveValue(context, 3),
               ResponsiveUtils.getResponsiveValue(context, 3),
@@ -61,24 +63,24 @@ class ResponsiveStatsCard extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontFamily: 'Sofia Sans',
+                    fontFamily: AppConstants.fontFamilySofiaSans,
                     fontWeight: FontWeight.w500,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, AppConstants.fontSizeRegular),
                     height: 1.0,
                     letterSpacing: 0,
-                    color: const Color(0xFF6B7280),
+                    color: AppColors.textSecondary,
                   ),
                 ),
                 SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 4)),
                 Text(
                   value,
                   style: TextStyle(
-                    fontFamily: 'Sofia Sans',
+                    fontFamily: AppConstants.fontFamilySofiaSans,
                     fontWeight: FontWeight.w600,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, AppConstants.fontSizeXXLarge),
                     height: 1.2,
                     letterSpacing: 0,
-                    color: const Color(0xFF212121),
+                    color: AppColors.textDark,
                   ),
                 ),
               ],

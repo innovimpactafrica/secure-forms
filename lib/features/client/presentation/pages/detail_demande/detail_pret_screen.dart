@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class DetailPretScreen extends StatelessWidget {
-  const DetailPretScreen({Key? key}) : super(key: key);
+  const DetailPretScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,25 +13,25 @@ class DetailPretScreen extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              width: 430,
-              height: 932,
-              color: const Color(0xFF0B3C5C),
+              width: AppConstants.screenWidth,
+              height: AppConstants.screenHeight,
+              color: AppColors.primaryDark,
               child: Stack(
                 children: [
                   // Bouton retour
                   Positioned(
                     top: 70,
-                    left: 24,
+                    left: AppConstants.paddingXLarge,
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pop();
                       },
                       child: Container(
-                        width: 50,
-                        height: 50,
+                        width: AppConstants.backButtonSize,
+                        height: AppConstants.backButtonSize,
                         decoration: BoxDecoration(
-                          color: const Color(0x14FFFFFF),
-                          borderRadius: BorderRadius.circular(12),
+                          color: AppColors.whiteOverlay,
+                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                         ),
                         child: Center(
                           child: SvgPicture.asset(
@@ -49,8 +51,8 @@ class DetailPretScreen extends StatelessWidget {
                       'Demande de prêt',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 20,
-                        color: Colors.white,
+                        fontSize: AppConstants.fontSizeXXLarge,
+                        color: AppColors.white,
                       ),
                     ),
                   ),
@@ -62,30 +64,30 @@ class DetailPretScreen extends StatelessWidget {
                       'Crédit Moderne • 05/12/2025',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha:0.6),
+                        fontSize: AppConstants.fontSizeRegular,
+                        color: AppColors.whiteOpacity(0.6),
                       ),
                     ),
                   ),
                   // Badge "Validé"
                   Positioned(
                     top: 78,
-                    right: 24,
+                    right: AppConstants.paddingXLarge,
                     child: Container(
                       width: 60,
                       height: 20,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF23A3A6),
+                        color: AppColors.statusValidated,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Center(
                         child: Text(
                           'Validé',
                           style: TextStyle(
-                            fontFamily: 'Inter',
+                            fontFamily: AppConstants.fontFamilyInter,
                             fontWeight: FontWeight.w500,
-                            fontSize: 10,
-                            color: Colors.white,
+                            fontSize: AppConstants.fontSizeSmall,
+                            color: AppColors.white,
                           ),
                         ),
                       ),
@@ -94,13 +96,13 @@ class DetailPretScreen extends StatelessWidget {
                   // Container blanc en bas du header
                   Positioned(
                     top: 150,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingXLarge,
+                    right: AppConstants.paddingXLarge,
                     child: Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(AppConstants.paddingLarge),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,12 +110,12 @@ class DetailPretScreen extends StatelessWidget {
                           Text(
                             'REQ-2024-003',
                             style: TextStyle(
-                              fontFamily: 'Inter',
+                              fontFamily: AppConstants.fontFamilyInter,
                               fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                              fontSize: AppConstants.fontSizeMedium,
                               height: 1.0,
                               letterSpacing: 0.03,
-                              color: const Color(0xFF1F2937),
+                              color: AppColors.textDarkGray,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -123,26 +125,26 @@ class DetailPretScreen extends StatelessWidget {
                               Text(
                                 'Soumis le 15/12, 10h00',
                                 style: TextStyle(
-                                  fontFamily: 'Inter',
+                                  fontFamily: AppConstants.fontFamilyInter,
                                   fontWeight: FontWeight.w500,
-                                  fontSize: 12,
+                                  fontSize: AppConstants.fontSizeRegular,
                                   height: 1.0,
-                                  color: const Color(0xFF6B7280),
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                               Text(
                                 'Estimé : 17/12',
                                 style: TextStyle(
-                                  fontFamily: 'Inter',
+                                  fontFamily: AppConstants.fontFamilyInter,
                                   fontWeight: FontWeight.w500,
-                                  fontSize: 12,
+                                  fontSize: AppConstants.fontSizeRegular,
                                   height: 1.0,
-                                  color: const Color(0xFF6B7280),
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: AppConstants.paddingXLarge),
                           // Barre de progression
                           Row(
                             children: [
@@ -150,30 +152,30 @@ class DetailPretScreen extends StatelessWidget {
                               Column(
                                 children: [
                                   Container(
-                                    width: 40,
-                                    height: 40,
+                                    width: AppConstants.progressStepSize,
+                                    height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF23A3A6),
-                                      borderRadius: BorderRadius.circular(20),
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/bi_pencil (1).svg',
-                                        width: 20,
-                                        height: 20,
-                                        color: Colors.white,
+                                        width: AppConstants.iconSizeMedium,
+                                        height: AppConstants.iconSizeMedium,
+                                        colorFilter: ColorFilter.mode(AppColors.white, BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: AppConstants.paddingSmall),
                                   Text(
                                     'Soumis',
                                     style: TextStyle(
-                                      fontFamily: 'Inter',
+                                      fontFamily: AppConstants.fontFamilyInter,
                                       fontWeight: FontWeight.w500,
-                                      fontSize: 12,
+                                      fontSize: AppConstants.fontSizeRegular,
                                       height: 1.0,
-                                      color: const Color(0xFF6B7280),
+                                      color: AppColors.textSecondary,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -182,11 +184,11 @@ class DetailPretScreen extends StatelessWidget {
                               // Ligne de progression 1
                               Expanded(
                                 child: Container(
-                                  height: 6,
+                                  height: AppConstants.progressLineHeight,
                                   margin: const EdgeInsets.only(bottom: 32),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF23A3A6),
-                                    borderRadius: BorderRadius.circular(100),
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                                   ),
                                 ),
                               ),
@@ -194,30 +196,30 @@ class DetailPretScreen extends StatelessWidget {
                               Column(
                                 children: [
                                   Container(
-                                    width: 40,
-                                    height: 40,
+                                    width: AppConstants.progressStepSize,
+                                    height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF23A3A6),
-                                      borderRadius: BorderRadius.circular(20),
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/bi_clock-history.svg',
-                                        width: 20,
-                                        height: 20,
-                                        color: Colors.white,
+                                        width: AppConstants.iconSizeMedium,
+                                        height: AppConstants.iconSizeMedium,
+                                        colorFilter: ColorFilter.mode(AppColors.white, BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: AppConstants.paddingSmall),
                                   Text(
                                     'En cours',
                                     style: TextStyle(
-                                      fontFamily: 'Inter',
+                                      fontFamily: AppConstants.fontFamilyInter,
                                       fontWeight: FontWeight.w500,
-                                      fontSize: 12,
+                                      fontSize: AppConstants.fontSizeRegular,
                                       height: 1.0,
-                                      color: const Color(0xFF6B7280),
+                                      color: AppColors.textSecondary,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -226,11 +228,11 @@ class DetailPretScreen extends StatelessWidget {
                               // Ligne de progression 2
                               Expanded(
                                 child: Container(
-                                  height: 6,
+                                  height: AppConstants.progressLineHeight,
                                   margin: const EdgeInsets.only(bottom: 32),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF23A3A6),
-                                    borderRadius: BorderRadius.circular(100),
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                                   ),
                                 ),
                               ),
@@ -238,30 +240,30 @@ class DetailPretScreen extends StatelessWidget {
                               Column(
                                 children: [
                                   Container(
-                                    width: 40,
-                                    height: 40,
+                                    width: AppConstants.progressStepSize,
+                                    height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF23A3A6),
-                                      borderRadius: BorderRadius.circular(20),
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/ep_check.svg',
-                                        width: 20,
-                                        height: 20,
-                                        color: Colors.white,
+                                        width: AppConstants.iconSizeMedium,
+                                        height: AppConstants.iconSizeMedium,
+                                        colorFilter: ColorFilter.mode(AppColors.white, BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: AppConstants.paddingSmall),
                                   Text(
                                     'Finalisé',
                                     style: TextStyle(
-                                      fontFamily: 'Inter',
+                                      fontFamily: AppConstants.fontFamilyInter,
                                       fontWeight: FontWeight.w500,
-                                      fontSize: 12,
+                                      fontSize: AppConstants.fontSizeRegular,
                                       height: 1.0,
-                                      color: const Color(0xFF6B7280),
+                                      color: AppColors.textSecondary,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -276,17 +278,17 @@ class DetailPretScreen extends StatelessWidget {
                   // Deuxième container
                   Positioned(
                     top: 320,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingXLarge,
+                    right: AppConstants.paddingXLarge,
                     child: Container(
-                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                      padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.paddingXLarge, AppConstants.paddingLarge, AppConstants.paddingXLarge),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE8EEE7), width: 1),
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        border: Border.all(color: AppColors.border, width: AppConstants.borderWidthThin),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0x08000000),
+                            color: AppColors.shadowDark,
                             offset: const Offset(3, 3),
                             blurRadius: 3,
                             spreadRadius: 0,
@@ -302,35 +304,35 @@ class DetailPretScreen extends StatelessWidget {
                               Row(
                                 children: [
                                   Container(
-                                    width: 36,
-                                    height: 36,
+                                    width: AppConstants.cardIconSize,
+                                    height: AppConstants.cardIconSize,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFF0F0F0),
+                                      color: AppColors.grayLight,
                                       borderRadius: BorderRadius.circular(18),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/earmark-text.svg',
-                                        width: 24,
-                                        height: 24,
+                                        width: AppConstants.iconSizeLarge,
+                                        height: AppConstants.iconSizeLarge,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
+                                  SizedBox(width: AppConstants.paddingMedium),
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsets.only(bottom: 8),
+                                        padding: EdgeInsets.only(bottom: AppConstants.paddingSmall),
                                         child: Text(
                                           'Acte de vente',
                                           style: TextStyle(
-                                            fontFamily: 'Inter',
+                                            fontFamily: AppConstants.fontFamilyInter,
                                             fontWeight: FontWeight.w600,
-                                            fontSize: 14,
+                                            fontSize: AppConstants.fontSizeMedium,
                                             height: 1.0,
                                             letterSpacing: 0.03,
-                                            color: const Color(0xFF1F2937),
+                                            color: AppColors.textDarkGray,
                                           ),
                                         ),
                                       ),
@@ -339,12 +341,12 @@ class DetailPretScreen extends StatelessWidget {
                                         child: Text(
                                           'Version 1.1',
                                           style: TextStyle(
-                                            fontFamily: 'Inter',
+                                            fontFamily: AppConstants.fontFamilyInter,
                                             fontWeight: FontWeight.w400,
-                                            fontSize: 12,
+                                            fontSize: AppConstants.fontSizeRegular,
                                             height: 1.0,
                                             letterSpacing: 0.03,
-                                            color: const Color(0xFF6B7280),
+                                            color: AppColors.textSecondary,
                                           ),
                                         ),
                                       ),
@@ -354,21 +356,21 @@ class DetailPretScreen extends StatelessWidget {
                               ),
                               SvgPicture.asset(
                                 'assets/icons/Group (2).svg',
-                                width: 24,
-                                height: 24,
+                                width: AppConstants.iconSizeLarge,
+                                height: AppConstants.iconSizeLarge,
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: AppConstants.paddingXLarge),
                           Container(
                             width: 350,
                             height: 160,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFDEE8EE), width: 1),
+                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                              border: Border.all(color: AppColors.borderLight, width: AppConstants.borderWidthThin),
                             ),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                               child: Image.asset(
                                 'assets/images/field.png',
                                 width: 350,
@@ -384,30 +386,30 @@ class DetailPretScreen extends StatelessWidget {
                   // Texte "Documents justificatifs"
                   Positioned(
                     top: 620,
-                    left: 24,
+                    left: AppConstants.paddingXLarge,
                     child: Text(
                       'Documents justificatifs',
                       style: TextStyle(
-                        fontFamily: 'Inter',
+                        fontFamily: AppConstants.fontFamilyInter,
                         fontWeight: FontWeight.w600,
-                        fontSize: 20,
+                        fontSize: AppConstants.fontSizeXXLarge,
                         height: 24 / 20,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                     ),
                   ),
                   // Container documents
                   Positioned(
                     top: 660,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingXLarge,
+                    right: AppConstants.paddingXLarge,
                     child: Container(
                       width: 382,
                       height: 172,
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(AppConstants.paddingLarge),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
                       ),
                       child: Column(
                         children: [
@@ -416,21 +418,21 @@ class DetailPretScreen extends StatelessWidget {
                             child: Row(
                               children: [
                                 Container(
-                                  width: 36,
-                                  height: 36,
+                                  width: AppConstants.cardIconSize,
+                                  height: AppConstants.cardIconSize,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF0F0F0),
+                                    color: AppColors.grayLight,
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                   child: Center(
                                     child: SvgPicture.asset(
                                       'assets/icons/earmark-text.svg',
-                                      width: 24,
-                                      height: 24,
+                                      width: AppConstants.iconSizeLarge,
+                                      height: AppConstants.iconSizeLarge,
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: AppConstants.paddingMedium),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -438,24 +440,24 @@ class DetailPretScreen extends StatelessWidget {
                                     Text(
                                       'Carte d\'identité',
                                       style: TextStyle(
-                                        fontFamily: 'Inter',
+                                        fontFamily: AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 14,
+                                        fontSize: AppConstants.fontSizeMedium,
                                         height: 1.0,
                                         letterSpacing: 0.03,
-                                        color: const Color(0xFF1F2937),
+                                        color: AppColors.textDarkGray,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
                                       '210 ko',
                                       style: TextStyle(
-                                        fontFamily: 'Inter',
+                                        fontFamily: AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 12,
+                                        fontSize: AppConstants.fontSizeRegular,
                                         height: 1.0,
                                         letterSpacing: 0.03,
-                                        color: const Color(0xFF6B7280),
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
                                   ],
@@ -465,17 +467,17 @@ class DetailPretScreen extends StatelessWidget {
                                   width: 53,
                                   height: 23,
                                   decoration: BoxDecoration(
-                                    color: const Color(0x0F23A3A6),
+                                    color: AppColors.primaryOverlay,
                                     borderRadius: BorderRadius.circular(999),
                                   ),
                                   child: Center(
                                     child: Text(
                                       'Vérifié',
                                       style: TextStyle(
-                                        fontFamily: 'Inter',
+                                        fontFamily: AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w500,
-                                        fontSize: 12,
-                                        color: const Color(0xFF23A3A6),
+                                        fontSize: AppConstants.fontSizeRegular,
+                                        color: AppColors.primary,
                                       ),
                                     ),
                                   ),
@@ -487,28 +489,28 @@ class DetailPretScreen extends StatelessWidget {
                           Container(
                             width: double.infinity,
                             height: 1,
-                            color: const Color(0xFFE5E7EB),
+                            color: AppColors.borderDivider,
                           ),
                           // Partie basse du container
                           Expanded(
                             child: Row(
                               children: [
                                 Container(
-                                  width: 36,
-                                  height: 36,
+                                  width: AppConstants.cardIconSize,
+                                  height: AppConstants.cardIconSize,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF0F0F0),
+                                    color: AppColors.grayLight,
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                   child: Center(
                                     child: SvgPicture.asset(
                                       'assets/icons/earmark-text.svg',
-                                      width: 24,
-                                      height: 24,
+                                      width: AppConstants.iconSizeLarge,
+                                      height: AppConstants.iconSizeLarge,
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: AppConstants.paddingMedium),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -516,24 +518,24 @@ class DetailPretScreen extends StatelessWidget {
                                     Text(
                                       'Preuve de résidence',
                                       style: TextStyle(
-                                        fontFamily: 'Inter',
+                                        fontFamily: AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 14,
+                                        fontSize: AppConstants.fontSizeMedium,
                                         height: 1.0,
                                         letterSpacing: 0.03,
-                                        color: const Color(0xFF1F2937),
+                                        color: AppColors.textDarkGray,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
                                       '404 ko',
                                       style: TextStyle(
-                                        fontFamily: 'Inter',
+                                        fontFamily: AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 12,
+                                        fontSize: AppConstants.fontSizeRegular,
                                         height: 1.0,
                                         letterSpacing: 0.03,
-                                        color: const Color(0xFF6B7280),
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
                                   ],
@@ -543,17 +545,17 @@ class DetailPretScreen extends StatelessWidget {
                                   width: 53,
                                   height: 23,
                                   decoration: BoxDecoration(
-                                    color: const Color(0x0F23A3A6),
+                                    color: AppColors.primaryOverlay,
                                     borderRadius: BorderRadius.circular(999),
                                   ),
                                   child: Center(
                                     child: Text(
                                       'Vérifié',
                                       style: TextStyle(
-                                        fontFamily: 'Inter',
+                                        fontFamily: AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w500,
-                                        fontSize: 12,
-                                        color: const Color(0xFF23A3A6),
+                                        fontSize: AppConstants.fontSizeRegular,
+                                        color: AppColors.primary,
                                       ),
                                     ),
                                   ),
@@ -568,34 +570,34 @@ class DetailPretScreen extends StatelessWidget {
                   // Bouton
                   Positioned(
                     top: 860,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingXLarge,
+                    right: AppConstants.paddingXLarge,
                     child: Container(
                       width: 382,
-                      height: 64,
-                      padding: const EdgeInsets.all(12),
+                      height: AppConstants.buttonHeightLarge,
+                      padding: EdgeInsets.all(AppConstants.paddingMedium),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF23A3A6),
-                        borderRadius: BorderRadius.circular(100),
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SvgPicture.asset(
                             'assets/icons/Group (1).svg',
-                            width: 24,
-                            height: 24,
-                            color: Colors.white,
+                            width: AppConstants.iconSizeLarge,
+                            height: AppConstants.iconSizeLarge,
+                            colorFilter: ColorFilter.mode(AppColors.white, BlendMode.srcIn),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: AppConstants.paddingSmall),
                           Text(
                             'Télécharger le PDF',
                             style: TextStyle(
-                              fontFamily: 'Sofia Sans',
+                              fontFamily: AppConstants.fontFamilySofiaSans,
                               fontWeight: FontWeight.w500,
-                              fontSize: 18,
+                              fontSize: AppConstants.fontSizeXLarge,
                               height: 1.5,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           ),
                         ],

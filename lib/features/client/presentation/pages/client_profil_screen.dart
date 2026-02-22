@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'client_informations_personnelles_screen.dart';
-import 'mes_beneficiaires_screen.dart';
 import 'mes_documents_screen.dart';
-import '../../../../utils/responsive_utils.dart';
+import '../../../../core/utils/app_colors.dart';
+import '../../../../core/utils/app_constants.dart';
 
 class ClientProfilScreen extends StatefulWidget {
   const ClientProfilScreen({super.key});
@@ -18,680 +18,52 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: ResponsiveUtils.getScreenWidth(context),
-        height: ResponsiveUtils.getScreenHeight(context),
-        color: const Color(0xFF0B3C5C),
-        child: Stack(
+      backgroundColor: AppColors.white,
+      body: SafeArea(
+        child: Column(
           children: [
-            // Bouton retour
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 70),
-              left: ResponsiveUtils.getResponsiveWidth(context, 24),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-                child: Container(
-                  width: ResponsiveUtils.getResponsiveWidth(context, 50),
-                  height: ResponsiveUtils.getResponsiveHeight(context, 50),
-                  decoration: BoxDecoration(
-                    color: const Color(0x14FFFFFF),
-                    borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 12)),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: ResponsiveUtils.getResponsiveValue(context, 21.4),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // Titre "Mon compte"
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 85),
-              left: 0,
-              right: 0,
-              child: Text(
-                'Mon compte',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w700,
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
-                  height: 1.0,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            // Avatar "LD"
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 140),
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  width: ResponsiveUtils.getResponsiveWidth(context, 100),
-                  height: ResponsiveUtils.getResponsiveHeight(context, 100),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(
-                      ResponsiveUtils.getResponsiveValue(context, 125),
-                    ),
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: ResponsiveUtils.getResponsiveHeight(context, 4),
-                        left: ResponsiveUtils.getResponsiveWidth(context, 4),
-                        child: Container(
-                          width: ResponsiveUtils.getResponsiveWidth(context, 92),
-                          height: ResponsiveUtils.getResponsiveHeight(context, 92),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF23A3A6),
-                            borderRadius: BorderRadius.circular(
-                              ResponsiveUtils.getResponsiveValue(context, 125),
-                            ),
-                            border: Border.all(color: const Color(0xFF0B3C5C), width: 4),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'LD',
-                              style: TextStyle(
-                                fontFamily: 'Sofia Sans',
-                                fontWeight: FontWeight.w700,
-                                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 36),
-                                height: 1.0,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            // Nom utilisateur "Lamine DIEME"
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 260),
-              left: 0,
-              right: 0,
-              child: Text(
-                'Lamine DIEME',
-                style: TextStyle(
-                  fontFamily: 'Sofia Sans',
-                  fontWeight: FontWeight.w700,
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 24),
-                  height: 1.0,
-                  letterSpacing: 0,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            // Numéro de téléphone
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 285),
-              left: 0,
-              right: 0,
-              child: Text(
-                '77 123 45 67',
-                style: TextStyle(
-                  fontFamily: 'Sofia Sans',
-                  fontWeight: FontWeight.w400,
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                  height: 30 / 16,
-                  letterSpacing: 0,
-                  color: Colors.white.withValues(alpha:0.7),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            // Cartes container
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 330),
-              left: ResponsiveUtils.getResponsiveWidth(context, 24),
-              right: ResponsiveUtils.getResponsiveWidth(context, 24),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: ResponsiveUtils.getResponsiveHeight(context, 82),
-                      padding: EdgeInsets.fromLTRB(
-                        ResponsiveUtils.getResponsiveWidth(context, 12),
-                        ResponsiveUtils.getResponsiveHeight(context, 16),
-                        ResponsiveUtils.getResponsiveWidth(context, 12),
-                        ResponsiveUtils.getResponsiveHeight(context, 16),
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveUtils.getResponsiveValue(context, 8),
-                        ),
-                        border: Border.all(color: Color(0xFFE8EEE7), width: 1),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x08000000),
-                            offset: Offset(
-                              ResponsiveUtils.getResponsiveValue(context, 3),
-                              ResponsiveUtils.getResponsiveValue(context, 3),
-                            ),
-                            blurRadius: ResponsiveUtils.getResponsiveValue(context, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Total demandes',
-                                  style: TextStyle(
-                                    fontFamily: 'Sofia Sans',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
-                                    height: 1.0,
-                                    letterSpacing: 0,
-                                    color: Color(0xFF6B7280),
-                                  ),
-                                ),
-                                SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 4)),
-                                Text(
-                                  '12',
-                                  style: TextStyle(
-                                    fontFamily: 'Sofia Sans',
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
-                                    height: 1.2,
-                                    letterSpacing: 0,
-                                    color: Color(0xFF212121),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SvgPicture.asset(
-                            'assets/icons/logo.svg',
-                            width: ResponsiveUtils.getResponsiveWidth(context, 32),
-                            height: ResponsiveUtils.getResponsiveHeight(context, 32),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 16)),
-                  Expanded(
-                    child: Container(
-                      height: ResponsiveUtils.getResponsiveHeight(context, 82),
-                      padding: EdgeInsets.fromLTRB(
-                        ResponsiveUtils.getResponsiveWidth(context, 12),
-                        ResponsiveUtils.getResponsiveHeight(context, 16),
-                        ResponsiveUtils.getResponsiveWidth(context, 12),
-                        ResponsiveUtils.getResponsiveHeight(context, 16),
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveUtils.getResponsiveValue(context, 8),
-                        ),
-                        border: Border.all(color: Color(0xFFE8EEE7), width: 1),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x08000000),
-                            offset: Offset(
-                              ResponsiveUtils.getResponsiveValue(context, 3),
-                              ResponsiveUtils.getResponsiveValue(context, 3),
-                            ),
-                            blurRadius: ResponsiveUtils.getResponsiveValue(context, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'En cours',
-                                  style: TextStyle(
-                                    fontFamily: 'Sofia Sans',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
-                                    height: 1.0,
-                                    letterSpacing: 0,
-                                    color: Color(0xFF6B7280),
-                                  ),
-                                ),
-                                SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 4)),
-                                Text(
-                                  '10',
-                                  style: TextStyle(
-                                    fontFamily: 'Sofia Sans',
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
-                                    height: 1.2,
-                                    letterSpacing: 0,
-                                    color: Color(0xFF212121),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SvgPicture.asset(
-                            'assets/icons/bi_clock-history.svg',
-                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
-                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
-                            colorFilter: ColorFilter.mode(
-                              Color(0xFF3B83F6),
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Deuxième rangée de cartes
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 428),
-              left: ResponsiveUtils.getResponsiveWidth(context, 24),
-              right: ResponsiveUtils.getResponsiveWidth(context, 24),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: ResponsiveUtils.getResponsiveHeight(context, 82),
-                      padding: EdgeInsets.fromLTRB(
-                        ResponsiveUtils.getResponsiveWidth(context, 12),
-                        ResponsiveUtils.getResponsiveHeight(context, 16),
-                        ResponsiveUtils.getResponsiveWidth(context, 12),
-                        ResponsiveUtils.getResponsiveHeight(context, 16),
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveUtils.getResponsiveValue(context, 8),
-                        ),
-                        border: Border.all(color: Color(0xFFE8EEE7), width: 1),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x08000000),
-                            offset: Offset(
-                              ResponsiveUtils.getResponsiveValue(context, 3),
-                              ResponsiveUtils.getResponsiveValue(context, 3),
-                            ),
-                            blurRadius: ResponsiveUtils.getResponsiveValue(context, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Brouillons',
-                                  style: TextStyle(
-                                    fontFamily: 'Sofia Sans',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
-                                    height: 1.0,
-                                    letterSpacing: 0,
-                                    color: Color(0xFF6B7280),
-                                  ),
-                                ),
-                                SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 4)),
-                                Text(
-                                  '01',
-                                  style: TextStyle(
-                                    fontFamily: 'Sofia Sans',
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
-                                    height: 1.2,
-                                    letterSpacing: 0,
-                                    color: Color(0xFF212121),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SvgPicture.asset(
-                            'assets/icons/carbon_rule-draft.svg',
-                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
-                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
-                            colorFilter: ColorFilter.mode(
-                              Colors.black.withValues(alpha:0.8),
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Container(
-                      height: ResponsiveUtils.getResponsiveHeight(context, 82),
-                      padding: EdgeInsets.fromLTRB(
-                        ResponsiveUtils.getResponsiveWidth(context, 12),
-                        ResponsiveUtils.getResponsiveHeight(context, 16),
-                        ResponsiveUtils.getResponsiveWidth(context, 12),
-                        ResponsiveUtils.getResponsiveHeight(context, 16),
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveUtils.getResponsiveValue(context, 8),
-                        ),
-                        border: Border.all(color: Color(0xFFE8EEE7), width: 1),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x08000000),
-                            offset: Offset(
-                              ResponsiveUtils.getResponsiveValue(context, 3),
-                              ResponsiveUtils.getResponsiveValue(context, 3),
-                            ),
-                            blurRadius: ResponsiveUtils.getResponsiveValue(context, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Complétés',
-                                  style: TextStyle(
-                                    fontFamily: 'Sofia Sans',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
-                                    height: 1.0,
-                                    letterSpacing: 0,
-                                    color: Color(0xFF6B7280),
-                                  ),
-                                ),
-                                SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 4)),
-                                Text(
-                                  '10',
-                                  style: TextStyle(
-                                    fontFamily: 'Sofia Sans',
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
-                                    height: 1.2,
-                                    letterSpacing: 0,
-                                    color: Color(0xFF212121),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SvgPicture.asset(
-                            'assets/icons/bi_check2-circle (1).svg',
-                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
-                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Nouveau container en bas
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 523),
-              left: ResponsiveUtils.getResponsiveWidth(context, 24),
-              right: ResponsiveUtils.getResponsiveWidth(context, 24),
-              child: Container(
-                height: ResponsiveUtils.getResponsiveHeight(context, 250),
-                padding: EdgeInsets.all(ResponsiveUtils.getResponsiveValue(context, 24)),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(
-                    ResponsiveUtils.getResponsiveValue(context, 8),
-                  ),
-                ),
+            // ── Header ──
+            _ProfileHeader(),
+            // ── Scrollable content ──
+            Expanded(
+              child: SingleChildScrollView(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 8)),
-                    // Informations personnelles
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ClientInformationsPersonnellesScreen(),
-                          ),
-                        );
-                      },
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/bi_person-circle.svg',
-                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
-                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
-                            colorFilter: ColorFilter.mode(
-                              Color(0xFF23A3A6),
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 16)),
-                          Expanded(
-                            child: Text(
-                              'Informations personnelles',
-                              style: TextStyle(
-                                fontFamily: 'Sofia Sans',
-                                fontWeight: FontWeight.w500,
-                                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                                color: Color(0xFF374151),
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right,
-                            color: Color(0xFF9CA3AF),
-                            size: ResponsiveUtils.getResponsiveValue(context, 20),
-                          ),
-                        ],
+                    const SizedBox(height: 24),
+                    // Avatar
+                    _AvatarSection(),
+                    const SizedBox(height: 16),
+                    // Name + phone
+                    _UserInfoSection(),
+                    const SizedBox(height: 32),
+                    // Menu items
+                    _MenuSection(
+                      selectedLanguage: selectedLanguage,
+                      onLanguageTap: () => _showLangueModal(context),
+                      onDemandesTap: () {},
+                      onDocumentsTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MesDocumentsScreen(),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 32)),
-                    // Mes bénéficiaires
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MesBeneficiairesScreen(),
-                          ),
-                        );
-                      },
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/bi_people (3).svg',
-                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
-                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
-                            colorFilter: ColorFilter.mode(
-                              Color(0xFF23A3A6),
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 16)),
-                          Expanded(
-                            child: Text(
-                              'Mes bénéficiaires',
-                              style: TextStyle(
-                                fontFamily: 'Sofia Sans',
-                                fontWeight: FontWeight.w500,
-                                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                                color: Color(0xFF374151),
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right,
-                            color: Color(0xFF9CA3AF),
-                            size: ResponsiveUtils.getResponsiveValue(context, 20),
-                          ),
-                        ],
+                      onInfosTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ClientInformationsPersonnellesScreen(),
+                        ),
                       ),
+                      onArchivesTap: () {},
+                      onNotifsTap: () {},
                     ),
-                    SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 32)),
-                    // Mes documents
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MesDocumentsScreen(),
-                          ),
-                        );
-                      },
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/bi_file-earmark-text.svg',
-                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
-                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
-                            colorFilter: ColorFilter.mode(
-                              Color(0xFF23A3A6),
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 16)),
-                          Expanded(
-                            child: Text(
-                              'Mes documents',
-                              style: TextStyle(
-                                fontFamily: 'Sofia Sans',
-                                fontWeight: FontWeight.w500,
-                                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                                color: Color(0xFF374151),
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right,
-                            color: Color(0xFF9CA3AF),
-                            size: ResponsiveUtils.getResponsiveValue(context, 20),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 32)),
-                    // Langue
-                    GestureDetector(
-                      onTap: () {
-                        _showLangueModal(context);
-                      },
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/material-symbols-light_language.svg',
-                            width: ResponsiveUtils.getResponsiveWidth(context, 24),
-                            height: ResponsiveUtils.getResponsiveHeight(context, 24),
-                            colorFilter: ColorFilter.mode(
-                              Color(0xFF23A3A6),
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 16)),
-                          Expanded(
-                            child: Text(
-                              'Langue',
-                              style: TextStyle(
-                                fontFamily: 'Sofia Sans',
-                                fontWeight: FontWeight.w500,
-                                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                                color: Color(0xFF374151),
-                              ),
-                            ),
-                          ),
-                          Text(
-                            selectedLanguage,
-                            style: TextStyle(
-                              fontFamily: 'Sofia Sans',
-                              fontWeight: FontWeight.w400,
-                              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                              color: Color(0xFF9CA3AF),
-                            ),
-                          ),
-                          SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 8)),
-                          Icon(
-                            Icons.chevron_right,
-                            color: Color(0xFF9CA3AF),
-                            size: ResponsiveUtils.getResponsiveValue(context, 20),
-                          ),
-                        ],
-                      ),
-                    ),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
             ),
-            // Bouton de déconnexion
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 783),
-              left: ResponsiveUtils.getResponsiveWidth(context, 20),
-              right: ResponsiveUtils.getResponsiveWidth(context, 20),
-              child: GestureDetector(
-                onTap: () {
-                  _showDeconnexionModal(context);
-                },
-                child: Container(
-                  height: ResponsiveUtils.getResponsiveHeight(context, 60),
-                  padding: EdgeInsets.all(ResponsiveUtils.getResponsiveValue(context, 20)),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF0A324A),
-                    borderRadius: BorderRadius.circular(
-                      ResponsiveUtils.getResponsiveValue(context, 100),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      SvgPicture.asset(
-                        'assets/icons/bi_box-arrow-left.svg',
-                        width: ResponsiveUtils.getResponsiveWidth(context, 24),
-                        height: ResponsiveUtils.getResponsiveHeight(context, 24),
-                        colorFilter: ColorFilter.mode(
-                          Color(0xFF23A3A6),
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      SizedBox(width: ResponsiveUtils.getResponsiveWidth(context, 12)),
-                      Text(
-                        'Se déconnecter',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w500,
-                          fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                          height: 1.0,
-                          letterSpacing: 0,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            // ── Logout button pinned at bottom ──
+            _LogoutButton(
+              onTap: () => _showDeconnexionModal(context),
             ),
           ],
         ),
@@ -699,214 +71,120 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
     );
   }
 
+  // ─────────────────────────────────────────────────────────────────
+  // MODALS
+  // ─────────────────────────────────────────────────────────────────
+
   void _showLangueModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: ResponsiveUtils.getResponsiveHeight(context, 280),
-        margin: EdgeInsets.symmetric(horizontal: ResponsiveUtils.getResponsiveWidth(context, 8)),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 24)),
-        ),
-        child: Stack(
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(AppConstants.paddingXLarge),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle de la modal
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 12),
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  width: ResponsiveUtils.getResponsiveWidth(context, 40),
-                  height: ResponsiveUtils.getResponsiveHeight(context, 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0x80212121),
-                    borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 999)),
-                  ),
-                ),
-              ),
-            ),
-            // Titre "Changer la langue" avec icône fermeture
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 40),
-              left: ResponsiveUtils.getResponsiveWidth(context, 24),
-              right: ResponsiveUtils.getResponsiveWidth(context, 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Changer la langue',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
-                      fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
-                      height: 32 / 20,
-                      letterSpacing: 0,
-                      color: const Color(0xFF212121),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Icon(
-                      Icons.close,
-                      size: ResponsiveUtils.getResponsiveValue(context, 24),
-                      color: Color(0xFF6B7280),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Container principal du contenu
-            Positioned(
-              top: 105,
-              left: 0,
-              right: 0,
-              bottom: 0,
+            // Handle
+            Center(
               child: Container(
+                width: AppConstants.modalHandleWidth,
+                height: AppConstants.modalHandleHeight,
                 decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      color: const Color(0xFFE5E5E5),
-                      width: 1,
-                    ),
-                  ),
-                ),
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        // Option Français
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedLanguage = 'Français';
-                            });
-                            Navigator.of(context).pop();
-                          },
-                          child: Container(
-                            height: 56,
-                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                            decoration: BoxDecoration(
-                              color: selectedLanguage == 'Français' ? Color(0xFFF0FDFA) : Colors.transparent,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: selectedLanguage == 'Français' ? Color(0xFF23A3A6) : Color(0xFFE5E7EB),
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  'assets/images/image 2.png',
-                                  width: 24,
-                                  height: 24,
-                                ),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'Français',
-                                    style: TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 16,
-                                      color: Color(0xFF374151),
-                                    ),
-                                  ),
-                                ),
-                                if (selectedLanguage == 'Français')
-                                  Icon(
-                                    Icons.check_circle,
-                                    color: Color(0xFF23A3A6),
-                                    size: 20,
-                                  )
-                                else
-                                  Container(
-                                    width: 20,
-                                    height: 20,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Color(0xFFD1D5DB),
-                                        width: 2,
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        // Option Anglais
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedLanguage = 'Anglais';
-                            });
-                            Navigator.of(context).pop();
-                          },
-                          child: Container(
-                            height: 56,
-                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                            decoration: BoxDecoration(
-                              color: selectedLanguage == 'Anglais' ? Color(0xFFF0FDFA) : Colors.transparent,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: selectedLanguage == 'Anglais' ? Color(0xFF23A3A6) : Color(0xFFE5E7EB),
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  'assets/images/image 3.png',
-                                  width: 24,
-                                  height: 24,
-                                ),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'Anglais',
-                                    style: TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 16,
-                                      color: Color(0xFF374151),
-                                    ),
-                                  ),
-                                ),
-                                if (selectedLanguage == 'Anglais')
-                                  Icon(
-                                    Icons.check_circle,
-                                    color: Color(0xFF23A3A6),
-                                    size: 20,
-                                  )
-                                else
-                                  Container(
-                                    width: 20,
-                                    height: 20,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Color(0xFFD1D5DB),
-                                        width: 2,
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  color: AppColors.modalHandle,
+                  borderRadius: BorderRadius.circular(999),
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Changer la langue',
+                  style: TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    fontWeight: FontWeight.w600,
+                    fontSize: AppConstants.fontSizeXXLarge,
+                    color: AppColors.textDark,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Icon(Icons.close,
+                      size: AppConstants.iconSizeLarge,
+                      color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Divider(color: AppColors.borderE5, height: 1),
+            const SizedBox(height: 16),
+            _buildLanguageOption(context, 'Français', 'assets/images/image 2.png'),
+            const SizedBox(height: AppConstants.paddingMedium),
+            _buildLanguageOption(context, 'Anglais', 'assets/images/image 3.png'),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(
+      BuildContext context, String language, String flagPath) {
+    final isSelected = selectedLanguage == language;
+    return GestureDetector(
+      onTap: () {
+        setState(() => selectedLanguage = language);
+        Navigator.of(context).pop();
+      },
+      child: Container(
+        height: AppConstants.languageOptionHeight,
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.paddingLarge,
+            vertical: AppConstants.paddingLarge),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.languageSelected : AppColors.white,
+          borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.languageBorder,
+            width: AppConstants.borderWidthThin,
+          ),
+        ),
+        child: Row(
+          children: [
+            Image.asset(flagPath,
+                width: AppConstants.iconSizeLarge,
+                height: AppConstants.iconSizeLarge),
+            const SizedBox(width: AppConstants.paddingMedium),
+            Expanded(
+              child: Text(
+                language,
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontWeight: FontWeight.w500,
+                  fontSize: AppConstants.fontSizeLarge,
+                  color: AppColors.profileText,
+                ),
+              ),
+            ),
+            if (isSelected)
+              Icon(Icons.check_circle,
+                  color: AppColors.primary, size: AppConstants.iconSizeMedium)
+            else
+              Container(
+                width: AppConstants.iconSizeMedium,
+                height: AppConstants.iconSizeMedium,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: AppColors.languageBorderUnselected,
+                      width: AppConstants.borderWidthThick),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
           ],
         ),
       ),
@@ -916,105 +194,433 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
   void _showDeconnexionModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: ResponsiveUtils.getResponsiveHeight(context, 240),
-        margin: EdgeInsets.symmetric(horizontal: ResponsiveUtils.getResponsiveWidth(context, 8)),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 24)),
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(AppConstants.paddingXLarge),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Déconnexion',
+              style: TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                fontWeight: FontWeight.w600,
+                fontSize: AppConstants.fontSizeTitle,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: AppConstants.paddingMedium),
+            Text(
+              'Êtes-vous sûr de vouloir vous déconnecter ?',
+              style: TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                fontWeight: FontWeight.w400,
+                fontSize: AppConstants.fontSizeXLarge,
+                color: AppColors.textGray,
+              ),
+            ),
+            const SizedBox(height: AppConstants.fontSizeXXLarge),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      height: 44,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Annuler',
+                        style: TextStyle(
+                          fontFamily: AppConstants.fontFamilyInter,
+                          fontWeight: FontWeight.w500,
+                          fontSize: AppConstants.fontSizeLarge,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: AppConstants.fontSizeXXLarge,
+                  color: AppColors.divider,
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context)
+                          .pushNamedAndRemoveUntil('/login', (r) => false);
+                    },
+                    child: Container(
+                      height: 44,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Se déconnecter',
+                        style: TextStyle(
+                          fontFamily: AppConstants.fontFamilyInter,
+                          fontWeight: FontWeight.w500,
+                          fontSize: AppConstants.fontSizeLarge,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
         ),
-        child: Padding(
-          padding: EdgeInsets.all(ResponsiveUtils.getResponsiveValue(context, 24)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// HEADER
+// ─────────────────────────────────────────────────────────────────
+class _ProfileHeader extends StatelessWidget {
+  const _ProfileHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        children: [
+          // Back button
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: AppColors.primaryDark,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.arrow_back,
+                color: AppColors.white,
+                size: 18,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Text(
+            'Mon Compte',
+            style: TextStyle(
+              fontFamily: AppConstants.fontFamilySofiaSans,
+              fontWeight: FontWeight.w700,
+              fontSize: AppConstants.fontSizeXXLarge,
+              color: AppColors.textDark,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// AVATAR
+// ─────────────────────────────────────────────────────────────────
+class _AvatarSection extends StatelessWidget {
+  const _AvatarSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: const BoxDecoration(
+        color: AppColors.primaryDark,
+        shape: BoxShape.circle,
+      ),
+      child: const Center(
+        child: Text(
+          'LD',
+          style: TextStyle(
+            fontFamily: AppConstants.fontFamilySofiaSans,
+            fontWeight: FontWeight.w700,
+            fontSize: 36,
+            color: AppColors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// USER INFO: name + phone
+// ─────────────────────────────────────────────────────────────────
+class _UserInfoSection extends StatelessWidget {
+  const _UserInfoSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          'Lamine DIEME',
+          style: TextStyle(
+            fontFamily: AppConstants.fontFamilySofiaSans,
+            fontWeight: FontWeight.w700,
+            fontSize: AppConstants.fontSizeTitle,
+            color: AppColors.textDark,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '77 123 45 67',
+          style: TextStyle(
+            fontFamily: AppConstants.fontFamilySofiaSans,
+            fontWeight: FontWeight.w400,
+            fontSize: AppConstants.fontSizeLarge,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MENU SECTION
+// ─────────────────────────────────────────────────────────────────
+class _MenuSection extends StatelessWidget {
+  final String selectedLanguage;
+  final VoidCallback onLanguageTap;
+  final VoidCallback onDemandesTap;
+  final VoidCallback onDocumentsTap;
+  final VoidCallback onInfosTap;
+  final VoidCallback onArchivesTap;
+  final VoidCallback onNotifsTap;
+
+  const _MenuSection({
+    required this.selectedLanguage,
+    required this.onLanguageTap,
+    required this.onDemandesTap,
+    required this.onDocumentsTap,
+    required this.onInfosTap,
+    required this.onArchivesTap,
+    required this.onNotifsTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          _MenuItem(
+            iconPath: 'assets/icons/bi_person-circle.svg',
+            title: 'Informations personnelles',
+            onTap: onInfosTap,
+          ),
+          _Divider(),
+          _MenuItem(
+            iconPath: 'assets/icons/bi_file-earmark-text.svg',
+            title: 'Mes documents',
+            onTap: onDocumentsTap,
+          ),
+          _Divider(),
+          _MenuItem(
+            iconPath: 'assets/icons/bi_file-earmark-text.svg',
+            title: 'Archives',
+            onTap: onArchivesTap,
+          ),
+          _Divider(),
+          _MenuItem(
+            iconPath: 'assets/icons/bi_person-circle.svg',
+            title: 'Mes notifications',
+            onTap: onNotifsTap,
+          ),
+          _Divider(),
+          // Language item with current value shown
+          _LanguageMenuItem(
+            selectedLanguage: selectedLanguage,
+            onTap: onLanguageTap,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MenuItem extends StatelessWidget {
+  final String iconPath;
+  final String title;
+  final VoidCallback onTap;
+
+  const _MenuItem({
+    required this.iconPath,
+    required this.title,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Row(
+          children: [
+            SvgPicture.asset(
+              iconPath,
+              width: AppConstants.iconSizeLarge,
+              height: AppConstants.iconSizeLarge,
+              colorFilter: ColorFilter.mode(
+                AppColors.primary,
+                BlendMode.srcIn,
+              ),
+            ),
+            const SizedBox(width: AppConstants.paddingLarge),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontWeight: FontWeight.w500,
+                  fontSize: AppConstants.fontSizeLarge,
+                  color: AppColors.textDark,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: AppColors.iconGray,
+              size: AppConstants.iconSizeMedium,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LanguageMenuItem extends StatelessWidget {
+  final String selectedLanguage;
+  final VoidCallback onTap;
+
+  const _LanguageMenuItem({
+    required this.selectedLanguage,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Row(
+          children: [
+            SvgPicture.asset(
+              'assets/icons/material-symbols-light_language.svg',
+              width: AppConstants.iconSizeLarge,
+              height: AppConstants.iconSizeLarge,
+              colorFilter: ColorFilter.mode(
+                AppColors.primary,
+                BlendMode.srcIn,
+              ),
+            ),
+            const SizedBox(width: AppConstants.paddingLarge),
+            Expanded(
+              child: Text(
+                'Langue',
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontWeight: FontWeight.w500,
+                  fontSize: AppConstants.fontSizeLarge,
+                  color: AppColors.textDark,
+                ),
+              ),
+            ),
+            Text(
+              selectedLanguage,
+              style: TextStyle(
+                fontFamily: AppConstants.fontFamilySofiaSans,
+                fontWeight: FontWeight.w400,
+                fontSize: AppConstants.fontSizeMedium,
+                color: AppColors.iconGray,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.chevron_right,
+              color: AppColors.iconGray,
+              size: AppConstants.iconSizeMedium,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  const _Divider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Divider(
+      height: 1,
+      color: AppColors.borderDivider,
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// LOGOUT BUTTON
+// ─────────────────────────────────────────────────────────────────
+class _LogoutButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _LogoutButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: AppConstants.logoutButtonHeight,
+          decoration: BoxDecoration(
+            color: AppColors.primaryDark,
+            borderRadius:
+                BorderRadius.circular(AppConstants.radiusRound),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'Déconnexion',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600,
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 24),
-                  height: 32 / 24,
-                  letterSpacing: 0,
-                  color: Color(0xFF212121),
+              SvgPicture.asset(
+                'assets/icons/bi_box-arrow-left.svg',
+                width: AppConstants.iconSizeLarge,
+                height: AppConstants.iconSizeLarge,
+                colorFilter: ColorFilter.mode(
+                  AppColors.primary,
+                  BlendMode.srcIn,
                 ),
               ),
-              SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 12)),
+              const SizedBox(width: AppConstants.paddingMedium),
               Text(
-                'Êtes-vous sûr de vouloir vous déconnectez ?',
+                'Se déconnecter',
                 style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w400,
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 18),
-                  height: 32 / 18,
-                  letterSpacing: 0,
-                  color: Color(0xFF4F4F4F),
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontWeight: FontWeight.w500,
+                  fontSize: AppConstants.fontSizeLarge,
+                  color: AppColors.white,
                 ),
-              ),
-              SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 20)),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Container(
-                        height: ResponsiveUtils.getResponsiveHeight(context, 44),
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 8)),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Annuler',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w500,
-                              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                              color: Color(0xFF6B7280),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: ResponsiveUtils.getResponsiveWidth(context, 2),
-                    height: ResponsiveUtils.getResponsiveHeight(context, 20),
-                    color: Color(0xFFD9D9D9),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                          '/login',
-                          (route) => false,
-                        );
-                      },
-                      child: Container(
-                        height: ResponsiveUtils.getResponsiveHeight(context, 44),
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 8)),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Se déconnecter',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w500,
-                              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                              color: Color(0xFF23A3A6),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ],
           ),

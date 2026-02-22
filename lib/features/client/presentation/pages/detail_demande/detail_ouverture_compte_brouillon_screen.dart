@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
-  const DetailOuvertureCompteBrouillonScreen({Key? key}) : super(key: key);
+  const DetailOuvertureCompteBrouillonScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,25 +13,25 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              width: 430,
-              height: 932,
-              color: const Color(0xFF0B3C5C),
+              width: AppConstants.screenWidth,
+              height: AppConstants.screenHeight,
+              color: AppColors.primaryDark,
               child: Stack(
                 children: [
                   // Bouton retour
                   Positioned(
                     top: 70,
-                    left: 24,
+                    left: AppConstants.paddingXLarge,
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pop();
                       },
                       child: Container(
-                        width: 50,
-                        height: 50,
+                        width: AppConstants.backButtonSize,
+                        height: AppConstants.backButtonSize,
                         decoration: BoxDecoration(
-                          color: const Color(0x14FFFFFF),
-                          borderRadius: BorderRadius.circular(12),
+                          color: AppColors.whiteOverlay,
+                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                         ),
                         child: Center(
                           child: SvgPicture.asset(
@@ -49,8 +51,8 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                       'Ouverture de compte',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 20,
-                        color: Colors.white,
+                        fontSize: AppConstants.fontSizeXXLarge,
+                        color: AppColors.white,
                       ),
                     ),
                   ),
@@ -62,30 +64,30 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                       'Banque Nationale • 18/12/2025',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha:0.6),
+                        fontSize: AppConstants.fontSizeRegular,
+                        color: AppColors.whiteOpacity(0.6),
                       ),
                     ),
                   ),
                   // Badge "Brouillon"
                   Positioned(
                     top: 78,
-                    right: 24,
+                    right: AppConstants.paddingXLarge,
                     child: Container(
                       width: 60,
                       height: 20,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF2F5F9),
+                        color: AppColors.statusDraftLight,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Center(
                         child: Text(
                           'Brouillon',
                           style: TextStyle(
-                            fontFamily: 'Inter',
+                            fontFamily: AppConstants.fontFamilyInter,
                             fontWeight: FontWeight.w500,
-                            fontSize: 10,
-                            color: const Color(0xFF6B7280),
+                            fontSize: AppConstants.fontSizeSmall,
+                            color: AppColors.statusDraft,
                           ),
                         ),
                       ),
@@ -94,23 +96,23 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                   // Barre de progression 3/5
                   Positioned(
                     top: 140,
-                    left: 24,
+                    left: AppConstants.paddingXLarge,
                     child: Stack(
                       children: [
                         Container(
-                          width: 320,
-                          height: 4,
+                          width: AppConstants.progressBarWidth,
+                          height: AppConstants.progressBarHeight,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFDEE8EE),
-                            borderRadius: BorderRadius.circular(100),
+                            color: AppColors.progressBar,
+                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                           ),
                         ),
                         Container(
                           width: 192,
-                          height: 4,
+                          height: AppConstants.progressBarHeight,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF23A3A6),
-                            borderRadius: BorderRadius.circular(100),
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                           ),
                         ),
                       ],
@@ -123,12 +125,12 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                     child: Text(
                       '3/5',
                       style: TextStyle(
-                        fontFamily: 'Inter',
+                        fontFamily: AppConstants.fontFamilyInter,
                         fontWeight: FontWeight.w500,
-                        fontSize: 14,
+                        fontSize: AppConstants.fontSizeMedium,
                         height: 1.0,
                         letterSpacing: 0,
-                        color: const Color(0xFF6F8A99),
+                        color: AppColors.textLightGray,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -136,50 +138,50 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                   // Titre "Téléverser le formulaire rempli"
                   Positioned(
                     top: 185,
-                    left: 24,
+                    left: AppConstants.paddingXLarge,
                     child: Text(
                       'Téléverser le formulaire rempli',
                       style: TextStyle(
-                        fontFamily: 'Inter',
+                        fontFamily: AppConstants.fontFamilyInter,
                         fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                        fontSize: AppConstants.fontSizeLarge,
                         height: 24 / 16,
                         letterSpacing: 0,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                     ),
                   ),
                   // Sous-titre "Sélectionnez le fichier PDF rempli"
                   Positioned(
                     top: 210,
-                    left: 24,
+                    left: AppConstants.paddingXLarge,
                     child: Text(
                       'Sélectionnez le fichier PDF rempli',
                       style: TextStyle(
-                        fontFamily: 'Inter',
+                        fontFamily: AppConstants.fontFamilyInter,
                         fontWeight: FontWeight.w400,
-                        fontSize: 14,
+                        fontSize: AppConstants.fontSizeMedium,
                         height: 24 / 14,
                         letterSpacing: 0,
-                        color: Colors.white.withValues(alpha:0.7),
+                        color: AppColors.whiteOpacity(0.7),
                       ),
                     ),
                   ),
                   // Nouveau container
                   Positioned(
                     top: 260,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingXLarge,
+                    right: AppConstants.paddingXLarge,
                     child: Container(
-                      height: 204,
-                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                      height: AppConstants.documentContainerHeight,
+                      padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.paddingXLarge, AppConstants.paddingLarge, AppConstants.paddingXLarge),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE8EEE7), width: 1),
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        border: Border.all(color: AppColors.border, width: AppConstants.borderWidthThin),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0x08000000),
+                            color: AppColors.shadowDark,
                             offset: const Offset(3, 3),
                             blurRadius: 3,
                             spreadRadius: 0,
@@ -193,13 +195,13 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                             width: double.infinity,
                             height: 150,
                             margin: const EdgeInsets.symmetric(horizontal: 8),
-                            padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+                            padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.radiusXLarge, AppConstants.paddingLarge, AppConstants.radiusXLarge),
                             decoration: BoxDecoration(
-                              color: const Color(0x0A23A3A6),
-                              borderRadius: BorderRadius.circular(12),
+                              color: AppColors.statusValidatedLight,
+                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                               border: Border.all(
-                                color: const Color(0xFF23A3A6),
-                                width: 1,
+                                color: AppColors.primary,
+                                width: AppConstants.borderWidthThin,
                                 style: BorderStyle.solid,
                               ),
                             ),
@@ -207,29 +209,29 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Container(
-                                  width: 36,
-                                  height: 36,
-                                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                                  width: AppConstants.cardIconSize,
+                                  height: AppConstants.cardIconSize,
+                                  padding: EdgeInsets.fromLTRB(AppConstants.paddingMedium, AppConstants.paddingSmall + 2, AppConstants.paddingMedium, AppConstants.paddingSmall + 2),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF23A3A6),
-                                    borderRadius: BorderRadius.circular(100),
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                                   ),
                                   child: SvgPicture.asset(
                                     'assets/icons/bi_cloud-upload.svg',
                                     width: 12,
                                     height: 16,
-                                    color: Colors.white,
+                                    colorFilter: ColorFilter.mode(AppColors.white, BlendMode.srcIn),
                                   ),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
                                   'Cliquez pour télécharger',
                                   style: TextStyle(
-                                    fontFamily: 'Inter',
+                                    fontFamily: AppConstants.fontFamilyInter,
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 14,
+                                    fontSize: AppConstants.fontSizeMedium,
                                     height: 1.0,
-                                    color: const Color(0xFF343A40),
+                                    color: AppColors.cardSubtext,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -237,11 +239,11 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                                 Text(
                                   'PDF, JPG, PNG jusqu\'à 10 Mo',
                                   style: TextStyle(
-                                    fontFamily: 'Inter',
+                                    fontFamily: AppConstants.fontFamilyInter,
                                     fontWeight: FontWeight.w500,
-                                    fontSize: 12,
+                                    fontSize: AppConstants.fontSizeRegular,
                                     height: 1.0,
-                                    color: const Color(0xFF6B7280),
+                                    color: AppColors.textSecondary,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -255,22 +257,22 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                   // Nouveau container en bas
                   Positioned(
                     top: 480,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingXLarge,
+                    right: AppConstants.paddingXLarge,
                     child: GestureDetector(
                       onTap: () {
                         // Navigation vers Client - Detail demande - Brouillon
                       },
                       child: Container(
                         height: 88,
-                        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+                        padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.radiusXLarge, AppConstants.paddingLarge, AppConstants.radiusXLarge),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0x14FFFFFF), width: 1),
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                          border: Border.all(color: AppColors.whiteOverlay, width: AppConstants.borderWidthThin),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0x0F000000),
+                              color: AppColors.shadowLight,
                               offset: const Offset(0, 2),
                               blurRadius: 48,
                               spreadRadius: 0,
@@ -289,22 +291,22 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                                     child: Text(
                                       'Formulaire_ouverture_compte.pdf',
                                       style: TextStyle(
-                                        fontFamily: 'Sofia Sans',
+                                        fontFamily: AppConstants.fontFamilySofiaSans,
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 16,
+                                        fontSize: AppConstants.fontSizeLarge,
                                         height: 24 / 16,
-                                        color: const Color(0xFF212121),
+                                        color: AppColors.textDark,
                                       ),
                                     ),
                                   ),
                                   Text(
                                     'Document officiel • 1,2 Mo',
                                     style: TextStyle(
-                                      fontFamily: 'Sofia Sans',
+                                      fontFamily: AppConstants.fontFamilySofiaSans,
                                       fontWeight: FontWeight.w400,
-                                      fontSize: 12,
+                                      fontSize: AppConstants.fontSizeRegular,
                                       height: 1.0,
-                                      color: const Color(0xFF6B7280),
+                                      color: AppColors.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -326,25 +328,25 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                   // Bouton en bas
                   Positioned(
                     bottom: 80,
-                    left: 24,
-                    right: 24,
+                    left: AppConstants.paddingXLarge,
+                    right: AppConstants.paddingXLarge,
                     child: GestureDetector(
                       onTap: () {
                         Navigator.pushNamed(context, '/detail-ouverture-compte-continuer');
                       },
                       child: Container(
-                        height: 64,
-                        padding: const EdgeInsets.all(12),
+                        height: AppConstants.buttonHeightLarge,
+                        padding: EdgeInsets.all(AppConstants.paddingMedium),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF23A3A6),
-                          borderRadius: BorderRadius.circular(100),
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                         ),
                         child: Center(
                           child: Text(
                             'Continuer',
                             style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
+                              color: AppColors.white,
+                              fontSize: AppConstants.fontSizeLarge,
                               fontWeight: FontWeight.w600,
                             ),
                           ),

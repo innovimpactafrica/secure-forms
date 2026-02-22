@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class ClientBanquesScreen extends StatefulWidget {
   const ClientBanquesScreen({super.key});
@@ -16,25 +18,25 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: 430,
-        height: 932,
-        color: const Color(0xFF0B3C5C),
+        width: AppConstants.screenWidth,
+        height: AppConstants.screenHeight,
+        color: AppColors.primaryDark,
         child: Stack(
           children: [
             // Bouton retour
             Positioned(
               top: 70,
-              left: 24,
+              left: AppConstants.paddingXLarge,
               child: GestureDetector(
                 onTap: () {
                   Navigator.of(context).pop();
                 },
                 child: Container(
-                  width: 50,
-                  height: 50,
+                  width: AppConstants.backButtonSize,
+                  height: AppConstants.backButtonSize,
                   decoration: BoxDecoration(
-                    color: const Color(0x14FFFFFF),
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.whiteOverlay,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                   ),
                   child: Center(
                     child: SvgPicture.asset(
@@ -54,8 +56,8 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
                 'Nouvelle demande',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  fontSize: 20,
-                  color: Colors.white,
+                  fontSize: AppConstants.fontSizeXXLarge,
+                  color: AppColors.white,
                 ),
               ),
             ),
@@ -67,21 +69,21 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
                 'Choisissez une banque ou un notaire',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  fontSize: 12,
-                  color: Colors.white.withValues(alpha:0.6),
+                  fontSize: AppConstants.fontSizeRegular,
+                  color: AppColors.whiteOpacity(0.6),
                 ),
               ),
             ),
             // Barre de progression
             Positioned(
               top: 140,
-              left: 24,
+              left: AppConstants.paddingXLarge,
               child: Container(
-                width: 320,
-                height: 4,
+                width: AppConstants.progressBarWidth,
+                height: AppConstants.progressBarHeight,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFDEE8EE),
-                  borderRadius: BorderRadius.circular(100),
+                  color: AppColors.progressBar,
+                  borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                 ),
               ),
             ),
@@ -92,12 +94,12 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
               child: Text(
                 '0/5',
                 style: TextStyle(
-                  fontFamily: 'Inter',
+                  fontFamily: AppConstants.fontFamilyInter,
                   fontWeight: FontWeight.w500,
-                  fontSize: 14,
+                  fontSize: AppConstants.fontSizeMedium,
                   height: 1.0,
                   letterSpacing: 0,
-                  color: const Color(0xFF6F8A99),
+                  color: AppColors.textLightGray,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -105,19 +107,19 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
             // Titre descriptif principal
             Positioned(
               top: 153,
-              left: 24,
+              left: AppConstants.paddingXLarge,
               child: SizedBox(
                 width: 382,
                 height: 48,
                 child: Text(
                   'Choisissez une banque ou un notaire pour entamer une demande.',
                   style: TextStyle(
-                    fontFamily: 'Inter',
+                    fontFamily: AppConstants.fontFamilyInter,
                     fontWeight: FontWeight.w600,
-                    fontSize: 16,
+                    fontSize: AppConstants.fontSizeLarge,
                     height: 24 / 16,
                     letterSpacing: 0,
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 ),
               ),
@@ -125,32 +127,32 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
             // Section barre de recherche
             Positioned(
               top: 220,
-              left: 24,
-              right: 24,
+              left: AppConstants.paddingXLarge,
+              right: AppConstants.paddingXLarge,
               child: Container(
-                height: 56,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                height: AppConstants.searchBarHeight,
+                padding: EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium, vertical: AppConstants.paddingMedium),
                 decoration: BoxDecoration(
-                  color: const Color(0x1AF8FBF9),
-                  borderRadius: BorderRadius.circular(100),
-                  border: Border.all(color: const Color(0x1AE8EEE7), width: 1),
+                  color: AppColors.searchBackground,
+                  borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                  border: Border.all(color: AppColors.borderOverlay, width: AppConstants.borderWidthThin),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.search,
                       size: 28,
-                      color: Colors.white.withValues(alpha:0.6),
+                      color: AppColors.whiteOpacity(0.6),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: AppConstants.paddingMedium),
                     Expanded(
                       child: Text(
                         'Rechercher une banque, notaire....',
                         style: TextStyle(
                           fontWeight: FontWeight.w400,
-                          fontSize: 14,
+                          fontSize: AppConstants.fontSizeMedium,
                           height: 20 / 14,
-                          color: const Color(0xFF9CA3AF),
+                          color: AppColors.iconGray,
                         ),
                       ),
                     ),
@@ -161,37 +163,37 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
             // Filtres Notaire et Banque
             Positioned(
               top: 290,
-              left: 24,
+              left: AppConstants.paddingXLarge,
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge, vertical: 10),
                     decoration: BoxDecoration(
-                      color: const Color(0x1AFFFFFF),
-                      borderRadius: BorderRadius.circular(20),
+                      color: AppColors.whiteOverlayLight,
+                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
                     ),
                     child: Text(
                       'Notaire',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        color: Colors.white.withValues(alpha:0.7),
+                        fontSize: AppConstants.fontSizeMedium,
+                        color: AppColors.whiteOpacity(0.7),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: AppConstants.paddingMedium),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge, vertical: 10),
                     decoration: BoxDecoration(
-                      color: const Color(0x1AFFFFFF),
-                      borderRadius: BorderRadius.circular(20),
+                      color: AppColors.whiteOverlayLight,
+                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
                     ),
                     child: Text(
                       'Banque',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        color: Colors.white.withValues(alpha:0.7),
+                        fontSize: AppConstants.fontSizeMedium,
+                        color: AppColors.whiteOpacity(0.7),
                       ),
                     ),
                   ),
@@ -201,8 +203,8 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
             // Cartes d'organisations
             Positioned(
               top: 340,
-              left: 24,
-              right: 24,
+              left: AppConstants.paddingXLarge,
+              right: AppConstants.paddingXLarge,
               child: Column(
                 children: [
                   // Première ligne - 2 cartes
@@ -217,14 +219,14 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
                           child: Container(
                             width: 183,
                             height: 162,
-                            padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+                            padding: EdgeInsets.fromLTRB(AppConstants.paddingMedium, AppConstants.paddingLarge, AppConstants.paddingMedium, AppConstants.paddingLarge),
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0x14FFFFFF)),
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                              border: Border.all(color: AppColors.whiteOverlay),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0x0F000000),
+                                  color: AppColors.shadowLight,
                                   blurRadius: 48,
                                   offset: const Offset(0, 2),
                                 ),
