@@ -1,4 +1,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<!-- Internet (OBLIGATOIRE pour API et images) -->
+<uses-permission android:name="android.permission.INTERNET"/>
+
+<!-- Caméra -->
+<uses-permission android:name="android.permission.CAMERA"/>
+
+<!-- Android 12 et moins -->
+<uses-permission
+    android:name="android.permission.READ_EXTERNAL_STORAGE"
+    android:maxSdkVersion="32"/>
+
+<!-- Android 13+ -->
+<uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+<uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
     <application
         android:label="secure_link"
         android:name="${applicationName}"

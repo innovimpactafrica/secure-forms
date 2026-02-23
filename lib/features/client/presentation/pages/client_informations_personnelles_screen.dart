@@ -1,444 +1,523 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
 
 class ClientInformationsPersonnellesScreen extends StatefulWidget {
   const ClientInformationsPersonnellesScreen({super.key});
 
   @override
-  State<ClientInformationsPersonnellesScreen> createState() => _ClientInformationsPersonnellesScreenState();
+  State<ClientInformationsPersonnellesScreen> createState() =>
+      _ClientInformationsPersonnellesScreenState();
 }
 
-class _ClientInformationsPersonnellesScreenState extends State<ClientInformationsPersonnellesScreen> {
-  String selectedGender = 'Homme';
+class _ClientInformationsPersonnellesScreenState
+    extends State<ClientInformationsPersonnellesScreen> {
+  // TODO: Initialiser ces controllers avec les données de l'API (ProfileRepository)
+  final TextEditingController _prenomController = TextEditingController();
+  final TextEditingController _nomController = TextEditingController();
+  final TextEditingController _telephoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _dateNaissanceController =
+      TextEditingController();
+
+  String _selectedGender = 'Homme';
+  String? _selectedSituation;
+
+  // TODO: Charger depuis l'API (liste des situations matrimoniales)
+  final List<String> _situationsMatrimoniales = [
+    'Célibataire',
+    'Marié(e)',
+    'Divorcé(e)',
+    'Veuf/Veuve',
+  ];
+
+  @override
+  void dispose() {
+    _prenomController.dispose();
+    _nomController.dispose();
+    _telephoneController.dispose();
+    _emailController.dispose();
+    _dateNaissanceController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: AppConstants.screenWidth,
-        height: AppConstants.screenHeight,
-        color: AppColors.primaryDark,
-        child: Stack(
-          children: [
-            // Bouton retour
-            Positioned(
-              top: 70,
-              left: AppConstants.paddingXLarge,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-                child: Container(
-                  width: AppConstants.backButtonSize,
-                  height: AppConstants.backButtonSize,
-                  decoration: BoxDecoration(
-                    color: AppColors.whiteOverlay,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: AppColors.white,
-                      size: 21.4,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // Titre "Complétez votre profil"
-            Positioned(
-              top: 85,
-              left: 73,
-              right: 24,
-              child: Text(
-                'Complétez votre profil',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 20,
-                  height: 1.0,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            // Container blanc principal
-            Positioned(
-              top: 140,
-              left: 24,
-              right: 24,
-              child: Container(
-                height: 600,
-                padding: EdgeInsets.fromLTRB(16, 24, 16, 24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
+      backgroundColor: AppColors.white,
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: SafeArea(
+                bottom: false,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Titre "Informations personnelles"
-                    Text(
-                      'Informations personnelles',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                        height: 32 / 18,
-                        letterSpacing: 0,
-                        color: Color(0xFF0F1A14),
-                      ),
-                    ),
-                    SizedBox(height: 1),
-                    // Sous-titre
-                    Text(
-                      'Ces informations facilitent la vérification.',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
-                        height: 1.0,
-                        letterSpacing: 0,
-                        color: Color(0xFF4B5563),
-                      ),
-                    ),
-                    SizedBox(height: 32),
-                    // Label Prénom
-                    Text(
-                      'Prénom',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        height: 1.0,
-                        letterSpacing: 0,
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    // Champ Prénom
-                    Container(
-                      height: 50,
-                      padding: EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xFFCBD5E1), width: 1),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/bi_person.svg',
-                            width: 20,
-                            height: 20,
-                            colorFilter: ColorFilter.mode(
-                              Color(0xFF9CA3AF),
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'Lamine',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 24),
-                    // Label Nom
-                    Text(
-                      'Nom',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        height: 1.0,
-                        letterSpacing: 0,
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    // Champ Nom
-                    Container(
-                      height: 50,
-                      padding: EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xFFCBD5E1), width: 1),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/bi_person.svg',
-                            width: 20,
-                            height: 20,
-                            colorFilter: ColorFilter.mode(
-                              Color(0xFF9CA3AF),
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'Dieme',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 24),
-                    // Label Téléphone
-                    Text(
-                      'Téléphone',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        height: 1.0,
-                        letterSpacing: 0,
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    // Champ Téléphone
-                    Container(
-                      height: 50,
-                      padding: EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xFFCBD5E1), width: 1),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Drapeau Sénégal
-                          Image.asset(
-                            'assets/images/flag_sn-1x1.png',
-                            width: 24,
-                            height: 24,
-                            fit: BoxFit.cover,
-                          ),
-                          SizedBox(width: 8),
-                          Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Color(0xFF9CA3AF),
-                            size: 16,
-                          ),
-                          SizedBox(width: 8),
-                          SizedBox(
-                            width: 1,
-                            height: 20,
-                            child: Container(
-                              color: Color(0xFFE5E7EB),
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            '+221',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFF374151),
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: '77 123 45 67',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 24),
-                    // Label Email
-                    Text(
-                      'Email',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        height: 1.0,
-                        letterSpacing: 0,
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    // Champ Email
-                    Container(
-                      height: 50,
-                      padding: EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xFFCBD5E1), width: 1),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/bi_envelope.svg',
-                            width: 20,
-                            height: 20,
-                            colorFilter: ColorFilter.mode(
-                              Color(0xFF9CA3AF),
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          SizedBox(
-                            width: 205,
-                            height: 19,
-                            child: Text(
-                              'Ex: aminadiallo@gmail.com',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w400,
-                                fontSize: 16,
-                                height: 1.0,
-                                letterSpacing: 0,
-                                color: Color(0xFF9C9AA5),
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 24),
-                    // Label Genre
-                    Text(
-                      'Genre',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        height: 1.0,
-                        letterSpacing: 0,
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    // Container Genre
-                    Container(
-                      width: 350,
-                      height: 49,
-                      padding: EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFF9F6F3),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedGender = 'Homme';
-                              });
-                            },
-                            child: Container(
-                              width: 161,
-                              height: 37,
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: selectedGender == 'Homme' ? Colors.white : Colors.transparent,
-                                borderRadius: BorderRadius.circular(100),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Homme',
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                    height: 1.0,
-                                    letterSpacing: 0,
-                                    color: Color(0xFF222222),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  selectedGender = 'Femme';
-                                });
-                              },
-                              child: Container(
-                                height: 37,
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: selectedGender == 'Femme' ? Colors.white : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    'Femme',
-                                    style: TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14,
-                                      height: 1.0,
-                                      letterSpacing: 0,
-                                      color: Color(0xFF222222),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildHeader(context),
+                    _buildForm(),
                   ],
                 ),
               ),
             ),
+          ),
+          _buildBottomButton(context),
+        ],
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Header
+  // -------------------------------------------------------------------------
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.primaryDark,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.arrow_back,
+                  color: AppColors.white, size: 20),
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Mon Compte',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              SizedBox(height: 2),
+              Text(
+                'Informations personnelles',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textDark,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Form
+  // -------------------------------------------------------------------------
+
+  Widget _buildForm() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Prénom
+          _buildLabel('Prénom'),
+          const SizedBox(height: 8),
+          _buildTextField(
+            controller: _prenomController,
+            hint: 'Lamine',
+            prefixIcon: 'assets/icons/bi_person.svg',
+          ),
+          const SizedBox(height: 20),
+
+          // Nom
+          _buildLabel('Nom'),
+          const SizedBox(height: 8),
+          _buildTextField(
+            controller: _nomController,
+            hint: 'Dieme',
+            prefixIcon: 'assets/icons/bi_person.svg',
+          ),
+          const SizedBox(height: 20),
+
+          // Téléphone
+          _buildLabel('Téléphone'),
+          const SizedBox(height: 8),
+          _buildPhoneField(),
+          const SizedBox(height: 20),
+
+          // Email
+          _buildLabel('Email'),
+          const SizedBox(height: 8),
+          _buildTextField(
+            controller: _emailController,
+            hint: 'Ex: aminadiallo@gmail.com',
+            prefixIcon: 'assets/icons/bi_envelope.svg',
+            keyboardType: TextInputType.emailAddress,
+          ),
+          const SizedBox(height: 20),
+
+          // Date de naissance
+          _buildLabel('Date de naissance'),
+          const SizedBox(height: 8),
+          _buildDateField(),
+          const SizedBox(height: 20),
+
+          // Genre
+          _buildLabel('Genre'),
+          const SizedBox(height: 8),
+          _buildGenderToggle(),
+          const SizedBox(height: 20),
+
+          // Situation matrimoniale
+          _buildLabel('Situation matrimoniale'),
+          const SizedBox(height: 8),
+          _buildDropdown(),
+          const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Label
+  // -------------------------------------------------------------------------
+
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+        color: AppColors.textSecondary,
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // TextField générique
+  // -------------------------------------------------------------------------
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    String? prefixIcon,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(color: AppColors.borderGray),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 16),
+          if (prefixIcon != null) ...[
+            SvgPicture.asset(
+              prefixIcon,
+              width: 18,
+              height: 18,
+              colorFilter: const ColorFilter.mode(
+                AppColors.textSecondary,
+                BlendMode.srcIn,
+              ),
+            ),
+            const SizedBox(width: 10),
+          ],
+          Expanded(
+            child: TextField(
+              controller: controller,
+              keyboardType: keyboardType,
+              style: const TextStyle(
+                fontSize: 15,
+                color: AppColors.textDark,
+              ),
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: hint,
+                hintStyle: const TextStyle(
+                  fontSize: 15,
+                  color: AppColors.textSecondary,
+                ),
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+        ],
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Champ Téléphone avec drapeau
+  // -------------------------------------------------------------------------
+
+  Widget _buildPhoneField() {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(color: AppColors.borderGray),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 14),
+          // Drapeau Sénégal
+          ClipOval(
+            child: Image.asset(
+              'assets/images/flag_sn-1x1.png',
+              width: 24,
+              height: 24,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 6),
+          const Icon(Icons.keyboard_arrow_down,
+              color: AppColors.textSecondary, size: 16),
+          const SizedBox(width: 8),
+          // Séparateur
+          Container(width: 1, height: 20, color: AppColors.borderDivider),
+          const SizedBox(width: 10),
+          const Text(
+            '+221',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textDark,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              controller: _telephoneController,
+              keyboardType: TextInputType.phone,
+              style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                hintText: '77 123 45 67',
+                hintStyle: TextStyle(
+                    fontSize: 15, color: AppColors.textSecondary),
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+        ],
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Champ Date de naissance avec icône calendrier
+  // -------------------------------------------------------------------------
+
+  Widget _buildDateField() {
+    return GestureDetector(
+      onTap: () async {
+        // TODO: Connecter à l'API pour sauvegarder la date de naissance
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: DateTime(1990),
+          firstDate: DateTime(1900),
+          lastDate: DateTime.now(),
+          locale: const Locale('fr', 'FR'),
+          builder: (context, child) {
+            return Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: const ColorScheme.light(
+                  primary: AppColors.primaryDark,
+                  onPrimary: AppColors.white,
+                ),
+              ),
+              child: child!,
+            );
+          },
+        );
+        if (picked != null) {
+          setState(() {
+            _dateNaissanceController.text =
+                '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+          });
+        }
+      },
+      child: Container(
+        height: 50,
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(100),
+          border: Border.all(color: AppColors.borderGray),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                _dateNaissanceController.text.isEmpty
+                    ? 'jj/mm/aaaa'
+                    : _dateNaissanceController.text,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: _dateNaissanceController.text.isEmpty
+                      ? AppColors.textSecondary
+                      : AppColors.textDark,
+                ),
+              ),
+            ),
+            const Icon(Icons.calendar_month_outlined,
+                color: AppColors.textSecondary, size: 20),
+            const SizedBox(width: 16),
           ],
         ),
       ),
-      floatingActionButton: Container(
-        width: 382,
-        height: 64,
-        margin: EdgeInsets.only(bottom: 0),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Toggle Genre Homme / Femme
+  // -------------------------------------------------------------------------
+
+  Widget _buildGenderToggle() {
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F4F8),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Row(
+        children: [
+          _genderOption('Homme'),
+          _genderOption('Femme'),
+        ],
+      ),
+    );
+  }
+
+  Widget _genderOption(String label) {
+    final isSelected = _selectedGender == label;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedGender = label),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(100),
+            boxShadow: isSelected
+                ? [
+                    const BoxShadow(
+                      color: Color(0x14000000),
+                      blurRadius: 4,
+                      offset: Offset(0, 1),
+                    )
+                  ]
+                : [],
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight:
+                    isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: AppColors.textDark,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Dropdown Situation matrimoniale
+  // -------------------------------------------------------------------------
+
+  Widget _buildDropdown() {
+    return Container(
+      height: 50,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(color: AppColors.borderGray),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedSituation,
+          hint: const Text(
+            'Ex: aminadiallo@gmail.com',
+            style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
+          ),
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down,
+              color: AppColors.textSecondary, size: 20),
+          style: const TextStyle(
+            fontSize: 15,
+            color: AppColors.textDark,
+          ),
+          dropdownColor: AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          items: _situationsMatrimoniales.map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            setState(() => _selectedSituation = newValue);
+          },
+        ),
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Bouton "Mettre à jour"
+  // -------------------------------------------------------------------------
+
+  Widget _buildBottomButton(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
         child: GestureDetector(
+          // TODO: Appeler ProfileRepository.updateProfile() avec les données du formulaire
           onTap: () {
             Navigator.of(context).pop();
           },
           child: Container(
-            padding: EdgeInsets.all(12),
+            height: 54,
             decoration: BoxDecoration(
-              color: Color(0xFF23A3A6),
+              color: AppColors.primaryDark,
               borderRadius: BorderRadius.circular(100),
             ),
-            child: Center(
+            child: const Center(
               child: Text(
-                'Enregistrer',
+                'Mettre à jour',
                 style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600,
                   fontSize: 16,
-                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.white,
                 ),
               ),
             ),
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

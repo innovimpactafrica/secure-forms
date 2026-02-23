@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:secure_link/features/client/presentation/pages/mes_archives_screen.dart';
 import 'client_informations_personnelles_screen.dart';
 import 'mes_documents_screen.dart';
 import '../../../../core/utils/app_colors.dart';
@@ -79,11 +80,17 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.white,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingXLarge),
+        padding: EdgeInsets.only(
+          left: AppConstants.paddingXLarge,
+          right: AppConstants.paddingXLarge,
+          top: AppConstants.paddingXLarge,
+          bottom: MediaQuery.of(context).viewInsets.bottom + AppConstants.paddingXLarge,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,24 +432,26 @@ class _MenuSection extends StatelessWidget {
           ),
           _Divider(),
           _MenuItem(
-            iconPath: 'assets/icons/bi_file-earmark-text.svg',
+            iconPath: 'assets/images/documents.png',
             title: 'Mes documents',
             onTap: onDocumentsTap,
           ),
           _Divider(),
-          _MenuItem(
-            iconPath: 'assets/icons/bi_file-earmark-text.svg',
-            title: 'Archives',
-            onTap: onArchivesTap,
-          ),
+         _MenuItem(
+  iconPath: 'assets/icons/archive.svg',
+  title: 'Archives',
+  onTap: () => Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => const MesArchivesScreen()),
+  ),
+),
           _Divider(),
           _MenuItem(
-            iconPath: 'assets/icons/bi_person-circle.svg',
+            iconPath: 'assets/images/iconenotif.png',
             title: 'Mes notifications',
             onTap: onNotifsTap,
           ),
           _Divider(),
-          // Language item with current value shown
           _LanguageMenuItem(
             selectedLanguage: selectedLanguage,
             onTap: onLanguageTap,
@@ -466,6 +475,7 @@ class _MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isPng = iconPath.endsWith('.png');
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -473,15 +483,22 @@ class _MenuItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16),
         child: Row(
           children: [
-            SvgPicture.asset(
-              iconPath,
-              width: AppConstants.iconSizeLarge,
-              height: AppConstants.iconSizeLarge,
-              colorFilter: ColorFilter.mode(
-                AppColors.primary,
-                BlendMode.srcIn,
-              ),
-            ),
+            isPng
+                ? Image.asset(
+                    iconPath,
+                    width: AppConstants.iconSizeLarge,
+                    height: AppConstants.iconSizeLarge,
+                   
+                  )
+                : SvgPicture.asset(
+                    iconPath,
+                    width: AppConstants.iconSizeLarge,
+                    height: AppConstants.iconSizeLarge,
+                    colorFilter: ColorFilter.mode(
+                      AppColors.primary,
+                      BlendMode.srcIn,
+                    ),
+                  ),
             const SizedBox(width: AppConstants.paddingLarge),
             Expanded(
               child: Text(

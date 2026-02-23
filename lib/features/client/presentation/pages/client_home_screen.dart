@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
+import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
+import 'package:secure_link/features/client/presentation/pages/step1_informations_screen.dart';
 
 class ClientHomeScreen extends StatelessWidget {
   const ClientHomeScreen({super.key});
@@ -30,9 +34,6 @@ class ClientHomeScreen extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────
-// HEADER: Logo | Bell + Avatar
-// ─────────────────────────────────────────────────────────────────
 class _HomeHeader extends StatelessWidget {
   const _HomeHeader();
 
@@ -123,9 +124,7 @@ class _HomeHeader extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────
-// WELCOME: "Bonjour Lamine," + "Bienvenue sur secure Forms"
-// ─────────────────────────────────────────────────────────────────
+
 class _WelcomeSection extends StatelessWidget {
   const _WelcomeSection();
 
@@ -181,121 +180,139 @@ class _WelcomeSection extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────
-// PROFILE PROGRESS: label + progress bar + CTA button
-// ─────────────────────────────────────────────────────────────────
+
 class _ProfileProgressSection extends StatelessWidget {
   const _ProfileProgressSection();
 
-  static const double _progressValue = 0.30;
-
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // "Complétez votre profil" label
-          Text(
-            'Complétez votre profil',
-            style: TextStyle(
-              fontFamily: AppConstants.fontFamilySofiaSans,
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(height: 10),
-          // Progress bar: track + fill
-          Stack(
-            alignment: Alignment.centerLeft,
+    return BlocBuilder<ProfileBloc, ProfileState>(
+      builder: (context, state) {
+        final isCompleted = state is ProfileCompleted;
+        final progress = state is ProfileInProgress
+            ? state.profile.progressPercent
+            : state is ProfileCompleted
+                ? 1.0
+                : 0.30;
+        final percent = '${(progress * 100).toInt()}%';
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                height: 7,
-                decoration: BoxDecoration(
-                  color: AppColors.progressTrack,
-                  borderRadius: BorderRadius.circular(4),
+              // Label dynamique
+              Text(
+                isCompleted ? 'Profil complété à 100% ✓' : 'Complétez votre profil',
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: isCompleted ? AppColors.statusValideGreen : AppColors.primary,
                 ),
               ),
-              FractionallySizedBox(
-                widthFactor: _progressValue,
-                child: Container(
-                  height: 7,
-                  decoration: BoxDecoration(
-                    color: AppColors.progressFill,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          // "30%" label right-aligned
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              '30%',
-              style: TextStyle(
-                fontFamily: AppConstants.fontFamilyInter,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.progressFill,
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          // CTA: "Commencer maintenant"
-          GestureDetector(
-            onTap: () => Navigator.of(context)
-                .pushNamed(AppRoutes.clientCompleteProfile),
-            child: Container(
-              height: 46,
-              decoration: BoxDecoration(
-                color: AppColors.primaryDark,
-                borderRadius: BorderRadius.circular(23),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+              const SizedBox(height: 10),
+              // Barre de progression dynamique
+              Stack(
+                alignment: Alignment.centerLeft,
                 children: [
-                  const SizedBox(width: 20),
-                  Text(
-                    'Commencer maintenant',
-                    style: TextStyle(
-                      fontFamily: AppConstants.fontFamilySofiaSans,
-                      color: AppColors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
                   Container(
-                    width: 30,
-                    height: 30,
+                    height: 7,
                     decoration: BoxDecoration(
-                      color: AppColors.ctaButtonOverlay,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.arrow_forward,
-                      color: AppColors.white,
-                      size: 16,
+                      color: AppColors.progressTrack,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  FractionallySizedBox(
+                    widthFactor: progress,
+                    child: Container(
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? AppColors.statusValideGreen
+                            : AppColors.progressFill,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
+              const SizedBox(height: 4),
+              // % dynamique
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  percent,
+                  style: TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isCompleted
+                        ? AppColors.statusValideGreen
+                        : AppColors.progressFill,
+                  ),
+                ),
+              ),
+              // Bouton masqué si profil complété
+              if (!isCompleted) ...[
+                const SizedBox(height: 14),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<ProfileBloc>(),
+                        child: const Step1InformationsScreen(),
+                      ),
+                    ),
+                  ),
+                  child: Container(
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryDark,
+                      borderRadius: BorderRadius.circular(23),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(width: 20),
+                        Text(
+                          'Commencer maintenant',
+                          style: TextStyle(
+                            fontFamily: AppConstants.fontFamilySofiaSans,
+                            color: AppColors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: const BoxDecoration(
+                            color: AppColors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.arrow_forward,
+                            color: AppColors.primaryDarker,
+                            size: 16,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
-// ─────────────────────────────────────────────────────────────────
-// STATS GRID: 2×2 cards
-// ─────────────────────────────────────────────────────────────────
+
 class _StatsGrid extends StatelessWidget {
   const _StatsGrid();
 
@@ -308,15 +325,15 @@ class _StatsGrid extends StatelessWidget {
           Row(
             children: [
               Expanded(
-  child: _StatCard(
-    label: 'Total demandes',
-    value: '12',
-    iconPath: 'assets/icons/logo.svg',
-    iconColor: AppColors.textBlack45,
-    borderColor: AppColors.progressTrack,
-    applyColorFilter: false,  
-  ),
-),
+                child: _StatCard(
+                  label: 'Total demandes',
+                  value: '12',
+                  iconPath: 'assets/icons/logo.svg',
+                  iconColor: AppColors.textBlack45,
+                  borderColor: AppColors.progressTrack,
+                  applyColorFilter: false,
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: _StatCard(
@@ -365,7 +382,7 @@ class _StatCard extends StatelessWidget {
   final String iconPath;
   final Color iconColor;
   final Color borderColor;
-   final bool applyColorFilter;
+  final bool applyColorFilter;
 
   const _StatCard({
     required this.label,
@@ -373,7 +390,7 @@ class _StatCard extends StatelessWidget {
     required this.iconPath,
     required this.iconColor,
     required this.borderColor,
-     this.applyColorFilter = true,
+    this.applyColorFilter = true,
   });
 
   @override
@@ -414,98 +431,29 @@ class _StatCard extends StatelessWidget {
               ),
             ],
           ),
-          SvgPicture.asset(
-            iconPath,
-            width: 22,
-            height: 22,
-          colorFilter: applyColorFilter
-                ? ColorFilter.mode(iconColor, BlendMode.srcIn)
-                : null,
-          ),
+          Container(
+  width: 44,
+  height: 44,
+  decoration: BoxDecoration(
+    color: iconColor.withValues(alpha: 0.12),
+    shape: BoxShape.circle,
+  ),
+  child: Center(
+    child: SvgPicture.asset(
+      iconPath,
+      width: 22,
+      height: 22,
+      colorFilter: applyColorFilter
+          ? ColorFilter.mode(iconColor, BlendMode.srcIn)
+          : null,
+    ),
+  ),
+),
         ],
       ),
     );
   }
 }
-
-/*Widget _buildStatCard(
-    BuildContext context,
-    String label,
-    String value,
-    String iconPath,
-    double iconSize, {
-    Color? iconColor,
-  }) {
-    return Container(
-      height: ResponsiveUtils.getResponsiveHeight(context, AppConstants.profileCardHeight),
-      padding: EdgeInsets.fromLTRB(
-        ResponsiveUtils.getResponsiveWidth(context, AppConstants.paddingMedium),
-        ResponsiveUtils.getResponsiveHeight(context, AppConstants.paddingLarge),
-        ResponsiveUtils.getResponsiveWidth(context, AppConstants.paddingMedium),
-        ResponsiveUtils.getResponsiveHeight(context, AppConstants.paddingLarge),
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(
-          ResponsiveUtils.getResponsiveValue(context, AppConstants.radiusSmall),
-        ),
-        border: Border.all(color: AppColors.border, width: AppConstants.borderWidthThin),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowDark,
-            offset: Offset(
-              ResponsiveUtils.getResponsiveValue(context, AppConstants.elevationMedium),
-              ResponsiveUtils.getResponsiveValue(context, AppConstants.elevationMedium),
-            ),
-            blurRadius: ResponsiveUtils.getResponsiveValue(context, AppConstants.elevationMedium),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontFamily: AppConstants.fontFamilySofiaSans,
-                    fontWeight: FontWeight.w500,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, AppConstants.fontSizeRegular),
-                    height: 1.0,
-                    letterSpacing: 0,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 4)),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontFamily: AppConstants.fontFamilySofiaSans,
-                    fontWeight: FontWeight.w600,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, AppConstants.fontSizeXXLarge),
-                    height: 1.2,
-                    letterSpacing: 0,
-                    color: AppColors.textDark,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SvgPicture.asset(
-            iconPath,
-            width: ResponsiveUtils.getResponsiveWidth(context, iconSize),
-            height: ResponsiveUtils.getResponsiveHeight(context, iconSize),
-            colorFilter: iconColor != null
-                ? ColorFilter.mode(iconColor, BlendMode.srcIn)
-                : null,
-          ),
-        ],
-      ),
-    );
-  }*/
 
 // ─────────────────────────────────────────────────────────────────
 // SEARCH BAR
