@@ -70,3 +70,8 @@ class UpdateDocumentStatusEvent extends ProfileEvent {
 class ResetProfileEvent extends ProfileEvent {
   const ResetProfileEvent();
 }
+
+/// Profil complété manuellement par l'utilisateur
+class CompleteProfileEvent extends ProfileEvent {
+  const CompleteProfileEvent();
+}

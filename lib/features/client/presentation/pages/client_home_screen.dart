@@ -6,6 +6,7 @@ import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
+import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
 import 'package:secure_link/features/client/presentation/pages/step1_informations_screen.dart';
 
 class ClientHomeScreen extends StatelessWidget {
@@ -59,38 +60,45 @@ class _HomeHeader extends StatelessWidget {
           Row(
             children: [
               // Bell with notification badge
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Icon(
-                    Icons.notifications_outlined,
-                    size: 26,
-                    color: AppColors.textBlack87,
-                  ),
-                  Positioned(
-                    top: -3,
-                    right: -3,
-                    child: Container(
-                      width: 15,
-                      height: 15,
-                      decoration: const BoxDecoration(
-                        color: AppColors.statusRejected,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '2',
-                          style: TextStyle(
-                            color: AppColors.white,
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              GestureDetector(
+  onTap: () => Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => const NotificationsScreen(),
+    ),
+  ),
+  child: Stack(
+    clipBehavior: Clip.none,
+    children: [
+      Icon(
+        Icons.notifications_outlined,
+        size: 26,
+        color: AppColors.textBlack87,
+      ),
+      Positioned(
+        top: -3,
+        right: -3,
+        child: Container(
+          width: 15,
+          height: 15,
+          decoration: const BoxDecoration(
+            color: AppColors.statusRejected,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              '2',
+              style: TextStyle(
+                color: AppColors.white,
+                fontSize: 8,
+                fontWeight: FontWeight.bold,
               ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  ),
+),
               const SizedBox(width: 14),
               // Avatar circle
               GestureDetector(
@@ -181,18 +189,51 @@ class _WelcomeSection extends StatelessWidget {
 }
 
 
-class _ProfileProgressSection extends StatelessWidget {
+class _ProfileProgressSection extends StatefulWidget {
   const _ProfileProgressSection();
 
   @override
+  State<_ProfileProgressSection> createState() =>
+      _ProfileProgressSectionState();
+}
+
+class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
+  bool _showCompleted = false;
+  bool _hideSection = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Vérifier si le profil est déjà complété au démarrage
+    final state = context.read<ProfileBloc>().state;
+    if (state is ProfileCompleted) {
+      _showCompleted = true;
+      // Masquer après 3 secondes
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) setState(() => _hideSection = true);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProfileBloc, ProfileState>(
+    return BlocConsumer<ProfileBloc, ProfileState>(
+      listener: (context, state) {
+        if (state is ProfileCompleted && !_showCompleted) {
+          setState(() => _showCompleted = true);
+          Future.delayed(const Duration(seconds: 3), () {
+            if (mounted) setState(() => _hideSection = true);
+          });
+        }
+      },
       builder: (context, state) {
-        final isCompleted = state is ProfileCompleted;
-        final progress = state is ProfileInProgress
-            ? state.profile.progressPercent
-            : state is ProfileCompleted
-                ? 1.0
+        if (_hideSection) return const SizedBox.shrink();
+
+        final isCompleted = _showCompleted || state is ProfileCompleted;
+        final progress = isCompleted
+            ? 1.0
+            : state is ProfileInProgress
+                ? state.profile.progressPercent
                 : 0.30;
         final percent = '${(progress * 100).toInt()}%';
 
@@ -201,18 +242,20 @@ class _ProfileProgressSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Label dynamique
               Text(
-                isCompleted ? 'Profil complété à 100% ✓' : 'Complétez votre profil',
+                isCompleted
+                    ? 'Profil complété à 100% ✓'
+                    : 'Complétez votre profil',
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilySofiaSans,
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: isCompleted ? AppColors.statusValideGreen : AppColors.primary,
+                  color: isCompleted
+                      ? AppColors.statusValideGreen
+                      : AppColors.primary,
                 ),
               ),
               const SizedBox(height: 10),
-              // Barre de progression dynamique
               Stack(
                 alignment: Alignment.centerLeft,
                 children: [
@@ -238,7 +281,6 @@ class _ProfileProgressSection extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 4),
-              // % dynamique
               Align(
                 alignment: Alignment.centerRight,
                 child: Text(
@@ -253,9 +295,8 @@ class _ProfileProgressSection extends StatelessWidget {
                   ),
                 ),
               ),
-              // Bouton masqué si profil complété
               if (!isCompleted) ...[
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
                 GestureDetector(
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(

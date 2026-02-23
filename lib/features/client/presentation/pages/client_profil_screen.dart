@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:secure_link/features/client/presentation/pages/mes_archives_screen.dart';
+import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
 import 'client_informations_personnelles_screen.dart';
 import 'mes_documents_screen.dart';
 import '../../../../core/utils/app_colors.dart';
@@ -55,7 +56,12 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                         ),
                       ),
                       onArchivesTap: () {},
-                      onNotifsTap: () {},
+                      onNotifsTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationsScreen(),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 32),
                   ],

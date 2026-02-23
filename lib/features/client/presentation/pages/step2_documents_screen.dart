@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/features/client/data/models/profile_model.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
@@ -31,8 +32,7 @@ class Step2DocumentsScreen extends StatelessWidget {
               ),
             ),
           );
-        } else if (state is ProfileCompleted) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
+       
         } else if (state is ProfileError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -96,29 +96,35 @@ class Step2DocumentsScreen extends StatelessWidget {
                             width: double.infinity,
                             height: AppConstants.logoutButtonHeight,
                             child: ElevatedButton(
-                              onPressed: () {
-                                if (!hasDocuments) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Veuillez renseigner vos documents avant de valider.',
-                                        style: TextStyle(
-                                          fontFamily: AppConstants.fontFamilyInter,
-                                          color: AppColors.white,
-                                        ),
-                                      ),
-                                      backgroundColor: AppColors.statusEnAttente,
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                  );
-                                  return;
-                                }
-                                // TODO: API — POST /profile/complete
-                                Navigator.of(context).popUntil((r) => r.isFirst);
-                              },
+                              // APRÈS
+onPressed: () {
+  if (!hasDocuments) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Veuillez renseigner vos documents avant de valider.',
+          style: TextStyle(
+            fontFamily: AppConstants.fontFamilyInter,
+            color: AppColors.white,
+          ),
+        ),
+        backgroundColor: AppColors.statusEnAttente,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+    return;
+  }
+  // 1 — Dispatcher l'event AVANT de naviguer
+  context.read<ProfileBloc>().add(const CompleteProfileEvent());
+  // 2 — Naviguer vers Home
+  Navigator.of(context).pushNamedAndRemoveUntil(
+    AppRoutes.clientHome,
+    (route) => false,
+  );
+},
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: hasDocuments
                                     ? AppColors.primaryDark
@@ -415,7 +421,8 @@ Container(
               ),
             ),
             // Afficher la date d'expiration si document uploadé
-            if (hasDoc && document!.expiryDate.isNotEmpty)
+           if (hasDoc && document!.expiryDate.isNotEmpty &&
+    DocumentType.hasExpiryDate.contains(type))
               Text(
                 'Expire le ${_formatDate(document!.expiryDate)}',
                 maxLines: 1,

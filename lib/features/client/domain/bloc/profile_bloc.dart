@@ -31,6 +31,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<FaceVerificationFailedEvent>(_onFaceVerificationFailed);
     on<UpdateDocumentStatusEvent>(_onUpdateDocumentStatus);
     on<ResetProfileEvent>(_onResetProfile);
+    on<CompleteProfileEvent>(_onCompleteProfile);
   }
 
   // ─────────────────────────────────────────────────────────────────
@@ -194,6 +195,16 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       profile: ProfileModel(progressPercent: 0.30),
     ));
   }
+
+  void _onCompleteProfile(
+  CompleteProfileEvent event,
+  Emitter<ProfileState> emit,
+) {
+  final currentProfile = _currentProfile(state);
+  emit(ProfileCompleted(
+    profile: currentProfile.copyWith(progressPercent: 1.0),
+  ));
+}
 
   // ─────────────────────────────────────────────────────────────────
   // Helper: extraire le ProfileModel de n'importe quel état

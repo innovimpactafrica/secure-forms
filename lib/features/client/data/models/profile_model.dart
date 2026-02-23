@@ -93,14 +93,17 @@ class DocumentType {
   static const String property = 'Titre de propriété';
 
   static List<String> get all => [
-        cni,
-        nationality,
-        drivingLicense,
-        residence,
-        photo,
-        property,
+        cni, nationality, drivingLicense,
+        residence, photo, property,
       ];
 
-  // Documents qui nécessitent une vérification Face ID
-  static List<String> get requireFaceId => [cni, drivingLicense, photo];
+  // Documents qui nécessitent Face ID
+  static List<String> get requireFaceId => [
+        cni, drivingLicense, photo,
+      ];
+
+  // Documents qui ont une date d'expiration à afficher
+  static List<String> get hasExpiryDate => [
+        cni, drivingLicense, residence,
+      ];
 }
