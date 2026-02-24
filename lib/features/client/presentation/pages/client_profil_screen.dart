@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/presentation/pages/mes_archives_screen.dart';
 import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
 import 'client_informations_personnelles_screen.dart';
@@ -25,20 +27,17 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
         child: Column(
           children: [
             // ── Header ──
-            _ProfileHeader(),
+            const _ProfileHeader(),
             // ── Scrollable content ──
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
                     const SizedBox(height: 24),
-                    // Avatar
-                    _AvatarSection(),
+                    const _AvatarSection(),
                     const SizedBox(height: 16),
-                    // Name + phone
-                    _UserInfoSection(),
+                    const _UserInfoSection(),
                     const SizedBox(height: 32),
-                    // Menu items
                     _MenuSection(
                       selectedLanguage: selectedLanguage,
                       onLanguageTap: () => _showLangueModal(context),
@@ -46,13 +45,16 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                       onDocumentsTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => MesDocumentsScreen(),
+                          builder: (_) => BlocProvider.value(
+                            value: context.read<ProfileBloc>(),
+                            child: const MesDocumentsScreen(),
+                          ),
                         ),
                       ),
                       onInfosTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ClientInformationsPersonnellesScreen(),
+                          builder: (_) => const ClientInformationsPersonnellesScreen(),
                         ),
                       ),
                       onArchivesTap: () {},
@@ -87,62 +89,70 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
       context: context,
       backgroundColor: AppColors.white,
       isScrollControlled: true,
+      enableDrag: true,
+      useSafeArea: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          left: AppConstants.paddingXLarge,
-          right: AppConstants.paddingXLarge,
-          top: AppConstants.paddingXLarge,
-          bottom: MediaQuery.of(context).viewInsets.bottom + AppConstants.paddingXLarge,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Handle
-            Center(
-              child: Container(
-                width: AppConstants.modalHandleWidth,
-                height: AppConstants.modalHandleHeight,
-                decoration: BoxDecoration(
-                  color: AppColors.modalHandle,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Changer la langue',
-                  style: TextStyle(
-                    fontFamily: AppConstants.fontFamilyInter,
-                    fontWeight: FontWeight.w600,
-                    fontSize: AppConstants.fontSizeXXLarge,
-                    color: AppColors.textDark,
+      builder: (context) {
+        final media = MediaQuery.of(context);
+        final bottomSafe = media.viewPadding.bottom;
+        final keyboard = media.viewInsets.bottom;
+
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            AppConstants.paddingXLarge,
+            AppConstants.paddingXLarge,
+            AppConstants.paddingXLarge,
+            bottomSafe + keyboard + 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  width: AppConstants.modalHandleWidth,
+                  height: AppConstants.modalHandleHeight,
+                  decoration: BoxDecoration(
+                    color: AppColors.modalHandle,
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: Icon(Icons.close,
-                      size: AppConstants.iconSizeLarge,
-                      color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Divider(color: AppColors.borderE5, height: 1),
-            const SizedBox(height: 16),
-            _buildLanguageOption(context, 'Français', 'assets/images/image 2.png'),
-            const SizedBox(height: AppConstants.paddingMedium),
-            _buildLanguageOption(context, 'Anglais', 'assets/images/image 3.png'),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Changer la langue',
+                    style: TextStyle(
+                      fontFamily: AppConstants.fontFamilyInter,
+                      fontWeight: FontWeight.w600,
+                      fontSize: AppConstants.fontSizeXXLarge,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Icon(Icons.close,
+                        size: AppConstants.iconSizeLarge,
+                        color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Divider(color: AppColors.borderE5, height: 1),
+              const SizedBox(height: 16),
+              _buildLanguageOption(context, 'Français', 'assets/images/image 2.png'),
+              const SizedBox(height: AppConstants.paddingMedium),
+              _buildLanguageOption(context, 'Anglais', 'assets/images/image 3.png'),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -208,91 +218,101 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.white,
+      useSafeArea: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingXLarge),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Déconnexion',
-              style: TextStyle(
-                fontFamily: AppConstants.fontFamilyInter,
-                fontWeight: FontWeight.w600,
-                fontSize: AppConstants.fontSizeTitle,
-                color: AppColors.textDark,
+      builder: (context) {
+        final bottom = MediaQuery.of(context).viewPadding.bottom;
+
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            AppConstants.paddingXLarge,
+            AppConstants.paddingXLarge,
+            AppConstants.paddingXLarge,
+            bottom + AppConstants.paddingXLarge,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Déconnexion',
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontWeight: FontWeight.w600,
+                  fontSize: AppConstants.fontSizeTitle,
+                  color: AppColors.textDark,
+                ),
               ),
-            ),
-            const SizedBox(height: AppConstants.paddingMedium),
-            Text(
-              'Êtes-vous sûr de vouloir vous déconnecter ?',
-              style: TextStyle(
-                fontFamily: AppConstants.fontFamilyInter,
-                fontWeight: FontWeight.w400,
-                fontSize: AppConstants.fontSizeXLarge,
-                color: AppColors.textGray,
+              const SizedBox(height: AppConstants.paddingMedium),
+              Text(
+                'Êtes-vous sûr de vouloir vous déconnecter ?',
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontWeight: FontWeight.w400,
+                  fontSize: AppConstants.fontSizeXLarge,
+                  color: AppColors.textGray,
+                ),
               ),
-            ),
-            const SizedBox(height: AppConstants.fontSizeXXLarge),
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      height: 44,
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Annuler',
-                        style: TextStyle(
-                          fontFamily: AppConstants.fontFamilyInter,
-                          fontWeight: FontWeight.w500,
-                          fontSize: AppConstants.fontSizeLarge,
-                          color: AppColors.textSecondary,
+              const SizedBox(height: AppConstants.fontSizeXXLarge),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        height: 44,
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Annuler',
+                          style: TextStyle(
+                            fontFamily: AppConstants.fontFamilyInter,
+                            fontWeight: FontWeight.w500,
+                            fontSize: AppConstants.fontSizeLarge,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Container(
-                  width: 1,
-                  height: AppConstants.fontSizeXXLarge,
-                  color: AppColors.divider,
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context)
-                          .pushNamedAndRemoveUntil('/login', (r) => false);
-                    },
-                    child: Container(
-                      height: 44,
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Se déconnecter',
-                        style: TextStyle(
-                          fontFamily: AppConstants.fontFamilyInter,
-                          fontWeight: FontWeight.w500,
-                          fontSize: AppConstants.fontSizeLarge,
-                          color: AppColors.primary,
+                  Container(
+                    width: 1,
+                    height: AppConstants.fontSizeXXLarge,
+                    color: AppColors.divider,
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context)
+                            .pushNamedAndRemoveUntil('/login', (r) => false);
+                      },
+                      child: Container(
+                        height: 44,
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Se déconnecter',
+                          style: TextStyle(
+                            fontFamily: AppConstants.fontFamilyInter,
+                            fontWeight: FontWeight.w500,
+                            fontSize: AppConstants.fontSizeLarge,
+                            color: AppColors.primary,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
     );
   }
-}
+} // ← FIN de _ClientProfilScreenState
 
 // ─────────────────────────────────────────────────────────────────
 // HEADER
@@ -306,7 +326,6 @@ class _ProfileHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          // Back button
           GestureDetector(
             onTap: () => Navigator.of(context).pop(),
             child: Container(
@@ -370,7 +389,7 @@ class _AvatarSection extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// USER INFO: name + phone
+// USER INFO
 // ─────────────────────────────────────────────────────────────────
 class _UserInfoSection extends StatelessWidget {
   const _UserInfoSection();
@@ -436,28 +455,28 @@ class _MenuSection extends StatelessWidget {
             title: 'Informations personnelles',
             onTap: onInfosTap,
           ),
-          _Divider(),
+          const _Divider(),
           _MenuItem(
             iconPath: 'assets/images/documents.png',
             title: 'Mes documents',
             onTap: onDocumentsTap,
           ),
-          _Divider(),
-         _MenuItem(
-  iconPath: 'assets/icons/archive.svg',
-  title: 'Archives',
-  onTap: () => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => const MesArchivesScreen()),
-  ),
-),
-          _Divider(),
+          const _Divider(),
+          _MenuItem(
+            iconPath: 'assets/icons/archive.svg',
+            title: 'Archives',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const MesArchivesScreen()),
+            ),
+          ),
+          const _Divider(),
           _MenuItem(
             iconPath: 'assets/images/iconenotif.png',
             title: 'Mes notifications',
             onTap: onNotifsTap,
           ),
-          _Divider(),
+          const _Divider(),
           _LanguageMenuItem(
             selectedLanguage: selectedLanguage,
             onTap: onLanguageTap,
@@ -490,12 +509,9 @@ class _MenuItem extends StatelessWidget {
         child: Row(
           children: [
             isPng
-                ? Image.asset(
-                    iconPath,
+                ? Image.asset(iconPath,
                     width: AppConstants.iconSizeLarge,
-                    height: AppConstants.iconSizeLarge,
-                   
-                  )
+                    height: AppConstants.iconSizeLarge)
                 : SvgPicture.asset(
                     iconPath,
                     width: AppConstants.iconSizeLarge,
@@ -613,15 +629,19 @@ class _LogoutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        8,
+        20,
+        MediaQuery.of(context).viewPadding.bottom + 16,
+      ),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
           height: AppConstants.logoutButtonHeight,
           decoration: BoxDecoration(
             color: AppColors.primaryDark,
-            borderRadius:
-                BorderRadius.circular(AppConstants.radiusRound),
+            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
