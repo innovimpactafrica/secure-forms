@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/client/data/models/profile_model.dart';
@@ -69,7 +70,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
         _uploadedFilePath == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Veuillez remplir tous les champs'),
+          content: Text('profile.fill_all_fields'.tr()),
           backgroundColor: AppColors.statusRejected,
         ),
       );
@@ -95,220 +96,225 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 20,
-        right: 20,
-        top: 16,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Handle
-          Center(
-            child: Container(
-              width: AppConstants.modalHandleWidth,
-              height: AppConstants.modalHandleHeight,
-              decoration: BoxDecoration(
-                color: AppColors.modalHandle,
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Titre + fermeture
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Ajouter un document',
-                style: TextStyle(
-                  fontFamily: AppConstants.fontFamilySofiaSans,
-                  fontWeight: FontWeight.w700,
-                  fontSize: AppConstants.fontSizeXXLarge,
-                  color: AppColors.textDark,
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: bottomInset + bottomPadding + 16,
+          left: 20,
+          right: 20,
+          top: 16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                width: AppConstants.modalHandleWidth,
+                height: AppConstants.modalHandleHeight,
+                decoration: BoxDecoration(
+                  color: AppColors.modalHandle,
+                  borderRadius: BorderRadius.circular(999),
                 ),
               ),
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Icon(Icons.close,
-                    color: AppColors.textSecondary,
-                    size: AppConstants.iconSizeLarge),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
+            ),
+            const SizedBox(height: 16),
+            // Titre + fermeture
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'profile.add_document'.tr(),
+                  style: TextStyle(
+                    fontFamily: AppConstants.fontFamilySofiaSans,
+                    fontWeight: FontWeight.w700,
+                    fontSize: AppConstants.fontSizeXXLarge,
+                    color: AppColors.textDark,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Icon(Icons.close,
+                      color: AppColors.textSecondary,
+                      size: AppConstants.iconSizeLarge),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
 
-          // Type de document (lecture seule)
-          Text(
-            'Type de document',
-            style: TextStyle(
-              fontFamily: AppConstants.fontFamilyInter,
-              fontSize: AppConstants.fontSizeMedium,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textDark,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.borderLight),
-              borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-            ),
-            child: Text(
-              widget.documentType,
+            // Type de document (lecture seule)
+            Text(
+              'profile.document_type'.tr(),
               style: TextStyle(
                 fontFamily: AppConstants.fontFamilyInter,
                 fontSize: AppConstants.fontSizeMedium,
-                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textDark,
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-
-          // Date de délivrance
-          Text(
-            'Date  de délivrance',
-            style: TextStyle(
-              fontFamily: AppConstants.fontFamilyInter,
-              fontSize: AppConstants.fontSizeMedium,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textDark,
-            ),
-          ),
-          const SizedBox(height: 6),
-          _ModalDateField(
-            controller: _deliveryDateController,
-            hint: '22/01/2021',
-            onTap: () => _pickDate(context, _deliveryDateController),
-          ),
-          const SizedBox(height: 16),
-
-          // Date d'expiration
-          Text(
-            'Date  d\'expiration',
-            style: TextStyle(
-              fontFamily: AppConstants.fontFamilyInter,
-              fontSize: AppConstants.fontSizeMedium,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textDark,
-            ),
-          ),
-          const SizedBox(height: 6),
-          _ModalDateField(
-            controller: _expiryDateController,
-            hint: '22/01/2026',
-            onTap: () =>
-                _pickDate(context, _expiryDateController, isExpiry: true),
-          ),
-          const SizedBox(height: 16),
-
-          // Zone upload fichier
-          GestureDetector(
-            onTap: _simulateFileUpload,
-            child: Container(
+            const SizedBox(height: 6),
+            Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 28),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: AppColors.primaryLight,
+                border: Border.all(color: AppColors.borderLight),
                 borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    style: BorderStyle.solid),
               ),
-              child: Column(
-                children: [
-                  Icon(
-                    _uploadedFilePath != null
-                        ? Icons.check_circle_outline
-                        : Icons.cloud_upload_outlined,
-                    size: 36,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _uploadedFilePath != null
-                        ? _uploadedFilePath!
-                        : 'Cliquez pour Téléverser',
-                    style: TextStyle(
-                      fontFamily: AppConstants.fontFamilySofiaSans,
-                      fontWeight: FontWeight.w600,
-                      fontSize: AppConstants.fontSizeMedium,
+              child: Text(
+                widget.documentType,
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontSize: AppConstants.fontSizeMedium,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Date de délivrance
+            Text(
+              'profile.delivery_date'.tr(),
+              style: TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                fontSize: AppConstants.fontSizeMedium,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 6),
+            _ModalDateField(
+              controller: _deliveryDateController,
+              hint: 'profile.delivery_date_hint'.tr(),
+              onTap: () => _pickDate(context, _deliveryDateController),
+            ),
+            const SizedBox(height: 16),
+
+            // Date d'expiration
+            Text(
+              'profile.expiry_date'.tr(),
+              style: TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                fontSize: AppConstants.fontSizeMedium,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 6),
+            _ModalDateField(
+              controller: _expiryDateController,
+              hint: 'profile.expiry_date_hint'.tr(),
+              onTap: () =>
+                  _pickDate(context, _expiryDateController, isExpiry: true),
+            ),
+            const SizedBox(height: 16),
+
+            // Zone upload fichier
+            GestureDetector(
+              onTap: _simulateFileUpload,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 28),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLight,
+                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                  border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                      style: BorderStyle.solid),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      _uploadedFilePath != null
+                          ? Icons.check_circle_outline
+                          : Icons.cloud_upload_outlined,
+                      size: 36,
                       color: AppColors.primary,
                     ),
-                  ),
-                  if (_uploadedFilePath == null)
+                    const SizedBox(height: 8),
                     Text(
-                      'PDF, JPG, PNG jusqu\'à 10 Mo',
+                      _uploadedFilePath != null
+                          ? _uploadedFilePath!
+                          : 'profile.click_upload'.tr(),
                       style: TextStyle(
-                        fontFamily: AppConstants.fontFamilyInter,
-                        fontSize: AppConstants.fontSizeRegular,
-                        color: AppColors.textSecondary,
+                        fontFamily: AppConstants.fontFamilySofiaSans,
+                        fontWeight: FontWeight.w600,
+                        fontSize: AppConstants.fontSizeMedium,
+                        color: AppColors.primary,
                       ),
                     ),
-                ],
+                    if (_uploadedFilePath == null)
+                      Text(
+                        'profile.file_format'.tr(),
+                        style: TextStyle(
+                          fontFamily: AppConstants.fontFamilyInter,
+                          fontSize: AppConstants.fontSizeRegular,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-          // Bouton Envoyer pour validation
-          SizedBox(
-            width: double.infinity,
-            height: AppConstants.logoutButtonHeight,
-            child: ElevatedButton(
-              onPressed: _onEnvoyer,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryDark,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.radiusRound),
+            // Bouton Envoyer pour validation
+            SizedBox(
+              width: double.infinity,
+              height: AppConstants.logoutButtonHeight,
+              child: ElevatedButton(
+                onPressed: _onEnvoyer,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryDark,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusRound),
+                  ),
                 ),
-              ),
-              child: Text(
-                'Envoyer pour validation',
-                style: TextStyle(
-                  fontFamily: AppConstants.fontFamilySofiaSans,
-                  color: AppColors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: AppConstants.fontSizeLarge,
+                child: Text(
+                  'profile.send_validation'.tr(),
+                  style: TextStyle(
+                    fontFamily: AppConstants.fontFamilySofiaSans,
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: AppConstants.fontSizeLarge,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          // Bouton Enregistrer (brouillon)
-          SizedBox(
-            width: double.infinity,
-            height: AppConstants.logoutButtonHeight,
-            child: OutlinedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppColors.primaryDark),
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.radiusRound),
+            // Bouton Enregistrer (brouillon)
+            SizedBox(
+              width: double.infinity,
+              height: AppConstants.logoutButtonHeight,
+              child: OutlinedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppColors.primaryDark),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusRound),
+                  ),
                 ),
-              ),
-              child: Text(
-                'Enregistrer',
-                style: TextStyle(
-                  fontFamily: AppConstants.fontFamilySofiaSans,
-                  color: AppColors.primaryDark,
-                  fontWeight: FontWeight.w600,
-                  fontSize: AppConstants.fontSizeLarge,
+                child: Text(
+                  'profile.save'.tr(),
+                  style: TextStyle(
+                    fontFamily: AppConstants.fontFamilySofiaSans,
+                    color: AppColors.primaryDark,
+                    fontWeight: FontWeight.w600,
+                    fontSize: AppConstants.fontSizeLarge,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-        ],
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }

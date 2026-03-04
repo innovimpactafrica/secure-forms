@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 
 // ---------------------------------------------------------------------------
@@ -127,9 +128,9 @@ class ClientDemandeDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Nouvelle demande',
-                  style: TextStyle(
+                Text(
+                  'demande_detail.new_request'.tr(),
+                  style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textDark,
@@ -203,28 +204,28 @@ class ClientDemandeDetailScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SizedBox(
                 width: 56,
-                child: Text('Soumis',
+                child: Text('demande_detail.submitted'.tr(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 11, color: AppColors.textSecondary)),
               ),
               SizedBox(
                 width: 56,
-                child: Text('En cours',
+                child: Text('demandes.in_progress'.tr(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 11, color: AppColors.textSecondary)),
               ),
               SizedBox(
                 width: 56,
-                child: Text('Finalisé',
+                child: Text('demande_detail.finalized'.tr(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 11, color: AppColors.textSecondary)),
               ),
             ],
@@ -356,9 +357,9 @@ class ClientDemandeDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Documents justificatifs',
-            style: TextStyle(
+          Text(
+            'demande_detail.supporting_documents'.tr(),
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: AppColors.textDark,
@@ -411,14 +412,14 @@ class ClientDemandeDetailScreen extends StatelessWidget {
               color: AppColors.primaryDark,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.download_outlined, color: AppColors.white, size: 20),
-                SizedBox(width: 8),
+                const Icon(Icons.download_outlined, color: AppColors.white, size: 20),
+                const SizedBox(width: 8),
                 Text(
-                  'Télécharger le PDF',
-                  style: TextStyle(
+                  'demande_detail.download_pdf'.tr(),
+                  style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: AppColors.white),
@@ -485,8 +486,8 @@ class _DocumentJustificatifItem extends StatelessWidget {
             ),
           ),
           if (doc.verifie)
-            const Text('Vérifié',
-                style: TextStyle(
+            Text('demande_detail.verified'.tr(),
+                style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: AppColors.primary)),
@@ -509,15 +510,15 @@ class _HeaderBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (status) {
       case DemandeDetailStatus.enAttente:
-        return _badge('En attente', AppColors.statusPending, AppColors.statusPendingLight);
+        return _badge('demandes.pending'.tr(), AppColors.statusPending, AppColors.statusPendingLight);
       case DemandeDetailStatus.enCours:
-        return _badge('En cours', AppColors.statusInProgress, AppColors.statusInProgressLight);
+        return _badge('demandes.in_progress'.tr(), AppColors.statusInProgress, AppColors.statusInProgressLight);
       case DemandeDetailStatus.valide:
-        return _badge('Validé', AppColors.statusValidated, AppColors.statusValidatedLight);
+        return _badge('profile.validated'.tr(), AppColors.statusValidated, AppColors.statusValidatedLight);
       case DemandeDetailStatus.rejete:
-        return _badge('Rejeté', AppColors.statusRejected, AppColors.statusRejectedLight);
+        return _badge('profile.rejected'.tr(), AppColors.statusRejected, AppColors.statusRejectedLight);
       case DemandeDetailStatus.brouillon:
-        return _badge('Brouillon', AppColors.statusDraft, AppColors.statusDraftLight);
+        return _badge('demandes.draft'.tr(), AppColors.statusDraft, AppColors.statusDraftLight);
     }
   }
 

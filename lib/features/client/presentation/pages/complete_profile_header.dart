@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 
@@ -45,7 +46,7 @@ class CompleteProfileHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Complétez votre profil',
+                    'profile.complete_profile'.tr(),
                     style: TextStyle(
                       fontFamily: AppConstants.fontFamilySofiaSans,
                       fontWeight: FontWeight.w700,

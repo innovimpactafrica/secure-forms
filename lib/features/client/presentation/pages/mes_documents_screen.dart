@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
@@ -72,7 +73,7 @@ class MesDocumentsScreen extends StatelessWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Documents mis à jour avec succès.',
+                                'documents.update_success'.tr(),
                                 style: TextStyle(
                                   fontFamily: AppConstants.fontFamilyInter,
                                   color: AppColors.white,
@@ -94,7 +95,7 @@ class MesDocumentsScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'Mettre à jour',
+                          'documents.update_button'.tr(),
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilySofiaSans,
                             color: AppColors.white,
@@ -154,7 +155,7 @@ class _MesDocsHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Mon Compte',
+                'documents.my_account'.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilyInter,
                   fontSize: AppConstants.fontSizeRegular,
@@ -163,7 +164,7 @@ class _MesDocsHeader extends StatelessWidget {
                 ),
               ),
               Text(
-                'Mes documents',
+                'documents.title'.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilySofiaSans,
                   fontWeight: FontWeight.w700,
@@ -190,10 +191,10 @@ class _StatusLegend extends StatelessWidget {
     return Wrap(
       spacing: 12,
       children: [
-        _LegendItem(color: AppColors.statusValideGreen, label: 'Validé'),
-        _LegendItem(color: AppColors.statusEnAttente, label: 'En attente'),
-        _LegendItem(color: AppColors.primary, label: 'En cours'),
-        _LegendItem(color: AppColors.statusRejected, label: 'Rejeté'),
+        _LegendItem(color: AppColors.statusValideGreen, label: 'profile.validated'.tr()),
+        _LegendItem(color: AppColors.statusEnAttente, label: 'profile.pending'.tr()),
+        _LegendItem(color: AppColors.primary, label: 'profile.in_progress'.tr()),
+        _LegendItem(color: AppColors.statusRejected, label: 'profile.rejected'.tr()),
       ],
     );
   }
@@ -413,7 +414,7 @@ class _DocumentCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          type,
+                          type.tr(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -427,7 +428,7 @@ class _DocumentCard extends StatelessWidget {
                             document!.expiryDate.isNotEmpty &&
                             DocumentType.hasExpiryDate.contains(type))
                           Text(
-                            'Expire le ${_formatDate(document!.expiryDate)}',
+                            'profile.expires_on'.tr() + ' ${_formatDate(document!.expiryDate)}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -542,7 +543,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
             const SizedBox(height: 8),
             ListTile(
               leading: Icon(Icons.photo_library_outlined, color: AppColors.primary),
-              title: Text('Galerie photo',
+              title: Text('profile.gallery'.tr(),
                   style: TextStyle(
                       fontFamily: AppConstants.fontFamilyInter,
                       color: AppColors.textDark,
@@ -551,7 +552,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
             ),
             ListTile(
               leading: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
-              title: Text('Prendre une photo',
+              title: Text('profile.take_photo'.tr(),
                   style: TextStyle(
                       fontFamily: AppConstants.fontFamilyInter,
                       color: AppColors.textDark,
@@ -581,7 +582,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Veuillez remplir tous les champs et téléverser un document.',
+            'profile.fill_all_fields'.tr(),
             style: TextStyle(
                 fontFamily: AppConstants.fontFamilyInter, color: AppColors.white),
           ),
@@ -643,8 +644,8 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                 Expanded(
                   child: Text(
                     widget.existingDocument != null
-                        ? 'Mettre à jour le document'
-                        : 'Ajouter un document',
+                        ? 'documents.update_document'.tr()
+                        : 'profile.add_document'.tr(),
                     style: TextStyle(
                       fontFamily: AppConstants.fontFamilySofiaSans,
                       fontWeight: FontWeight.w700,
@@ -664,7 +665,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
             const SizedBox(height: 20),
 
             // Type (lecture seule)
-            _ModalLabel(text: 'Type de document'),
+            _ModalLabel(text: 'profile.document_type'.tr()),
             const SizedBox(height: 6),
             Container(
               width: double.infinity,
@@ -674,7 +675,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                 borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
               ),
               child: Text(
-                widget.documentType,
+                widget.documentType.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilyInter,
                   fontSize: AppConstants.fontSizeMedium,
@@ -684,21 +685,21 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
             ),
             const SizedBox(height: 16),
 
-            _ModalLabel(text: 'Date de délivrance'),
+            _ModalLabel(text: 'profile.delivery_date'.tr()),
             const SizedBox(height: 6),
             _ModalDateField(
               controller: _deliveryDateController,
-              hint: '22/01/2021',
+              hint: 'profile.delivery_date_hint'.tr(),
               onTap: () => _pickDate(context, _deliveryDateController),
             ),
             const SizedBox(height: 16),
 
             if (showExpiryField) ...[
-              _ModalLabel(text: 'Date d\'expiration'),
+              _ModalLabel(text: 'profile.expiry_date'.tr()),
               const SizedBox(height: 6),
               _ModalDateField(
                 controller: _expiryDateController,
-                hint: '22/01/2026',
+                hint: 'profile.expiry_date_hint'.tr(),
                 onTap: () =>
                     _pickDate(context, _expiryDateController, isExpiry: true),
               ),
@@ -748,7 +749,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                   ),
                 ),
                 child: Text(
-                  'Envoyer pour validation',
+                  'profile.send_validation'.tr(),
                   style: TextStyle(
                     fontFamily: AppConstants.fontFamilySofiaSans,
                     color: AppColors.white,
@@ -773,7 +774,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                   ),
                 ),
                 child: Text(
-                  'Annuler',
+                  'documents.cancel'.tr(),
                   style: TextStyle(
                     fontFamily: AppConstants.fontFamilySofiaSans,
                     color: AppColors.primaryDark,
@@ -828,7 +829,7 @@ class _UploadPlaceholder extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          hasFile ? 'Fichier sélectionné' : 'Cliquez pour Téléverser',
+          hasFile ? 'profile.file_selected'.tr() : 'profile.click_upload'.tr(),
           style: TextStyle(
             fontFamily: AppConstants.fontFamilySofiaSans,
             fontWeight: FontWeight.w600,
@@ -838,7 +839,7 @@ class _UploadPlaceholder extends StatelessWidget {
         ),
         if (!hasFile)
           Text(
-            'PDF, JPG, PNG jusqu\'à 10 Mo',
+            'profile.file_format'.tr(),
             style: TextStyle(
               fontFamily: AppConstants.fontFamilyInter,
               fontSize: AppConstants.fontSizeRegular,

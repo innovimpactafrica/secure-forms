@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 
@@ -44,43 +45,43 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   // TODO: Replace with data coming from DemandesBloc / DemandesRepository
-  final List<DemandeItem> _allDemandes = const [
+  List<DemandeItem> get _allDemandes => [
     DemandeItem(
       id: '1',
-      title: 'Ouverture de compte',
-      institution: 'Banque Nationale',
+      title: 'demandes.account_opening'.tr(),
+      institution: 'demandes.national_bank'.tr(),
       date: '18/12/2025',
       status: DemandeStatus.enAttente,
       iconAsset: 'assets/icons/logo.svg',
     ),
     DemandeItem(
       id: '2',
-      title: 'Demande de virement',
-      institution: 'Banque Nationale',
+      title: 'demandes.transfer_request'.tr(),
+      institution: 'demandes.national_bank'.tr(),
       date: '12/12/2025',
       status: DemandeStatus.valide,
       iconAsset: 'assets/icons/logo (1).svg',
     ),
     DemandeItem(
       id: '3',
-      title: 'Acte de vente',
-      institution: 'Notaire X',
+      title: 'demandes.sale_deed'.tr(),
+      institution: 'demandes.notary_x'.tr(),
       date: '05/12/2025',
       status: DemandeStatus.enCours,
       iconAsset: 'assets/icons/logo.svg',
     ),
     DemandeItem(
       id: '4',
-      title: 'Demande de prêt',
-      institution: 'Crédit Moderne',
+      title: 'demandes.loan_request'.tr(),
+      institution: 'demandes.modern_credit'.tr(),
       date: '12/11/2025',
       status: DemandeStatus.valide,
       iconAsset: 'assets/icons/logo.svg',
     ),
     DemandeItem(
       id: '5',
-      title: "Carte de l'opposition",
-      institution: 'Banque Nationale',
+      title: 'demandes.card_opposition'.tr(),
+      institution: 'demandes.national_bank'.tr(),
       date: '04/11/2025',
       status: DemandeStatus.rejete,
       iconAsset: 'assets/icons/logo.svg',
@@ -88,11 +89,11 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
   ];
 
   static const List<String> _filterLabels = [
-    'Tous',
-    'Brouillon',
-    'En cours',
-    'Validés',
-    'Rejetés',
+    'demandes.all',
+    'demandes.draft',
+    'demandes.in_progress',
+    'demandes.validated',
+    'demandes.rejected',
   ];
 
   // Convertit le statut en String pour le passer à la page de détail
@@ -188,9 +189,9 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
-                'Mes demandes',
+                'demandes.title'.tr(),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -199,7 +200,7 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
               ),
               SizedBox(height: 2),
               Text(
-                "Suivez et gérez l'avancement de vos demandes",
+                'demandes.subtitle'.tr(),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
@@ -237,8 +238,8 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
                 controller: _searchController,
                 onChanged: (_) => setState(() {}),
                 style: const TextStyle(fontSize: 14, color: AppColors.textDark),
-                decoration: const InputDecoration(
-                  hintText: 'Rechercher une demande',
+                decoration: InputDecoration(
+                  hintText: 'demandes.search_placeholder'.tr(),
                   hintStyle: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                   border: InputBorder.none,
                   isDense: true,
@@ -278,7 +279,7 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  _filterLabels[index],
+                  _filterLabels[index].tr(),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
@@ -301,9 +302,9 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
     final items = _filteredDemandes;
 
     if (items.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'Aucune demande trouvée',
+          'demandes.no_demandes'.tr(),
           style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
       );
@@ -329,9 +330,9 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
                   'institution': item.institution,
                   'status': _statusToString(item.status),
                   'reference': 'REQ-2024-00${item.id}',
-                  'datesoumission': 'Soumis le 15/12, 10h00',
-                  'dateEstimee': 'Estimé : 17/12',
-                  'documentVersion': 'Version 1.1',
+                  'datesoumission': '${'demande_detail.submitted_on'.tr()} 15/12, 10h00',
+                  'dateEstimee': '${'demande_detail.estimated'.tr()} : 17/12',
+                  'documentVersion': '${'demande_detail.version'.tr()} 1.1',
                 },
               );
             },
@@ -456,31 +457,31 @@ class _StatusBadge extends StatelessWidget {
     switch (status) {
       case DemandeStatus.brouillon:
         return _StatusConfig(
-          label: 'Brouillon',
+          label: 'demandes.draft'.tr(),
           textColor: AppColors.statusDraft,
           bgColor: AppColors.statusDraftLight,
         );
       case DemandeStatus.enAttente:
         return _StatusConfig(
-          label: 'En attente',
+          label: 'demandes.pending'.tr(),
           textColor: AppColors.statusPending,
           bgColor: AppColors.statusPendingLight,
         );
       case DemandeStatus.enCours:
         return _StatusConfig(
-          label: 'En cours',
+          label: 'demandes.in_progress'.tr(),
           textColor: AppColors.statusInProgress,
           bgColor: AppColors.statusInProgressLight,
         );
       case DemandeStatus.valide:
         return _StatusConfig(
-          label: 'Validé',
+          label: 'profile.validated'.tr(),
           textColor: AppColors.statusValidated,
           bgColor: AppColors.statusValidatedLight,
         );
       case DemandeStatus.rejete:
         return _StatusConfig(
-          label: 'Rejeté',
+          label: 'profile.rejected'.tr(),
           textColor: AppColors.statusRejected,
           bgColor: AppColors.statusRejectedLight,
         );

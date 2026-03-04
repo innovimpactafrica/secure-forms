@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
@@ -9,18 +10,24 @@ import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
 import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
 import 'package:secure_link/features/client/presentation/pages/step1_informations_screen.dart';
 
-class ClientHomeScreen extends StatelessWidget {
+class ClientHomeScreen extends StatefulWidget {
   const ClientHomeScreen({super.key});
 
   @override
+  State<ClientHomeScreen> createState() => _ClientHomeScreenState();
+}
+
+class _ClientHomeScreenState extends State<ClientHomeScreen> {
+  @override
   Widget build(BuildContext context) {
+    context.locale; // Force rebuild on locale change
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               _HomeHeader(),
               _WelcomeSection(),
               _ProfileProgressSection(),
@@ -144,7 +151,7 @@ class _WelcomeSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Bonjour Lamine,',
+            '${'home.hello'.tr()} Lamine,',
             style: TextStyle(
               fontFamily: AppConstants.fontFamilySofiaSans,
               fontWeight: FontWeight.w700,
@@ -162,18 +169,18 @@ class _WelcomeSection extends StatelessWidget {
               ),
               children: [
                 TextSpan(
-                  text: 'Bienvenue sur ',
+                  text: 'home.welcome_on'.tr(),
                   style: TextStyle(color: AppColors.textBlack54),
                 ),
                 TextSpan(
-                  text: 'secure ',
+                  text: 'home.secure'.tr(),
                   style: TextStyle(
                     color: AppColors.textBlack87,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 TextSpan(
-                  text: 'Forms',
+                  text: 'home.forms'.tr(),
                   style: TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
@@ -244,8 +251,8 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
             children: [
               Text(
                 isCompleted
-                    ? 'Profil complété à 100% ✓'
-                    : 'Complétez votre profil',
+                    ? 'home.profile_completed'.tr()
+                    : 'home.complete_profile'.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilySofiaSans,
                   fontWeight: FontWeight.w600,
@@ -317,7 +324,7 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
                       children: [
                         const SizedBox(width: 20),
                         Text(
-                          'Commencer maintenant',
+                          'home.start_now'.tr(),
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilySofiaSans,
                             color: AppColors.white,
@@ -367,7 +374,7 @@ class _StatsGrid extends StatelessWidget {
             children: [
               Expanded(
                 child: _StatCard(
-                  label: 'Total demandes',
+                  label: 'home.total_requests'.tr(),
                   value: '12',
                   iconPath: 'assets/icons/logo.svg',
                   iconColor: AppColors.textBlack45,
@@ -378,7 +385,7 @@ class _StatsGrid extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: _StatCard(
-                  label: 'En cours',
+                  label: 'home.in_progress'.tr(),
                   value: '10',
                   iconPath: 'assets/icons/bi_clock-history.svg',
                   iconColor: AppColors.primary,
@@ -392,7 +399,7 @@ class _StatsGrid extends StatelessWidget {
             children: [
               Expanded(
                 child: _StatCard(
-                  label: 'En attente',
+                  label: 'home.pending'.tr(),
                   value: '01',
                   iconPath: 'assets/icons/carbon_rule-draft.svg',
                   iconColor: AppColors.statusEnAttente,
@@ -402,7 +409,7 @@ class _StatsGrid extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: _StatCard(
-                  label: 'Validé',
+                  label: 'home.validated'.tr(),
                   value: '10',
                   iconPath: 'assets/icons/bi_check2-circle (1).svg',
                   iconColor: AppColors.statusValideGreen,
@@ -520,7 +527,7 @@ class _SearchBarSection extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Rechercher une banque, notaire....',
+                'home.search_placeholder'.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilyInter,
                   fontSize: AppConstants.fontSizeMedium,
@@ -569,7 +576,7 @@ class _RecentDemandesSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Demandes récentes',
+                'home.recent_requests'.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilySofiaSans,
                   fontWeight: FontWeight.w500,
@@ -583,7 +590,7 @@ class _RecentDemandesSection extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      'Tout voir',
+                      'home.see_all'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilyInter,
                         fontWeight: FontWeight.bold,
@@ -639,7 +646,7 @@ class _RecentDemandesSection extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Ouverture de compte',
+                          'home.account_opening'.tr(),
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilySofiaSans,
                             fontWeight: FontWeight.w600,
@@ -649,7 +656,7 @@ class _RecentDemandesSection extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          'Banque Nationale • 18/12/2025',
+                          '${'home.national_bank'.tr()} • 18/12/2025',
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilyInter,
                             fontWeight: FontWeight.w400,
@@ -669,7 +676,7 @@ class _RecentDemandesSection extends StatelessWidget {
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      'En attente',
+                      'home.pending'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilyInter,
                         fontWeight: FontWeight.w500,
@@ -721,7 +728,7 @@ class _RecentDemandesSection extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Demande de virement',
+                          'home.transfer_request'.tr(),
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilySofiaSans,
                             fontWeight: FontWeight.w600,
@@ -731,7 +738,7 @@ class _RecentDemandesSection extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          'Banque Nationale • 12/12/2025',
+                          '${'home.national_bank'.tr()} • 12/12/2025',
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilyInter,
                             fontWeight: FontWeight.w400,
@@ -751,7 +758,7 @@ class _RecentDemandesSection extends StatelessWidget {
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      'Validé',
+                      'home.validated'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilyInter,
                         fontWeight: FontWeight.w500,

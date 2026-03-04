@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
@@ -54,7 +55,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
                 width: ResponsiveUtils.getResponsiveWidth(context, 112),
                 height: ResponsiveUtils.getResponsiveHeight(context, 26),
                 child: Text(
-                  'Compte créé',
+                  'success.title'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: AppConstants.fontFamilySofiaSans,
@@ -70,7 +71,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
                 width: ResponsiveUtils.getResponsiveWidth(context, 342),
                 height: ResponsiveUtils.getResponsiveHeight(context, 24),
                 child: Text(
-                  'Bienvenue sur votre espace',
+                  'success.message'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: AppConstants.fontFamilySofiaSans,

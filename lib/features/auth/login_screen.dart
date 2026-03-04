@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
@@ -77,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Numéro de téléphone',
+                    'login.title'.tr(),
                     style: TextStyle(
                       fontFamily: AppConstants.fontFamilySofiaSans,
                       fontWeight: FontWeight.w600,
@@ -88,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 16)),
                   Text(
-                    'Veuillez saisir votre numéro de téléphone.\nNous vous enverrons un code pour nous assurer que c\'est bien vous.',
+                    'login.description'.tr(),
                     style: TextStyle(
                       fontFamily: AppConstants.fontFamilySofiaSans,
                       fontWeight: FontWeight.w400,
@@ -158,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             controller: _phoneController,
                             textAlignVertical: TextAlignVertical.center,
                             decoration: InputDecoration(
-                              hintText: '77 123 45 67',
+                              hintText: 'login.phone_placeholder'.tr(),
                               hintStyle: TextStyle(
                                 fontFamily: AppConstants.fontFamilyInter,
                                 fontWeight: FontWeight.w400,
@@ -197,17 +198,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: AppColors.textSecondary,
                   ),
                   children: [
-                    const TextSpan(text: 'En continuant, vous confirmez avoir lu et accepté les '),
+                    TextSpan(text: 'login.legal_text'.tr()),
                     TextSpan(
-                      text: 'conditions générales',
+                      text: 'login.terms'.tr(),
                       style: TextStyle(
                         color: AppColors.textBlack,
                         decoration: TextDecoration.underline,
                       ),
                     ),
-                    const TextSpan(text: ' et la '),
+                    TextSpan(text: 'login.and'.tr()),
                     TextSpan(
-                      text: 'politique de confidentialité.',
+                      text: 'login.privacy'.tr(),
                       style: TextStyle(
                         color: AppColors.textBlack,
                         decoration: TextDecoration.underline,
@@ -233,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      'Suivant',
+                      'login.next_button'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilySofiaSans,
                         fontWeight: FontWeight.w500,

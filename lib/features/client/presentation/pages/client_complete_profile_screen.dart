@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 
@@ -30,9 +31,9 @@ class ClientCompleteProfileScreen extends StatelessWidget {
             ),
           ),
         ),
-        title: const Text(
-          'Compléter mon profil',
-          style: TextStyle(
+        title: Text(
+          'profile.complete_my_profile'.tr(),
+          style: const TextStyle(
             fontFamily: AppConstants.fontFamilySofiaSans,
             color: Colors.black87,
             fontWeight: FontWeight.w600,
@@ -51,16 +52,16 @@ class ClientCompleteProfileScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Progression du profil',
+                  'profile.profile_progress'.tr(),
                   style: TextStyle(
                     fontFamily: AppConstants.fontFamilyInter,
                     fontSize: 13,
                     color: Colors.grey.shade600,
                   ),
                 ),
-                const Text(
-                  '30%',
-                  style: TextStyle(
+                Text(
+                  'profile.progress_label'.tr(),
+                  style: const TextStyle(
                     fontFamily: AppConstants.fontFamilyInter,
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -94,9 +95,9 @@ class ClientCompleteProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             // Section title
-            const Text(
-              'Informations personnelles',
-              style: TextStyle(
+            Text(
+              'profile.step1_title'.tr(),
+              style: const TextStyle(
                 fontFamily: AppConstants.fontFamilySofiaSans,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -104,13 +105,13 @@ class ClientCompleteProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            const _ProfileField(label: 'Prénom', hint: 'Votre prénom'),
+            _ProfileField(label: 'profile.first_name'.tr(), hint: 'profile.your_first_name'.tr()),
             const SizedBox(height: 14),
-            const _ProfileField(label: 'Nom', hint: 'Votre nom de famille'),
+            _ProfileField(label: 'profile.last_name'.tr(), hint: 'profile.your_last_name'.tr()),
             const SizedBox(height: 14),
-            const _ProfileField(label: 'Téléphone', hint: '+221 xx xxx xx xx'),
+            _ProfileField(label: 'profile.phone'.tr(), hint: 'profile.phone_placeholder'.tr()),
             const SizedBox(height: 14),
-            const _ProfileField(label: 'Adresse', hint: 'Votre adresse complète'),
+            _ProfileField(label: 'profile.address'.tr(), hint: 'profile.full_address'.tr()),
             const SizedBox(height: 32),
             // Save button
             SizedBox(
@@ -127,9 +128,9 @@ class ClientCompleteProfileScreen extends StatelessWidget {
                   ),
                   elevation: 0,
                 ),
-                child: const Text(
-                  'Enregistrer',
-                  style: TextStyle(
+                child: Text(
+                  'profile.save'.tr(),
+                  style: const TextStyle(
                     fontFamily: AppConstants.fontFamilySofiaSans,
                     color: Colors.white,
                     fontWeight: FontWeight.w600,

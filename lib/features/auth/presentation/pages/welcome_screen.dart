@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
@@ -65,7 +66,7 @@ class WelcomeScreen extends StatelessWidget {
                     width: ResponsiveUtils.getResponsiveWidth(context, 406),
                     height: ResponsiveUtils.getResponsiveHeight(context, 56),
                     child: Text(
-                      'Lorem Ipsum is simply dummy text of the printing and typesetting industry',
+                      'welcome.subtitle'.tr(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilySofiaSans,
@@ -94,7 +95,7 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          'Commencer',
+                          'welcome.start_button'.tr(),
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilySofiaSans,
                             fontWeight: FontWeight.w500,

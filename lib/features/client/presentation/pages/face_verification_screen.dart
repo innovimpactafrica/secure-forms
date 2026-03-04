@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
@@ -94,7 +95,7 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  'Vérification échouée : ${state.reason}. Veuillez réessayer.'),
+                  'face_verification.verification_failed'.tr() + ' : ${state.reason}. ' + 'face_verification.please_retry'.tr()),
               backgroundColor: AppColors.statusRejected,
             ),
           );
@@ -128,7 +129,7 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Vérification d\'identité',
+                      'face_verification.title'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilySofiaSans,
                         fontWeight: FontWeight.w700,
@@ -149,7 +150,7 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
                     children: [
                       // Titre
                       Text(
-                        'Vérification vidéo en direct',
+                        'face_verification.video_title'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilySofiaSans,
                           fontWeight: FontWeight.w700,
@@ -160,7 +161,7 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Positionnez votre visage dans le cadre',
+                        'face_verification.position_face'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilyInter,
                           fontSize: AppConstants.fontSizeMedium,
@@ -177,8 +178,8 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
                       // "Analyse de votre visage..."
                       Text(
                         _scanComplete
-                            ? 'Analyse terminée'
-                            : 'Analyse de votre visage...',
+                            ? 'face_verification.analysis_complete'.tr()
+                            : 'face_verification.analyzing'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilyInter,
                           fontSize: AppConstants.fontSizeLarge,
@@ -195,7 +196,7 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _scanComplete ? 'Terminé' : 'Scan en cours...',
+                        _scanComplete ? 'face_verification.completed'.tr() : 'face_verification.scan_in_progress'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilyInter,
                           fontSize: AppConstants.fontSizeMedium,
@@ -221,7 +222,7 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
                       size: AppConstants.iconSizeMedium,
                     ),
                     label: Text(
-                      'Recommencer',
+                      'face_verification.restart'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilySofiaSans,
                         color: AppColors.textDark,
@@ -399,7 +400,7 @@ class _SuccessDialog extends StatelessWidget {
               color: AppColors.statusValideGreen, size: 56),
           const SizedBox(height: 16),
           Text(
-            'Document vérifié !',
+            'face_verification.document_verified'.tr(),
             style: TextStyle(
               fontFamily: AppConstants.fontFamilySofiaSans,
               fontWeight: FontWeight.w700,
@@ -409,7 +410,7 @@ class _SuccessDialog extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Votre identité a été confirmée avec succès.',
+            'face_verification.identity_confirmed'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: AppConstants.fontFamilyInter,
@@ -431,7 +432,7 @@ class _SuccessDialog extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'Continuer',
+                'face_verification.continue'.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilySofiaSans,
                   color: AppColors.white,

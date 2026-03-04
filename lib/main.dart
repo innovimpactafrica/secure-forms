@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'features/splash/presentation/pages/splash_screen.dart';
 import 'features/auth/presentation/pages/welcome_screen.dart';
@@ -25,8 +26,18 @@ import 'features/client/presentation/pages/client_profil_screen.dart';
 import 'features/client/presentation/pages/detail_demande/detail_ouverture_compte_continuer_screen.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 
-void main() {
-  runApp(const SecureLinkApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+  
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('fr'), Locale('en')],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('fr'),
+      child: const SecureLinkApp(),
+    ),
+  );
 }
 
 class SecureLinkApp extends StatelessWidget {
@@ -39,6 +50,9 @@ class SecureLinkApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Secure Link',
         debugShowCheckedModeBanner: false,
+        localizationsDelegates: context.localizationDelegates,
+        supportedLocales: context.supportedLocales,
+        locale: context.locale,
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 
 class ClientInformationsPersonnellesScreen extends StatefulWidget {
@@ -20,15 +21,14 @@ class _ClientInformationsPersonnellesScreenState
   final TextEditingController _dateNaissanceController =
       TextEditingController();
 
-  String _selectedGender = 'Homme';
+  String _selectedGender = 'profile.male'.tr();
   String? _selectedSituation;
 
-  // TODO: Charger depuis l'API (liste des situations matrimoniales)
-  final List<String> _situationsMatrimoniales = [
-    'Célibataire',
-    'Marié(e)',
-    'Divorcé(e)',
-    'Veuf/Veuve',
+  List<String> get _situationsMatrimoniales => [
+    'profile.single'.tr(),
+    'profile.married'.tr(),
+    'profile.divorced'.tr(),
+    'profile.widowed'.tr(),
   ];
 
   @override
@@ -90,11 +90,11 @@ class _ClientInformationsPersonnellesScreenState
             ),
           ),
           const SizedBox(width: 12),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Mon Compte',
+                'profil.my_account'.tr(),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
@@ -103,7 +103,7 @@ class _ClientInformationsPersonnellesScreenState
               ),
               SizedBox(height: 2),
               Text(
-                'Informations personnelles',
+                'profil.personal_info'.tr(),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -128,56 +128,56 @@ class _ClientInformationsPersonnellesScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Prénom
-          _buildLabel('Prénom'),
+          _buildLabel('profile.first_name'.tr()),
           const SizedBox(height: 8),
           _buildTextField(
             controller: _prenomController,
-            hint: 'Lamine',
+            hint: 'profile.first_name_hint'.tr(),
             prefixIcon: 'assets/icons/bi_person.svg',
           ),
           const SizedBox(height: 20),
 
           // Nom
-          _buildLabel('Nom'),
+          _buildLabel('profile.last_name'.tr()),
           const SizedBox(height: 8),
           _buildTextField(
             controller: _nomController,
-            hint: 'Dieme',
+            hint: 'profile.last_name_hint'.tr(),
             prefixIcon: 'assets/icons/bi_person.svg',
           ),
           const SizedBox(height: 20),
 
           // Téléphone
-          _buildLabel('Téléphone'),
+          _buildLabel('profile.phone'.tr()),
           const SizedBox(height: 8),
           _buildPhoneField(),
           const SizedBox(height: 20),
 
           // Email
-          _buildLabel('Email'),
+          _buildLabel('profile.email'.tr()),
           const SizedBox(height: 8),
           _buildTextField(
             controller: _emailController,
-            hint: 'Ex: aminadiallo@gmail.com',
+            hint: 'profile.email_hint'.tr(),
             prefixIcon: 'assets/icons/bi_envelope.svg',
             keyboardType: TextInputType.emailAddress,
           ),
           const SizedBox(height: 20),
 
           // Date de naissance
-          _buildLabel('Date de naissance'),
+          _buildLabel('profile.birth_date'.tr()),
           const SizedBox(height: 8),
           _buildDateField(),
           const SizedBox(height: 20),
 
           // Genre
-          _buildLabel('Genre'),
+          _buildLabel('profile.gender'.tr()),
           const SizedBox(height: 8),
           _buildGenderToggle(),
           const SizedBox(height: 20),
 
           // Situation matrimoniale
-          _buildLabel('Situation matrimoniale'),
+          _buildLabel('profile.marital_status'.tr()),
           const SizedBox(height: 8),
           _buildDropdown(),
           const SizedBox(height: 32),
@@ -366,7 +366,7 @@ class _ClientInformationsPersonnellesScreenState
             Expanded(
               child: Text(
                 _dateNaissanceController.text.isEmpty
-                    ? 'jj/mm/aaaa'
+                    ? 'profile.birth_date_hint'.tr()
                     : _dateNaissanceController.text,
                 style: TextStyle(
                   fontSize: 15,
@@ -399,8 +399,8 @@ class _ClientInformationsPersonnellesScreenState
       ),
       child: Row(
         children: [
-          _genderOption('Homme'),
-          _genderOption('Femme'),
+          _genderOption('profile.male'.tr()),
+          _genderOption('profile.female'.tr()),
         ],
       ),
     );
@@ -458,8 +458,8 @@ class _ClientInformationsPersonnellesScreenState
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _selectedSituation,
-          hint: const Text(
-            'Ex: aminadiallo@gmail.com',
+          hint: Text(
+            'profile.marital_status'.tr(),
             style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
           ),
           isExpanded: true,
@@ -505,9 +505,9 @@ class _ClientInformationsPersonnellesScreenState
               color: AppColors.primaryDark,
               borderRadius: BorderRadius.circular(100),
             ),
-            child: const Center(
+            child: Center(
               child: Text(
-                'Mettre à jour',
+                'documents.update_button'.tr(),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
@@ -28,14 +29,14 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
   final _emailController = TextEditingController();
   final _birthDateController = TextEditingController();
 
-  String _selectedGender = 'Homme';
+  String _selectedGender = 'profile.male'.tr();
   String _selectedMaritalStatus = '';
 
-  final List<String> _maritalStatusOptions = [
-    'Célibataire',
-    'Marié(e)',
-    'Divorcé(e)',
-    'Veuf/Veuve',
+  List<String> get _maritalStatusOptions => [
+    'profile.single'.tr(),
+    'profile.married'.tr(),
+    'profile.divorced'.tr(),
+    'profile.widowed'.tr(),
   ];
 
   @override
@@ -50,7 +51,7 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
       _phoneController.text = profile.phone;
       _emailController.text = profile.email;
       _birthDateController.text = profile.birthDate;
-      _selectedGender = profile.gender.isNotEmpty ? profile.gender : 'Homme';
+      _selectedGender = profile.gender.isNotEmpty ? profile.gender : 'profile.male'.tr();
       _selectedMaritalStatus = profile.maritalStatus;
     }
   }
@@ -112,7 +113,7 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
               // ── Header avec jauge ──
               _CompleteProfileHeader(
                 progressValue: 0.30,
-                progressLabel: '30%',
+                progressLabel: 'profile.progress_label'.tr(),
                 subtitle: 'Lamine Diop',
               ),
               // ── Formulaire scrollable ──
@@ -126,7 +127,7 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
                       children: [
                         // Titre section
                         Text(
-                          'Informations personnelles',
+                          'profile.step1_title'.tr(),
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilySofiaSans,
                             fontSize: AppConstants.fontSizeXXLarge,
@@ -136,7 +137,7 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Ces informations facilitent la vérification.',
+                          'profile.step1_subtitle'.tr(),
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilyInter,
                             fontSize: AppConstants.fontSizeMedium,
@@ -147,23 +148,23 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
 
                         // Prénom
                         _FormField(
-                          label: 'Prénom',
+                          label: 'profile.first_name'.tr(),
                           controller: _firstNameController,
-                          hint: 'Lamine',
+                          hint: 'profile.first_name_hint'.tr(),
                           prefixIcon: Icons.person_outline,
                           validator: (v) =>
-                              v!.isEmpty ? 'Champ obligatoire' : null,
+                              v!.isEmpty ? 'profile.required_field'.tr() : null,
                         ),
                         const SizedBox(height: 16),
 
                         // Nom
                         _FormField(
-                          label: 'Nom',
+                          label: 'profile.last_name'.tr(),
                           controller: _lastNameController,
-                          hint: 'Dieme',
+                          hint: 'profile.last_name_hint'.tr(),
                           prefixIcon: Icons.person_outline,
                           validator: (v) =>
-                              v!.isEmpty ? 'Champ obligatoire' : null,
+                              v!.isEmpty ? 'profile.required_field'.tr() : null,
                         ),
                         const SizedBox(height: 16),
 
@@ -173,14 +174,14 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
 
                         // Email
                         _FormField(
-                          label: 'Email',
+                          label: 'profile.email'.tr(),
                           controller: _emailController,
-                          hint: 'Ex: aminadiallo@gmail.com',
+                          hint: 'profile.email_hint'.tr(),
                           prefixIcon: Icons.email_outlined,
                           keyboardType: TextInputType.emailAddress,
                           validator: (v) {
-                            if (v!.isEmpty) return 'Champ obligatoire';
-                            if (!v.contains('@')) return 'Email invalide';
+                            if (v!.isEmpty) return 'profile.required_field'.tr();
+                            if (!v.contains('@')) return 'profile.invalid_email'.tr();
                             return null;
                           },
                         ),
@@ -188,9 +189,9 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
 
                         // Date de naissance
                         _DateField(
-                          label: 'Date de naissance',
+                          label: 'profile.birth_date'.tr(),
                           controller: _birthDateController,
-                          hint: 'jj/mm/aaaa',
+                          hint: 'profile.birth_date_hint'.tr(),
                         ),
                         const SizedBox(height: 16),
 
@@ -204,8 +205,8 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
 
                         // Situation matrimoniale
                         _DropdownField(
-                          label: 'Situation matrimoniale',
-                          hint: 'Ex: aminadiallo@gmail.com',
+                          label: 'profile.marital_status'.tr(),
+                          hint: 'profile.marital_status'.tr(),
                           value: _selectedMaritalStatus.isEmpty
                               ? null
                               : _selectedMaritalStatus,
@@ -244,7 +245,7 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
                                         ),
                                       )
                                     : Text(
-                                        'Valider',
+                                        'profile.validate_button'.tr(),
                                         style: TextStyle(
                                           fontFamily:
                                               AppConstants.fontFamilySofiaSans,
@@ -316,7 +317,7 @@ class _CompleteProfileHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Complétez votre profil',
+                    'profile.complete_profile'.tr(),
                     style: TextStyle(
                       fontFamily: AppConstants.fontFamilySofiaSans,
                       fontWeight: FontWeight.w700,
@@ -474,7 +475,7 @@ class _PhoneField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Téléphone',
+          'profile.phone'.tr(),
           style: TextStyle(
             fontFamily: AppConstants.fontFamilyInter,
             fontSize: AppConstants.fontSizeMedium,
@@ -486,14 +487,14 @@ class _PhoneField extends StatelessWidget {
         TextFormField(
           controller: controller,
           keyboardType: TextInputType.phone,
-          validator: (v) => v!.isEmpty ? 'Champ obligatoire' : null,
+          validator: (v) => v!.isEmpty ? 'profile.required_field'.tr() : null,
           style: TextStyle(
             fontFamily: AppConstants.fontFamilyInter,
             fontSize: AppConstants.fontSizeMedium,
             color: AppColors.textDark,
           ),
           decoration: InputDecoration(
-            hintText: '+221 77 123 45 67',
+            hintText: 'profile.phone_hint'.tr(),
             hintStyle: TextStyle(
               fontFamily: AppConstants.fontFamilyInter,
               color: AppColors.hintText,
@@ -592,7 +593,7 @@ class _DateField extends StatelessWidget {
           controller: controller,
           readOnly: true,
           onTap: () => _pickDate(context),
-          validator: (v) => v!.isEmpty ? 'Champ obligatoire' : null,
+          validator: (v) => v!.isEmpty ? 'profile.required_field'.tr() : null,
           style: TextStyle(
             fontFamily: AppConstants.fontFamilyInter,
             fontSize: AppConstants.fontSizeMedium,
@@ -645,7 +646,7 @@ class _GenderSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Genre',
+          'profile.gender'.tr(),
           style: TextStyle(
             fontFamily: AppConstants.fontFamilyInter,
             fontSize: AppConstants.fontSizeMedium,
@@ -664,14 +665,14 @@ class _GenderSelector extends StatelessWidget {
           child: Row(
             children: [
               _GenderOption(
-                label: 'Homme',
-                isSelected: selected == 'Homme',
-                onTap: () => onChanged('Homme'),
+                label: 'profile.male'.tr(),
+                isSelected: selected == 'profile.male'.tr(),
+                onTap: () => onChanged('profile.male'.tr()),
               ),
               _GenderOption(
-                label: 'Femme',
-                isSelected: selected == 'Femme',
-                onTap: () => onChanged('Femme'),
+                label: 'profile.female'.tr(),
+                isSelected: selected == 'profile.female'.tr(),
+                onTap: () => onChanged('profile.female'.tr()),
               ),
             ],
           ),

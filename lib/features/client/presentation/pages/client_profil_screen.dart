@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/presentation/pages/mes_archives_screen.dart';
 import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
@@ -17,7 +18,12 @@ class ClientProfilScreen extends StatefulWidget {
 }
 
 class _ClientProfilScreenState extends State<ClientProfilScreen> {
-  String selectedLanguage = 'Français';
+  String get selectedLanguage {
+    // Retourne le nom de la langue dans la langue actuelle
+    return context.locale.languageCode == 'fr' 
+        ? 'profil.french'.tr() 
+        : 'profil.english'.tr();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +132,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Changer la langue',
+                    'profil.change_language'.tr(),
                     style: TextStyle(
                       fontFamily: AppConstants.fontFamilyInter,
                       fontWeight: FontWeight.w600,
@@ -145,9 +151,9 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
               const SizedBox(height: 16),
               Divider(color: AppColors.borderE5, height: 1),
               const SizedBox(height: 16),
-              _buildLanguageOption(context, 'Français', 'assets/images/image 2.png'),
+              _buildLanguageOption(context, 'profil.french'.tr(), 'assets/images/image 2.png'),
               const SizedBox(height: AppConstants.paddingMedium),
-              _buildLanguageOption(context, 'Anglais', 'assets/images/image 3.png'),
+              _buildLanguageOption(context, 'profil.english'.tr(), 'assets/images/image 3.png'),
               const SizedBox(height: 16),
             ],
           ),
@@ -158,11 +164,22 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
 
   Widget _buildLanguageOption(
       BuildContext context, String language, String flagPath) {
-    final isSelected = selectedLanguage == language;
+    // Détermine si cette option est sélectionnée en comparant avec la locale actuelle
+    final bool isSelected = (language == 'profil.french'.tr() && context.locale.languageCode == 'fr') ||
+                            (language == 'profil.english'.tr() && context.locale.languageCode == 'en');
+    
     return GestureDetector(
       onTap: () {
-        setState(() => selectedLanguage = language);
+        // Changer la locale de l'application
+        if (language == 'profil.french'.tr()) {
+          context.setLocale(const Locale('fr'));
+        } else {
+          context.setLocale(const Locale('en'));
+        }
+        // Fermer le modal et forcer le rebuild de toute la page
         Navigator.of(context).pop();
+        // Forcer le rebuild de la page profil
+        if (mounted) setState(() {});
       },
       child: Container(
         height: AppConstants.languageOptionHeight,
@@ -237,7 +254,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Déconnexion',
+                'profil.logout_title'.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilyInter,
                   fontWeight: FontWeight.w600,
@@ -247,7 +264,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
               ),
               const SizedBox(height: AppConstants.paddingMedium),
               Text(
-                'Êtes-vous sûr de vouloir vous déconnecter ?',
+                'profil.logout_message'.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilyInter,
                   fontWeight: FontWeight.w400,
@@ -265,7 +282,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                         height: 44,
                         alignment: Alignment.center,
                         child: Text(
-                          'Annuler',
+                          'profil.cancel'.tr(),
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilyInter,
                             fontWeight: FontWeight.w500,
@@ -292,7 +309,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                         height: 44,
                         alignment: Alignment.center,
                         child: Text(
-                          'Se déconnecter',
+                          'profil.logout'.tr(),
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilyInter,
                             fontWeight: FontWeight.w500,
@@ -344,7 +361,7 @@ class _ProfileHeader extends StatelessWidget {
           ),
           const SizedBox(width: 16),
           Text(
-            'Mon Compte',
+            'profil.my_account'.tr(),
             style: TextStyle(
               fontFamily: AppConstants.fontFamilySofiaSans,
               fontWeight: FontWeight.w700,
@@ -452,19 +469,19 @@ class _MenuSection extends StatelessWidget {
         children: [
           _MenuItem(
             iconPath: 'assets/icons/bi_person-circle.svg',
-            title: 'Informations personnelles',
+            title: 'profil.personal_info'.tr(),
             onTap: onInfosTap,
           ),
           const _Divider(),
           _MenuItem(
             iconPath: 'assets/images/documents.png',
-            title: 'Mes documents',
+            title: 'profil.my_documents'.tr(),
             onTap: onDocumentsTap,
           ),
           const _Divider(),
           _MenuItem(
             iconPath: 'assets/icons/archive.svg',
-            title: 'Archives',
+            title: 'profil.archives'.tr(),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const MesArchivesScreen()),
@@ -473,7 +490,7 @@ class _MenuSection extends StatelessWidget {
           const _Divider(),
           _MenuItem(
             iconPath: 'assets/images/iconenotif.png',
-            title: 'Mes notifications',
+            title: 'profil.my_notifications'.tr(),
             onTap: onNotifsTap,
           ),
           const _Divider(),
@@ -575,7 +592,7 @@ class _LanguageMenuItem extends StatelessWidget {
             const SizedBox(width: AppConstants.paddingLarge),
             Expanded(
               child: Text(
-                'Langue',
+                'profil.language'.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilySofiaSans,
                   fontWeight: FontWeight.w500,
@@ -657,7 +674,7 @@ class _LogoutButton extends StatelessWidget {
               ),
               const SizedBox(width: AppConstants.paddingMedium),
               Text(
-                'Se déconnecter',
+                'profil.logout'.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilyInter,
                   fontWeight: FontWeight.w500,

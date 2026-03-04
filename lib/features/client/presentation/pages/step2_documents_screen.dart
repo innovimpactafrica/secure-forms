@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
@@ -68,7 +69,7 @@ class Step2DocumentsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Mes documents',
+                            'profile.step2_title'.tr(),
                             style: TextStyle(
                               fontFamily: AppConstants.fontFamilySofiaSans,
                               fontSize: AppConstants.fontSizeXXLarge,
@@ -78,7 +79,7 @@ class Step2DocumentsScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Ces informations facilitent la vérification.',
+                            'profile.step2_subtitle'.tr(),
                             style: TextStyle(
                               fontFamily: AppConstants.fontFamilyInter,
                               fontSize: AppConstants.fontSizeMedium,
@@ -102,7 +103,7 @@ onPressed: () {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Veuillez renseigner vos documents avant de valider.',
+          'profile.fill_documents'.tr(),
           style: TextStyle(
             fontFamily: AppConstants.fontFamilyInter,
             color: AppColors.white,
@@ -136,7 +137,7 @@ onPressed: () {
                                 ),
                               ),
                               child: Text(
-                                'valider',
+                                'profile.validate'.tr(),
                                 style: TextStyle(
                                   fontFamily: AppConstants.fontFamilySofiaSans,
                                   color: AppColors.white,
@@ -181,10 +182,10 @@ class _StatusLegend extends StatelessWidget {
     return Wrap(
       spacing: 12,
       children: [
-        _LegendItem(color: AppColors.statusValideGreen, label: 'Validé'),
-        _LegendItem(color: AppColors.statusEnAttente, label: 'En attente'),
-        _LegendItem(color: AppColors.primary, label: 'En cours'),
-        _LegendItem(color: AppColors.statusRejected, label: 'Rejeté'),
+        _LegendItem(color: AppColors.statusValideGreen, label: 'profile.validated'.tr()),
+        _LegendItem(color: AppColors.statusEnAttente, label: 'profile.pending'.tr()),
+        _LegendItem(color: AppColors.primary, label: 'profile.in_progress'.tr()),
+        _LegendItem(color: AppColors.statusRejected, label: 'profile.rejected'.tr()),
       ],
     );
   }
@@ -410,7 +411,7 @@ Container(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              type,
+              type.tr(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -424,7 +425,7 @@ Container(
            if (hasDoc && document!.expiryDate.isNotEmpty &&
     DocumentType.hasExpiryDate.contains(type))
               Text(
-                'Expire le ${_formatDate(document!.expiryDate)}',
+                'profile.expires_on'.tr() + ' ${_formatDate(document!.expiryDate)}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -547,7 +548,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
               leading: Icon(Icons.photo_library_outlined,
                   color: AppColors.primary),
               title: Text(
-                'Galerie photo',
+                'profile.gallery'.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilyInter,
                   color: AppColors.textDark,
@@ -560,7 +561,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
               leading: Icon(Icons.camera_alt_outlined,
                   color: AppColors.primary),
               title: Text(
-                'Prendre une photo',
+                'profile.take_photo'.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilyInter,
                   color: AppColors.textDark,
@@ -597,7 +598,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Veuillez remplir tous les champs et téléverser un document.',
+            'profile.fill_all_fields'.tr(),
             style: TextStyle(
               fontFamily: AppConstants.fontFamilyInter,
               color: AppColors.white,
@@ -660,7 +661,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Ajouter un document',
+                  'profile.add_document'.tr(),
                   style: TextStyle(
                     fontFamily: AppConstants.fontFamilySofiaSans,
                     fontWeight: FontWeight.w700,
@@ -679,7 +680,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
             const SizedBox(height: 20),
 
             // Type de document (lecture seule)
-            _ModalLabel(text: 'Type de document'),
+            _ModalLabel(text: 'profile.document_type'.tr()),
             const SizedBox(height: 6),
             Container(
               width: double.infinity,
@@ -691,7 +692,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
                     BorderRadius.circular(AppConstants.radiusSmall),
               ),
               child: Text(
-                widget.documentType,
+                widget.documentType.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilyInter,
                   fontSize: AppConstants.fontSizeMedium,
@@ -702,21 +703,21 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
             const SizedBox(height: 16),
 
             // Date de délivrance
-            _ModalLabel(text: 'Date  de délivrance'),
+            _ModalLabel(text: 'profile.delivery_date'.tr()),
             const SizedBox(height: 6),
             _ModalDateField(
               controller: _deliveryDateController,
-              hint: '22/01/2021',
+              hint: 'profile.delivery_date_hint'.tr(),
               onTap: () => _pickDate(context, _deliveryDateController),
             ),
             const SizedBox(height: 16),
 
             // Date d'expiration
-            _ModalLabel(text: 'Date  d\'expiration'),
+            _ModalLabel(text: 'profile.expiry_date'.tr()),
             const SizedBox(height: 6),
             _ModalDateField(
               controller: _expiryDateController,
-              hint: '22/01/2026',
+              hint: 'profile.expiry_date_hint'.tr(),
               onTap: () =>
                   _pickDate(context, _expiryDateController, isExpiry: true),
             ),
@@ -768,7 +769,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
                   ),
                 ),
                 child: Text(
-                  'Envoyer pour validation',
+                  'profile.send_validation'.tr(),
                   style: TextStyle(
                     fontFamily: AppConstants.fontFamilySofiaSans,
                     color: AppColors.white,
@@ -794,7 +795,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
                   ),
                 ),
                 child: Text(
-                  'Enregistrer',
+                  'profile.save'.tr(),
                   style: TextStyle(
                     fontFamily: AppConstants.fontFamilySofiaSans,
                     color: AppColors.primaryDark,
@@ -851,7 +852,7 @@ class _UploadPlaceholder extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          hasFile ? 'Fichier sélectionné' : 'Cliquez pour Téléverser',
+          hasFile ? 'profile.file_selected'.tr() : 'profile.click_upload'.tr(),
           style: TextStyle(
             fontFamily: AppConstants.fontFamilySofiaSans,
             fontWeight: FontWeight.w600,
@@ -861,7 +862,7 @@ class _UploadPlaceholder extends StatelessWidget {
         ),
         if (!hasFile)
           Text(
-            'PDF, JPG, PNG jusqu\'à 10 Mo',
+            'profile.file_format'.tr(),
             style: TextStyle(
               fontFamily: AppConstants.fontFamilyInter,
               fontSize: AppConstants.fontSizeRegular,

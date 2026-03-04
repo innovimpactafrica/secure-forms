@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 
@@ -23,33 +24,34 @@ class NotifItem {
 
 // ─────────────────────────────────────────────────────────────────
 // DONNÉES SIMULÉES — TODO: remplacer par API GET /notifications
+// Quand l'API sera connectée, elle retournera les données déjà traduites
 // ─────────────────────────────────────────────────────────────────
-final _notifsTodayMock = [
-  const NotifItem(
-    title: 'Carte d\'identité expire bientôt',
-    subtitle: 'Votre carte d\'identité expire dans 15 jours renouvelez des maintenant.',
-    time: 'Aujourd\'hui, 07:35',
+List<NotifItem> _getNotifsTodayMock(BuildContext context) => [
+  NotifItem(
+    title: 'notifications.id_card_expiring'.tr(),
+    subtitle: 'notifications.id_card_expiring_desc'.tr(),
+    time: 'notifications.today_time'.tr(),
     type: NotifType.urgent,
   ),
-  const NotifItem(
-    title: 'Permis de conduire validé',
-    subtitle: 'Votre permis de conduire a été validé avec succès. score: 98%',
-    time: 'Aujourd\'hui, 07:55',
+  NotifItem(
+    title: 'notifications.driving_license_validated'.tr(),
+    subtitle: 'notifications.driving_license_validated_desc'.tr(),
+    time: 'notifications.today_time_2'.tr(),
     type: NotifType.success,
   ),
-  const NotifItem(
-    title: 'Vérification en attente',
-    subtitle: 'Validation en cours pour votre ouverture de compte SUNU Banque',
-    time: 'Hier, 07:35',
+  NotifItem(
+    title: 'notifications.verification_pending'.tr(),
+    subtitle: 'notifications.verification_pending_desc'.tr(),
+    time: 'notifications.yesterday_time'.tr(),
     type: NotifType.warning,
   ),
 ];
 
-final _notifsYesterdayMock = [
-  const NotifItem(
-    title: 'Permis de conduire expire bientôt',
-    subtitle: 'Votre permis de conduire expire dans 30 jours renouvelez des maintenant.',
-    time: 'Hier, 07:35',
+List<NotifItem> _getNotifsYesterdayMock(BuildContext context) => [
+  NotifItem(
+    title: 'notifications.driving_license_expiring'.tr(),
+    subtitle: 'notifications.driving_license_expiring_desc'.tr(),
+    time: 'notifications.yesterday_time'.tr(),
     type: NotifType.urgent,
   ),
 ];
@@ -85,8 +87,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final todayFiltered = _filter(_notifsTodayMock);
-    final yesterdayFiltered = _filter(_notifsYesterdayMock);
+    final todayFiltered = _filter(_getNotifsTodayMock(context));
+    final yesterdayFiltered = _filter(_getNotifsYesterdayMock(context));
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -121,7 +123,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           color: AppColors.textDark,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Rechercher une demande',
+                          hintText: 'notifications.search_placeholder'.tr(),
                           hintStyle: TextStyle(
                             fontFamily: AppConstants.fontFamilyInter,
                             fontSize: AppConstants.fontSizeMedium,
@@ -143,13 +145,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                 children: [
                   if (todayFiltered.isNotEmpty) ...[
-                    _SectionLabel(label: 'Aujourd\'hui'),
+                    _SectionLabel(label: 'notifications.today'.tr()),
                     const SizedBox(height: 12),
                     ...todayFiltered.map((n) => _NotifCard(item: n)),
                   ],
                   if (yesterdayFiltered.isNotEmpty) ...[
                     const SizedBox(height: 20),
-                    _SectionLabel(label: 'Hier'),
+                    _SectionLabel(label: 'notifications.yesterday'.tr()),
                     const SizedBox(height: 12),
                     ...yesterdayFiltered.map((n) => _NotifCard(item: n)),
                   ],
@@ -158,7 +160,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       child: Padding(
                         padding: const EdgeInsets.only(top: 60),
                         child: Text(
-                          'Aucune notification trouvée',
+                          'notifications.no_notifications'.tr(),
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilyInter,
                             fontSize: AppConstants.fontSizeMedium,
@@ -207,7 +209,7 @@ class _NotifHeader extends StatelessWidget {
           ),
           const SizedBox(width: 16),
           Text(
-            'Mes notifications',
+            'notifications.title'.tr(),
             style: TextStyle(
               fontFamily: AppConstants.fontFamilySofiaSans,
               fontWeight: FontWeight.w700,

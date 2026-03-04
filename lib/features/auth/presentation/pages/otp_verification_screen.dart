@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
@@ -93,7 +94,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                   Text(
-                    'Code de vérification',
+                    'otp.title'.tr(),
                     style: TextStyle(
                       fontFamily: AppConstants.fontFamilySofiaSans,
                       fontWeight: FontWeight.w600,
@@ -104,7 +105,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   ),
                   SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 16)),
                   Text(
-                    'Saisissez le code à 4 chiffres envoyé par téléphone au 77... .. 67',
+                    'otp.description'.tr() + ' 77... .. 67',
                     style: TextStyle(
                       fontFamily: AppConstants.fontFamilySofiaSans,
                       fontWeight: FontWeight.w400,
@@ -160,7 +161,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 40)),
                   Center(
                     child: Text(
-                      'Vous n\'avez pas reçu de code ?',
+                      'otp.didnt_receive'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilySofiaSans,
                         fontWeight: FontWeight.w400,
@@ -174,7 +175,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     child: Opacity(
                       opacity: 0.3,
                       child: Text(
-                        'Renvoyer le code dans 00:29',
+                        'otp.resend'.tr() + ' 00:29',
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilyInter,
                           fontWeight: FontWeight.w500,
@@ -202,17 +203,17 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     color: AppColors.textSecondary,
                   ),
                   children: [
-                    const TextSpan(text: 'En continuant, vous confirmez avoir lu et accepté les '),
+                    TextSpan(text: 'login.legal_text'.tr()),
                     TextSpan(
-                      text: 'conditions générales',
+                      text: 'login.terms'.tr(),
                       style: TextStyle(
                         color: AppColors.textBlack,
                         decoration: TextDecoration.underline,
                       ),
                     ),
-                    const TextSpan(text: ' et la '),
+                    TextSpan(text: 'login.and'.tr()),
                     TextSpan(
-                      text: 'politique de confidentialité.',
+                      text: 'login.privacy'.tr(),
                       style: TextStyle(
                         color: AppColors.textBlack,
                         decoration: TextDecoration.underline,
@@ -236,7 +237,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      'Vérifier',
+                      'otp.verify_button'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilySofiaSans,
                         fontWeight: FontWeight.w500,
@@ -286,7 +287,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         width: ResponsiveUtils.getResponsiveWidth(context, 112),
                         height: ResponsiveUtils.getResponsiveHeight(context, 26),
                         child: Text(
-                          'Compte créé',
+                          'otp.account_created'.tr(),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilySofiaSans,
@@ -302,7 +303,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         width: ResponsiveUtils.getResponsiveWidth(context, 342),
                         height: ResponsiveUtils.getResponsiveHeight(context, 24),
                         child: Text(
-                          'Bienvenue sur votre espace',
+                          'otp.welcome_space'.tr(),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilySofiaSans,

@@ -85,12 +85,12 @@ enum DocumentStatus { pending, validated, rejected, inProgress }
 
 /// Types de documents requis
 class DocumentType {
-  static const String cni = 'Pièce d\'identité (CNI)';
-  static const String nationality = 'Certificat de nationalité';
-  static const String drivingLicense = 'Permis de conduire';
-  static const String residence = 'Certificat de résidence';
-  static const String photo = 'Photo d\'identité';
-  static const String property = 'Titre de propriété';
+  static const String cni = 'profile.doc_cni';
+  static const String nationality = 'profile.doc_nationality';
+  static const String drivingLicense = 'profile.doc_driving_license';
+  static const String residence = 'profile.doc_residence';
+  static const String photo = 'profile.doc_photo';
+  static const String property = 'profile.doc_property';
 
   static List<String> get all => [
         cni, nationality, drivingLicense,

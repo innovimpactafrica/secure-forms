@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 
 // ---------------------------------------------------------------------------
@@ -44,35 +45,35 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   // TODO: Replace with data from ArchivesRepository
-  final List<ArchiveItem> _allArchives = const [
+  List<ArchiveItem> get _allArchives => [
     ArchiveItem(
       id: '1',
-      titre: 'Ouverture de compte',
-      institution: 'Banque Nationale',
+      titre: 'demandes.account_opening'.tr(),
+      institution: 'demandes.national_bank'.tr(),
       date: '18/12/2025',
       status: ArchiveStatus.valide,
       iconAsset: 'assets/icons/logo.svg',
     ),
     ArchiveItem(
       id: '2',
-      titre: 'Demande de virement',
-      institution: 'Banque Nationale',
+      titre: 'demandes.transfer_request'.tr(),
+      institution: 'demandes.national_bank'.tr(),
       date: '12/12/2025',
       status: ArchiveStatus.rejete,
       iconAsset: 'assets/icons/logo (1).svg',
     ),
     ArchiveItem(
       id: '3',
-      titre: 'Acte de vente',
-      institution: 'Notaire X',
+      titre: 'demandes.sale_deed'.tr(),
+      institution: 'demandes.notary_x'.tr(),
       date: '05/12/2025',
       status: ArchiveStatus.enCours,
       iconAsset: 'assets/icons/logo.svg',
     ),
     ArchiveItem(
       id: '4',
-      titre: 'Demande de prêt',
-      institution: 'Crédit Moderne',
+      titre: 'demandes.loan_request'.tr(),
+      institution: 'demandes.modern_credit'.tr(),
       date: '12/11/2025',
       status: ArchiveStatus.valide,
       iconAsset: 'assets/icons/logo.svg',
@@ -80,11 +81,11 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
   ];
 
   static const List<String> _filterLabels = [
-    'Tous',
-    'Brouillon',
-    'En cours',
-    'Validés',
-    'Rejetés',
+    'archives.all',
+    'archives.draft',
+    'archives.in_progress',
+    'archives.validated',
+    'archives.rejected',
   ];
 
   List<ArchiveItem> get _filteredArchives {
@@ -162,11 +163,11 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Mes archives',
+                'archives.title'.tr(),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -175,7 +176,7 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
               ),
               SizedBox(height: 2),
               Text(
-                'Suivez et gérer mes demandes',
+                'archives.subtitle'.tr(),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
@@ -214,8 +215,8 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
                 onChanged: (_) => setState(() {}),
                 style: const TextStyle(
                     fontSize: 14, color: AppColors.textDark),
-                decoration: const InputDecoration(
-                  hintText: 'Rechercher une demande',
+                decoration: InputDecoration(
+                  hintText: 'archives.search_placeholder'.tr(),
                   hintStyle: TextStyle(
                       fontSize: 14, color: AppColors.textSecondary),
                   border: InputBorder.none,
@@ -259,7 +260,7 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  _filterLabels[index],
+                  _filterLabels[index].tr(),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: isSelected
@@ -286,9 +287,9 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
     final items = _filteredArchives;
 
     if (items.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'Aucune archive trouvée',
+          'archives.no_archives'.tr(),
           style: TextStyle(
               fontSize: 14, color: AppColors.textSecondary),
         ),
@@ -402,14 +403,14 @@ class _ArchiveCard extends StatelessWidget {
                   child: GestureDetector(
                     // TODO: Implémenter l'aperçu du document via le service PDF
                     onTap: () {},
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.remove_red_eye_outlined,
                             size: 16, color: AppColors.textSecondary),
                         SizedBox(width: 5),
                         Text(
-                          'Voir',
+                          'archives.view'.tr(),
                           style: TextStyle(
                             fontSize: 13,
                             color: AppColors.textSecondary,
@@ -438,8 +439,8 @@ class _ArchiveCard extends StatelessWidget {
                          // color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 5),
-                        const Text(
-                          'Télécharger',
+                        Text(
+                          'archives.download'.tr(),
                           style: TextStyle(
                             fontSize: 13,
                             color: AppColors.textSecondary,
@@ -468,8 +469,8 @@ class _ArchiveCard extends StatelessWidget {
                          // color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 5),
-                        const Text(
-                          'Partager',
+                        Text(
+                          'archives.share'.tr(),
                           style: TextStyle(
                             fontSize: 13,
                             color: AppColors.textSecondary,
@@ -522,25 +523,25 @@ class _StatusText extends StatelessWidget {
     switch (status) {
       case ArchiveStatus.valide:
         return _StatusConfig(
-          label: 'Validé',
+          label: 'profile.validated'.tr(),
           textColor: AppColors.statusValidated,
           bgColor: AppColors.statusValidatedLight,
         );
       case ArchiveStatus.rejete:
         return _StatusConfig(
-          label: 'Rejeté',
+          label: 'profile.rejected'.tr(),
           textColor: AppColors.statusRejected,
           bgColor: AppColors.statusRejectedLight,
         );
       case ArchiveStatus.enCours:
         return _StatusConfig(
-          label: 'En cours',
+          label: 'profile.in_progress'.tr(),
           textColor: AppColors.statusInProgress,
           bgColor: AppColors.statusInProgressLight,
         );
       case ArchiveStatus.brouillon:
         return _StatusConfig(
-          label: 'Brouillon',
+          label: 'archives.draft'.tr(),
           textColor: AppColors.statusDraft,
           bgColor: AppColors.statusDraftLight,
         );
