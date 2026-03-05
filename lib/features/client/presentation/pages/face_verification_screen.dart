@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:camera/camera.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
@@ -26,6 +27,8 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
   late AnimationController _scanController;
   bool _isScanning = false;
   bool _scanComplete = false;
+  CameraController? _cameraController;
+  bool _isCameraInitialized = false;
 
   @override
   void initState() {
@@ -35,13 +38,38 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
       duration: const Duration(seconds: 2),
     )..repeat();
 
-    // Démarrer le scan automatiquement
-    _startScan();
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    try {
+      final cameras = await availableCameras();
+      final frontCamera = cameras.firstWhere(
+        (camera) => camera.lensDirection == CameraLensDirection.front,
+        orElse: () => cameras.first,
+      );
+
+      _cameraController = CameraController(
+        frontCamera,
+        ResolutionPreset.medium,
+        enableAudio: false,
+      );
+
+      await _cameraController!.initialize();
+      if (mounted) {
+        setState(() => _isCameraInitialized = true);
+        _startScan();
+      }
+    } catch (e) {
+      debugPrint('Erreur initialisation caméra: $e');
+      if (mounted) _startScan();
+    }
   }
 
   @override
   void dispose() {
     _scanController.dispose();
+    _cameraController?.dispose();
     super.dispose();
   }
 
@@ -171,8 +199,12 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
                       ),
                       const SizedBox(height: 48),
 
-                      // Cadre de scan
-                      _FaceFrame(isScanning: _isScanning),
+                      // Cadre de scan avec caméra
+                      _FaceFrame(
+                        isScanning: _isScanning,
+                        cameraController: _cameraController,
+                        isCameraInitialized: _isCameraInitialized,
+                      ),
                       const SizedBox(height: 32),
 
                       // "Analyse de votre visage..."
@@ -253,39 +285,57 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
 // ─────────────────────────────────────────────────────────────────
 class _FaceFrame extends StatelessWidget {
   final bool isScanning;
+  final CameraController? cameraController;
+  final bool isCameraInitialized;
 
-  const _FaceFrame({required this.isScanning});
+  const _FaceFrame({
+    required this.isScanning,
+    required this.cameraController,
+    required this.isCameraInitialized,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 220,
       height: 220,
-      child: Stack(
-        children: [
-          // Silhouette visage au centre
-          Center(
-            child: Icon(
-              Icons.person_outline,
-              size: 140,
-              color: AppColors.greyShade200,
-            ),
-          ),
-          // 4 coins du cadre
-          Positioned(top: 0, left: 0, child: _Corner()),
-          Positioned(
-              top: 0,
-              right: 0,
-              child: Transform.rotate(angle: 1.5708, child: _Corner())),
-          Positioned(
-              bottom: 0,
-              left: 0,
-              child: Transform.rotate(angle: -1.5708, child: _Corner())),
-          Positioned(
-              bottom: 0,
-              right: 0,
-              child: Transform.rotate(angle: 3.1416, child: _Corner())),
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          children: [
+            // Flux caméra en arrière-plan
+            if (isCameraInitialized && cameraController != null)
+              Positioned.fill(
+                child: CameraPreview(cameraController!),
+              )
+            else
+              // Fallback si caméra non disponible
+              Container(
+                color: AppColors.greyShade200,
+                child: Center(
+                  child: Icon(
+                    Icons.person_outline,
+                    size: 140,
+                    color: AppColors.white,
+                  ),
+                ),
+              ),
+            // 4 coins du cadre par-dessus
+            Positioned(top: 0, left: 0, child: _Corner()),
+            Positioned(
+                top: 0,
+                right: 0,
+                child: Transform.rotate(angle: 1.5708, child: _Corner())),
+            Positioned(
+                bottom: 0,
+                left: 0,
+                child: Transform.rotate(angle: -1.5708, child: _Corner())),
+            Positioned(
+                bottom: 0,
+                right: 0,
+                child: Transform.rotate(angle: 3.1416, child: _Corner())),
+          ],
+        ),
       ),
     );
   }
