@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:secure_link/features/auth/presentation/pages/login_screen.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'features/splash/presentation/pages/splash_screen.dart';
 import 'features/auth/presentation/pages/welcome_screen.dart';
-import 'features/auth/login_screen.dart';
 import 'features/auth/presentation/pages/otp_verification_screen.dart';
 import 'features/auth/presentation/widgets/success_screen.dart';
 import 'features/client/presentation/pages/client_home_screen.dart';
@@ -29,7 +29,7 @@ import 'package:secure_link/core/utils/app_routes.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
-  
+
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('fr'), Locale('en')],
@@ -57,11 +57,20 @@ class SecureLinkApp extends StatelessWidget {
           primarySwatch: Colors.blue,
         ),
         initialRoute: AppRoutes.splash,
+       
+        onGenerateRoute: (settings) {
+          if (settings.name == AppRoutes.otpVerification) {
+            final email = settings.arguments as String? ?? '';
+            return MaterialPageRoute(
+              builder: (_) => OtpVerificationScreen(email: email),
+            );
+          }
+          return null;
+        },
         routes: {
           AppRoutes.splash: (context) => const SplashScreen(),
           AppRoutes.welcome: (context) => const WelcomeScreen(),
           AppRoutes.login: (context) => const LoginScreen(),
-          AppRoutes.otpVerification: (context) => const OtpVerificationScreen(),
           '/success': (context) => const SuccessScreen(),
           AppRoutes.clientHome: (context) => const ClientHomeScreen(),
           AppRoutes.clientDemandes: (context) => const ClientDemandesScreen(),

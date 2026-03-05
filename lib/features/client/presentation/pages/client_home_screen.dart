@@ -8,7 +8,7 @@ import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
 import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
-import 'package:secure_link/features/client/presentation/pages/step1_informations_screen.dart';
+import 'package:secure_link/features/client/presentation/pages/step2_documents_screen.dart';
 
 class ClientHomeScreen extends StatefulWidget {
   const ClientHomeScreen({super.key});
@@ -241,7 +241,7 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
             ? 1.0
             : state is ProfileInProgress
                 ? state.profile.progressPercent
-                : 0.30;
+                : 0.50;
         final percent = '${(progress * 100).toInt()}%';
 
         return Padding(
@@ -309,7 +309,7 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
                     MaterialPageRoute(
                       builder: (_) => BlocProvider.value(
                         value: context.read<ProfileBloc>(),
-                        child: const Step1InformationsScreen(),
+                        child: const Step2DocumentsScreen(),
                       ),
                     ),
                   ),

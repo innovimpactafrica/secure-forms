@@ -1,337 +1,456 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
-import '../../../../utils/responsive_utils.dart';
+import 'package:secure_link/core/utils/app_routes.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
-  const OtpVerificationScreen({super.key});
+  final String email;
+
+  const OtpVerificationScreen({super.key, required this.email});
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
-  final List<TextEditingController> _otpControllers = List.generate(4, (index) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
-  bool _showSuccessModal = false;
+  final List<TextEditingController> _controllers =
+      List.generate(4, (_) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
 
-  void _showSuccess() {
+  int _secondsRemaining = 29;
+  Timer? _timer;
+  bool _canResend = false;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
     setState(() {
-      _showSuccessModal = true;
+      _canResend = false;
+      _secondsRemaining = 29;
     });
-    
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppRoutes.clientHome);
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsRemaining == 0) {
+        timer.cancel();
+        setState(() => _canResend = true);
+      } else {
+        setState(() => _secondsRemaining--);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    for (final c in _controllers) c.dispose();
+    for (final f in _focusNodes) f.dispose();
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  String _maskedEmail(String email) {
+    final parts = email.split('@');
+    if (parts.length != 2) return email;
+    final name = parts[0];
+    final domain = parts[1];
+    final visible = name.length > 4 ? name.substring(0, 4) : name;
+    return '$visible...$domain';
+  }
+
+  String get _otpCode => _controllers.map((c) => c.text).join();
+
+  void _onVerify() {
+    if (_otpCode.length < 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('otp.enter_4_digits'.tr()),
+          backgroundColor: AppColors.statusRejected,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    // TODO: API — remplacer par AuthBloc + OtpVerifyRequested event
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      _showSuccessAndRedirect();
+    });
+  }
+
+  void _showSuccessAndRedirect() {
+    // Afficher le modal de succès en bottom sheet
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isDismissible: false,
+      enableDrag: false,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => const _SuccessBottomSheet(),
+    );
+
+    // Après 2 secondes, fermer le modal et rediriger vers client home
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        AppRoutes.clientHome,
+        (route) => false,
+      );
+    });
+  }
+
+  void _onResend() {
+    if (!_canResend) return;
+    // TODO: API — remplacer par AuthBloc + ResendOtpRequested event
+    _startTimer();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: SizedBox(
-        width: ResponsiveUtils.getScreenWidth(context),
-        height: ResponsiveUtils.getScreenHeight(context),
-        child: Stack(
+      body: SafeArea(
+        child: Column(
           children: [
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 50),
-              left: ResponsiveUtils.getResponsiveWidth(context, 24),
-              child: GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  width: ResponsiveUtils.getResponsiveWidth(context, 44),
-                  height: ResponsiveUtils.getResponsiveHeight(context, 44),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 22)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.shadowDark,
-                        blurRadius: ResponsiveUtils.getResponsiveValue(context, 32),
-                        offset: Offset(ResponsiveUtils.getResponsiveValue(context, -3), ResponsiveUtils.getResponsiveValue(context, -3)),
+            // ── Header ──
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.paddingLarge,
+                vertical: AppConstants.paddingLarge,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: AppConstants.avatarSizeSmall,
+                      height: AppConstants.avatarSizeSmall,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.borderLight),
+                        shape: BoxShape.circle,
                       ),
-                      BoxShadow(
-                        color: AppColors.shadowDark,
-                        blurRadius: ResponsiveUtils.getResponsiveValue(context, 32),
-                        offset: Offset(ResponsiveUtils.getResponsiveValue(context, 3), ResponsiveUtils.getResponsiveValue(context, 3)),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        color: AppColors.textDark,
+                        size: AppConstants.iconSizeMedium,
                       ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(ResponsiveUtils.getResponsiveValue(context, 7.54)),
-                    child: SvgPicture.asset(
-                      'assets/icons/arrow-left.svg',
-                      width: ResponsiveUtils.getResponsiveWidth(context, 30.17),
-                      height: ResponsiveUtils.getResponsiveHeight(context, 30.17),
                     ),
                   ),
+                  Image.asset(
+                    'assets/images/securelink.png',
+                    height: AppConstants.logoHeight,
+                    fit: BoxFit.contain,
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Contenu ──
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppConstants.paddingLarge,
+                  AppConstants.paddingLarge,
+                  AppConstants.paddingLarge,
+                  AppConstants.paddingXLarge,
                 ),
-              ),
-            ),
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 56),
-              right: ResponsiveUtils.getResponsiveWidth(context, 24),
-              child: Image.asset(
-                'assets/images/securelink.png',
-                width: ResponsiveUtils.getResponsiveWidth(context, 131),
-                height: ResponsiveUtils.getResponsiveHeight(context, 32),
-                fit: BoxFit.contain,
-              ),
-            ),
-            Positioned(
-              top: ResponsiveUtils.getResponsiveHeight(context, 150),
-              left: ResponsiveUtils.getResponsiveWidth(context, 24),
-              right: ResponsiveUtils.getResponsiveWidth(context, 24),
-              bottom: ResponsiveUtils.getResponsiveHeight(context, 250),
-              child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                  Text(
-                    'otp.title'.tr(),
-                    style: TextStyle(
-                      fontFamily: AppConstants.fontFamilySofiaSans,
-                      fontWeight: FontWeight.w600,
-                      fontSize: ResponsiveUtils.getResponsiveFontSize(context, 24),
-                      height: 32 / 24,
-                      color: AppColors.textPrimary,
+                    // Titre
+                    Text(
+                      'otp.verification_code'.tr(),
+                      style: const TextStyle(
+                        fontFamily: AppConstants.fontFamilySofiaSans,
+                        fontSize: AppConstants.fontSizeTitle,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textDark,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 16)),
-                  Text(
-                    'otp.description'.tr() + ' 77... .. 67',
-                    style: TextStyle(
-                      fontFamily: AppConstants.fontFamilySofiaSans,
-                      fontWeight: FontWeight.w400,
-                      fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                      height: 24 / 16,
-                      color: AppColors.textSecondary,
+                    const SizedBox(height: 8),
+                    // Sous-titre avec email masqué
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'otp.enter_code_sent'.tr(),
+                            style: const TextStyle(
+                              fontFamily: AppConstants.fontFamilyInter,
+                              fontSize: AppConstants.fontSizeMedium,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          TextSpan(
+                            text: _maskedEmail(widget.email),
+                            style: const TextStyle(
+                              fontFamily: AppConstants.fontFamilyInter,
+                              fontSize: AppConstants.fontSizeMedium,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textDark,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 40)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(4, (index) {
-                      bool isActive = _otpControllers[index].text.isEmpty && 
-                          (index == 0 || _otpControllers[index - 1].text.isNotEmpty);
-                      
-                      return Container(
-                        width: ResponsiveUtils.getResponsiveWidth(context, 60),
-                        height: ResponsiveUtils.getResponsiveHeight(context, 60),
-                        decoration: BoxDecoration(
-                          color: isActive ? AppColors.primaryLight : AppColors.statusDraftLight,
-                          borderRadius: BorderRadius.circular(ResponsiveUtils.getResponsiveValue(context, 12)),
-                          border: isActive ? Border.all(color: AppColors.primary, width: AppConstants.borderWidthThin) : null,
-                        ),
-                        child: TextField(
-                          controller: _otpControllers[index],
+                    const SizedBox(height: 40),
+
+                    // ── Cases OTP ──
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(4, (index) {
+                        return _OtpBox(
+                          controller: _controllers[index],
                           focusNode: _focusNodes[index],
-                          textAlign: TextAlign.center,
-                          keyboardType: TextInputType.number,
-                          maxLength: 1,
-                          style: TextStyle(
-                            fontFamily: AppConstants.fontFamilySofiaSans,
-                            fontWeight: FontWeight.w600,
-                            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 24),
-                            color: AppColors.textPrimary,
-                          ),
-                          decoration: const InputDecoration(
-                            counterText: '',
-                            border: InputBorder.none,
-                          ),
                           onChanged: (value) {
-                            setState(() {
-                              if (value.isNotEmpty && index < 3) {
-                                _focusNodes[index + 1].requestFocus();
-                              } else if (value.isEmpty && index > 0) {
-                                _focusNodes[index - 1].requestFocus();
-                              }
-                            });
+                            if (value.isNotEmpty && index < 3) {
+                              _focusNodes[index + 1].requestFocus();
+                            } else if (value.isEmpty && index > 0) {
+                              _focusNodes[index - 1].requestFocus();
+                            }
+                            setState(() {});
                           },
-                        ),
-                      );
-                    }),
-                  ),
-                  SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 40)),
-                  Center(
-                    child: Text(
-                      'otp.didnt_receive'.tr(),
-                      style: TextStyle(
-                        fontFamily: AppConstants.fontFamilySofiaSans,
-                        fontWeight: FontWeight.w400,
-                        fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                        color: AppColors.textSecondary,
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // ── Renvoi du code ──
+                    Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            'otp.didnt_receive'.tr(),
+                            style: const TextStyle(
+                              fontFamily: AppConstants.fontFamilyInter,
+                              fontSize: AppConstants.fontSizeMedium,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          GestureDetector(
+                            onTap: _canResend ? _onResend : null,
+                            child: Text(
+                              _canResend
+                                  ? 'otp.resend'.tr()
+                                  : '${'otp.resend_in'.tr()}${_secondsRemaining.toString().padLeft(2, '0')}',
+                              style: TextStyle(
+                                fontFamily: AppConstants.fontFamilyInter,
+                                fontSize: AppConstants.fontSizeMedium,
+                                fontWeight: FontWeight.w500,
+                                color: _canResend
+                                    ? AppColors.primary
+                                    : AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 8)),
-                  Center(
-                    child: Opacity(
-                      opacity: 0.3,
-                      child: Text(
-                        'otp.resend'.tr() + ' 00:29',
-                        style: TextStyle(
-                          fontFamily: AppConstants.fontFamilyInter,
-                          fontWeight: FontWeight.w500,
-                          fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
-                          height: 1.0,
-                          color: AppColors.primary,
+
+                    const Spacer(),
+
+                    // ── Bouton Vérifier ──
+                    SizedBox(
+                      width: double.infinity,
+                      height: AppConstants.logoutButtonHeight,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _onVerify,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryDark,
+                          disabledBackgroundColor:
+                              AppColors.primaryDark.withValues(alpha: 0.6),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                AppConstants.radiusRound),
+                          ),
                         ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.white,
+                                ),
+                              )
+                            : Text(
+                              'otp.verify_button'.tr(),
+                              style: const TextStyle(
+                                fontFamily: AppConstants.fontFamilySofiaSans,
+                                color: AppColors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: AppConstants.fontSizeLarge,
+                              ),
+                            ),
                       ),
                     ),
-                  ),
+                    SizedBox(
+                        height: MediaQuery.of(context).padding.bottom + 8),
                   ],
                 ),
               ),
             ),
-            Positioned(
-              bottom: ResponsiveUtils.getResponsiveHeight(context, 170),
-              left: ResponsiveUtils.getResponsiveWidth(context, 24),
-              right: ResponsiveUtils.getResponsiveWidth(context, 24),
-              child: RichText(
-                text: TextSpan(
-                  style: TextStyle(
-                    fontFamily: AppConstants.fontFamilySofiaSans,
-                    fontWeight: FontWeight.w400,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                    color: AppColors.textSecondary,
-                  ),
-                  children: [
-                    TextSpan(text: 'login.legal_text'.tr()),
-                    TextSpan(
-                      text: 'login.terms'.tr(),
-                      style: TextStyle(
-                        color: AppColors.textBlack,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                    TextSpan(text: 'login.and'.tr()),
-                    TextSpan(
-                      text: 'login.privacy'.tr(),
-                      style: TextStyle(
-                        color: AppColors.textBlack,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: ResponsiveUtils.getResponsiveHeight(context, 80),
-              left: ResponsiveUtils.getResponsiveWidth(context, 24),
-              right: ResponsiveUtils.getResponsiveWidth(context, 24),
-              child: GestureDetector(
-                onTap: _showSuccess,
-                child: Container(
-                  height: ResponsiveUtils.getResponsiveHeight(context, 64),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryDark,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'otp.verify_button'.tr(),
-                      style: TextStyle(
-                        fontFamily: AppConstants.fontFamilySofiaSans,
-                        fontWeight: FontWeight.w500,
-                        fontSize: ResponsiveUtils.getResponsiveFontSize(context, 18),
-                        color: AppColors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            if (_showSuccessModal)
-              Positioned(
-                bottom: ResponsiveUtils.getResponsiveHeight(context, 50),
-                left: ResponsiveUtils.getResponsiveWidth(context, 20),
-                right: ResponsiveUtils.getResponsiveWidth(context, 20),
-                child: Container(
-                  width: ResponsiveUtils.getResponsiveWidth(context, 390),
-                  height: ResponsiveUtils.getResponsiveHeight(context, 264),
-                  padding: EdgeInsets.fromLTRB(
-                    ResponsiveUtils.getResponsiveWidth(context, 24),
-                    ResponsiveUtils.getResponsiveHeight(context, 50),
-                    ResponsiveUtils.getResponsiveWidth(context, 24),
-                    ResponsiveUtils.getResponsiveHeight(context, 50),
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.whiteOpacity(0.2),
-                        blurRadius: ResponsiveUtils.getResponsiveValue(context, 10),
-                        offset: Offset(0, ResponsiveUtils.getResponsiveValue(context, 5)),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/icons/Vector (16).svg',
-                        width: ResponsiveUtils.getResponsiveWidth(context, 64),
-                        height: ResponsiveUtils.getResponsiveHeight(context, 64),
-                      ),
-                      SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 32)),
-                      SizedBox(
-                        width: ResponsiveUtils.getResponsiveWidth(context, 112),
-                        height: ResponsiveUtils.getResponsiveHeight(context, 26),
-                        child: Text(
-                          'otp.account_created'.tr(),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: AppConstants.fontFamilySofiaSans,
-                            fontWeight: FontWeight.w600,
-                            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
-                            height: 1.3,
-                            color: AppColors.textDark,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 16)),
-                      SizedBox(
-                        width: ResponsiveUtils.getResponsiveWidth(context, 342),
-                        height: ResponsiveUtils.getResponsiveHeight(context, 24),
-                        child: Text(
-                          'otp.welcome_space'.tr(),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: AppConstants.fontFamilySofiaSans,
-                            fontWeight: FontWeight.w400,
-                            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 18),
-                            height: 24 / 18,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
           ],
         ),
       ),
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// CASE OTP INDIVIDUELLE
+// ─────────────────────────────────────────────────────────────────
+class _OtpBox extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final ValueChanged<String> onChanged;
+
+  const _OtpBox({
+    required this.controller,
+    required this.focusNode,
+    required this.onChanged,
+  });
 
   @override
-  void dispose() {
-    for (var controller in _otpControllers) {
-      controller.dispose();
-    }
-    for (var focusNode in _focusNodes) {
-      focusNode.dispose();
-    }
-    super.dispose();
+  Widget build(BuildContext context) {
+    final isFilled = controller.text.isNotEmpty;
+
+    return Container(
+      width: AppConstants.otpBoxSize,
+      height: AppConstants.otpBoxSize,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        maxLength: 1,
+        onChanged: onChanged,
+        style: const TextStyle(
+          fontFamily: AppConstants.fontFamilySofiaSans,
+          fontSize: AppConstants.fontSizeXXLarge,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textDark,
+        ),
+        decoration: InputDecoration(
+          counterText: '',
+          contentPadding: EdgeInsets.zero,
+          filled: true,
+          fillColor: AppColors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+            borderSide: BorderSide(
+              color: isFilled ? AppColors.primary : AppColors.borderLight,
+              width: isFilled
+                  ? AppConstants.borderWidthMedium
+                  : AppConstants.borderWidthThin,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+            borderSide: BorderSide(
+              color: isFilled ? AppColors.primary : AppColors.borderLight,
+              width: isFilled
+                  ? AppConstants.borderWidthMedium
+                  : AppConstants.borderWidthThin,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+            borderSide: const BorderSide(
+              color: AppColors.primary,
+              width: AppConstants.borderWidthMedium,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MODAL SUCCÈS (bottom sheet)
+// ─────────────────────────────────────────────────────────────────
+class _SuccessBottomSheet extends StatelessWidget {
+  const _SuccessBottomSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: AppConstants.paddingLarge,
+        right: AppConstants.paddingLarge,
+        bottom: MediaQuery.of(context).padding.bottom + AppConstants.paddingLarge,
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
+          boxShadow: const [
+            BoxShadow(
+              color: AppColors.shadowLight,
+              blurRadius: 20,
+              offset: Offset(0, -4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Icône cercle check
+            Container(
+              width: AppConstants.successIconSize,
+              height: AppConstants.successIconSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.primary,
+                  width: AppConstants.borderWidthThick,
+                ),
+              ),
+              child: const Icon(
+                Icons.check,
+                color: AppColors.primary,
+                size: AppConstants.iconSizeXLarge,
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Titre
+            Text(
+              'otp.login_success'.tr(),
+              style: const TextStyle(
+                fontFamily: AppConstants.fontFamilySofiaSans,
+                fontSize: AppConstants.fontSizeXLarge,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Sous-titre
+            Text(
+              'otp.welcome_space'.tr(),
+              style: const TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                fontSize: AppConstants.fontSizeMedium,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

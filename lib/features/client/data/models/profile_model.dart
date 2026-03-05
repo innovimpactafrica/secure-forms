@@ -20,7 +20,7 @@ class ProfileModel {
     this.gender = '',
     this.maritalStatus = '',
     this.documents = const [],
-    this.progressPercent = 0.30,
+    this.progressPercent = 0.50,
   });
 
   ProfileModel copyWith({

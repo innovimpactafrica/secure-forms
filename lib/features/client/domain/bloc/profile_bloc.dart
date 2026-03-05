@@ -6,8 +6,7 @@ import 'profile_state.dart';
 /// ProfileBloc — gère la progression du profil client
 ///
 /// Progression :
-///   30% → initial (non connecté)
-///   50% → infos personnelles validées
+///   50% → initial (après connexion)
 ///   50% à 100% → chaque document validé ajoute (50 / nbDocuments) %
 ///
 /// TODO: remplacer les emit locaux par des appels API quand les endpoints
@@ -22,7 +21,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc()
       : super(
           const ProfileInProgress(
-            profile: ProfileModel(progressPercent: 0.30),
+            profile: ProfileModel(progressPercent: 0.50),
           ),
         ) {
     on<SavePersonalInfoEvent>(_onSavePersonalInfo);
@@ -192,7 +191,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     Emitter<ProfileState> emit,
   ) {
     emit(const ProfileInProgress(
-      profile: ProfileModel(progressPercent: 0.30),
+      profile: ProfileModel(progressPercent: 0.50),
     ));
   }
 
@@ -216,6 +215,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     if (state is ProfileFaceVerificationSuccess) return state.profile;
     if (state is ProfileFaceVerificationFailed) return state.profile;
     if (state is ProfileCompleted) return state.profile;
-    return const ProfileModel(progressPercent: 0.30);
+    return const ProfileModel(progressPercent: 0.50);
   }
 }
