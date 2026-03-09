@@ -4,6 +4,7 @@ class AppRoutes {
   static const String welcome = '/welcome';
   static const String login = '/login';
   static const String otpVerification = '/otp-verification';
+  static const String createPassword = '/create-password'; 
 
   // Client - Pages principales
   static const String clientHome = '/client-home';
@@ -38,8 +39,7 @@ class AppRoutes {
   static const String detailActeVente = '/detail-acte-vente';
   static const String detailPret = '/detail-pret';
   static const String detailOuvertureCompte = '/detail-ouverture-compte';
-  static const String detailOuvertureCompteBrouillon =
-      '/detail-ouverture-compte-brouillon';
+  static const String detailOuvertureCompteBrouillon = '/detail-ouverture-compte-brouillon';
   static const String detailDemandeRejet = '/detail-demande-rejet';
   static const String detailDemandeAttente = '/detail-demande-attente';
   static const String detailDemandeEnCours = '/detail-demande-en-cours';

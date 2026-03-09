@@ -25,6 +25,18 @@
     "no_account": "Vous n'avez pas de compte ? ",
     "register": "S'inscrire"
   },
+  "password": {
+    "create_title": "Créez votre mot de passe",
+    "create_subtitle": "Choisissez un mot de passe sécurisé pour protéger votre compte.",
+    "new_password": "Nouveau mot de passe",
+    "new_password_hint": "••••••••",
+    "confirm_password": "Confirmer mot de passe",
+    "confirm_password_hint": "••••••••",
+    "confirm_button": "Confirmer",
+    "min_length": "Minimum 8 caractères",
+    "mismatch": "Les mots de passe ne correspondent pas",
+    "success_message": "Mot de passe défini. Bienvenue !"
+  },
   "register": {
     "title": "S'inscrire",
     "subtitle": "Créez votre compte pour accéder à nos services",
@@ -46,7 +58,9 @@
     "phone_hint": "Ex: 77 000 00 00",
     "birth_date_hint": "JJ/MM/AAAA",
     "min_6_chars": "Minimum 6 caractères",
-    "passwords_not_match": "Les mots de passe ne correspondent pas"
+    "passwords_not_match": "Les mots de passe ne correspondent pas",
+    "account_created": "Compte créé",
+    "code_sent_to": "Vérifiez le code envoyé au"
   },
   "otp": {
     "title": "Vérification",

@@ -1,0 +1,45 @@
+import 'package:equatable/equatable.dart';
+
+abstract class AuthState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
+
+class AuthInitial extends AuthState {}
+class AuthLoading extends AuthState {}
+
+class RegisterSuccess extends AuthState {
+  final String email;
+  final String sessionToken;
+  RegisterSuccess({required this.email, required this.sessionToken});
+  @override
+  List<Object?> get props => [email, sessionToken];
+}
+
+class OtpVerifySuccess extends AuthState {
+  final String email;
+  final String message;
+  OtpVerifySuccess({required this.email, required this.message});
+  @override
+  List<Object?> get props => [email, message];
+}
+
+class OtpResendSuccess extends AuthState {}
+
+// Mot de passe créé avec succès
+class PasswordSetupSuccess extends AuthState {}
+
+// Connexion réussie
+class LoginSuccess extends AuthState {
+  final String accessToken;
+  LoginSuccess({required this.accessToken});
+  @override
+  List<Object?> get props => [accessToken];
+}
+
+class AuthFailure extends AuthState {
+  final String message;
+  AuthFailure({required this.message});
+  @override
+  List<Object?> get props => [message];
+}

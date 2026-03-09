@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:secure_link/features/auth/data/models/auth_request.dart';
+import 'package:secure_link/features/auth/domain/bloc/auth_bloc.dart';
+import 'package:secure_link/features/auth/domain/bloc/auth_event.dart';
+import 'package:secure_link/features/auth/domain/bloc/auth_state.dart';
 import 'package:secure_link/features/auth/presentation/pages/otp_verification_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -19,12 +24,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _birthDateController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-  bool _isLoading = false;
 
   String _selectedGender = 'register.male';
   String _selectedMaritalStatus = '';
@@ -36,6 +35,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
     'profile.widowed',
   ];
 
+  static const Map<String, String> _genderMap = {
+    'register.male': 'HOMME',
+    'register.female': 'FEMME',
+  };
+
+  static const Map<String, String> _maritalMap = {
+    'profile.single': 'CELIBATAIRE',
+    'profile.married': 'MARIE',
+    'profile.divorced': 'DIVORCE',
+    'profile.widowed': 'VEUF',
+  };
+
   @override
   void dispose() {
     _firstNameController.dispose();
@@ -43,374 +54,293 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _phoneController.dispose();
     _emailController.dispose();
     _birthDateController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _onRegister() {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      // TODO: API — remplacer par AuthBloc + RegisterRequested event
-      Future.delayed(const Duration(seconds: 1), () {
-        if (!mounted) return;
-        setState(() => _isLoading = false);
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => OtpVerificationScreen(
+  void _onRegister(BuildContext context) {
+    if (!_formKey.currentState!.validate()) return;
+    context.read<AuthBloc>().add(
+          RegisterRequested(
+            RegisterRequest(
+              lastName: _lastNameController.text.trim(),
+              firstName: _firstNameController.text.trim(),
               email: _emailController.text.trim(),
+              phone: _phoneController.text.trim(),
+              address: 'Dakar',
+              dateOfBirth: _birthDateController.text.trim(),
+              gender: _genderMap[_selectedGender] ?? 'HOMME',
+              maritalStatus: _maritalMap[_selectedMaritalStatus] ?? 'CELIBATAIRE',
             ),
           ),
         );
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ── Header ──
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.paddingLarge,
-                vertical: AppConstants.paddingLarge,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Bouton retour — cercle
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      width: AppConstants.avatarSizeSmall,
-                      height: AppConstants.avatarSizeSmall,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.borderLight),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.arrow_back,
-                        color: AppColors.textDark,
-                        size: AppConstants.iconSizeMedium,
-                      ),
+    return BlocProvider(
+      create: (_) => AuthBloc(),
+      child: BlocConsumer<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is RegisterSuccess) {
+            // ✅ Capturer le BLoC ET les données AVANT tout
+            final authBloc = context.read<AuthBloc>();
+            final email = state.email;
+            final sessionToken = state.sessionToken;
+            final phone = _phoneController.text.trim();
+
+            // 1. Afficher le modal de succès
+            showModalBottomSheet(
+              context: context,
+              backgroundColor: Colors.transparent,
+              isDismissible: false,
+              enableDrag: false,
+              isScrollControlled: true,
+              useSafeArea: true,
+              builder: (_) => _RegisterSuccessBottomSheet(phone: phone),
+            );
+
+            // 2. Après 2 secondes → fermer modal + naviguer vers OTP
+            Future.delayed(const Duration(seconds: 2), () {
+              if (!context.mounted) return;
+              Navigator.of(context).pop(); // ferme le modal
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider.value(
+                    value: authBloc, // ✅ transmet le même BLoC
+                    child: OtpVerificationScreen(
+                      email: email,
+                      sessionToken: sessionToken,
                     ),
                   ),
-                  // Logo image
-                  Image.asset(
-                    'assets/images/securelink.png',
-                    height: AppConstants.logoHeight,
-                    fit: BoxFit.contain,
+                ),
+              );
+            });
+          } else if (state is AuthFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.statusRejected,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          final isLoading = state is AuthLoading;
+
+          return Scaffold(
+            backgroundColor: AppColors.white,
+            body: SafeArea(
+              child: Column(
+                children: [
+                  // ── Header ──
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppConstants.paddingLarge,
+                      vertical: AppConstants.paddingLarge,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            width: AppConstants.avatarSizeSmall,
+                            height: AppConstants.avatarSizeSmall,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppColors.borderLight),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back,
+                              color: AppColors.textDark,
+                              size: AppConstants.iconSizeMedium,
+                            ),
+                          ),
+                        ),
+                        Image.asset(
+                          'assets/images/securelink.png',
+                          height: AppConstants.logoHeight,
+                          fit: BoxFit.contain,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // ── Formulaire ──
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppConstants.paddingLarge,
+                        8,
+                        AppConstants.paddingLarge,
+                        AppConstants.paddingXLarge,
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'register.title'.tr(),
+                              style: const TextStyle(
+                                fontFamily: AppConstants.fontFamilySofiaSans,
+                                fontSize: AppConstants.fontSizeTitle,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textDark,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'register.subtitle'.tr(),
+                              style: const TextStyle(
+                                fontFamily: AppConstants.fontFamilyInter,
+                                fontSize: AppConstants.fontSizeMedium,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: AppConstants.paddingXLarge),
+
+                            _FormField(
+                              label: 'register.first_name'.tr(),
+                              controller: _firstNameController,
+                              hint: 'register.first_name_hint'.tr(),
+                              prefixIcon: Icons.person_outline,
+                              validator: (v) => v!.isEmpty ? 'login.required_field'.tr() : null,
+                            ),
+                            const SizedBox(height: AppConstants.paddingLarge),
+
+                            _FormField(
+                              label: 'register.last_name'.tr(),
+                              controller: _lastNameController,
+                              hint: 'register.last_name_hint'.tr(),
+                              prefixIcon: Icons.person_outline,
+                              validator: (v) => v!.isEmpty ? 'login.required_field'.tr() : null,
+                            ),
+                            const SizedBox(height: AppConstants.paddingLarge),
+
+                            _PhoneField(controller: _phoneController),
+                            const SizedBox(height: AppConstants.paddingLarge),
+
+                            _FormField(
+                              label: 'login.email_label'.tr(),
+                              controller: _emailController,
+                              hint: 'login.email_hint'.tr(),
+                              prefixIcon: Icons.email_outlined,
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (v) {
+                                if (v!.isEmpty) return 'login.required_field'.tr();
+                                if (!v.contains('@')) return 'login.invalid_email'.tr();
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: AppConstants.paddingLarge),
+
+                            _DateField(
+                              label: 'register.birth_date'.tr(),
+                              controller: _birthDateController,
+                              hint: 'register.birth_date_hint'.tr(),
+                            ),
+                            const SizedBox(height: AppConstants.paddingLarge),
+
+                            _GenderSelector(
+                              selected: _selectedGender,
+                              onChanged: (val) => setState(() => _selectedGender = val),
+                            ),
+                            const SizedBox(height: AppConstants.paddingLarge),
+
+                            _DropdownField(
+                              label: 'register.marital_status'.tr(),
+                              hint: 'register.select'.tr(),
+                              value: _selectedMaritalStatus.isEmpty ? null : _selectedMaritalStatus,
+                              items: _maritalStatusOptions,
+                              onChanged: (val) => setState(() => _selectedMaritalStatus = val ?? ''),
+                            ),
+                            const SizedBox(height: 32),
+
+                            SizedBox(
+                              width: double.infinity,
+                              height: AppConstants.logoutButtonHeight,
+                              child: ElevatedButton(
+                                onPressed: isLoading ? null : () => _onRegister(context),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primaryDark,
+                                  disabledBackgroundColor:
+                                      AppColors.primaryDark.withValues(alpha: 0.6),
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                                  ),
+                                ),
+                                child: isLoading
+                                    ? const SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppColors.white,
+                                        ),
+                                      )
+                                    : Text(
+                                        'register.register_button'.tr(),
+                                        style: const TextStyle(
+                                          fontFamily: AppConstants.fontFamilySofiaSans,
+                                          color: AppColors.white,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: AppConstants.fontSizeLarge,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: AppConstants.paddingXLarge),
+
+                            Center(
+                              child: GestureDetector(
+                                onTap: () => Navigator.of(context).pop(),
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: 'register.already_account'.tr(),
+                                        style: const TextStyle(
+                                          fontFamily: AppConstants.fontFamilyInter,
+                                          fontSize: AppConstants.fontSizeMedium,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: 'register.login_link'.tr(),
+                                        style: const TextStyle(
+                                          fontFamily: AppConstants.fontFamilyInter,
+                                          fontSize: AppConstants.fontSizeMedium,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.primary,
+                                          decoration: TextDecoration.underline,
+                                          decorationColor: AppColors.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-
-            // ── Formulaire scrollable ──
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(
-                  AppConstants.paddingLarge,
-                  8,
-                  AppConstants.paddingLarge,
-                  AppConstants.paddingXLarge,
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'register.title'.tr(),
-                        style: const TextStyle(
-                          fontFamily: AppConstants.fontFamilySofiaSans,
-                          fontSize: AppConstants.fontSizeTitle,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textDark,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'register.subtitle'.tr(),
-                        style: const TextStyle(
-                          fontFamily: AppConstants.fontFamilyInter,
-                          fontSize: AppConstants.fontSizeMedium,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: AppConstants.paddingXLarge),
-
-                      // Prénom
-                      _FormField(
-                        label: 'register.first_name'.tr(),
-                        controller: _firstNameController,
-                        hint: 'register.first_name_hint'.tr(),
-                        prefixIcon: Icons.person_outline,
-                        validator: (v) =>
-                            v!.isEmpty ? 'login.required_field'.tr() : null,
-                      ),
-                      const SizedBox(height: AppConstants.paddingLarge),
-
-                      // Nom
-                      _FormField(
-                        label: 'register.last_name'.tr(),
-                        controller: _lastNameController,
-                        hint: 'register.last_name_hint'.tr(),
-                        prefixIcon: Icons.person_outline,
-                        validator: (v) =>
-                            v!.isEmpty ? 'login.required_field'.tr() : null,
-                      ),
-                      const SizedBox(height: AppConstants.paddingLarge),
-
-                      // Téléphone
-                      _PhoneField(controller: _phoneController),
-                      const SizedBox(height: AppConstants.paddingLarge),
-
-                      // Email
-                      _FormField(
-                        label: 'login.email_label'.tr(),
-                        controller: _emailController,
-                        hint: 'login.email_hint'.tr(),
-                        prefixIcon: Icons.email_outlined,
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (v) {
-                          if (v!.isEmpty) return 'login.required_field'.tr();
-                          if (!v.contains('@')) return 'login.invalid_email'.tr();
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: AppConstants.paddingLarge),
-
-                      // Date de naissance
-                      _DateField(
-                        label: 'register.birth_date'.tr(),
-                        controller: _birthDateController,
-                        hint: 'register.birth_date_hint'.tr(),
-                      ),
-                      const SizedBox(height: AppConstants.paddingLarge),
-
-                      // Genre
-                      _GenderSelector(
-                        selected: _selectedGender,
-                        onChanged: (val) =>
-                            setState(() => _selectedGender = val),
-                      ),
-                      const SizedBox(height: AppConstants.paddingLarge),
-
-                      // Situation matrimoniale
-                      _DropdownField(
-                        label: 'register.marital_status'.tr(),
-                        hint: 'register.select'.tr(),
-                        value: _selectedMaritalStatus.isEmpty
-                            ? null
-                            : _selectedMaritalStatus,
-                        items: _maritalStatusOptions,
-                        onChanged: (val) => setState(
-                            () => _selectedMaritalStatus = val ?? ''),
-                      ),
-                      const SizedBox(height: AppConstants.paddingLarge),
-
-                      // Mot de passe
-                      _FieldLabel(label: 'login.password_label'.tr()),
-                      const SizedBox(height: 6),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        validator: (v) {
-                          if (v!.isEmpty) return 'login.required_field'.tr();
-                          if (v.length < 6) return 'register.min_6_chars'.tr();
-                          return null;
-                        },
-                        style: const TextStyle(
-                          fontFamily: AppConstants.fontFamilyInter,
-                          fontSize: AppConstants.fontSizeMedium,
-                          color: AppColors.textDark,
-                        ),
-                        decoration: _buildInputDecoration(
-                          hint: 'login.password_hint'.tr(),
-                          prefixIcon: Icons.lock_outline,
-                          suffixIcon: GestureDetector(
-                            onTap: () => setState(
-                                () => _obscurePassword = !_obscurePassword),
-                            child: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: AppColors.textSecondary,
-                              size: AppConstants.iconSizeMedium,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: AppConstants.paddingLarge),
-
-                      // Confirmer mot de passe
-                      _FieldLabel(label: 'register.confirm_password'.tr()),
-                      const SizedBox(height: 6),
-                      TextFormField(
-                        controller: _confirmPasswordController,
-                        obscureText: _obscureConfirmPassword,
-                        validator: (v) {
-                          if (v!.isEmpty) return 'login.required_field'.tr();
-                          if (v != _passwordController.text)
-                            return 'register.passwords_not_match'.tr();
-                          return null;
-                        },
-                        style: const TextStyle(
-                          fontFamily: AppConstants.fontFamilyInter,
-                          fontSize: AppConstants.fontSizeMedium,
-                          color: AppColors.textDark,
-                        ),
-                        decoration: _buildInputDecoration(
-                          hint: 'login.password_hint'.tr(),
-                          prefixIcon: Icons.lock_outline,
-                          suffixIcon: GestureDetector(
-                            onTap: () => setState(() =>
-                                _obscureConfirmPassword =
-                                    !_obscureConfirmPassword),
-                            child: Icon(
-                              _obscureConfirmPassword
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: AppColors.textSecondary,
-                              size: AppConstants.iconSizeMedium,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-
-                      // Bouton S'inscrire
-                      SizedBox(
-                        width: double.infinity,
-                        height: AppConstants.logoutButtonHeight,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _onRegister,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryDark,
-                            disabledBackgroundColor: AppColors.primaryDark
-                                .withValues(alpha: 0.6),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  AppConstants.radiusRound),
-                            ),
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.white,
-                                  ),
-                                )
-                              : Text(
-                                  'register.register_button'.tr(),
-                                  style: const TextStyle(
-                                    fontFamily:
-                                        AppConstants.fontFamilySofiaSans,
-                                    color: AppColors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: AppConstants.fontSizeLarge,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(height: AppConstants.paddingXLarge),
-
-                      // Lien Se connecter souligné
-                      Center(
-                        child: GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          child: RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'register.already_account'.tr(),
-                                  style: const TextStyle(
-                                    fontFamily: AppConstants.fontFamilyInter,
-                                    fontSize: AppConstants.fontSizeMedium,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: 'register.login_link'.tr(),
-                                  style: const TextStyle(
-                                    fontFamily: AppConstants.fontFamilyInter,
-                                    fontSize: AppConstants.fontSizeMedium,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.primary,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: AppColors.primary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  InputDecoration _buildInputDecoration({
-    required String hint,
-    required IconData prefixIcon,
-    Widget? suffixIcon,
-  }) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: const TextStyle(
-        fontFamily: AppConstants.fontFamilyInter,
-        color: AppColors.hintText,
-        fontSize: AppConstants.fontSizeMedium,
-      ),
-      prefixIcon: Icon(prefixIcon,
-          color: AppColors.textSecondary, size: AppConstants.iconSizeMedium),
-      suffixIcon: suffixIcon,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      filled: true,
-      fillColor: AppColors.white,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-        borderSide: const BorderSide(color: AppColors.borderLight),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-        borderSide: const BorderSide(color: AppColors.borderLight),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-        borderSide: const BorderSide(
-            color: AppColors.primary, width: AppConstants.borderWidthMedium),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-        borderSide: const BorderSide(color: AppColors.statusRejected),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-        borderSide: const BorderSide(color: AppColors.statusRejected),
+          );
+        },
       ),
     );
   }
 }
 
-// ─────────────────────────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════
 // WIDGETS PRIVÉS
-// ─────────────────────────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════
 
 class _FieldLabel extends StatelessWidget {
   final String label;
@@ -463,45 +393,44 @@ class _FormField extends StatelessWidget {
             fontSize: AppConstants.fontSizeMedium,
             color: AppColors.textDark,
           ),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(
-              fontFamily: AppConstants.fontFamilyInter,
-              color: AppColors.hintText,
-              fontSize: AppConstants.fontSizeMedium,
-            ),
-            prefixIcon: Icon(prefixIcon,
-                color: AppColors.textSecondary,
-                size: AppConstants.iconSizeMedium),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            filled: true,
-            fillColor: AppColors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-              borderSide: const BorderSide(color: AppColors.borderLight),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-              borderSide: const BorderSide(color: AppColors.borderLight),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-              borderSide: const BorderSide(
-                  color: AppColors.primary,
-                  width: AppConstants.borderWidthMedium),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-              borderSide: const BorderSide(color: AppColors.statusRejected),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-              borderSide: const BorderSide(color: AppColors.statusRejected),
-            ),
-          ),
+          decoration: _inputDecoration(hint: hint, prefixIcon: prefixIcon),
         ),
       ],
+    );
+  }
+
+  InputDecoration _inputDecoration({required String hint, required IconData prefixIcon}) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(
+        fontFamily: AppConstants.fontFamilyInter,
+        color: AppColors.hintText,
+        fontSize: AppConstants.fontSizeMedium,
+      ),
+      prefixIcon: Icon(prefixIcon, color: AppColors.textSecondary, size: AppConstants.iconSizeMedium),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      filled: true,
+      fillColor: AppColors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+        borderSide: const BorderSide(color: AppColors.borderLight),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+        borderSide: const BorderSide(color: AppColors.borderLight),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+        borderSide: const BorderSide(color: AppColors.primary, width: AppConstants.borderWidthMedium),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+        borderSide: const BorderSide(color: AppColors.statusRejected),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+        borderSide: const BorderSide(color: AppColors.statusRejected),
+      ),
     );
   }
 }
@@ -534,28 +463,19 @@ class _PhoneField extends StatelessWidget {
               fontSize: AppConstants.fontSizeMedium,
             ),
             prefixIcon: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('🇸🇳',
-                      style: TextStyle(fontSize: AppConstants.flagSize)),
+                  const Text('🇸🇳', style: TextStyle(fontSize: AppConstants.flagSize)),
                   const SizedBox(width: 4),
-                  const Icon(Icons.keyboard_arrow_down,
-                      color: AppColors.textSecondary,
-                      size: AppConstants.chevronSize),
+                  const Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary, size: AppConstants.chevronSize),
                   const SizedBox(width: 4),
-                  Container(
-                    width: AppConstants.separatorWidth,
-                    height: AppConstants.separatorHeight,
-                    color: AppColors.borderLight,
-                  ),
+                  Container(width: AppConstants.separatorWidth, height: AppConstants.separatorHeight, color: AppColors.borderLight),
                 ],
               ),
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             filled: true,
             fillColor: AppColors.white,
             border: OutlineInputBorder(
@@ -568,9 +488,7 @@ class _PhoneField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-              borderSide: const BorderSide(
-                  color: AppColors.primary,
-                  width: AppConstants.borderWidthMedium),
+              borderSide: const BorderSide(color: AppColors.primary, width: AppConstants.borderWidthMedium),
             ),
           ),
         ),
@@ -584,11 +502,7 @@ class _DateField extends StatelessWidget {
   final String hint;
   final TextEditingController controller;
 
-  const _DateField({
-    required this.label,
-    required this.hint,
-    required this.controller,
-  });
+  const _DateField({required this.label, required this.hint, required this.controller});
 
   Future<void> _pickDate(BuildContext context) async {
     final picked = await showDatePicker(
@@ -636,11 +550,8 @@ class _DateField extends StatelessWidget {
               color: AppColors.hintText,
               fontSize: AppConstants.fontSizeMedium,
             ),
-            suffixIcon: const Icon(Icons.calendar_today_outlined,
-                color: AppColors.textSecondary,
-                size: AppConstants.iconSizeMedium),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            suffixIcon: const Icon(Icons.calendar_today_outlined, color: AppColors.textSecondary, size: AppConstants.iconSizeMedium),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             filled: true,
             fillColor: AppColors.white,
             border: OutlineInputBorder(
@@ -653,9 +564,7 @@ class _DateField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-              borderSide: const BorderSide(
-                  color: AppColors.primary,
-                  width: AppConstants.borderWidthMedium),
+              borderSide: const BorderSide(color: AppColors.primary, width: AppConstants.borderWidthMedium),
             ),
           ),
         ),
@@ -709,11 +618,7 @@ class _GenderOption extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _GenderOption({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
+  const _GenderOption({required this.label, required this.isSelected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -726,13 +631,7 @@ class _GenderOption extends StatelessWidget {
             color: isSelected ? AppColors.white : AppColors.backgroundLight,
             borderRadius: BorderRadius.circular(AppConstants.radiusRound),
             boxShadow: isSelected
-                ? [
-                    const BoxShadow(
-                      color: AppColors.shadowLight,
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
-                    )
-                  ]
+                ? [const BoxShadow(color: AppColors.shadowLight, blurRadius: 4, offset: Offset(0, 2))]
                 : [],
           ),
           alignment: Alignment.center,
@@ -742,8 +641,7 @@ class _GenderOption extends StatelessWidget {
               fontFamily: AppConstants.fontFamilySofiaSans,
               fontSize: AppConstants.fontSizeMedium,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-              color:
-                  isSelected ? AppColors.textDark : AppColors.textSecondary,
+              color: isSelected ? AppColors.textDark : AppColors.textSecondary,
             ),
           ),
         ),
@@ -776,19 +674,14 @@ class _DropdownField extends StatelessWidget {
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
           value: value,
-          hint: Text(
-            hint,
-            style: const TextStyle(
-              fontFamily: AppConstants.fontFamilyInter,
-              color: AppColors.hintText,
-              fontSize: AppConstants.fontSizeMedium,
-            ),
-          ),
-          icon: const Icon(Icons.keyboard_arrow_down,
-              color: AppColors.textSecondary),
+          hint: Text(hint,
+              style: const TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  color: AppColors.hintText,
+                  fontSize: AppConstants.fontSizeMedium)),
+          icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
           decoration: InputDecoration(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             filled: true,
             fillColor: AppColors.white,
             border: OutlineInputBorder(
@@ -801,29 +694,105 @@ class _DropdownField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-              borderSide: const BorderSide(
-                  color: AppColors.primary,
-                  width: AppConstants.borderWidthMedium),
+              borderSide: const BorderSide(color: AppColors.primary, width: AppConstants.borderWidthMedium),
             ),
           ),
           items: items
-              .map(
-                (item) => DropdownMenuItem(
-                  value: item,
-                  child: Text(
-                    item.tr(),
-                    style: const TextStyle(
-                      fontFamily: AppConstants.fontFamilyInter,
-                      fontSize: AppConstants.fontSizeMedium,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                ),
-              )
+              .map((item) => DropdownMenuItem(
+                    value: item,
+                    child: Text(item.tr(),
+                        style: const TextStyle(
+                            fontFamily: AppConstants.fontFamilyInter,
+                            fontSize: AppConstants.fontSizeMedium,
+                            color: AppColors.textDark)),
+                  ))
               .toList(),
           onChanged: onChanged,
         ),
       ],
+    );
+  }
+}
+
+class _RegisterSuccessBottomSheet extends StatelessWidget {
+  final String phone;
+
+  const _RegisterSuccessBottomSheet({required this.phone});
+
+  String _maskedPhone(String phone) {
+    final cleaned = phone.replaceAll(' ', '').replaceAll('+221', '').trim();
+    if (cleaned.length >= 4) {
+      final start = cleaned.substring(0, 2);
+      final end = cleaned.substring(cleaned.length - 2);
+      return '$start ... $end';
+    }
+    return phone;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: AppConstants.paddingLarge,
+        right: AppConstants.paddingLarge,
+        bottom: MediaQuery.of(context).padding.bottom + AppConstants.paddingLarge,
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
+          boxShadow: const [
+            BoxShadow(
+              color: AppColors.shadowLight,
+              blurRadius: 20,
+              offset: Offset(0, -4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: AppConstants.successIconSize,
+              height: AppConstants.successIconSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.primary,
+                  width: AppConstants.borderWidthThick,
+                ),
+              ),
+              child: const Icon(
+                Icons.check,
+                color: AppColors.primary,
+                size: AppConstants.iconSizeXLarge,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'register.account_created'.tr(),
+              style: const TextStyle(
+                fontFamily: AppConstants.fontFamilySofiaSans,
+                fontSize: AppConstants.fontSizeXLarge,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${'register.code_sent_to'.tr()} ${_maskedPhone(phone)}',
+              style: const TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                fontSize: AppConstants.fontSizeMedium,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

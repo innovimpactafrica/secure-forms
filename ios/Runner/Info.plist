@@ -49,5 +49,21 @@
 	<string>Cette application a besoin d'accéder à la caméra pour la vérification faciale</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Cette application a besoin d'accéder au microphone</string>
+
+	<key>CFBundleURLTypes</key>
+<array>
+    <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLName</key>
+        <string>securelink</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>securelink</string>
+        </array>
+    </dict>
+</array>
+<key>FlutterDeepLinkingEnabled</key>
+<true/>
 </dict>
 </plist>

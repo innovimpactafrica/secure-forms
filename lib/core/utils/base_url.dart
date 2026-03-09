@@ -1,46 +1,39 @@
 class BaseUrl {
-  // Base URLs
-  static const String baseUrl = 'https://api.votreapp.com/api';
-  static const String baseUrlDev = 'https://dev-api.votreapp.com/api';
-  static const String baseUrlProd = 'https://prod-api.votreapp.com/api';
+  static const String _dev  = 'http://86.106.181.31:3002';
+  //static const String _prod = 'https://prod-api.votreapp.com';
 
-  // Current environment
-  static const String currentBaseUrl = baseUrlDev; // Change selon l'environnement
+  
+  static const String currentBaseUrl = _dev;
 
   // ========== AUTH ENDPOINTS ==========
-  static const String login = '$currentBaseUrl/auth/login';
-  static const String register = '$currentBaseUrl/auth/register';
-  static const String verifyOtp = '$currentBaseUrl/auth/verify-otp';
-  static const String logout = '$currentBaseUrl/auth/logout';
-  static const String refreshToken = '$currentBaseUrl/auth/refresh';
-  
+  static const String registerStep1         = '$currentBaseUrl/api/auth/register/client/step1';
+  static const String verifyRegistrationOtp = '$currentBaseUrl/api/auth/register/client/verify-otp';
+  static const String login                 = '$currentBaseUrl/api/auth/login';
+  static const String resendOtp             = '$currentBaseUrl/api/auth/resend-otp';
+  static const String logout                = '$currentBaseUrl/api/auth/logout';
+  static const String refreshToken          = '$currentBaseUrl/api/auth/refresh';
+  static const String setupPassword         = '$currentBaseUrl/api/auth/setup-password'; // ✅
+
   // ========== USER ENDPOINTS ==========
-  static const String getUserProfile = '$currentBaseUrl/user/profile';
-  static const String updateProfile = '$currentBaseUrl/user/update';
-  
+  static const String getUserProfile = '$currentBaseUrl/api/user/profile';
+  static const String updateProfile  = '$currentBaseUrl/api/user/update';
+
   // ========== CLIENT ENDPOINTS ==========
-  static const String getClientDemandes = '$currentBaseUrl/client/demandes';
-  static const String createDemande = '$currentBaseUrl/client/demandes/create';
-  static const String getDemandeDetails = '$currentBaseUrl/client/demandes'; // + /{id}
-  static const String getBeneficiaires = '$currentBaseUrl/client/beneficiaires';
-  static const String getDocuments = '$currentBaseUrl/client/documents';
-  static const String getBanques = '$currentBaseUrl/client/banques';
-  
+  static const String getClientDemandes = '$currentBaseUrl/api/client/demandes';
+  static const String createDemande     = '$currentBaseUrl/api/client/demandes/create';
+  static const String getDemandeDetails = '$currentBaseUrl/api/client/demandes';
+  static const String getBeneficiaires  = '$currentBaseUrl/api/client/beneficiaires';
+  static const String getDocuments      = '$currentBaseUrl/api/client/documents';
+  static const String getBanques        = '$currentBaseUrl/api/client/banques';
+
   // ========== HOME ENDPOINTS ==========
-  static const String getHomeData = '$currentBaseUrl/home';
-  
-  // Méthode pour construire une URL avec paramètres
+  static const String getHomeData = '$currentBaseUrl/api/home';
+
   static String buildUrl(String endpoint, {Map<String, dynamic>? params}) {
     if (params == null || params.isEmpty) return endpoint;
-    
-    final queryString = params.entries
-        .map((e) => '${e.key}=${e.value}')
-        .join('&');
+    final queryString = params.entries.map((e) => '${e.key}=${e.value}').join('&');
     return '$endpoint?$queryString';
   }
-  
-  // Méthode pour construire une URL avec ID
-  static String buildUrlWithId(String endpoint, String id) {
-    return '$endpoint/$id';
-  }
+
+  static String buildUrlWithId(String endpoint, String id) => '$endpoint/$id';
 }
