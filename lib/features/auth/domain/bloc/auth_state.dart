@@ -32,9 +32,15 @@ class PasswordSetupSuccess extends AuthState {}
 // Connexion réussie
 class LoginSuccess extends AuthState {
   final String accessToken;
-  LoginSuccess({required this.accessToken});
+  final String firstName;
+  final String lastName;
+  LoginSuccess({
+    required this.accessToken,
+    required this.firstName,
+    required this.lastName,
+  });
   @override
-  List<Object?> get props => [accessToken];
+  List<Object?> get props => [accessToken, firstName, lastName];
 }
 
 class AuthFailure extends AuthState {

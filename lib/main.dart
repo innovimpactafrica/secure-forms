@@ -62,42 +62,24 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
   Future<void> _initDeepLinks() async {
     _appLinks = AppLinks();
 
-    // Cas 1 : app déjà ouverte en arrière-plan → lien reçu
+    
     _appLinks.uriLinkStream.listen((uri) {
       _handleDeepLink(uri);
     });
 
-    // Cas 2 : app était fermée → lien qui l'a ouverte
+    
     final initialUri = await _appLinks.getInitialLink();
     if (initialUri != null) {
-      // Petit délai pour laisser le temps à MaterialApp de s'initialiser
       await Future.delayed(const Duration(milliseconds: 500));
       _handleDeepLink(initialUri);
     }
   }
 
   void _handleDeepLink(Uri uri) {
-    String? token;
-
-    // ── Format 1 : custom scheme ──────────────────────────────────
-    // securelink://create-password?token=pwd-setup-xxxx
-    if (uri.scheme == 'securelink' && uri.host == 'create-password') {
-      token = uri.queryParameters['token'];
-    }
-
-    // ── Format 2 : lien HTTP backend (localhost:4200 ou prod) ─────
-    // http://localhost:4200/create-password?token=pwd-setup-xxxx
-    // https://monapp.com/create-password?token=pwd-setup-xxxx
-    else if (uri.path.contains('create-password') ||
-             uri.path.contains('setup-password')) {
-      token = uri.queryParameters['token'];
-    }
-
-    // ── Navigation si token trouvé ────────────────────────────────
-    if (token != null && token.isNotEmpty) {
-      _navigatorKey.currentState?.pushNamed(
-        AppRoutes.createPassword,
-        arguments: token,
+    if (uri.scheme == 'securelink' && uri.host == 'login') {
+      _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        AppRoutes.login,
+        (route) => false,
       );
     }
   }
@@ -118,6 +100,15 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
         ),
         initialRoute: AppRoutes.splash,
         onGenerateRoute: (settings) {
+          if (settings.name == AppRoutes.clientHome) {
+            final args = settings.arguments as Map<String, dynamic>? ?? {};
+            return MaterialPageRoute(
+              builder: (_) => ClientHomeScreen(
+                firstName: args['firstName'] as String? ?? '',
+                lastName: args['lastName'] as String? ?? '',
+              ),
+            );
+          }
           if (settings.name == AppRoutes.otpVerification) {
             final args = settings.arguments as Map<String, String>? ?? {};
             return MaterialPageRoute(
@@ -140,7 +131,6 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
           AppRoutes.welcome: (context) => const WelcomeScreen(),
           AppRoutes.login: (context) => const LoginScreen(),
           '/success': (context) => const SuccessScreen(),
-          AppRoutes.clientHome: (context) => const ClientHomeScreen(),
           AppRoutes.clientDemandes: (context) => const ClientDemandesScreen(),
           AppRoutes.clientBanques: (context) => const ClientBanquesScreen(),
           AppRoutes.clientFormulaires: (context) => const ClientFormulairesScreen(),

@@ -7,6 +7,7 @@ import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_event.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_state.dart';
+import 'package:secure_link/features/auth/presentation/pages/login_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String email;
@@ -124,12 +125,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         builder: (_) => _EmailSentBottomSheet(email: email),
       );
 
-      // Après 3s → fermer modal 2 → rester sur cet écran (attente du lien email)
+      // Après 3s → fermer modal 2 → rediriger vers la page de connexion
       Future.delayed(const Duration(seconds: 3), () {
         if (!mounted) return;
         Navigator.of(context).pop(); // ferme modal 2
-        // L'utilisateur reçoit un email avec un lien deep link
-        // Le deep link ouvrira CreatePasswordScreen avec le token
+        // Rediriger vers la page de connexion
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
       });
     });
   }

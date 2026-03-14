@@ -11,7 +11,14 @@ import 'package:secure_link/features/client/presentation/pages/notifications_scr
 import 'package:secure_link/features/client/presentation/pages/step2_documents_screen.dart';
 
 class ClientHomeScreen extends StatefulWidget {
-  const ClientHomeScreen({super.key});
+  final String firstName;
+  final String lastName;
+
+  const ClientHomeScreen({
+    super.key,
+    this.firstName = '',
+    this.lastName = '',
+  });
 
   @override
   State<ClientHomeScreen> createState() => _ClientHomeScreenState();
@@ -28,8 +35,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _HomeHeader(),
-              _WelcomeSection(),
+              _HomeHeader(firstName: widget.firstName, lastName: widget.lastName),
+              _WelcomeSection(firstName: widget.firstName),
               _ProfileProgressSection(),
               _StatsGrid(),
               _SearchBarSection(),
@@ -43,7 +50,16 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
 }
 
 class _HomeHeader extends StatelessWidget {
-  const _HomeHeader();
+  final String firstName;
+  final String lastName;
+
+  const _HomeHeader({required this.firstName, required this.lastName});
+
+  String get _initials {
+    final f = firstName.isNotEmpty ? firstName[0].toUpperCase() : '';
+    final l = lastName.isNotEmpty ? lastName[0].toUpperCase() : '';
+    return '$f$l';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,9 +134,9 @@ class _HomeHeader extends StatelessWidget {
                     color: AppColors.primaryDark,
                     shape: BoxShape.circle,
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
-                      'LD',
+                      _initials.isNotEmpty ? _initials : 'LD',
                       style: TextStyle(
                         color: AppColors.white,
                         fontWeight: FontWeight.w700,
@@ -141,7 +157,8 @@ class _HomeHeader extends StatelessWidget {
 
 
 class _WelcomeSection extends StatelessWidget {
-  const _WelcomeSection();
+  final String firstName;
+  const _WelcomeSection({required this.firstName});
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +168,7 @@ class _WelcomeSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${'home.hello'.tr()} Lamine,',
+            '${'home.hello'.tr()} ${firstName.isNotEmpty ? firstName : 'Lamine'},',
             style: TextStyle(
               fontFamily: AppConstants.fontFamilySofiaSans,
               fontWeight: FontWeight.w700,

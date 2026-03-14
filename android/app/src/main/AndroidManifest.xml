@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
 
     <application
-        android:label="secure_link"
+      android:label="Secure Forms"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
@@ -31,38 +31,26 @@
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme"/>
 
-            
+            <!--  1. Launcher — démarre l'app depuis l'icône -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
-            <!--  Deep link HTTP localhost:4200 -->
-            <intent-filter android:autoVerify="false">
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data
-                    android:scheme="http"
-                    android:host="localhost"
-                    android:port="4200"
-                    android:pathPrefix="/create-password"/>
-            </intent-filter>
-
-            <!--  Deep link custom scheme securelink://  -->
+            <!-- Deep link : securelink://login
+                 Angular appelle window.location.href = 'securelink://login'
+                 après création du mot de passe → ouvre LoginScreen -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data
                     android:scheme="securelink"
-                    android:host="create-password"/>
+                    android:host="login"/>
             </intent-filter>
 
         </activity>
 
-        <!-- Don't delete the meta-data below.
-             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2"/>

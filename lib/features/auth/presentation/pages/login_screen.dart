@@ -49,6 +49,10 @@ class _LoginScreenState extends State<LoginScreen> {
             Navigator.of(context).pushNamedAndRemoveUntil(
               AppRoutes.clientHome,
               (route) => false,
+              arguments: {
+                'firstName': state.firstName,
+                'lastName': state.lastName,
+              },
             );
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(

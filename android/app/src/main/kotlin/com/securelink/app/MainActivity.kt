@@ -1,4 +1,4 @@
-package com.example.secure_link
+package com.securelink.app
 
 import io.flutter.embedding.android.FlutterActivity
 
