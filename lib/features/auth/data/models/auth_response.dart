@@ -91,6 +91,9 @@ class LoginResponse {
       refreshToken: json['refreshToken'] ?? '',
       firstName: nameParts.isNotEmpty ? nameParts.first : '',
       lastName: nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '',
+      name: user['name'] ?? '',
+      email: user['email'] ?? '',
+      role: user['role'] ?? '',
     );
   }
 }
