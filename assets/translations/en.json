@@ -60,7 +60,12 @@
     "enter_code_sent": "Enter the 4-digit code sent by email to ",
     "resend_in": "Resend code in 00:",
     "enter_4_digits": "Please enter the 4 digits of the code",
-    "login_success": "Login successful"
+    "login_success": "Login successful",
+    "number_verified": "Number verified",
+    "account_created_title": "Registration recorded",
+    "check_email": "Check your email",
+    "password_link_sent": "A password creation link has been sent to your email address. Check your inbox (and spam) then click the link to activate your account.",
+    "go_to_login": "Go to login"
   },
   "success": {
     "title": "Congratulations!",

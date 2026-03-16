@@ -7,6 +7,8 @@ import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_event.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_state.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
 import 'package:secure_link/features/auth/presentation/pages/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -46,13 +48,11 @@ class _LoginScreenState extends State<LoginScreen> {
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
+            // Charger le profil utilisateur via l'API
+            context.read<UserBloc>().add(LoadUserProfile(state.accessToken));
             Navigator.of(context).pushNamedAndRemoveUntil(
               AppRoutes.clientHome,
               (route) => false,
-              arguments: {
-                'firstName': state.firstName,
-                'lastName': state.lastName,
-              },
             );
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(

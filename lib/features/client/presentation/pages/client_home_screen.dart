@@ -5,43 +5,125 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
 import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
 import 'package:secure_link/features/client/presentation/pages/step2_documents_screen.dart';
+import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
+import 'package:secure_link/features/kyc/domain/bloc/kyc_event.dart';
+import 'package:secure_link/features/kyc/domain/bloc/kyc_state.dart';
+import 'package:secure_link/features/kyc/presentation/pages/kyc_gate_page.dart';
 
 class ClientHomeScreen extends StatefulWidget {
-  final String firstName;
-  final String lastName;
-
-  const ClientHomeScreen({
-    super.key,
-    this.firstName = '',
-    this.lastName = '',
-  });
+  const ClientHomeScreen({super.key});
 
   @override
   State<ClientHomeScreen> createState() => _ClientHomeScreenState();
 }
 
 class _ClientHomeScreenState extends State<ClientHomeScreen> {
+  KycBloc? _kycBloc;
+  String _lastUserId = '';
+  bool _kycTriggered = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final userState = context.read<UserBloc>().state;
+    final userId = userState is UserLoaded ? userState.user.id : '';
+    // Crée un nouveau KycBloc si l'userId a changé (nouvel utilisateur)
+    if (userId != _lastUserId) {
+      _kycBloc?.close();
+      _lastUserId = userId;
+      _kycTriggered = false;
+      _kycBloc = KycBloc(userId: userId);
+      _kycBloc!.add(const KycCheckStatus());
+    }
+  }
+
+  @override
+  void dispose() {
+    _kycBloc?.close();
+    super.dispose();
+  }
+
+  void _handleKycState(BuildContext context, KycState state) {
+    if (state is KycRequired && !_kycTriggered) {
+      _kycTriggered = true;
+      final navigator = Navigator.of(context);
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) {
+          navigator.push(
+            MaterialPageRoute(
+              builder: (_) => BlocProvider.value(
+                value: _kycBloc!,
+                child: const KycGatePage(),
+              ),
+            ),
+          ).then((_) {
+            // Réinitialise le flag quand on revient sur le home
+            _kycTriggered = false;
+          });
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    context.locale; // Force rebuild on locale change
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _HomeHeader(firstName: widget.firstName, lastName: widget.lastName),
-              _WelcomeSection(firstName: widget.firstName),
-              _ProfileProgressSection(),
-              _StatsGrid(),
-              _SearchBarSection(),
-              _RecentDemandesSection(),
-            ],
+    context.locale;
+    if (_kycBloc == null) return const SizedBox.shrink();
+    return BlocListener<UserBloc, UserState>(
+      listener: (context, userState) {
+        if (userState is UserLoaded) {
+          final userId = userState.user.id;
+          if (userId != _lastUserId) {
+            _kycBloc?.close();
+            _lastUserId = userId;
+            _kycTriggered = false;
+            setState(() {
+              _kycBloc = KycBloc(userId: userId);
+            });
+            _kycBloc!.add(const KycCheckStatus());
+          }
+        }
+      },
+      child: BlocProvider.value(
+        value: _kycBloc!,
+        child: BlocListener<KycBloc, KycState>(
+          listener: _handleKycState,
+          child: PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, _) {
+              if (!didPop) {
+                _kycTriggered = false;
+                _kycBloc!.add(const KycCheckStatus());
+              }
+            },
+            child: BlocBuilder<UserBloc, UserState>(
+              builder: (context, userState) {
+                final user = userState is UserLoaded ? userState.user : null;
+                return Scaffold(
+                  backgroundColor: AppColors.white,
+                  body: SafeArea(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _HomeHeader(initials: user?.initials ?? ''),
+                          _WelcomeSection(firstName: user?.firstName ?? ''),
+                          _ProfileProgressSection(),
+                          _StatsGrid(),
+                          _SearchBarSection(),
+                          _RecentDemandesSection(),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -50,16 +132,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
 }
 
 class _HomeHeader extends StatelessWidget {
-  final String firstName;
-  final String lastName;
-
-  const _HomeHeader({required this.firstName, required this.lastName});
-
-  String get _initials {
-    final f = firstName.isNotEmpty ? firstName[0].toUpperCase() : '';
-    final l = lastName.isNotEmpty ? lastName[0].toUpperCase() : '';
-    return '$f$l';
-  }
+  final String initials;
+  const _HomeHeader({required this.initials});
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +210,7 @@ class _HomeHeader extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      _initials.isNotEmpty ? _initials : 'LD',
+                      initials.isNotEmpty ? initials : '??',
                       style: TextStyle(
                         color: AppColors.white,
                         fontWeight: FontWeight.w700,
@@ -168,7 +242,7 @@ class _WelcomeSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${'home.hello'.tr()} ${firstName.isNotEmpty ? firstName : 'Lamine'},',
+            '${'home.hello'.tr()} ${firstName.isNotEmpty ? firstName : ''},',
             style: TextStyle(
               fontFamily: AppConstants.fontFamilySofiaSans,
               fontWeight: FontWeight.w700,
@@ -213,53 +287,21 @@ class _WelcomeSection extends StatelessWidget {
 }
 
 
-class _ProfileProgressSection extends StatefulWidget {
+class _ProfileProgressSection extends StatelessWidget {
   const _ProfileProgressSection();
 
   @override
-  State<_ProfileProgressSection> createState() =>
-      _ProfileProgressSectionState();
-}
-
-class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
-  bool _showCompleted = false;
-  bool _hideSection = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Vérifier si le profil est déjà complété au démarrage
-    final state = context.read<ProfileBloc>().state;
-    if (state is ProfileCompleted) {
-      _showCompleted = true;
-      // Masquer après 3 secondes
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) setState(() => _hideSection = true);
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ProfileBloc, ProfileState>(
-      listener: (context, state) {
-        if (state is ProfileCompleted && !_showCompleted) {
-          setState(() => _showCompleted = true);
-          Future.delayed(const Duration(seconds: 3), () {
-            if (mounted) setState(() => _hideSection = true);
-          });
-        }
-      },
-      builder: (context, state) {
-        if (_hideSection) return const SizedBox.shrink();
+    return BlocBuilder<UserBloc, UserState>(
+      builder: (context, userState) {
+        final completion = userState is UserLoaded
+            ? userState.user.profileCompletion
+            : 0;
+        final progress = (completion / 100).clamp(0.0, 1.0);
+        final isCompleted = completion >= 100;
+        final percent = '$completion%';
 
-        final isCompleted = _showCompleted || state is ProfileCompleted;
-        final progress = isCompleted
-            ? 1.0
-            : state is ProfileInProgress
-                ? state.profile.progressPercent
-                : 0.50;
-        final percent = '${(progress * 100).toInt()}%';
+        if (isCompleted) return const SizedBox.shrink();
 
         return Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
@@ -267,16 +309,12 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isCompleted
-                    ? 'home.profile_completed'.tr()
-                    : 'home.complete_profile'.tr(),
+                'home.complete_profile'.tr(),
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilySofiaSans,
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: isCompleted
-                      ? AppColors.statusValideGreen
-                      : AppColors.primary,
+                  color: AppColors.progressFill,
                 ),
               ),
               const SizedBox(height: 10),
@@ -295,9 +333,7 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
                     child: Container(
                       height: 7,
                       decoration: BoxDecoration(
-                        color: isCompleted
-                            ? AppColors.statusValideGreen
-                            : AppColors.progressFill,
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -313,62 +349,58 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
                     fontFamily: AppConstants.fontFamilyInter,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: isCompleted
-                        ? AppColors.statusValideGreen
-                        : AppColors.progressFill,
+                    color: AppColors.primary,
                   ),
                 ),
               ),
-              if (!isCompleted) ...[
-                const SizedBox(height: 10),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => BlocProvider.value(
-                        value: context.read<ProfileBloc>(),
-                        child: const Step2DocumentsScreen(),
-                      ),
-                    ),
-                  ),
-                  child: Container(
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryDark,
-                      borderRadius: BorderRadius.circular(23),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(width: 20),
-                        Text(
-                          'home.start_now'.tr(),
-                          style: TextStyle(
-                            fontFamily: AppConstants.fontFamilySofiaSans,
-                            color: AppColors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Container(
-                          width: 30,
-                          height: 30,
-                          decoration: const BoxDecoration(
-                            color: AppColors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.arrow_forward,
-                            color: AppColors.primaryDarker,
-                            size: 16,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider.value(
+                      value: context.read<ProfileBloc>(),
+                      child: const Step2DocumentsScreen(),
                     ),
                   ),
                 ),
-              ],
+                child: Container(
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryDark,
+                    borderRadius: BorderRadius.circular(23),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(width: 20),
+                      Text(
+                        'home.start_now'.tr(),
+                        style: TextStyle(
+                          fontFamily: AppConstants.fontFamilySofiaSans,
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        width: 30,
+                        height: 30,
+                        decoration: const BoxDecoration(
+                          color: AppColors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.arrow_forward,
+                          color: AppColors.primaryDarker,
+                          size: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         );

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
 
 class ClientInformationsPersonnellesScreen extends StatefulWidget {
   const ClientInformationsPersonnellesScreen({super.key});
@@ -21,8 +24,25 @@ class _ClientInformationsPersonnellesScreenState
   final TextEditingController _dateNaissanceController =
       TextEditingController();
 
-  String _selectedGender = 'profile.male'.tr();
+  late String _selectedGender;
   String? _selectedSituation;
+
+  @override
+  void initState() {
+    _selectedGender = 'profile.male'.tr();
+    super.initState();
+    // Pré-remplir avec les données de l'utilisateur connecté
+    final userState = context.read<UserBloc>().state;
+    if (userState is UserLoaded) {
+      final user = userState.user;
+      _prenomController.text = user.firstName;
+      _nomController.text = user.lastName;
+      _emailController.text = user.email;
+      // Extraire le numéro sans l'indicatif +221
+      final phone = user.phone.replaceAll('+221', '').replaceAll(' ', '').trim();
+      _telephoneController.text = phone;
+    }
+  }
 
   List<String> get _situationsMatrimoniales => [
     'profile.single'.tr(),
@@ -394,7 +414,7 @@ class _ClientInformationsPersonnellesScreenState
       height: 48,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F4F8),
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(100),
       ),
       child: Row(

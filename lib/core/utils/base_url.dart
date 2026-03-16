@@ -15,7 +15,7 @@ class BaseUrl {
   static const String setupPassword         = '$currentBaseUrl/auth/setup-password';
 
   // ========== USER ENDPOINTS ==========
-  static const String getUserProfile = '$currentBaseUrl/user/profile';
+  static const String getUserProfile = '$currentBaseUrl/auth/profile';
   static const String updateProfile  = '$currentBaseUrl/user/update';
 
   // ========== CLIENT ENDPOINTS ==========

@@ -1,19 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Internet (OBLIGATOIRE pour API et images) -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- Caméra -->
     <uses-permission android:name="android.permission.CAMERA"/>
-    <!-- Android 12 et moins -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"/>
-    <!-- Android 13+ -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
 
     <application
-      android:label="Secure Forms"
+        android:label="Secure Forms"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
@@ -31,22 +27,21 @@
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme"/>
 
-            <!--  1. Launcher — démarre l'app depuis l'icône -->
+            <!--  Launcher — NE JAMAIS SUPPRIMER -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
-            <!-- Deep link : securelink://login
-                 Angular appelle window.location.href = 'securelink://login'
-                 après création du mot de passe → ouvre LoginScreen -->
-            <intent-filter>
+            <!--  App Links HTTPS — intercepte tous les liens
+                 https://secure.innovimpactdev.cloud/... -->
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data
-                    android:scheme="securelink"
-                    android:host="login"/>
+                    android:scheme="https"
+                    android:host="secure.innovimpactdev.cloud"/>
             </intent-filter>
 
         </activity>
@@ -57,6 +52,7 @@
 
     </application>
 
+    
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>

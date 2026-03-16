@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
 import 'package:secure_link/features/client/data/models/profile_model.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
@@ -58,9 +60,13 @@ class Step2DocumentsScreen extends StatelessWidget {
                   CompleteProfileHeader(
                     progressValue: progressValue,
                     progressLabel: progressLabel,
-                    subtitle: '${profile.firstName} ${profile.lastName}'.trim().isEmpty
-                        ? 'Lamine Diop'
-                        : '${profile.firstName} ${profile.lastName}',
+                    subtitle: () {
+                      final userState = context.read<UserBloc>().state;
+                      if (userState is UserLoaded) {
+                        return userState.user.displayName;
+                      }
+                      return '';
+                    }(),
                   ),
                   Expanded(
                     child: SingleChildScrollView(

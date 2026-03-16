@@ -65,7 +65,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               lastName: _lastNameController.text.trim(),
               firstName: _firstNameController.text.trim(),
               email: _emailController.text.trim(),
-              phone: _phoneController.text.trim(),
+              phone: '+221${_phoneController.text.trim()}',
               address: 'Dakar',
               dateOfBirth: _birthDateController.text.trim(),
               gender: _genderMap[_selectedGender] ?? 'HOMME',

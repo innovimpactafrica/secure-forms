@@ -6,6 +6,12 @@ class AppRoutes {
   static const String otpVerification = '/otp-verification';
   static const String createPassword = '/create-password'; 
 
+  // KYC - Vérification d'identité
+  static const String kycGate = '/kyc-gate';
+  static const String kycIntro = '/kyc-intro';
+  static const String kycStep1 = '/kyc-step1';
+  static const String kycStep2Face = '/kyc-step2-face';
+
   // Client - Pages principales
   static const String clientHome = '/client-home';
   static const String clientDemandes = '/client-demandes';

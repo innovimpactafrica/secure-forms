@@ -73,6 +73,8 @@ class LoginResponse {
   final String refreshToken;
   final String firstName;
   final String lastName;
+  final String email;
+  final String role;
 
   const LoginResponse({
     required this.message,
@@ -80,20 +82,23 @@ class LoginResponse {
     required this.refreshToken,
     required this.firstName,
     required this.lastName,
+    required this.email,
+    required this.role,
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
     final user = json['user'] as Map<String, dynamic>? ?? {};
-    final nameParts = (user['name'] as String? ?? '').trim().split(' ');
+    final fullName = (user['name'] as String? ?? '').trim();
+    final nameParts = fullName.isNotEmpty ? fullName.split(' ') : [];
+
     return LoginResponse(
       message: json['message'] ?? '',
       accessToken: json['accessToken'] ?? '',
       refreshToken: json['refreshToken'] ?? '',
       firstName: nameParts.isNotEmpty ? nameParts.first : '',
       lastName: nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '',
-      name: user['name'] ?? '',
       email: user['email'] ?? '',
       role: user['role'] ?? '',
     );
   }
-}
+} 

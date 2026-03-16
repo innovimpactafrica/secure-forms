@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:app_links/app_links.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
 import 'package:secure_link/features/auth/presentation/pages/login_screen.dart';
 import 'package:secure_link/features/auth/presentation/pages/create_password_screen.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
+import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'features/splash/presentation/pages/splash_screen.dart';
 import 'features/auth/presentation/pages/welcome_screen.dart';
 import 'features/auth/presentation/pages/otp_verification_screen.dart';
@@ -62,12 +66,12 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
   Future<void> _initDeepLinks() async {
     _appLinks = AppLinks();
 
-    
+    // Cas 1 : app ouverte en arrière-plan
     _appLinks.uriLinkStream.listen((uri) {
       _handleDeepLink(uri);
     });
 
-    
+    // Cas 2 : app fermée — lien qui l'a ouverte
     final initialUri = await _appLinks.getInitialLink();
     if (initialUri != null) {
       await Future.delayed(const Duration(milliseconds: 500));
@@ -76,18 +80,38 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
   }
 
   void _handleDeepLink(Uri uri) {
-    if (uri.scheme == 'securelink' && uri.host == 'login') {
-      _navigatorKey.currentState?.pushNamedAndRemoveUntil(
-        AppRoutes.login,
-        (route) => false,
-      );
+    if (uri.host == 'secure.innovimpactdev.cloud') {
+
+      // https://secure.innovimpactdev.cloud/mobile/login
+      // → ouvre LoginScreen
+      if (uri.path.contains('/mobile/login')) {
+        _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+          AppRoutes.login,
+          (route) => false,
+        );
+      }
+
+      // https://secure.innovimpactdev.cloud/auth/setup-password?token=xxx
+      // → ouvre CreatePasswordScreen
+      else if (uri.path.contains('setup-password')) {
+        final token = uri.queryParameters['token'] ?? '';
+        if (token.isNotEmpty) {
+          _navigatorKey.currentState?.pushNamed(
+            AppRoutes.createPassword,
+            arguments: token,
+          );
+        }
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ProfileBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => ProfileBloc()),
+        BlocProvider(create: (_) => UserBloc()),
+      ],
       child: MaterialApp(
         title: 'Secure Link',
         navigatorKey: _navigatorKey,
@@ -100,15 +124,6 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
         ),
         initialRoute: AppRoutes.splash,
         onGenerateRoute: (settings) {
-          if (settings.name == AppRoutes.clientHome) {
-            final args = settings.arguments as Map<String, dynamic>? ?? {};
-            return MaterialPageRoute(
-              builder: (_) => ClientHomeScreen(
-                firstName: args['firstName'] as String? ?? '',
-                lastName: args['lastName'] as String? ?? '',
-              ),
-            );
-          }
           if (settings.name == AppRoutes.otpVerification) {
             final args = settings.arguments as Map<String, String>? ?? {};
             return MaterialPageRoute(
@@ -131,6 +146,7 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
           AppRoutes.welcome: (context) => const WelcomeScreen(),
           AppRoutes.login: (context) => const LoginScreen(),
           '/success': (context) => const SuccessScreen(),
+          AppRoutes.clientHome: (context) => const ClientHomeScreen(),
           AppRoutes.clientDemandes: (context) => const ClientDemandesScreen(),
           AppRoutes.clientBanques: (context) => const ClientBanquesScreen(),
           AppRoutes.clientFormulaires: (context) => const ClientFormulairesScreen(),

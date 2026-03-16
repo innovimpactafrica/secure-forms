@@ -7,7 +7,7 @@ import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_event.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_state.dart';
-import 'package:secure_link/features/auth/presentation/pages/login_screen.dart';
+import 'package:secure_link/features/auth/presentation/pages/email_sent_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String email;
@@ -97,53 +97,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     _startTimer();
   }
 
-  // ─── Affiche les 2 modals enchaînés ───────────────────────────
-  void _showSuccessFlow(BuildContext context, String email) {
-    // Modal 1 : "Numéro vérifié"
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isDismissible: false,
-      enableDrag: false,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (_) => const _VerifiedBottomSheet(),
-    );
-
-    // Après 2s → fermer modal 1 + ouvrir modal 2
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      Navigator.of(context).pop(); // ferme modal 1
-
-      showModalBottomSheet(
-        context: context,
-        backgroundColor: Colors.transparent,
-        isDismissible: false,
-        enableDrag: false,
-        isScrollControlled: true,
-        useSafeArea: true,
-        builder: (_) => _EmailSentBottomSheet(email: email),
-      );
-
-      // Après 3s → fermer modal 2 → rediriger vers la page de connexion
-      Future.delayed(const Duration(seconds: 3), () {
-        if (!mounted) return;
-        Navigator.of(context).pop(); // ferme modal 2
-        // Rediriger vers la page de connexion
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
-        );
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is OtpVerifySuccess) {
-          _showSuccessFlow(context, state.email.isNotEmpty ? state.email : widget.email);
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const EmailSentScreen()),
+            (route) => false,
+          );
         } else if (state is OtpResendSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -404,139 +366,6 @@ class _OtpBox extends StatelessWidget {
             borderSide: const BorderSide(
                 color: AppColors.primary, width: AppConstants.borderWidthMedium),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// ═════════════════════════════════════════════════════════════════
-// MODAL 1 — Numéro / Email vérifié ✅
-// ═════════════════════════════════════════════════════════════════
-class _VerifiedBottomSheet extends StatelessWidget {
-  const _VerifiedBottomSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: AppConstants.paddingLarge,
-        right: AppConstants.paddingLarge,
-        bottom: MediaQuery.of(context).padding.bottom + AppConstants.paddingLarge,
-      ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
-          boxShadow: const [
-            BoxShadow(
-                color: AppColors.shadowLight,
-                blurRadius: 20,
-                offset: Offset(0, -4)),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Icône check cercle teal
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: AppColors.primary,
-                    width: AppConstants.borderWidthThick),
-              ),
-              child: const Icon(Icons.check,
-                  color: AppColors.primary, size: 22),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                'otp.number_verified'.tr(),
-                style: const TextStyle(
-                  fontFamily: AppConstants.fontFamilySofiaSans,
-                  fontSize: AppConstants.fontSizeLarge,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textDark,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ═════════════════════════════════════════════════════════════════
-// MODAL 2 — Lien de création de mot de passe envoyé 📧
-// ═════════════════════════════════════════════════════════════════
-class _EmailSentBottomSheet extends StatelessWidget {
-  final String email;
-  const _EmailSentBottomSheet({required this.email});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: AppConstants.paddingLarge,
-        right: AppConstants.paddingLarge,
-        bottom: MediaQuery.of(context).padding.bottom + AppConstants.paddingLarge,
-      ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
-          boxShadow: const [
-            BoxShadow(
-                color: AppColors.shadowLight,
-                blurRadius: 20,
-                offset: Offset(0, -4)),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Icône email
-            Container(
-              width: AppConstants.successIconSize,
-              height: AppConstants.successIconSize,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: AppColors.primary,
-                    width: AppConstants.borderWidthThick),
-              ),
-              child: const Icon(Icons.mark_email_read_outlined,
-                  color: AppColors.primary, size: AppConstants.iconSizeXLarge),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'otp.account_created_title'.tr(),
-              style: const TextStyle(
-                fontFamily: AppConstants.fontFamilySofiaSans,
-                fontSize: AppConstants.fontSizeXLarge,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'otp.password_link_sent'.tr(),
-              style: const TextStyle(
-                fontFamily: AppConstants.fontFamilyInter,
-                fontSize: AppConstants.fontSizeMedium,
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
         ),
       ),
     );

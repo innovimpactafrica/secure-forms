@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/presentation/pages/mes_archives_screen.dart';
 import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
@@ -40,9 +42,21 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 24),
-                    const _AvatarSection(),
-                    const SizedBox(height: 16),
-                    const _UserInfoSection(),
+                    BlocBuilder<UserBloc, UserState>(
+                      builder: (context, userState) {
+                        final user = userState is UserLoaded ? userState.user : null;
+                        return Column(
+                          children: [
+                            _AvatarSection(initials: user?.initials ?? '??'),
+                            const SizedBox(height: 16),
+                            _UserInfoSection(
+                              name: user?.displayName ?? '',
+                              phone: user?.phone ?? '',
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                     const SizedBox(height: 32),
                     _MenuSection(
                       selectedLanguage: selectedLanguage,
@@ -379,7 +393,8 @@ class _ProfileHeader extends StatelessWidget {
 // AVATAR
 // ─────────────────────────────────────────────────────────────────
 class _AvatarSection extends StatelessWidget {
-  const _AvatarSection();
+  final String initials;
+  const _AvatarSection({required this.initials});
 
   @override
   Widget build(BuildContext context) {
@@ -390,10 +405,10 @@ class _AvatarSection extends StatelessWidget {
         color: AppColors.primaryDark,
         shape: BoxShape.circle,
       ),
-      child: const Center(
+      child: Center(
         child: Text(
-          'LD',
-          style: TextStyle(
+          initials,
+          style: const TextStyle(
             fontFamily: AppConstants.fontFamilySofiaSans,
             fontWeight: FontWeight.w700,
             fontSize: 36,
@@ -409,14 +424,16 @@ class _AvatarSection extends StatelessWidget {
 // USER INFO
 // ─────────────────────────────────────────────────────────────────
 class _UserInfoSection extends StatelessWidget {
-  const _UserInfoSection();
+  final String name;
+  final String phone;
+  const _UserInfoSection({required this.name, required this.phone});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Text(
-          'Lamine DIEME',
+          name.isNotEmpty ? name : '',
           style: TextStyle(
             fontFamily: AppConstants.fontFamilySofiaSans,
             fontWeight: FontWeight.w700,
@@ -426,7 +443,7 @@ class _UserInfoSection extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          '77 123 45 67',
+          phone.isNotEmpty ? phone : '',
           style: TextStyle(
             fontFamily: AppConstants.fontFamilySofiaSans,
             fontWeight: FontWeight.w400,
