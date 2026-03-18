@@ -1,5 +1,4 @@
 
-
 import 'package:secure_link/features/client/data/models/profile_model.dart';
 
 /// États du ProfileBloc
@@ -7,12 +6,10 @@ abstract class ProfileState {
   const ProfileState();
 }
 
-/// État initial au démarrage
 class ProfileInitial extends ProfileState {
   const ProfileInitial();
 }
 
-/// Chargement en cours (future API call)
 class ProfileLoading extends ProfileState {
   const ProfileLoading();
 }
@@ -23,7 +20,6 @@ class ProfileInProgress extends ProfileState {
 
   const ProfileInProgress({required this.profile});
 
-  /// Raccourcis utiles dans les widgets
   double get progress => profile.progressPercent;
   bool get isPersonalInfoComplete => profile.firstName.isNotEmpty;
   int get validatedDocumentsCount =>
@@ -32,14 +28,13 @@ class ProfileInProgress extends ProfileState {
           .length;
 }
 
-/// Étape 1 validée — on navigue vers Étape 2
+/// Étape 1 validée
 class ProfileStep1Validated extends ProfileState {
   final ProfileModel profile;
-
   const ProfileStep1Validated({required this.profile});
 }
 
-/// Un document vient d'être ajouté — on déclenche Face ID si nécessaire
+/// Un document local vient d'être ajouté
 class ProfileDocumentAdded extends ProfileState {
   final ProfileModel profile;
   final DocumentModel addedDocument;
@@ -52,11 +47,10 @@ class ProfileDocumentAdded extends ProfileState {
   });
 }
 
-/// Face ID validé pour un document
+/// Face ID validé
 class ProfileFaceVerificationSuccess extends ProfileState {
   final ProfileModel profile;
   final String documentType;
-
   const ProfileFaceVerificationSuccess({
     required this.profile,
     required this.documentType,
@@ -68,7 +62,6 @@ class ProfileFaceVerificationFailed extends ProfileState {
   final ProfileModel profile;
   final String documentType;
   final String reason;
-
   const ProfileFaceVerificationFailed({
     required this.profile,
     required this.documentType,
@@ -79,13 +72,123 @@ class ProfileFaceVerificationFailed extends ProfileState {
 /// Profil complété à 100%
 class ProfileCompleted extends ProfileState {
   final ProfileModel profile;
-
   const ProfileCompleted({required this.profile});
 }
 
 /// Erreur
 class ProfileError extends ProfileState {
   final String message;
-
   const ProfileError({required this.message});
+}
+
+// ─────────────────────────────────────────────────────────────────
+// STATES API — Profile Documents
+// ─────────────────────────────────────────────────────────────────
+
+/// Types de documents + documents uploadés chargés depuis l'API
+class ProfileDocumentsLoaded extends ProfileState {
+  final ProfileModel profile;
+  final List<DocumentTypeModel> documentTypes;
+  final List<UploadedDocumentModel> uploadedDocuments;
+  final ProfileCompletionModel completion;
+
+  const ProfileDocumentsLoaded({
+    required this.profile,
+    required this.documentTypes,
+    required this.uploadedDocuments,
+    required this.completion,
+  });
+}
+
+/// Upload en cours
+class ProfileDocumentUploading extends ProfileState {
+  final ProfileModel profile;
+  final List<DocumentTypeModel> documentTypes;
+  final List<UploadedDocumentModel> uploadedDocuments;
+  final ProfileCompletionModel completion;
+
+  const ProfileDocumentUploading({
+    required this.profile,
+    required this.documentTypes,
+    required this.uploadedDocuments,
+    required this.completion,
+  });
+}
+
+/// Upload réussi — document nécessitant vérification identité
+class ProfileDocumentUploadedNeedsVerification extends ProfileState {
+  final ProfileModel profile;
+  final List<DocumentTypeModel> documentTypes;
+  final List<UploadedDocumentModel> uploadedDocuments;
+  final ProfileCompletionModel completion;
+  final DocumentTypeModel documentType;
+
+  const ProfileDocumentUploadedNeedsVerification({
+    required this.profile,
+    required this.documentTypes,
+    required this.uploadedDocuments,
+    required this.completion,
+    required this.documentType,
+  });
+}
+
+/// Upload réussi — document sans vérification identité
+class ProfileDocumentUploadedSuccess extends ProfileState {
+  final ProfileModel profile;
+  final List<DocumentTypeModel> documentTypes;
+  final List<UploadedDocumentModel> uploadedDocuments;
+  final ProfileCompletionModel completion;
+
+  const ProfileDocumentUploadedSuccess({
+    required this.profile,
+    required this.documentTypes,
+    required this.uploadedDocuments,
+    required this.completion,
+  });
+}
+
+/// Suppression réussie
+class ProfileDocumentDeleted extends ProfileState {
+  final ProfileModel profile;
+  final List<DocumentTypeModel> documentTypes;
+  final List<UploadedDocumentModel> uploadedDocuments;
+  final ProfileCompletionModel completion;
+
+  const ProfileDocumentDeleted({
+    required this.profile,
+    required this.documentTypes,
+    required this.uploadedDocuments,
+    required this.completion,
+  });
+}
+
+/// Modification dates réussie (PATCH)
+class ProfileDocumentPatched extends ProfileState {
+  final ProfileModel profile;
+  final List<DocumentTypeModel> documentTypes;
+  final List<UploadedDocumentModel> uploadedDocuments;
+  final ProfileCompletionModel completion;
+
+  const ProfileDocumentPatched({
+    required this.profile,
+    required this.documentTypes,
+    required this.uploadedDocuments,
+    required this.completion,
+  });
+}
+
+/// Image d'un document chargée
+class ProfileDocumentImageLoaded extends ProfileState {
+  final String documentId;
+  final List<int> bytes;
+  const ProfileDocumentImageLoaded({
+    required this.documentId,
+    required this.bytes,
+  });
+}
+
+/// Erreur chargement image document
+class ProfileDocumentImageError extends ProfileState {
+  final String documentId;
+  const ProfileDocumentImageError({required this.documentId});
 }

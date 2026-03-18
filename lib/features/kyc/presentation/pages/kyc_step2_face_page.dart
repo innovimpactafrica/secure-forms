@@ -8,7 +8,9 @@ import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'kyc_step2_face_preview_page.dart';
 
 class KycStep2FacePage extends StatefulWidget {
-  const KycStep2FacePage({super.key});
+  /// Callback appelé après validation du selfie
+  final VoidCallback? onSuccess;
+  const KycStep2FacePage({super.key, this.onSuccess});
 
   @override
   State<KycStep2FacePage> createState() => _KycStep2FacePageState();
@@ -33,7 +35,10 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
         MaterialPageRoute(
           builder: (_) => BlocProvider.value(
             value: context.read<KycBloc>(),
-            child: KycStep2FacePreviewPage(photo: File(picked.path)),
+            child: KycStep2FacePreviewPage(
+              photo: File(picked.path),
+              onSuccess: widget.onSuccess,
+            ),
           ),
         ),
       );

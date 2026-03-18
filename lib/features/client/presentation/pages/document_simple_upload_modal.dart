@@ -1,0 +1,333 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:secure_link/features/client/data/models/profile_model.dart';
+import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
+import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
+import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
+
+/// Modal d'ajout de document SANS vérification d'identité
+/// Design : docsvi.png
+/// Type de document (lecture seule) + zone upload + bouton Enregistrer
+class DocumentSimpleUploadModal extends StatefulWidget {
+  final DocumentTypeModel documentType;
+  final UploadedDocumentModel? existingDocument;
+
+  const DocumentSimpleUploadModal({
+    super.key,
+    required this.documentType,
+    this.existingDocument,
+  });
+
+  @override
+  State<DocumentSimpleUploadModal> createState() =>
+      _DocumentSimpleUploadModalState();
+}
+
+class _DocumentSimpleUploadModalState
+    extends State<DocumentSimpleUploadModal> {
+  File? _selectedFile;
+  bool _isImage = false;
+  final _picker = ImagePicker();
+
+  Future<void> _pickFile() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            ListTile(
+              leading: Icon(Icons.photo_library_outlined,
+                  color: AppColors.primary),
+              title: Text(
+                'profile.gallery'.tr(),
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  color: AppColors.textDark,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            ListTile(
+              leading:
+                  Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+              title: Text(
+                'profile.take_photo'.tr(),
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  color: AppColors.textDark,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+    final XFile? picked =
+        await _picker.pickImage(source: source, imageQuality: 85);
+    if (picked != null) {
+      setState(() {
+        _selectedFile = File(picked.path);
+        _isImage = true;
+      });
+    }
+  }
+
+  void _onEnregistrer() {
+    if (_selectedFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'profile.fill_all_fields'.tr(),
+            style: TextStyle(
+              fontFamily: AppConstants.fontFamilyInter,
+              color: AppColors.white,
+            ),
+          ),
+          backgroundColor: AppColors.statusRejected,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
+
+    context.read<ProfileBloc>().add(
+          UploadProfileDocumentEvent(
+            file: _selectedFile!,
+            documentTypeId: widget.documentType.id,
+          ),
+        );
+
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<ProfileBloc, ProfileState>(
+      listener: (context, state) {
+        if (state is ProfileError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                state.message,
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  color: AppColors.white,
+                ),
+              ),
+              backgroundColor: AppColors.statusRejected,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        }
+      },
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 20,
+          right: 20,
+          top: 16,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  width: AppConstants.modalHandleWidth,
+                  height: AppConstants.modalHandleHeight,
+                  decoration: BoxDecoration(
+                    color: AppColors.modalHandle,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Titre + fermeture
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'profile.add_document'.tr(),
+                    style: TextStyle(
+                      fontFamily: AppConstants.fontFamilySofiaSans,
+                      fontWeight: FontWeight.w700,
+                      fontSize: AppConstants.fontSizeXXLarge,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Icon(
+                      Icons.close,
+                      color: AppColors.textSecondary,
+                      size: AppConstants.iconSizeLarge,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Type de document (lecture seule)
+              Text(
+                'profile.document_type'.tr(),
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontSize: AppConstants.fontSizeMedium,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textDark,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.borderLight),
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.radiusSmall),
+                ),
+                child: Text(
+                  widget.documentType.title,
+                  style: TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    fontSize: AppConstants.fontSizeMedium,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Zone upload
+              GestureDetector(
+                onTap: _pickFile,
+                child: Container(
+                  width: double.infinity,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEAF4F4),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusSmall),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.25),
+                    ),
+                  ),
+                  child: _selectedFile != null && _isImage
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(
+                              AppConstants.radiusSmall),
+                          child: Image.file(
+                            _selectedFile!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            errorBuilder: (_, __, ___) =>
+                                const _UploadPlaceholder(hasFile: true),
+                          ),
+                        )
+                      : _UploadPlaceholder(hasFile: _selectedFile != null),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Bouton Enregistrer (seul bouton — design docsvi.png)
+              SizedBox(
+                width: double.infinity,
+                height: AppConstants.logoutButtonHeight,
+                child: ElevatedButton(
+                  onPressed: _onEnregistrer,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryDark,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusRound),
+                    ),
+                  ),
+                  child: Text(
+                    'profile.save'.tr(),
+                    style: TextStyle(
+                      fontFamily: AppConstants.fontFamilySofiaSans,
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: AppConstants.fontSizeLarge,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _UploadPlaceholder extends StatelessWidget {
+  final bool hasFile;
+  const _UploadPlaceholder({required this.hasFile});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          hasFile
+              ? Icons.insert_drive_file_outlined
+              : Icons.cloud_upload_outlined,
+          size: AppConstants.iconSizeXXLarge,
+          color: AppColors.primary,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          hasFile
+              ? 'profile.file_selected'.tr()
+              : 'profile.click_upload'.tr(),
+          style: TextStyle(
+            fontFamily: AppConstants.fontFamilySofiaSans,
+            fontWeight: FontWeight.w600,
+            fontSize: AppConstants.fontSizeMedium,
+            color: AppColors.primary,
+          ),
+        ),
+        if (!hasFile)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              'profile.file_format'.tr(),
+              style: TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                fontSize: AppConstants.fontSizeRegular,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}

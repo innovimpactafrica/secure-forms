@@ -1,9 +1,15 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
 
 class ClientInformationsPersonnellesScreen extends StatefulWidget {
@@ -26,6 +32,9 @@ class _ClientInformationsPersonnellesScreenState
 
   late String _selectedGender;
   String? _selectedSituation;
+  // Photo de profil locale (avant upload) ou bytes depuis l'API
+  File? _localPicture;
+  Uint8List? _pictureBytes;
 
   @override
   void initState() {
@@ -38,9 +47,15 @@ class _ClientInformationsPersonnellesScreenState
       _prenomController.text = user.firstName;
       _nomController.text = user.lastName;
       _emailController.text = user.email;
-      // Extraire le numéro sans l'indicatif +221
       final phone = user.phone.replaceAll('+221', '').replaceAll(' ', '').trim();
       _telephoneController.text = phone;
+    }
+    // Charger la photo de profil existante
+    _pictureBytes = context.read<UserBloc>().profilePictureBytes;
+    if (_pictureBytes == null) {
+      context.read<UserBloc>().add(
+        LoadProfilePictureEvent(UserSession.instance.accessToken),
+      );
     }
   }
 
@@ -63,26 +78,183 @@ class _ClientInformationsPersonnellesScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: SafeArea(
-                bottom: false,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(context),
-                    _buildForm(),
-                  ],
+    return BlocListener<UserBloc, UserState>(
+      listener: (context, state) {
+        if (state is UserProfilePictureLoaded) {
+          setState(() => _pictureBytes = state.bytes);
+        } else if (state is UserProfilePictureUpdated) {
+          setState(() {
+            _pictureBytes = state.bytes;
+            _localPicture = null;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'profile.photo_updated'.tr(),
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  color: AppColors.white,
+                ),
+              ),
+              backgroundColor: AppColors.statusValideGreen,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        } else if (state is UserError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                state.message,
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  color: AppColors.white,
+                ),
+              ),
+              backgroundColor: AppColors.statusRejected,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.white,
+        body: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: SafeArea(
+                  bottom: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(context),
+                      _buildAvatarSection(context),
+                      _buildForm(),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          _buildBottomButton(context),
-        ],
+            _buildBottomButton(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Avatar Section
+  // -------------------------------------------------------------------------
+
+  Widget _buildAvatarSection(BuildContext context) {
+    final userState = context.read<UserBloc>().state;
+    final initials = userState is UserLoaded ? userState.user.initials : '??';
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 24),
+        child: Stack(
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                color: AppColors.primaryDark,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.borderLight, width: 2),
+              ),
+              child: ClipOval(
+                child: _localPicture != null
+                    ? Image.file(_localPicture!, fit: BoxFit.cover)
+                    : _pictureBytes != null
+                        ? Image.memory(_pictureBytes!, fit: BoxFit.cover)
+                        : Center(
+                            child: Text(
+                              initials,
+                              style: TextStyle(
+                                fontFamily: AppConstants.fontFamilySofiaSans,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 30,
+                                color: AppColors.white,
+                              ),
+                            ),
+                          ),
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: () => _pickProfilePicture(context),
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.white, width: 2),
+                  ),
+                  child: Icon(
+                    Icons.camera_alt,
+                    color: AppColors.white,
+                    size: 14,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickProfilePicture(BuildContext context) async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            ListTile(
+              leading: Icon(Icons.photo_library_outlined, color: AppColors.primary),
+              title: Text('profile.gallery'.tr(),
+                  style: TextStyle(
+                      fontFamily: AppConstants.fontFamilyInter,
+                      color: AppColors.textDark,
+                      fontWeight: FontWeight.w500)),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+              title: Text('profile.take_photo'.tr(),
+                  style: TextStyle(
+                      fontFamily: AppConstants.fontFamilyInter,
+                      color: AppColors.textDark,
+                      fontWeight: FontWeight.w500)),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+    final picked = await ImagePicker().pickImage(source: source, imageQuality: 85);
+    if (picked == null) return;
+    final file = File(picked.path);
+    setState(() => _localPicture = file);
+    // ignore: use_build_context_synchronously
+    context.read<UserBloc>().add(
+      UpdateProfilePictureEvent(
+        accessToken: UserSession.instance.accessToken,
+        file: file,
       ),
     );
   }

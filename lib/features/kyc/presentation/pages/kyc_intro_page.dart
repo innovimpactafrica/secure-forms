@@ -21,7 +21,7 @@ class KycIntroPage extends StatelessWidget {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
+                    onTap: () => Navigator.of(context).pop(true),
                     child: Container(
                       width: 40,
                       height: 40,

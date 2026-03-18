@@ -1,22 +1,70 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/client/data/models/profile_model.dart';
+import 'package:secure_link/features/client/data/repositories/profile_document_repository.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
 import 'face_verification_screen.dart';
 
 /// Page "Mes documents" accessible depuis le profil.
-/// Affiche les documents déjà renseignés lors de la complétion du profil.
-/// Permet de les mettre à jour (même flow : Face ID + date expiration).
-/// TODO: connecter à l'API GET /profile/documents + PUT /profile/documents/{id}
-class MesDocumentsScreen extends StatelessWidget {
+/// Charge les documents depuis GET /api/users/profile/documents
+/// Design inchangé.
+class MesDocumentsScreen extends StatefulWidget {
   const MesDocumentsScreen({super.key});
+
+  @override
+  State<MesDocumentsScreen> createState() => _MesDocumentsScreenState();
+}
+
+class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
+  final _repository = ProfileDocumentRepository();
+  List<DocumentTypeModel> _documentTypes = [];
+  List<UploadedDocumentModel> _uploadedDocuments = [];
+  bool _isLoading = true;
+  String? _error;
+  // documentTypeId -> chemin fichier local pour affichage instantané
+  final Map<String, String> _localFileCache = {};
+
+  void _onFileSelected(String documentTypeId, String filePath) {
+    setState(() => _localFileCache[documentTypeId] = filePath);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final token = UserSession.instance.accessToken;
+    // ignore: avoid_print
+    print('[MesDocumentsScreen] Chargement documents — token présent: ${token.isNotEmpty}');
+    try {
+      final types = await _repository.getDocumentTypes(token);
+      final docs = await _repository.getDocuments(token);
+      // ignore: avoid_print
+      print('[MesDocumentsScreen] ${types.length} type(s) | ${docs.length} document(s) uploadé(s)');
+      if (mounted) {
+        setState(() {
+          _documentTypes = types;
+          _uploadedDocuments = docs;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('[MesDocumentsScreen] ERREUR: $e');
+      if (mounted) setState(() { _error = e.toString().replaceAll('Exception: ', ''); _isLoading = false; });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +81,11 @@ class MesDocumentsScreen extends StatelessWidget {
               ),
             ),
           );
+        } else if (state is ProfileDocumentUploadedSuccess ||
+            state is ProfileDocumentUploadedNeedsVerification ||
+            state is ProfileDocumentDeleted ||
+            state is ProfileDocumentPatched) {
+          _loadData();
         } else if (state is ProfileError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -42,87 +95,94 @@ class MesDocumentsScreen extends StatelessWidget {
           );
         }
       },
-      child: BlocBuilder<ProfileBloc, ProfileState>(
-        builder: (context, state) {
-          final profile = _getProfile(state);
-
-          return Scaffold(
-            backgroundColor: AppColors.white,
-            body: SafeArea(
-              child: Column(
-                children: [
-                  _MesDocsHeader(),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                    child: _StatusLegend(),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                      child: _DocumentsGrid(documents: profile.documents),
-                    ),
-                  ),
-                  // Bouton Mettre à jour
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: AppConstants.logoutButtonHeight,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'documents.update_success'.tr(),
-                                style: TextStyle(
-                                  fontFamily: AppConstants.fontFamilyInter,
-                                  color: AppColors.white,
-                                ),
+      child: Scaffold(
+        backgroundColor: AppColors.white,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _MesDocsHeader(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                child: _StatusLegend(),
+              ),
+              Expanded(
+                child: _isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation(AppColors.primaryDark),
+                        ),
+                      )
+                    : _error != null
+                        ? Center(
+                            child: Text(
+                              _error!,
+                              style: TextStyle(
+                                fontFamily: AppConstants.fontFamilyInter,
+                                color: AppColors.statusRejected,
+                                fontSize: AppConstants.fontSizeMedium,
                               ),
-                              backgroundColor: AppColors.statusValideGreen,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                              textAlign: TextAlign.center,
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryDark,
-                          elevation: 0,
+                          )
+                        : SingleChildScrollView(
+                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                            child: _DocumentsGrid(
+                              documentTypes: _documentTypes,
+                              uploadedDocuments: _uploadedDocuments,
+                              localFileCache: _localFileCache,
+                              onFileSelected: _onFileSelected,
+                            ),
+                          ),
+              ),
+              // Bouton Mettre à jour
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: AppConstants.logoutButtonHeight,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'documents.update_success'.tr(),
+                            style: TextStyle(
+                              fontFamily: AppConstants.fontFamilyInter,
+                              color: AppColors.white,
+                            ),
+                          ),
+                          backgroundColor: AppColors.statusValideGreen,
+                          behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: Text(
-                          'documents.update_button'.tr(),
-                          style: TextStyle(
-                            fontFamily: AppConstants.fontFamilySofiaSans,
-                            color: AppColors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: AppConstants.fontSizeLarge,
-                          ),
-                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryDark,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                      ),
+                    ),
+                    child: Text(
+                      'documents.update_button'.tr(),
+                      style: TextStyle(
+                        fontFamily: AppConstants.fontFamilySofiaSans,
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: AppConstants.fontSizeLarge,
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
-          );
-        },
+            ],
+          ),
+        ),
       ),
     );
-  }
-
-  ProfileModel _getProfile(ProfileState state) {
-    if (state is ProfileInProgress) return state.profile;
-    if (state is ProfileStep1Validated) return state.profile;
-    if (state is ProfileDocumentAdded) return state.profile;
-    if (state is ProfileFaceVerificationSuccess) return state.profile;
-    if (state is ProfileFaceVerificationFailed) return state.profile;
-    if (state is ProfileCompleted) return state.profile;
-    return const ProfileModel(progressPercent: 0.30);
   }
 }
 
@@ -233,12 +293,36 @@ class _LegendItem extends StatelessWidget {
 // GRILLE 2 COLONNES
 // ─────────────────────────────────────────────────────────────────
 class _DocumentsGrid extends StatelessWidget {
-  final List<DocumentModel> documents;
-  const _DocumentsGrid({required this.documents});
+  final List<DocumentTypeModel> documentTypes;
+  final List<UploadedDocumentModel> uploadedDocuments;
+  final Map<String, String> localFileCache;
+  final void Function(String documentTypeId, String filePath) onFileSelected;
+
+  const _DocumentsGrid({
+    required this.documentTypes,
+    required this.uploadedDocuments,
+    required this.localFileCache,
+    required this.onFileSelected,
+  });
+
 
   @override
   Widget build(BuildContext context) {
-    final types = DocumentType.all;
+    if (documentTypes.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 40),
+          child: Text(
+            'profile.no_document_types'.tr(),
+            style: TextStyle(
+              fontFamily: AppConstants.fontFamilyInter,
+              fontSize: AppConstants.fontSizeMedium,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      );
+    }
 
     return GridView.builder(
       shrinkWrap: true,
@@ -249,21 +333,27 @@ class _DocumentsGrid extends StatelessWidget {
         mainAxisSpacing: 12,
         childAspectRatio: 0.85,
       ),
-      itemCount: types.length,
+      itemCount: documentTypes.length,
       itemBuilder: (context, index) {
-        final type = types[index];
-        final doc = documents.where((d) => d.type == type).firstOrNull;
+        final docType = documentTypes[index];
+        final uploaded = uploadedDocuments
+            .where((d) => d.documentTypeId == docType.id)
+            .firstOrNull;
         return _DocumentCard(
-          type: type,
-          document: doc,
-          onTap: () => _showUpdateModal(context, type, doc),
+          documentType: docType,
+          uploadedDocument: uploaded,
+          localFilePath: localFileCache[docType.id],
+          onTap: () => _showUpdateModal(context, docType, uploaded),
         );
       },
     );
   }
 
   void _showUpdateModal(
-      BuildContext context, String documentType, DocumentModel? existing) {
+    BuildContext context,
+    DocumentTypeModel docType,
+    UploadedDocumentModel? existing,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -275,8 +365,9 @@ class _DocumentsGrid extends StatelessWidget {
       builder: (_) => BlocProvider.value(
         value: context.read<ProfileBloc>(),
         child: _DocumentUpdateModal(
-          documentType: documentType,
+          documentType: docType,
           existingDocument: existing,
+          onFileSelected: (path) => onFileSelected(docType.id, path),
         ),
       ),
     );
@@ -287,43 +378,51 @@ class _DocumentsGrid extends StatelessWidget {
 // CARD DOCUMENT
 // ─────────────────────────────────────────────────────────────────
 class _DocumentCard extends StatelessWidget {
-  final String type;
-  final DocumentModel? document;
+  final DocumentTypeModel documentType;
+  final UploadedDocumentModel? uploadedDocument;
+  final String? localFilePath;
   final VoidCallback onTap;
 
   const _DocumentCard({
-    required this.type,
-    required this.document,
+    required this.documentType,
+    required this.uploadedDocument,
     required this.onTap,
+    this.localFilePath,
   });
 
   Color _statusColor() {
-    if (document == null) return AppColors.borderLight;
-    switch (document!.status) {
-      case DocumentStatus.validated:
+    if (uploadedDocument == null) return AppColors.borderLight;
+    switch (uploadedDocument!.status.toUpperCase()) {
+      case 'VALIDATED':
+      case 'APPROVED':
+      case 'VALIDE':
         return AppColors.statusValideGreen;
-      case DocumentStatus.pending:
+      case 'PENDING':
+      case 'EN_ATTENTE':
         return AppColors.statusEnAttente;
-      case DocumentStatus.inProgress:
+      case 'IN_PROGRESS':
+      case 'EN_COURS':
         return AppColors.primary;
-      case DocumentStatus.rejected:
+      case 'REJECTED':
+      case 'REJETE':
         return AppColors.statusRejected;
+      default:
+        return AppColors.statusEnAttente;
     }
   }
 
-  String _formatDate(String date) {
+  String _formatDate(String? date) {
+    if (date == null || date.isEmpty) return '';
     try {
-      final parts = date.split('/');
-      if (parts.length != 3) return date;
-      final day = parts[0];
-      final month = int.parse(parts[1]);
-      final year = parts[2];
+      if (date.contains('/')) return date;
+      final parsed = DateTime.tryParse(date);
+      if (parsed == null) return date;
       const months = [
         '', 'janv.', 'févr.', 'mars', 'avr.',
         'mai', 'juin', 'juil.', 'août',
         'sept.', 'oct.', 'nov.', 'déc.'
       ];
-      return '$day ${months[month]}$year';
+      return '${parsed.day} ${months[parsed.month]}${parsed.year}';
     } catch (_) {
       return date;
     }
@@ -331,12 +430,7 @@ class _DocumentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasDoc = document != null;
-    final filePath = document?.filePath;
-    final isImage = filePath != null &&
-        (filePath.endsWith('.jpg') ||
-            filePath.endsWith('.jpeg') ||
-            filePath.endsWith('.png'));
+    final hasDoc = uploadedDocument != null;
 
     return GestureDetector(
       onTap: onTap,
@@ -358,41 +452,45 @@ class _DocumentCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Zone bleue avec image
+            // Zone image ou icône
             Expanded(
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE8F0FE),
+                  color: AppColors.documentCardBackground,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(AppConstants.radiusSmall),
                     topRight: Radius.circular(AppConstants.radiusSmall),
                   ),
                 ),
-                child: hasDoc && isImage
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(AppConstants.radiusSmall),
-                          topRight: Radius.circular(AppConstants.radiusSmall),
-                        ),
-                        child: Image.file(
-                          File(filePath!),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(AppConstants.radiusSmall),
+                    topRight: Radius.circular(AppConstants.radiusSmall),
+                  ),
+                  child: localFilePath != null
+                      ? Image.file(
+                          File(localFilePath!),
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Center(
-                            child: Icon(Icons.check_circle_outline,
-                                size: 36, color: _statusColor()),
+                          width: double.infinity,
+                          errorBuilder: (_, __, ___) => _DocumentImage(
+                            key: ValueKey(uploadedDocument?.id ?? ''),
+                            documentId: uploadedDocument!.id,
                           ),
-                        ),
-                      )
-                    : Center(
-                        child: Icon(
-                          hasDoc
-                              ? Icons.check_circle_outline
-                              : Icons.add_photo_alternate_outlined,
-                          size: 36,
-                          color: hasDoc ? _statusColor() : AppColors.primary,
-                        ),
-                      ),
+                        )
+                      : hasDoc
+                          ? _DocumentImage(
+                              key: ValueKey(uploadedDocument!.id + (uploadedDocument!.uploadedAt?.toIso8601String() ?? '')),
+                              documentId: uploadedDocument!.id,
+                            )
+                          : Center(
+                              child: Icon(
+                                Icons.add_photo_alternate_outlined,
+                                size: 36,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                ),
               ),
             ),
             // Bande grise
@@ -414,7 +512,7 @@ class _DocumentCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          type.tr(),
+                          documentType.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -425,10 +523,11 @@ class _DocumentCard extends StatelessWidget {
                           ),
                         ),
                         if (hasDoc &&
-                            document!.expiryDate.isNotEmpty &&
-                            DocumentType.hasExpiryDate.contains(type))
+                            uploadedDocument!.expirationDate != null &&
+                            uploadedDocument!.expirationDate!.isNotEmpty)
                           Text(
-                            'profile.expires_on'.tr() + ' ${_formatDate(document!.expiryDate)}',
+                            'profile.expires_on'.tr() +
+                                ' ${_formatDate(uploadedDocument!.expirationDate)}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -465,12 +564,14 @@ class _DocumentCard extends StatelessWidget {
 // MODAL MISE À JOUR
 // ─────────────────────────────────────────────────────────────────
 class _DocumentUpdateModal extends StatefulWidget {
-  final String documentType;
-  final DocumentModel? existingDocument;
+  final DocumentTypeModel documentType;
+  final UploadedDocumentModel? existingDocument;
+  final void Function(String filePath)? onFileSelected;
 
   const _DocumentUpdateModal({
     required this.documentType,
     this.existingDocument,
+    this.onFileSelected,
   });
 
   @override
@@ -483,17 +584,90 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
   String? _uploadedFilePath;
   bool _isImage = false;
 
+  bool get _isExisting => widget.existingDocument != null;
+
+  bool get _canEditPhoto {
+    if (!_isExisting) return true;
+    final s = widget.existingDocument!.status.toUpperCase();
+    return s != 'VALIDATED' && s != 'APPROVED' && s != 'VALIDE';
+  }
+
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+        ),
+        title: Text(
+          'documents.delete_confirm_title'.tr(),
+          style: TextStyle(
+            fontFamily: AppConstants.fontFamilySofiaSans,
+            fontWeight: FontWeight.w700,
+            fontSize: AppConstants.fontSizeLarge,
+            color: AppColors.textDark,
+          ),
+        ),
+        content: Text(
+          'documents.delete_confirm_body'.tr(),
+          style: TextStyle(
+            fontFamily: AppConstants.fontFamilyInter,
+            fontSize: AppConstants.fontSizeMedium,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              'documents.cancel'.tr(),
+              style: TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              context.read<ProfileBloc>().add(
+                    DeleteProfileDocumentEvent(
+                      documentId: widget.existingDocument!.id,
+                    ),
+                  );
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              'documents.delete'.tr(),
+              style: TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                color: AppColors.statusRejected,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Convertit une date ISO (2026-03-27) ou dd/MM/yyyy en dd/MM/yyyy
+  String _toDisplayDate(String? raw) {
+    if (raw == null || raw.isEmpty) return '';
+    if (raw.contains('/')) return raw;
+    final parsed = DateTime.tryParse(raw);
+    if (parsed == null) return raw;
+    return '${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}';
+  }
+
   @override
   void initState() {
     super.initState();
     if (widget.existingDocument != null) {
-      _deliveryDateController.text = widget.existingDocument!.deliveryDate;
-      _expiryDateController.text = widget.existingDocument!.expiryDate;
-      _uploadedFilePath = widget.existingDocument!.filePath;
-      _isImage = _uploadedFilePath != null &&
-          (_uploadedFilePath!.endsWith('.jpg') ||
-              _uploadedFilePath!.endsWith('.jpeg') ||
-              _uploadedFilePath!.endsWith('.png'));
+      _deliveryDateController.text = _toDisplayDate(widget.existingDocument!.issueDate);
+      _expiryDateController.text = _toDisplayDate(widget.existingDocument!.expirationDate);
     }
   }
 
@@ -571,14 +745,50 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
         _uploadedFilePath = picked.path;
         _isImage = true;
       });
+      widget.onFileSelected?.call(picked.path);
     }
   }
 
   void _onEnvoyer() {
-    final showExpiry = DocumentType.hasExpiryDate.contains(widget.documentType);
-    if (_deliveryDateController.text.isEmpty ||
-        (showExpiry && _expiryDateController.text.isEmpty) ||
-        _uploadedFilePath == null) {
+    final hasExpiry = widget.documentType.hasExpirationDate;
+
+    // Mode PATCH : modifier uniquement les dates
+    if (_isExisting && _uploadedFilePath == null) {
+      if (_deliveryDateController.text.isEmpty ||
+          (hasExpiry && _expiryDateController.text.isEmpty)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'profile.fill_all_fields'.tr(),
+              style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter, color: AppColors.white),
+            ),
+            backgroundColor: AppColors.statusRejected,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+        return;
+      }
+      context.read<ProfileBloc>().add(
+            PatchProfileDocumentEvent(
+              documentId: widget.existingDocument!.id,
+              issueDate: _deliveryDateController.text.isNotEmpty
+                  ? _deliveryDateController.text
+                  : null,
+              expirationDate: _expiryDateController.text.isNotEmpty
+                  ? _expiryDateController.text
+                  : null,
+            ),
+          );
+      Navigator.of(context).pop();
+      return;
+    }
+
+    // Mode POST : upload nouveau fichier
+    if (_uploadedFilePath == null ||
+        _deliveryDateController.text.isEmpty ||
+        (hasExpiry && _expiryDateController.text.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -594,16 +804,16 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
       return;
     }
 
-    // TODO: API — PUT /profile/documents/{type} + OCR vérification
     context.read<ProfileBloc>().add(
-          AddDocumentEvent(
-            document: DocumentModel(
-              type: widget.documentType,
-              deliveryDate: _deliveryDateController.text,
-              expiryDate: _expiryDateController.text,
-              filePath: _uploadedFilePath!,
-              status: DocumentStatus.pending,
-            ),
+          UploadProfileDocumentEvent(
+            file: File(_uploadedFilePath!),
+            documentTypeId: widget.documentType.id,
+            issueDate: _deliveryDateController.text.isNotEmpty
+                ? _deliveryDateController.text
+                : null,
+            expirationDate: _expiryDateController.text.isNotEmpty
+                ? _expiryDateController.text
+                : null,
           ),
         );
     Navigator.of(context).pop();
@@ -611,17 +821,17 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
 
   @override
   Widget build(BuildContext context) {
-    final showExpiryField = DocumentType.hasExpiryDate.contains(widget.documentType);
+    final showExpiryField = widget.documentType.hasExpirationDate;
 
     return Padding(
-  padding: EdgeInsets.only(
-    bottom: MediaQuery.of(context).viewInsets.bottom +
-        MediaQuery.of(context).padding.bottom +
-        16,
-    left: 20,
-    right: 20,
-    top: 16,
-  ),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom +
+            16,
+        left: 20,
+        right: 20,
+        top: 16,
+      ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -643,7 +853,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
               children: [
                 Expanded(
                   child: Text(
-                    widget.existingDocument != null
+                    _isExisting
                         ? 'documents.update_document'.tr()
                         : 'profile.add_document'.tr(),
                     style: TextStyle(
@@ -654,6 +864,36 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                     ),
                   ),
                 ),
+                if (_isExisting)
+                  GestureDetector(
+                    onTap: () => _confirmDelete(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.statusRejected.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.delete_outline,
+                              color: AppColors.statusRejected,
+                              size: AppConstants.iconSizeMedium),
+                          const SizedBox(width: 4),
+                          Text(
+                            'documents.delete'.tr(),
+                            style: TextStyle(
+                              fontFamily: AppConstants.fontFamilyInter,
+                              fontSize: AppConstants.fontSizeRegular,
+                              color: AppColors.statusRejected,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () => Navigator.of(context).pop(),
                   child: Icon(Icons.close,
@@ -675,7 +915,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                 borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
               ),
               child: Text(
-                widget.documentType.tr(),
+                widget.documentType.title,
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilyInter,
                   fontSize: AppConstants.fontSizeMedium,
@@ -706,34 +946,65 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
               const SizedBox(height: 16),
             ],
 
-            // Zone upload
-            GestureDetector(
-              onTap: _pickFile,
-              child: Container(
-                width: double.infinity,
-                height: 140,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8F0FE),
-                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                  border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.3)),
+            // Zone upload (masquée si document validé)
+            if (_canEditPhoto) ...[
+              GestureDetector(
+                onTap: _pickFile,
+                child: Container(
+                  width: double.infinity,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    color: AppColors.documentCardBackground,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                    border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3)),
+                  ),
+                  child: _uploadedFilePath != null && _isImage
+                      ? ClipRRect(
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusSmall),
+                          child: Image.file(
+                            File(_uploadedFilePath!),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            errorBuilder: (_, __, ___) =>
+                                const _UploadPlaceholder(hasFile: true),
+                          ),
+                        )
+                      : _UploadPlaceholder(hasFile: _uploadedFilePath != null),
                 ),
-                child: _uploadedFilePath != null && _isImage
-                    ? ClipRRect(
-                        borderRadius:
-                            BorderRadius.circular(AppConstants.radiusSmall),
-                        child: Image.file(
-                          File(_uploadedFilePath!),
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          errorBuilder: (_, __, ___) =>
-                              const _UploadPlaceholder(hasFile: true),
-                        ),
-                      )
-                    : _UploadPlaceholder(hasFile: _uploadedFilePath != null),
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
+            ] else ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.statusValideGreenLight,
+                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                  border: Border.all(color: AppColors.statusValideGreen.withValues(alpha: 0.4)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.lock_outline,
+                        color: AppColors.statusValideGreen,
+                        size: AppConstants.iconSizeMedium),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'documents.validated_no_edit'.tr(),
+                        style: TextStyle(
+                          fontFamily: AppConstants.fontFamilyInter,
+                          fontSize: AppConstants.fontSizeRegular,
+                          color: AppColors.statusValideGreen,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
 
             SizedBox(
               width: double.infinity,
@@ -894,6 +1165,87 @@ class _ModalDateField extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
           borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// WIDGET IMAGE DOCUMENT — charge via le repository (isolé du BLoC)
+// ─────────────────────────────────────────────────────────────────
+class _DocumentImage extends StatefulWidget {
+  final String documentId;
+  const _DocumentImage({super.key, required this.documentId});
+
+  @override
+  State<_DocumentImage> createState() => _DocumentImageState();
+}
+
+class _DocumentImageState extends State<_DocumentImage> {
+  Uint8List? _bytes;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadImage();
+  }
+
+  Future<void> _loadImage() async {
+    try {
+      final bytes = await context.read<ProfileBloc>().repository.getDocumentFile(
+            token: UserSession.instance.accessToken,
+            documentId: widget.documentId,
+          );
+      if (mounted) {
+        setState(() {
+          _bytes = Uint8List.fromList(bytes);
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return Container(
+        color: AppColors.documentCardBackground,
+        child: Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation(AppColors.primary),
+            ),
+          ),
+        ),
+      );
+    }
+    if (_bytes != null) {
+      return SizedBox.expand(
+        child: Image.memory(
+          _bytes!,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _placeholder(),
+        ),
+      );
+    }
+    return _placeholder();
+  }
+
+  Widget _placeholder() {
+    return Container(
+      color: AppColors.documentCardBackground,
+      child: Center(
+        child: Icon(
+          Icons.insert_drive_file_outlined,
+          size: 36,
+          color: AppColors.primary,
         ),
       ),
     );

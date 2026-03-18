@@ -1,5 +1,4 @@
 /// Modèle de données du profil client
-/// TODO: connecter à l'API — ajouter fromJson/toJson lors de l'intégration
 class ProfileModel {
   final String firstName;
   final String lastName;
@@ -48,12 +47,12 @@ class ProfileModel {
   }
 }
 
-/// Modèle d'un document uploadé
+/// Modèle d'un document uploadé (local)
 class DocumentModel {
-  final String type;         // CNI, Permis, etc.
+  final String type;
   final String deliveryDate;
   final String expiryDate;
-  final String filePath;     // chemin local temporaire avant upload API
+  final String filePath;
   final DocumentStatus status;
 
   const DocumentModel({
@@ -83,7 +82,7 @@ class DocumentModel {
 
 enum DocumentStatus { pending, validated, rejected, inProgress }
 
-/// Types de documents requis
+/// Types de documents requis (statique — fallback)
 class DocumentType {
   static const String cni = 'profile.doc_cni';
   static const String nationality = 'profile.doc_nationality';
@@ -97,13 +96,132 @@ class DocumentType {
         residence, photo, property,
       ];
 
-  // Documents qui nécessitent Face ID
-  static List<String> get requireFaceId => [
-        cni, drivingLicense, photo,
-      ];
+  static List<String> get requireFaceId => [cni, drivingLicense, photo];
 
-  // Documents qui ont une date d'expiration à afficher
-  static List<String> get hasExpiryDate => [
-        cni, drivingLicense, residence,
-      ];
+  static List<String> get hasExpiryDate => [cni, drivingLicense, residence];
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MODÈLES API — Profile Documents
+// ─────────────────────────────────────────────────────────────────
+
+/// Type de document retourné par GET /api/users/profile/document-types
+class DocumentTypeModel {
+  final String id;
+  final String title;
+  final bool hasExpirationDate;
+  final bool isForIdentityVerification;
+  final String mappedType;
+  final bool isRequired;
+
+  const DocumentTypeModel({
+    required this.id,
+    required this.title,
+    required this.hasExpirationDate,
+    required this.isForIdentityVerification,
+    required this.mappedType,
+    required this.isRequired,
+  });
+
+  factory DocumentTypeModel.fromJson(Map<String, dynamic> json) {
+    return DocumentTypeModel(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      hasExpirationDate: json['hasExpirationDate'] == true,
+      isForIdentityVerification: json['isForIdentityVerification'] == true,
+      mappedType: json['mappedType']?.toString() ?? '',
+      isRequired: json['isRequired'] == true,
+    );
+  }
+}
+
+/// Document uploadé retourné par GET /api/users/profile/documents
+class UploadedDocumentModel {
+  final String id;
+  final String documentTypeId;
+  final String documentTypeTitle;
+  final String status;
+  final String? issueDate;
+  final String? expirationDate;
+  final DateTime? uploadedAt;
+  /// URL du fichier : GET /api/users/profile/documents/{id}/file
+  final String? fileUrl;
+
+  const UploadedDocumentModel({
+    required this.id,
+    required this.documentTypeId,
+    required this.documentTypeTitle,
+    required this.status,
+    this.issueDate,
+    this.expirationDate,
+    this.uploadedAt,
+    this.fileUrl,
+  });
+
+  factory UploadedDocumentModel.fromJson(Map<String, dynamic> json) {
+    final id = json['id']?.toString() ?? '';
+    return UploadedDocumentModel(
+      id: id,
+      documentTypeId: (json['documentType']?['id'] ?? json['documentTypeId'] ?? '').toString(),
+      documentTypeTitle: (json['documentType']?['title'] ?? json['documentTypeTitle'] ?? '').toString(),
+      status: json['status']?.toString() ?? 'PENDING',
+      issueDate: json['issueDate']?.toString(),
+      expirationDate: json['expirationDate']?.toString(),
+      uploadedAt: json['uploadedAt'] != null
+          ? DateTime.tryParse(json['uploadedAt'].toString())
+          : null,
+      fileUrl: json['fileUrl']?.toString(),
+    );
+  }
+}
+
+/// Complétion du profil retournée par GET /api/users/profile/completion
+class ProfileCompletionModel {
+  final int completion;
+  final List<RequiredDocumentStatus> requiredDocuments;
+
+  const ProfileCompletionModel({
+    required this.completion,
+    required this.requiredDocuments,
+  });
+
+  factory ProfileCompletionModel.fromJson(Map<String, dynamic> json) {
+    final docs = (json['requiredDocuments'] as List<dynamic>? ?? [])
+        .map((e) => RequiredDocumentStatus.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return ProfileCompletionModel(
+      completion: (json['completion'] as num?)?.toInt() ?? 50,
+      requiredDocuments: docs,
+    );
+  }
+}
+
+/// Statut d'un document requis dans la complétion
+class RequiredDocumentStatus {
+  final String type;
+  final String label;
+  final bool isUploaded;
+  final String status;
+  final String? documentId;
+  final String? uploadedAt;
+
+  const RequiredDocumentStatus({
+    required this.type,
+    required this.label,
+    required this.isUploaded,
+    required this.status,
+    this.documentId,
+    this.uploadedAt,
+  });
+
+  factory RequiredDocumentStatus.fromJson(Map<String, dynamic> json) {
+    return RequiredDocumentStatus(
+      type: json['type']?.toString() ?? '',
+      label: json['label']?.toString() ?? '',
+      isUploaded: json['isUploaded'] == true,
+      status: json['status']?.toString() ?? '',
+      documentId: json['documentId']?.toString(),
+      uploadedAt: json['uploadedAt']?.toString(),
+    );
+  }
 }

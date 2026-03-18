@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -8,12 +9,15 @@ import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
+import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
+import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
 import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
 import 'package:secure_link/features/client/presentation/pages/step2_documents_screen.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_event.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_state.dart';
 import 'package:secure_link/features/kyc/presentation/pages/kyc_gate_page.dart';
+import 'package:secure_link/features/kyc/presentation/pages/kyc_intro_page.dart';
 
 class ClientHomeScreen extends StatefulWidget {
   const ClientHomeScreen({super.key});
@@ -23,107 +27,161 @@ class ClientHomeScreen extends StatefulWidget {
 }
 
 class _ClientHomeScreenState extends State<ClientHomeScreen> {
-  KycBloc? _kycBloc;
+  late KycBloc _kycBloc;
+  StreamSubscription<KycState>? _kycSub;
   String _lastUserId = '';
   bool _kycTriggered = false;
+  bool _kycGateOpen = false;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final userState = context.read<UserBloc>().state;
-    final userId = userState is UserLoaded ? userState.user.id : '';
-    // Crée un nouveau KycBloc si l'userId a changé (nouvel utilisateur)
-    if (userId != _lastUserId) {
-      _kycBloc?.close();
-      _lastUserId = userId;
-      _kycTriggered = false;
-      _kycBloc = KycBloc(userId: userId);
-      _kycBloc!.add(const KycCheckStatus());
+  void initState() {
+    super.initState();
+    _kycBloc = KycBloc(userId: '');
+    _kycSub = _kycBloc.stream.listen(_onKycState);
+    // Charger la complétion réelle depuis l'API au démarrage
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userState = context.read<UserBloc>().state;
+      if (userState is UserLoaded && userState.user.id != _lastUserId) {
+        _initKycBloc(userState.user.id);
+      }
+      context.read<ProfileBloc>().add(const LoadDocumentTypesEvent());
+    });
+  }
+
+  void _initKycBloc(String userId) {
+    // ignore: avoid_print
+    print('[ClientHome] _initKycBloc userId="$_lastUserId" -> "$userId"');
+    _kycSub?.cancel();
+    _kycBloc.close();
+    _lastUserId = userId;
+    _kycTriggered = false;
+    _kycBloc = KycBloc(userId: userId);
+    _kycSub = _kycBloc.stream.listen(_onKycState);
+    _kycBloc.add(const KycCheckStatus());
+    // ignore: avoid_print
+    print('[ClientHome] KycBloc initialise pour userId="$userId"');
+  }
+
+  void _pushKycIntro({bool withDelay = true}) {
+    if (_kycGateOpen || !mounted) return;
+    _kycGateOpen = true;
+    _kycTriggered = true;
+    Future.delayed(withDelay ? const Duration(seconds: 3) : Duration.zero, () {
+      if (!mounted) { _kycGateOpen = false; return; }
+      // ignore: avoid_print
+      print('[ClientHome] ${withDelay ? "3s ecoulees" : "retour"} -> push KycGatePage');
+      // Etape 1 : afficher KycGatePage (ecran d'attente 3s)
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => BlocProvider.value(
+            value: _kycBloc,
+            child: const KycGatePage(),
+          ),
+        ),
+      ).then((_) {
+        // KycGatePage s'est fermee automatiquement -> push KycIntroPage
+        if (!mounted) { _kycGateOpen = false; return; }
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: _kycBloc,
+              child: const KycIntroPage(),
+            ),
+          ),
+        ).then((result) {
+          // ignore: avoid_print
+          print('[ClientHome] Retour depuis KycGatePage -> re-check KYC');
+          _kycGateOpen = false;
+          final userClickedBack = result == true;
+          if (mounted && userClickedBack && _kycBloc.state is KycRequired) {
+            _kycTriggered = false;
+            _pushKycIntro(withDelay: true);
+          }
+        });
+      });
+    });
+  }
+
+  void _triggerKycCheck() {
+    // ignore: avoid_print
+    print('[ClientHome] triggerKycCheck -> _kycTriggered=$_kycTriggered');
+    if (_kycGateOpen) return;
+    if (_kycBloc.state is KycRequired) {
+      _pushKycIntro(withDelay: true);
+    }
+  }
+
+  void _onKycState(KycState state) {
+    // ignore: avoid_print
+    print('[ClientHome] KycState: ${state.runtimeType} | userId=$_lastUserId | triggered=$_kycTriggered');
+    if (state is KycCompleted) {
+      // ignore: avoid_print
+      print('[ClientHome] KYC deja complete -> acces libre');
+      _kycTriggered = true;
+      return;
+    }
+    if (state is KycRequired && !_kycTriggered) {
+      // ignore: avoid_print
+      print('[ClientHome] KYC requis -> home 3s puis KycGatePage');
+      _pushKycIntro(withDelay: true);
     }
   }
 
   @override
   void dispose() {
-    _kycBloc?.close();
+    _kycSub?.cancel();
+    _kycBloc.close();
     super.dispose();
-  }
-
-  void _handleKycState(BuildContext context, KycState state) {
-    if (state is KycRequired && !_kycTriggered) {
-      _kycTriggered = true;
-      final navigator = Navigator.of(context);
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) {
-          navigator.push(
-            MaterialPageRoute(
-              builder: (_) => BlocProvider.value(
-                value: _kycBloc!,
-                child: const KycGatePage(),
-              ),
-            ),
-          ).then((_) {
-            // Réinitialise le flag quand on revient sur le home
-            _kycTriggered = false;
-          });
-        }
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     context.locale;
-    if (_kycBloc == null) return const SizedBox.shrink();
     return BlocListener<UserBloc, UserState>(
       listener: (context, userState) {
         if (userState is UserLoaded) {
           final userId = userState.user.id;
           if (userId != _lastUserId) {
-            _kycBloc?.close();
-            _lastUserId = userId;
-            _kycTriggered = false;
-            setState(() {
-              _kycBloc = KycBloc(userId: userId);
-            });
-            _kycBloc!.add(const KycCheckStatus());
+            // ignore: avoid_print
+            print('[ClientHome] UserBloc -> nouvel userId: "$_lastUserId" -> "$userId"');
+            _initKycBloc(userId);
           }
         }
       },
       child: BlocProvider.value(
-        value: _kycBloc!,
-        child: BlocListener<KycBloc, KycState>(
-          listener: _handleKycState,
-          child: PopScope(
-            canPop: false,
-            onPopInvokedWithResult: (didPop, _) {
-              if (!didPop) {
-                _kycTriggered = false;
-                _kycBloc!.add(const KycCheckStatus());
-              }
-            },
-            child: BlocBuilder<UserBloc, UserState>(
-              builder: (context, userState) {
-                final user = userState is UserLoaded ? userState.user : null;
-                return Scaffold(
-                  backgroundColor: AppColors.white,
-                  body: SafeArea(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _HomeHeader(initials: user?.initials ?? ''),
-                          _WelcomeSection(firstName: user?.firstName ?? ''),
-                          _ProfileProgressSection(),
-                          _StatsGrid(),
-                          _SearchBarSection(),
-                          _RecentDemandesSection(),
-                        ],
-                      ),
+        value: _kycBloc,
+        child: PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) {
+              // ignore: avoid_print
+              print('[ClientHome] Retour arriere intercepte -> re-check KYC');
+              _kycTriggered = false;
+              _triggerKycCheck();
+            }
+          },
+          child: BlocBuilder<UserBloc, UserState>(
+            builder: (context, userState) {
+              final user = userState is UserLoaded ? userState.user : null;
+              return Scaffold(
+                backgroundColor: AppColors.white,
+                body: SafeArea(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _HomeHeader(initials: user?.initials ?? ''),
+                        _WelcomeSection(firstName: user?.firstName ?? ''),
+                        _ProfileProgressSection(),
+                        _StatsGrid(),
+                        _SearchBarSection(),
+                        _RecentDemandesSection(),
+                      ],
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -287,125 +345,225 @@ class _WelcomeSection extends StatelessWidget {
 }
 
 
-class _ProfileProgressSection extends StatelessWidget {
+class _ProfileProgressSection extends StatefulWidget {
   const _ProfileProgressSection();
 
   @override
+  State<_ProfileProgressSection> createState() =>
+      _ProfileProgressSectionState();
+}
+
+class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
+  bool _showCompletedBanner = false;
+  int _lastCompletion = -1;
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, UserState>(
-      builder: (context, userState) {
-        final completion = userState is UserLoaded
-            ? userState.user.profileCompletion
-            : 0;
-        final progress = (completion / 100).clamp(0.0, 1.0);
-        final isCompleted = completion >= 100;
-        final percent = '$completion%';
+    return BlocListener<UserBloc, UserState>(
+      listener: (context, userState) {
+        if (userState is UserLoaded) {
+          final completion = userState.user.profileCompletion;
+          if (completion >= 100 && _lastCompletion >= 0 && _lastCompletion < 100) {
+            setState(() => _showCompletedBanner = true);
+            Future.delayed(const Duration(seconds: 3), () {
+              if (mounted) setState(() => _showCompletedBanner = false);
+            });
+          }
+          _lastCompletion = completion;
+        }
+      },
+      child: BlocListener<ProfileBloc, ProfileState>(
+        listener: (context, profileState) {
+          int? newCompletion;
+          if (profileState is ProfileDocumentsLoaded) newCompletion = profileState.completion.completion;
+          if (profileState is ProfileDocumentUploadedSuccess) newCompletion = profileState.completion.completion;
+          if (profileState is ProfileDocumentUploadedNeedsVerification) newCompletion = profileState.completion.completion;
+          if (profileState is ProfileDocumentPatched) newCompletion = profileState.completion.completion;
+          if (profileState is ProfileDocumentDeleted) newCompletion = profileState.completion.completion;
+          if (newCompletion != null) {
+            if (newCompletion >= 100 && _lastCompletion >= 0 && _lastCompletion < 100) {
+              setState(() => _showCompletedBanner = true);
+              Future.delayed(const Duration(seconds: 3), () {
+                if (mounted) setState(() => _showCompletedBanner = false);
+              });
+            }
+            _lastCompletion = newCompletion;
+          }
+        },
+        child: BlocBuilder<ProfileBloc, ProfileState>(
+        builder: (context, profileState) {
+          // Lire la complétion depuis le ProfileBloc (GET /api/users/profile/completion)
+          int completion = 50;
+          if (profileState is ProfileDocumentsLoaded) {
+            completion = profileState.completion.completion;
+          } else if (profileState is ProfileDocumentUploadedSuccess) {
+            completion = profileState.completion.completion;
+          } else if (profileState is ProfileDocumentUploadedNeedsVerification) {
+            completion = profileState.completion.completion;
+          } else if (profileState is ProfileDocumentPatched) {
+            completion = profileState.completion.completion;
+          } else if (profileState is ProfileDocumentDeleted) {
+            completion = profileState.completion.completion;
+          } else if (profileState is ProfileDocumentUploading) {
+            completion = profileState.completion.completion;
+          } else {
+            // Fallback sur UserBloc si ProfileBloc pas encore chargé
+            final userState = context.read<UserBloc>().state;
+            if (userState is UserLoaded) {
+              completion = userState.user.profileCompletion;
+            }
+          }
 
-        if (isCompleted) return const SizedBox.shrink();
+          final isCompleted = completion >= 100;
 
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'home.complete_profile'.tr(),
-                style: TextStyle(
-                  fontFamily: AppConstants.fontFamilySofiaSans,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: AppColors.progressFill,
+          if (isCompleted && !_showCompletedBanner) {
+            return const SizedBox.shrink();
+          }
+
+          if (_showCompletedBanner) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppColors.statusValideGreen.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.statusValideGreen.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      color: AppColors.statusValideGreen,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'home.profile_completed'.tr(),
+                      style: TextStyle(
+                        fontFamily: AppConstants.fontFamilySofiaSans,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: AppColors.statusValideGreen,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 10),
-              Stack(
-                alignment: Alignment.centerLeft,
-                children: [
-                  Container(
-                    height: 7,
-                    decoration: BoxDecoration(
-                      color: AppColors.progressTrack,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+            );
+          }
+
+          final progress = (completion / 100).clamp(0.0, 1.0);
+          final percent = '$completion%';
+
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'home.complete_profile'.tr(),
+                  style: TextStyle(
+                    fontFamily: AppConstants.fontFamilySofiaSans,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: AppColors.progressFill,
                   ),
-                  FractionallySizedBox(
-                    widthFactor: progress,
-                    child: Container(
+                ),
+                const SizedBox(height: 10),
+                Stack(
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    Container(
                       height: 7,
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: AppColors.progressTrack,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  percent,
-                  style: TextStyle(
-                    fontFamily: AppConstants.fontFamilyInter,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
+                    FractionallySizedBox(
+                      widthFactor: progress,
+                      child: Container(
+                        height: 7,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 10),
-              GestureDetector(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: context.read<ProfileBloc>(),
-                      child: const Step2DocumentsScreen(),
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    percent,
+                    style: TextStyle(
+                      fontFamily: AppConstants.fontFamilyInter,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
-                child: Container(
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryDark,
-                    borderRadius: BorderRadius.circular(23),
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<ProfileBloc>(),
+                        child: const Step2DocumentsScreen(),
+                      ),
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(width: 20),
-                      Text(
-                        'home.start_now'.tr(),
-                        style: TextStyle(
-                          fontFamily: AppConstants.fontFamilySofiaSans,
-                          color: AppColors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                  child: Container(
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryDark,
+                      borderRadius: BorderRadius.circular(23),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(width: 20),
+                        Text(
+                          'home.start_now'.tr(),
+                          style: TextStyle(
+                            fontFamily: AppConstants.fontFamilySofiaSans,
+                            color: AppColors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        width: 30,
-                        height: 30,
-                        decoration: const BoxDecoration(
-                          color: AppColors.white,
-                          shape: BoxShape.circle,
+                        const SizedBox(width: 12),
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: const BoxDecoration(
+                            color: AppColors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.arrow_forward,
+                            color: AppColors.primaryDarker,
+                            size: 16,
+                          ),
                         ),
-                        child: Icon(
-                          Icons.arrow_forward,
-                          color: AppColors.primaryDarker,
-                          size: 16,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
+                        const SizedBox(width: 8),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+              ],
+            ),
+          );
+        },
+      ),
+    ),
+  );
   }
 }
 

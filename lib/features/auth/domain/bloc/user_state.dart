@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:secure_link/features/auth/data/models/user_profile_model.dart';
 
@@ -23,3 +24,19 @@ class UserError extends UserState {
   @override
   List<Object?> get props => [message];
 }
+
+class UserProfilePictureLoaded extends UserState {
+  final Uint8List bytes;
+  UserProfilePictureLoaded(this.bytes);
+  @override
+  List<Object?> get props => [bytes];
+}
+
+class UserProfilePictureUpdated extends UserState {
+  final Uint8List bytes;
+  UserProfilePictureUpdated(this.bytes);
+  @override
+  List<Object?> get props => [bytes];
+}
+
+class UserProfilePictureNone extends UserState {}

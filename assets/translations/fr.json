@@ -172,7 +172,12 @@
     "doc_driving_license": "Permis de conduire",
     "doc_residence": "Certificat de résidence",
     "doc_photo": "Photo d'identité",
-    "doc_property": "Titre de propriété"
+    "doc_property": "Titre de propriété",
+    "document_uploaded_success": "Document envoyé avec succès",
+    "document_deleted": "Document supprimé",
+    "no_document_types": "Aucun type de document disponible",
+    "doc_type_unavailable": "Ce type de document n'est pas encore disponible",
+    "photo_updated": "Photo de profil mise à jour avec succès"
   },
   "notifications": {
     "title": "Mes notifications",
@@ -198,7 +203,11 @@
     "update_button": "Mettre à jour",
     "update_success": "Documents mis à jour avec succès.",
     "update_document": "Mettre à jour le document",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "delete_confirm_title": "Supprimer le document",
+    "delete_confirm_body": "Êtes-vous sûr de vouloir supprimer ce document ? Cette action est irréversible.",
+    "validated_no_edit": "Ce document est validé. La photo ne peut plus être modifiée."
   },
   "archives": {
     "title": "Mes archives",

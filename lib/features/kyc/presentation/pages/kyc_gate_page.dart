@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
-import 'kyc_intro_page.dart';
 
 /// Page affichée 3s après connexion/retour si KYC non complété.
 /// Redirige automatiquement vers KycIntroPage.
@@ -20,14 +19,7 @@ class _KycGatePageState extends State<KycGatePage> {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => BlocProvider.value(
-              value: context.read<KycBloc>(),
-              child: const KycIntroPage(),
-            ),
-          ),
-        );
+        Navigator.of(context).pop();
       }
     });
   }

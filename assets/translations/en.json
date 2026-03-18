@@ -158,7 +158,12 @@
     "doc_driving_license": "Driving License",
     "doc_residence": "Residence Certificate",
     "doc_photo": "Identity Photo",
-    "doc_property": "Property Title"
+    "doc_property": "Property Title",
+    "document_uploaded_success": "Document sent successfully",
+    "document_deleted": "Document deleted",
+    "no_document_types": "No document types available",
+    "doc_type_unavailable": "This document type is not yet available",
+    "photo_updated": "Profile photo updated successfully"
   },
   "notifications": {
     "title": "My notifications",
@@ -184,7 +189,11 @@
     "update_button": "Update",
     "update_success": "Documents updated successfully.",
     "update_document": "Update document",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "delete_confirm_title": "Delete document",
+    "delete_confirm_body": "Are you sure you want to delete this document? This action is irreversible.",
+    "validated_no_edit": "This document is validated. The photo can no longer be modified."
   },
   "archives": {
     "title": "My archives",

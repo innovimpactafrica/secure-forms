@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
+import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_event.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_state.dart';
@@ -48,6 +49,10 @@ class _LoginScreenState extends State<LoginScreen> {
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
+            // Stocker le token dans UserSession
+            UserSession.instance.accessToken = state.accessToken;
+            // ignore: avoid_print
+            print('[LoginScreen] Login réussi → token stocké (longueur: ${state.accessToken.length})');
             // Charger le profil utilisateur via l'API
             context.read<UserBloc>().add(LoadUserProfile(state.accessToken));
             Navigator.of(context).pushNamedAndRemoveUntil(

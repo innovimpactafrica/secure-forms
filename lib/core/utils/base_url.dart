@@ -18,6 +18,22 @@ class BaseUrl {
   static const String getUserProfile = '$currentBaseUrl/auth/profile';
   static const String updateProfile  = '$currentBaseUrl/user/update';
 
+  // ========== KYC - IDENTITY DOCUMENTS ==========
+  static const String identityDocuments = '$currentBaseUrl/users/profile/identity-documents';
+  static String identityDocumentFile(String documentId) =>
+      '$currentBaseUrl/users/profile/identity-documents/$documentId/file';
+
+  // ========== PROFILE DOCUMENTS ==========
+  static const String profileDocumentTypes = '$currentBaseUrl/users/profile/document-types';
+  static const String profileCompletion    = '$currentBaseUrl/users/profile/completion';
+  static const String profileDocuments     = '$currentBaseUrl/users/profile/documents';
+  static String profileDocumentFile(String documentId) =>
+      '$currentBaseUrl/users/profile/documents/$documentId/file';
+  static String deleteProfileDocument(String documentId) =>
+      '$currentBaseUrl/users/profile/documents/$documentId';
+  static const String updateUserProfile = '$currentBaseUrl/users/me/profile';
+  static const String getProfilePicture = '$currentBaseUrl/users/me/profile-picture';
+
   // ========== CLIENT ENDPOINTS ==========
   static const String getClientDemandes = '$currentBaseUrl/client/demandes';
   static const String createDemande     = '$currentBaseUrl/client/demandes/create';

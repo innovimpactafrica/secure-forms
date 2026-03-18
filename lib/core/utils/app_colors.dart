@@ -98,4 +98,7 @@ class AppColors {
 
   // Couleur bouton CTA overlay
   static const Color ctaButtonOverlay = Color(0x26FFFFFF);
+
+  // Fond zone upload / card document
+  static const Color documentCardBackground = Color(0xFFE8F0FE);
 }

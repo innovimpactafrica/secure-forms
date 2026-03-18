@@ -4,7 +4,10 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
+import 'package:secure_link/features/kyc/domain/bloc/kyc_event.dart';
+import 'package:secure_link/features/kyc/domain/bloc/kyc_state.dart';
 import 'kyc_step2_face_page.dart';
 
 class KycStep1IdPage extends StatefulWidget {
@@ -36,7 +39,30 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocListener<KycBloc, KycState>(
+      listener: (context, state) {
+        if (state is KycIdDocumentsUploaded) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => BlocProvider.value(
+                value: context.read<KycBloc>(),
+                child: const KycStep2FacePage(),
+              ),
+            ),
+          );
+        } else if (state is KycError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: AppColors.statusRejected,
+            ),
+          );
+        }
+      },
+      child: BlocBuilder<KycBloc, KycState>(
+        builder: (context, kycState) {
+          final isLoading = kycState is KycUploading;
+          return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: Column(
@@ -193,41 +219,72 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
               child: GestureDetector(
-                onTap: _uploadedCount == 2
-                    ? () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => BlocProvider.value(
-                              value: context.read<KycBloc>(),
-                              child: const KycStep2FacePage(),
+                onTap: (_uploadedCount == 2 && !isLoading)
+                    ? () {
+                        final token = UserSession.instance.accessToken;
+                        if (token.isNotEmpty) {
+                          context.read<KycBloc>().add(KycUploadIdDocuments(
+                                recto: _frontImage!,
+                                verso: _backImage!,
+                                token: token,
+                              ));
+                        } else {
+                          // Sans token (test) → navigation directe
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => BlocProvider.value(
+                                value: context.read<KycBloc>(),
+                                child: const KycStep2FacePage(),
+                              ),
                             ),
-                          ),
-                        )
+                          );
+                        }
+                      }
                     : null,
                 child: Container(
                   height: 56,
                   decoration: BoxDecoration(
-                    color: _uploadedCount == 2 ? AppColors.primaryDark : AppColors.borderLight,
+                    color: (_uploadedCount == 2 && !isLoading)
+                        ? AppColors.primaryDark
+                        : AppColors.borderLight,
                     borderRadius: BorderRadius.circular(28),
                     border: Border.all(
-                      color: _uploadedCount == 2 ? AppColors.primaryDark : AppColors.borderGray,
+                      color: (_uploadedCount == 2 && !isLoading)
+                          ? AppColors.primaryDark
+                          : AppColors.borderGray,
                     ),
                   ),
                   child: Center(
-                    child: Text(
-                      'Continuer',
-                      style: TextStyle(
-                        fontFamily: AppConstants.fontFamilySofiaSans,
-                        fontWeight: FontWeight.w600,
-                        fontSize: AppConstants.fontSizeLarge,
-                        color: _uploadedCount == 2 ? AppColors.white : AppColors.textSecondary,
-                      ),
-                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.primaryDark),
+                            ),
+                          )
+                        : Text(
+                            'Continuer',
+                            style: TextStyle(
+                              fontFamily: AppConstants.fontFamilySofiaSans,
+                              fontWeight: FontWeight.w600,
+                              fontSize: AppConstants.fontSizeLarge,
+                              color: (_uploadedCount == 2 && !isLoading)
+                                  ? AppColors.white
+                                  : AppColors.textSecondary,
+                            ),
+                          ),
                   ),
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+        },
       ),
     );
   }

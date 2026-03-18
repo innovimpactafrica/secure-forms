@@ -1,10 +1,8 @@
 
-
+import 'dart:io';
 import 'package:secure_link/features/client/data/models/profile_model.dart';
 
 /// Events du ProfileBloc
-/// TODO: ajouter les events API (SaveProfileToServer, UploadDocumentToServer)
-/// lors de l'intégration des endpoints
 abstract class ProfileEvent {
   const ProfileEvent();
 }
@@ -30,17 +28,15 @@ class SavePersonalInfoEvent extends ProfileEvent {
   });
 }
 
-/// Ajout d'un document avec vérification (Étape 2)
+/// Ajout d'un document local (legacy)
 class AddDocumentEvent extends ProfileEvent {
   final DocumentModel document;
-
   const AddDocumentEvent({required this.document});
 }
 
 /// Face ID validé pour un document
 class FaceVerificationSuccessEvent extends ProfileEvent {
   final String documentType;
-
   const FaceVerificationSuccessEvent({required this.documentType});
 }
 
@@ -48,7 +44,6 @@ class FaceVerificationSuccessEvent extends ProfileEvent {
 class FaceVerificationFailedEvent extends ProfileEvent {
   final String documentType;
   final String reason;
-
   const FaceVerificationFailedEvent({
     required this.documentType,
     required this.reason,
@@ -59,7 +54,6 @@ class FaceVerificationFailedEvent extends ProfileEvent {
 class UpdateDocumentStatusEvent extends ProfileEvent {
   final String documentType;
   final DocumentStatus status;
-
   const UpdateDocumentStatusEvent({
     required this.documentType,
     required this.status,
@@ -71,7 +65,55 @@ class ResetProfileEvent extends ProfileEvent {
   const ResetProfileEvent();
 }
 
-/// Profil complété manuellement par l'utilisateur
+/// Profil complété manuellement
 class CompleteProfileEvent extends ProfileEvent {
   const CompleteProfileEvent();
+}
+
+// ─────────────────────────────────────────────────────────────────
+// EVENTS API — Profile Documents
+// ─────────────────────────────────────────────────────────────────
+
+/// Charger les types de documents disponibles + complétion
+class LoadDocumentTypesEvent extends ProfileEvent {
+  const LoadDocumentTypesEvent();
+}
+
+/// Upload d'un document via l'API
+class UploadProfileDocumentEvent extends ProfileEvent {
+  final File file;
+  final String documentTypeId;
+  final String? issueDate;
+  final String? expirationDate;
+
+  const UploadProfileDocumentEvent({
+    required this.file,
+    required this.documentTypeId,
+    this.issueDate,
+    this.expirationDate,
+  });
+}
+
+/// Supprimer un document via l'API
+class DeleteProfileDocumentEvent extends ProfileEvent {
+  final String documentId;
+  const DeleteProfileDocumentEvent({required this.documentId});
+}
+
+/// Modifier les dates d'un document existant (PATCH)
+class PatchProfileDocumentEvent extends ProfileEvent {
+  final String documentId;
+  final String? issueDate;
+  final String? expirationDate;
+  const PatchProfileDocumentEvent({
+    required this.documentId,
+    this.issueDate,
+    this.expirationDate,
+  });
+}
+
+/// Charger les bytes d'un fichier document
+class FetchDocumentImageEvent extends ProfileEvent {
+  final String documentId;
+  const FetchDocumentImageEvent({required this.documentId});
 }

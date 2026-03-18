@@ -5,6 +5,7 @@ class UserSession {
   String name = '';
   String email = '';
   String role = '';
+  String accessToken = '';
 
   String get firstName => name.trim().split(' ').first;
   String get lastName {
@@ -22,5 +23,6 @@ class UserSession {
     name = '';
     email = '';
     role = '';
+    accessToken = '';
   }
 }
