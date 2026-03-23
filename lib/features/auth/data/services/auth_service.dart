@@ -71,6 +71,20 @@ class AuthService {
     }
   }
 
+  // POST /api/auth/refresh
+  Future<String> refreshAccessToken(String refreshToken) async {
+    final response = await _client.post(
+      Uri.parse(BaseUrl.refreshToken),
+      headers: _headers,
+      body: jsonEncode({'refreshToken': refreshToken}),
+    );
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return data['accessToken']?.toString() ?? '';
+    }
+    throw Exception(data['message'] ?? 'Refresh token invalide');
+  }
+
   // POST /api/auth/setup-password
   // Body : { "token": "...", "password": "...", "confirmPassword": "..." }
   Future<SetupPasswordResponse> setupPassword({

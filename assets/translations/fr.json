@@ -221,7 +221,11 @@
     "no_archives": "Aucune archive trouvée",
     "view": "Voir",
     "download": "Télécharger",
-    "share": "Partager"
+    "share": "Partager",
+    "download_success": "PDF téléchargé avec succès",
+    "download_error": "Échec du téléchargement",
+    "open": "Ouvrir",
+    "retry": "Réessayer"
   },
   "face_verification": {
     "title": "Vérification d'identité",

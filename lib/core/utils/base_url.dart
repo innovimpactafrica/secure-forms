@@ -35,12 +35,21 @@ class BaseUrl {
   static const String getProfilePicture = '$currentBaseUrl/users/me/profile-picture';
 
   // ========== CLIENT ENDPOINTS ==========
-  static const String getClientDemandes = '$currentBaseUrl/client/demandes';
-  static const String createDemande     = '$currentBaseUrl/client/demandes/create';
-  static const String getDemandeDetails = '$currentBaseUrl/client/demandes';
-  static const String getBeneficiaires  = '$currentBaseUrl/client/beneficiaires';
-  static const String getDocuments      = '$currentBaseUrl/client/documents';
-  static const String getBanques        = '$currentBaseUrl/client/banques';
+  static const String getClientDemandes  = '$currentBaseUrl/client/demandes';
+  static const String createDemande      = '$currentBaseUrl/client/demandes/create';
+  static const String getDemandeDetails  = '$currentBaseUrl/client/demandes';
+  static const String getBeneficiaires   = '$currentBaseUrl/client/beneficiaires';
+  static const String getDocuments       = '$currentBaseUrl/client/documents';
+  static const String getBanques         = '$currentBaseUrl/client/banques';
+  static const String getArchives        = '$currentBaseUrl/clients/archives';
+  static const String getNotifications   = '$currentBaseUrl/clients/notifications';
+
+  // ========== DEMANDES ENDPOINTS ==========
+  static const String recentRequests   = '$currentBaseUrl/clients/recent-requests';
+  static const String requests         = '$currentBaseUrl/requests';
+  static String requestById(String id) => '$currentBaseUrl/requests/$id';
+  static String draftById(String id)   => '$currentBaseUrl/requests/draft/$id';
+  static String requestPdf(String id)  => '$currentBaseUrl/requests/$id/pdf';
 
   // ========== HOME ENDPOINTS ==========
   static const String getHomeData = '$currentBaseUrl/home';

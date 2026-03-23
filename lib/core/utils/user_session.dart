@@ -6,6 +6,8 @@ class UserSession {
   String email = '';
   String role = '';
   String accessToken = '';
+  String refreshToken = '';
+  String userId = '';
 
   String get firstName => name.trim().split(' ').first;
   String get lastName {
@@ -24,5 +26,7 @@ class UserSession {
     email = '';
     role = '';
     accessToken = '';
+    refreshToken = '';
+    userId = '';
   }
 }

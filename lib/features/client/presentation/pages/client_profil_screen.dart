@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:secure_link/core/utils/user_session.dart';
+import 'package:secure_link/core/utils/session_storage.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
+import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
+import 'package:secure_link/widgets/user_avatar.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/presentation/pages/mes_archives_screen.dart';
 import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
@@ -21,10 +25,30 @@ class ClientProfilScreen extends StatefulWidget {
 
 class _ClientProfilScreenState extends State<ClientProfilScreen> {
   String get selectedLanguage {
-    // Retourne le nom de la langue dans la langue actuelle
-    return context.locale.languageCode == 'fr' 
-        ? 'profil.french'.tr() 
+    return context.locale.languageCode == 'fr'
+        ? 'profil.french'.tr()
         : 'profil.english'.tr();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final bloc = context.read<UserBloc>();
+      final token = bloc.state is UserLoaded
+          ? (bloc.state as UserLoaded).user.id.isNotEmpty
+              ? UserSession.instance.accessToken
+              : ''
+          : UserSession.instance.accessToken;
+      // Recharger le profil si cachedUser est null
+      if (bloc.cachedUser == null) {
+        bloc.add(LoadUserProfile(token));
+      }
+      // Charger la photo si pas en cache
+      if (bloc.profilePictureBytes == null) {
+        bloc.add(LoadProfilePictureEvent(token));
+      }
+    });
   }
 
   @override
@@ -44,10 +68,13 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                     const SizedBox(height: 24),
                     BlocBuilder<UserBloc, UserState>(
                       builder: (context, userState) {
-                        final user = userState is UserLoaded ? userState.user : null;
+                        final bloc = context.read<UserBloc>();
+                        final user = userState is UserLoaded
+                            ? userState.user
+                            : bloc.cachedUser;
                         return Column(
                           children: [
-                            _AvatarSection(initials: user?.initials ?? '??'),
+                            const UserAvatar(size: 100, fontSize: 36),
                             const SizedBox(height: 16),
                             _UserInfoSection(
                               name: user?.displayName ?? '',
@@ -77,7 +104,12 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                           builder: (_) => const ClientInformationsPersonnellesScreen(),
                         ),
                       ),
-                      onArchivesTap: () {},
+                      onArchivesTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const MesArchivesScreen(),
+              ),
+            ),
                       onNotifsTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -316,6 +348,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pop();
+                        SessionStorage.instance.clear();
                         Navigator.of(context)
                             .pushNamedAndRemoveUntil('/login', (r) => false);
                       },
@@ -384,37 +417,6 @@ class _ProfileHeader extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────
-// AVATAR
-// ─────────────────────────────────────────────────────────────────
-class _AvatarSection extends StatelessWidget {
-  final String initials;
-  const _AvatarSection({required this.initials});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 100,
-      height: 100,
-      decoration: const BoxDecoration(
-        color: AppColors.primaryDark,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Text(
-          initials,
-          style: const TextStyle(
-            fontFamily: AppConstants.fontFamilySofiaSans,
-            fontWeight: FontWeight.w700,
-            fontSize: 36,
-            color: AppColors.white,
-          ),
-        ),
       ),
     );
   }

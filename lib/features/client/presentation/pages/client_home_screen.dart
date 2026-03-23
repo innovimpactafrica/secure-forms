@@ -8,6 +8,13 @@ import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
+import 'package:secure_link/features/client/data/models/demande_model.dart';
+import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_bloc.dart';
+import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_event.dart';
+import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_state.dart';
+import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
+import 'package:secure_link/features/client/domain/bloc/notifications_event.dart';
+import 'package:secure_link/features/client/domain/bloc/notifications_state.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
@@ -18,6 +25,7 @@ import 'package:secure_link/features/kyc/domain/bloc/kyc_event.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_state.dart';
 import 'package:secure_link/features/kyc/presentation/pages/kyc_gate_page.dart';
 import 'package:secure_link/features/kyc/presentation/pages/kyc_intro_page.dart';
+import 'package:secure_link/widgets/user_avatar.dart';
 
 class ClientHomeScreen extends StatefulWidget {
   const ClientHomeScreen({super.key});
@@ -45,6 +53,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         _initKycBloc(userState.user.id);
       }
       context.read<ProfileBloc>().add(const LoadDocumentTypesEvent());
+      context.read<DemandesBloc>().add(const LoadRecentDemandesEvent(limit: 5));
     });
   }
 
@@ -162,7 +171,10 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           },
           child: BlocBuilder<UserBloc, UserState>(
             builder: (context, userState) {
-              final user = userState is UserLoaded ? userState.user : null;
+              final bloc = context.read<UserBloc>();
+              final user = userState is UserLoaded
+                  ? userState.user
+                  : bloc.cachedUser;
               return Scaffold(
                 backgroundColor: AppColors.white,
                 body: SafeArea(
@@ -200,7 +212,6 @@ class _HomeHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // SecureLink logo
           SizedBox(
             width: 54,
             height: 54,
@@ -211,78 +222,80 @@ class _HomeHeader extends StatelessWidget {
               fit: BoxFit.contain,
             ),
           ),
-          // Right side: notification bell + avatar
           Row(
             children: [
-              // Bell with notification badge
               GestureDetector(
-  onTap: () => Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (_) => const NotificationsScreen(),
-    ),
-  ),
-  child: Stack(
-    clipBehavior: Clip.none,
-    children: [
-      Icon(
-        Icons.notifications_outlined,
-        size: 26,
-        color: AppColors.textBlack87,
-      ),
-      Positioned(
-        top: -3,
-        right: -3,
-        child: Container(
-          width: 15,
-          height: 15,
-          decoration: const BoxDecoration(
-            color: AppColors.statusRejected,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              '2',
-              style: TextStyle(
-                color: AppColors.white,
-                fontSize: 8,
-                fontWeight: FontWeight.bold,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const NotificationsScreen(),
+                  ),
+                ).then((_) {
+                  if (context.mounted) {
+                    context.read<NotificationsBloc>().add(const LoadNotificationsEvent());
+                  }
+                }),
+                child: const _NotifBadge(),
               ),
-            ),
-          ),
-        ),
-      ),
-    ],
-  ),
-),
               const SizedBox(width: 14),
-              // Avatar circle
               GestureDetector(
-                onTap: () =>
-                    Navigator.of(context).pushNamed(AppRoutes.clientProfil),
-                child: Container(
-                  width: 42,
-                  height: 42,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryDark,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      initials.isNotEmpty ? initials : '??',
-                      style: TextStyle(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        fontFamily: AppConstants.fontFamilySofiaSans,
-                      ),
-                    ),
-                  ),
-                ),
+                onTap: () => Navigator.of(context).pushNamed(AppRoutes.clientProfil),
+                child: const UserAvatar(size: 42, fontSize: 14),
               ),
             ],
           ),
         ],
       ),
+    );
+  }
+}
+
+// Badge notifications — widget séparé pour écouter le bloc indépendamment
+class _NotifBadge extends StatelessWidget {
+  const _NotifBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<NotificationsBloc, NotificationsState>(
+      builder: (context, state) {
+        final unread = state is NotificationsLoaded
+            ? state.notifications.where((n) => !n.isRead).length
+            : 0;
+        // ignore: avoid_print
+        print('[NotifBadge] unread=$unread state=${state.runtimeType}');
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            const Icon(
+              Icons.notifications_outlined,
+              size: 26,
+              color: AppColors.textBlack87,
+            ),
+            if (unread > 0)
+              Positioned(
+                top: -3,
+                right: -3,
+                child: Container(
+                  width: 15,
+                  height: 15,
+                  decoration: const BoxDecoration(
+                    color: AppColors.statusRejected,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      unread > 9 ? '9+' : '$unread',
+                      style: const TextStyle(
+                        color: AppColors.white,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -767,7 +780,7 @@ class _SearchBarSection extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// RECENT DEMANDES — cards conservées identiques à l'original
+// RECENT DEMANDES — branchée sur DemandesBloc (API réelle)
 // ─────────────────────────────────────────────────────────────────
 class _RecentDemandesSection extends StatelessWidget {
   const _RecentDemandesSection();
@@ -777,8 +790,8 @@ class _RecentDemandesSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -792,8 +805,7 @@ class _RecentDemandesSection extends StatelessWidget {
                 ),
               ),
               GestureDetector(
-                onTap: () =>
-                    Navigator.of(context).pushNamed(AppRoutes.clientDemandes),
+                onTap: () => Navigator.of(context).pushNamed(AppRoutes.clientDemandes),
                 child: Row(
                   children: [
                     Text(
@@ -817,170 +829,170 @@ class _RecentDemandesSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-
-          // ── Card 1: Ouverture de compte ──
-          GestureDetector(
-            onTap: () => Navigator.of(context)
-                .pushNamed(AppRoutes.clientDemandeDetail),
-            child: Container(
-              height: AppConstants.cardDemandeHeight,
-              padding: EdgeInsets.fromLTRB(
-                  AppConstants.paddingLarge, 10, AppConstants.paddingSmall, 10),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius:
-                    BorderRadius.circular(AppConstants.radiusMedium),
-                border: Border.all(color: AppColors.whiteOverlay),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.shadowLight,
-                    blurRadius: 48,
-                    offset: const Offset(0, 2),
+          BlocBuilder<DemandesBloc, DemandesState>(
+            builder: (context, state) {
+              if (state is DemandesLoading) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  SvgPicture.asset(
-                    'assets/icons/logo.svg',
-                    width: AppConstants.cardIconSize,
-                    height: AppConstants.cardIconSize,
-                  ),
-                  SizedBox(width: AppConstants.paddingLarge),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'home.account_opening'.tr(),
-                          style: TextStyle(
-                            fontFamily: AppConstants.fontFamilySofiaSans,
-                            fontWeight: FontWeight.w600,
-                            fontSize: AppConstants.fontSizeLarge,
-                            color: AppColors.textDark,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          '${'home.national_bank'.tr()} • 18/12/2025',
-                          style: TextStyle(
-                            fontFamily: AppConstants.fontFamilyInter,
-                            fontWeight: FontWeight.w400,
-                            fontSize: AppConstants.fontSizeRegular,
-                            color: AppColors.textSecondary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                );
+              }
+              if (state is DemandesError) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    state.message,
+                    style: TextStyle(
+                      fontFamily: AppConstants.fontFamilyInter,
+                      fontSize: AppConstants.fontSizeRegular,
+                      color: AppColors.statusRejected,
                     ),
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: AppConstants.paddingSmall, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.statusPendingLight,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
+                );
+              }
+              if (state is RecentDemandesLoaded) {
+                if (state.demandes.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Text(
-                      'home.pending'.tr(),
+                      'demandes.no_demandes'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilyInter,
-                        fontWeight: FontWeight.w500,
                         fontSize: AppConstants.fontSizeRegular,
-                        height: 1.0,
-                        color: AppColors.statusPending,
+                        color: AppColors.textSecondary,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          SizedBox(height: AppConstants.paddingLarge),
-
-          // ── Card 2: Demande de virement ──
-          GestureDetector(
-            onTap: () => Navigator.of(context)
-                .pushNamed(AppRoutes.clientDemandeDetail),
-            child: Container(
-              height: AppConstants.cardDemandeHeight,
-              padding: EdgeInsets.fromLTRB(
-                  AppConstants.paddingLarge, 10, AppConstants.paddingSmall, 10),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius:
-                    BorderRadius.circular(AppConstants.radiusMedium),
-                border: Border.all(color: AppColors.whiteOverlay),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.shadowLight,
-                    blurRadius: 48,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  SvgPicture.asset(
-                    'assets/icons/logo (1).svg',
-                    width: AppConstants.cardIconSize,
-                    height: AppConstants.cardIconSize,
-                  ),
-                  SizedBox(width: AppConstants.paddingLarge),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'home.transfer_request'.tr(),
-                          style: TextStyle(
-                            fontFamily: AppConstants.fontFamilySofiaSans,
-                            fontWeight: FontWeight.w600,
-                            fontSize: AppConstants.fontSizeLarge,
-                            color: AppColors.textDark,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          '${'home.national_bank'.tr()} • 12/12/2025',
-                          style: TextStyle(
-                            fontFamily: AppConstants.fontFamilyInter,
-                            fontWeight: FontWeight.w400,
-                            fontSize: AppConstants.fontSizeRegular,
-                            color: AppColors.textSecondary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: AppConstants.paddingSmall, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.statusValidatedLight,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      'home.validated'.tr(),
-                      style: TextStyle(
-                        fontFamily: AppConstants.fontFamilyInter,
-                        fontWeight: FontWeight.w500,
-                        fontSize: AppConstants.fontSizeRegular,
-                        height: 1.0,
-                        color: AppColors.statusValidated,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                  );
+                }
+                return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: state.demandes.length,
+                  separatorBuilder: (_, __) => SizedBox(height: AppConstants.paddingLarge),
+                  itemBuilder: (context, index) =>
+                      _RecentDemandeCard(demande: state.demandes[index]),
+                );
+              }
+              return const SizedBox.shrink();
+            },
           ),
         ],
       ),
     );
   }
+}
+
+class _RecentDemandeCard extends StatelessWidget {
+  final DemandeModel demande;
+  const _RecentDemandeCard({required this.demande});
+
+  @override
+  Widget build(BuildContext context) {
+    final statusCfg = _statusConfig(demande.status);
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pushNamed(
+        AppRoutes.clientDemandeDetail,
+        arguments: {'id': demande.id},
+      ),
+      child: Container(
+        height: AppConstants.cardDemandeHeight,
+        padding: EdgeInsets.fromLTRB(
+            AppConstants.paddingLarge, 10, AppConstants.paddingSmall, 10),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+          border: Border.all(color: AppColors.whiteOverlay),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadowLight,
+              blurRadius: 48,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            SvgPicture.asset(
+              'assets/icons/logo.svg',
+              width: AppConstants.cardIconSize,
+              height: AppConstants.cardIconSize,
+            ),
+            SizedBox(width: AppConstants.paddingLarge),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    demande.formType.isNotEmpty ? demande.formType : demande.requestNumber,
+                    style: TextStyle(
+                      fontFamily: AppConstants.fontFamilySofiaSans,
+                      fontWeight: FontWeight.w600,
+                      fontSize: AppConstants.fontSizeLarge,
+                      color: AppColors.textDark,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    '${demande.organisationName} • ${demande.createdAt}',
+                    style: TextStyle(
+                      fontFamily: AppConstants.fontFamilyInter,
+                      fontWeight: FontWeight.w400,
+                      fontSize: AppConstants.fontSizeRegular,
+                      color: AppColors.textSecondary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingSmall, vertical: 4),
+              decoration: BoxDecoration(
+                color: statusCfg.bgColor,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                statusCfg.label,
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontWeight: FontWeight.w500,
+                  fontSize: AppConstants.fontSizeRegular,
+                  height: 1.0,
+                  color: statusCfg.textColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  _StatusCfg _statusConfig(String status) {
+    switch (status.toUpperCase()) {
+      case 'EN_ATTENTE':
+        return _StatusCfg('home.pending'.tr(), AppColors.statusPending, AppColors.statusPendingLight);
+      case 'EN_COURS':
+        return _StatusCfg('demandes.in_progress'.tr(), AppColors.statusInProgress, AppColors.statusInProgressLight);
+      case 'VALIDEE':
+        return _StatusCfg('home.validated'.tr(), AppColors.statusValidated, AppColors.statusValidatedLight);
+      case 'REJETEE':
+        return _StatusCfg('profile.rejected'.tr(), AppColors.statusRejected, AppColors.statusRejectedLight);
+      case 'BROUILLON':
+        return _StatusCfg('demandes.draft'.tr(), AppColors.statusDraft, AppColors.statusDraftLight);
+      default:
+        return _StatusCfg(status, AppColors.statusDraft, AppColors.statusDraftLight);
+    }
+  }
+}
+
+class _StatusCfg {
+  final String label;
+  final Color textColor;
+  final Color bgColor;
+  const _StatusCfg(this.label, this.textColor, this.bgColor);
 }

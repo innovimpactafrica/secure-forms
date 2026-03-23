@@ -34,9 +34,11 @@ class UserProfilePictureLoaded extends UserState {
 
 class UserProfilePictureUpdated extends UserState {
   final Uint8List bytes;
-  UserProfilePictureUpdated(this.bytes);
+  final int updatedAt;
+  UserProfilePictureUpdated(this.bytes)
+      : updatedAt = DateTime.now().millisecondsSinceEpoch;
   @override
-  List<Object?> get props => [bytes];
+  List<Object?> get props => [bytes, updatedAt];
 }
 
 class UserProfilePictureNone extends UserState {}

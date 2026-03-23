@@ -40,22 +40,31 @@ class _ClientInformationsPersonnellesScreenState
   void initState() {
     _selectedGender = 'profile.male'.tr();
     super.initState();
-    // Pré-remplir avec les données de l'utilisateur connecté
-    final userState = context.read<UserBloc>().state;
-    if (userState is UserLoaded) {
-      final user = userState.user;
+    final bloc = context.read<UserBloc>();
+    // Pré-remplir : priorité cachedUser, sinon UserLoaded
+    final user = bloc.cachedUser ??
+        (bloc.state is UserLoaded ? (bloc.state as UserLoaded).user : null);
+    // ignore: avoid_print
+    print('[InfosPerso] initState — cachedUser=${bloc.cachedUser?.firstName} state=${bloc.state.runtimeType}');
+    // ignore: avoid_print
+    print('[InfosPerso] user trouvé: firstName=${user?.firstName} lastName=${user?.lastName} email=${user?.email} phone=${user?.phone}');
+    if (user != null) {
       _prenomController.text = user.firstName;
       _nomController.text = user.lastName;
       _emailController.text = user.email;
       final phone = user.phone.replaceAll('+221', '').replaceAll(' ', '').trim();
       _telephoneController.text = phone;
+    } else {
+      // ignore: avoid_print
+      print('[InfosPerso] Aucun user en cache → rechargement profil');
+      bloc.add(LoadUserProfile(UserSession.instance.accessToken));
     }
-    // Charger la photo de profil existante
-    _pictureBytes = context.read<UserBloc>().profilePictureBytes;
+    // Photo de profil
+    _pictureBytes = bloc.profilePictureBytes;
+    // ignore: avoid_print
+    print('[InfosPerso] profilePictureBytes en cache: ${_pictureBytes != null ? "${_pictureBytes!.length} bytes" : "null"}');
     if (_pictureBytes == null) {
-      context.read<UserBloc>().add(
-        LoadProfilePictureEvent(UserSession.instance.accessToken),
-      );
+      bloc.add(LoadProfilePictureEvent(UserSession.instance.accessToken));
     }
   }
 
@@ -101,6 +110,19 @@ class _ClientInformationsPersonnellesScreenState
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
           );
+        } else if (state is UserLoaded) {
+          // ignore: avoid_print
+          print('[InfosPerso] UserLoaded reçu → firstName=${state.user.firstName} lastName=${state.user.lastName}');
+          final user = state.user;
+          setState(() {
+            if (_prenomController.text.isEmpty) _prenomController.text = user.firstName;
+            if (_nomController.text.isEmpty) _nomController.text = user.lastName;
+            if (_emailController.text.isEmpty) _emailController.text = user.email;
+            if (_telephoneController.text.isEmpty) {
+              final phone = user.phone.replaceAll('+221', '').replaceAll(' ', '').trim();
+              _telephoneController.text = phone;
+            }
+          });
         } else if (state is UserError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -149,8 +171,9 @@ class _ClientInformationsPersonnellesScreenState
   // -------------------------------------------------------------------------
 
   Widget _buildAvatarSection(BuildContext context) {
-    final userState = context.read<UserBloc>().state;
-    final initials = userState is UserLoaded ? userState.user.initials : '??';
+    final bloc = context.read<UserBloc>();
+    final initials = bloc.cachedUser?.initials ??
+        (bloc.state is UserLoaded ? (bloc.state as UserLoaded).user.initials : '??');
 
     return Center(
       child: Padding(

@@ -2,76 +2,103 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/base_url.dart';
+import 'package:secure_link/core/utils/user_session.dart';
+import 'package:secure_link/features/client/data/models/demande_model.dart';
+import 'package:secure_link/features/client/data/repositories/demandes_repository.dart';
 
 // ---------------------------------------------------------------------------
-// Enums & Models
-// TODO: Déplacer dans data/models/demande_detail_model.dart lors de l'intégration API
+// Page principale — charge depuis l'API via l'id
 // ---------------------------------------------------------------------------
 
-enum DemandeDetailStatus { enAttente, enCours, valide, rejete, brouillon }
-
-class DocumentJustificatif {
-  final String nom;
-  final String taille;
-  final bool verifie;
-
-  const DocumentJustificatif({
-    required this.nom,
-    required this.taille,
-    required this.verifie,
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Page principale
-// ---------------------------------------------------------------------------
-
-class ClientDemandeDetailScreen extends StatelessWidget {
+class ClientDemandeDetailScreen extends StatefulWidget {
   const ClientDemandeDetailScreen({super.key});
 
-  Map<String, dynamic> _getArgs(BuildContext context) {
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Map<String, dynamic>) return args;
-    return {
-      'id': '1',
-      'titre': 'Ouverture de compte',
-      'institution': 'Banque Nationale',
-      'status': 'enAttente',
-      'reference': 'REQ-2024-001',
-      'datesoumission': 'Soumis le 15/12, 10h00',
-      'dateEstimee': 'Estimé : 17/12',
-      'documentVersion': 'Version 1.1',
-    };
+  @override
+  State<ClientDemandeDetailScreen> createState() =>
+      _ClientDemandeDetailScreenState();
+}
+
+class _ClientDemandeDetailScreenState
+    extends State<ClientDemandeDetailScreen> {
+  final _repo = DemandesRepository();
+  DemandeModel? _demande;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_loading) _load();
   }
 
-  DemandeDetailStatus _parseStatus(String raw) {
-    switch (raw) {
-      case 'enCours':   return DemandeDetailStatus.enCours;
-      case 'valide':    return DemandeDetailStatus.valide;
-      case 'rejete':    return DemandeDetailStatus.rejete;
-      case 'brouillon': return DemandeDetailStatus.brouillon;
-      default:          return DemandeDetailStatus.enAttente;
+  Future<void> _load() async {
+    final args = ModalRoute.of(context)?.settings.arguments;
+    String? id;
+    if (args is Map) id = args['id']?.toString();
+
+    if (id == null || id.isEmpty) {
+      setState(() { _loading = false; _error = 'ID manquant'; });
+      return;
+    }
+
+    try {
+      final token = UserSession.instance.accessToken;
+      final demande = await _repo.getRequestById(accessToken: token, id: id);
+      if (mounted) setState(() { _demande = demande; _loading = false; });
+    } catch (e) {
+      if (mounted) setState(() { _loading = false; _error = e.toString().replaceAll('Exception: ', ''); });
     }
   }
 
-  // TODO: charger depuis l'API
-  static const List<DocumentJustificatif> _mockDocuments = [
-    DocumentJustificatif(nom: "Carte d'identité",    taille: '210 ko', verifie: true),
-    DocumentJustificatif(nom: 'Preuve de résidence', taille: '404 ko', verifie: true),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final args          = _getArgs(context);
-    final status        = _parseStatus(args['status'] as String);
-    final titre         = args['titre'] as String;
-    final institution   = args['institution'] as String;
-    final reference     = args['reference'] as String;
-    final datesoumission= args['datesoumission'] as String;
-    final dateEstimee   = args['dateEstimee'] as String;
-    final documentVersion = args['documentVersion'] as String;
+    if (_loading) {
+      return const Scaffold(
+        backgroundColor: AppColors.white,
+        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
+    }
 
-    // TODO: Remplacer par BlocBuilder<DemandeDetailBloc, DemandeDetailState>
+    if (_error != null) {
+      return Scaffold(
+        backgroundColor: AppColors.white,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _BackButton(),
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.error_outline,
+                          color: AppColors.statusRejected, size: 40),
+                      const SizedBox(height: 12),
+                      Text(_error!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              color: AppColors.textSecondary, fontSize: 14)),
+                      const SizedBox(height: 16),
+                      TextButton(
+                          onPressed: () {
+                            setState(() { _loading = true; _error = null; });
+                            _load();
+                          },
+                          child: Text('archives.retry'.tr())),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final d = _demande!;
+    final status = _parseStatus(d.status);
+
     return Scaffold(
       backgroundColor: AppColors.white,
       body: Column(
@@ -83,30 +110,27 @@ class ClientDemandeDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeader(context, institution, status),
-                    _buildRefRow(reference, datesoumission, dateEstimee),
+                    _buildHeader(context, d.organisationName, status),
+                    _buildRefRow(d.requestNumber, d.createdAt),
                     _buildStepper(status),
-                    _buildDocumentCard(titre, documentVersion),
-                    _buildDocumentsSection(_mockDocuments),
+                    _buildDocumentCard(
+                        d.formType.isNotEmpty ? d.formType : d.requestNumber),
                     const SizedBox(height: 32),
                   ],
                 ),
               ),
             ),
           ),
-          if (status == DemandeDetailStatus.valide)
-            _buildDownloadButton(context),
+          if (status == _DemandeStatus.valide) _buildDownloadButton(context, d.id),
         ],
       ),
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Header
-  // -------------------------------------------------------------------------
+  // ── Header ──────────────────────────────────────────────────────────────
 
   Widget _buildHeader(
-      BuildContext context, String institution, DemandeDetailStatus status) {
+      BuildContext context, String institution, _DemandeStatus status) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
       child: Row(
@@ -120,7 +144,8 @@ class ClientDemandeDetailScreen extends StatelessWidget {
                 color: AppColors.primaryDark,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
+              child:
+                  const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
             ),
           ),
           const SizedBox(width: 12),
@@ -131,10 +156,9 @@ class ClientDemandeDetailScreen extends StatelessWidget {
                 Text(
                   'demande_detail.new_request'.tr(),
                   style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textDark,
-                  ),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textDark),
                 ),
                 const SizedBox(height: 2),
                 Text(institution,
@@ -143,19 +167,15 @@ class ClientDemandeDetailScreen extends StatelessWidget {
               ],
             ),
           ),
-          // Badge statut avec fond coloré
           _HeaderBadge(status: status),
         ],
       ),
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Référence + dates
-  // -------------------------------------------------------------------------
+  // ── Référence + date ─────────────────────────────────────────────────────
 
-  Widget _buildRefRow(
-      String reference, String datesoumission, String dateEstimee) {
+  Widget _buildRefRow(String reference, String date) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -167,28 +187,18 @@ class ClientDemandeDetailScreen extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   color: AppColors.textDark)),
           const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(datesoumission,
-                  style: const TextStyle(
-                      fontSize: 12, color: AppColors.textSecondary)),
-              Text(dateEstimee,
-                  style: const TextStyle(
-                      fontSize: 12, color: AppColors.textSecondary)),
-            ],
-          ),
+          Text('${'demande_detail.submitted_on'.tr()} $date',
+              style: const TextStyle(
+                  fontSize: 12, color: AppColors.textSecondary)),
           const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Stepper
-  // -------------------------------------------------------------------------
+  // ── Stepper ──────────────────────────────────────────────────────────────
 
-  Widget _buildStepper(DemandeDetailStatus status) {
+  Widget _buildStepper(_DemandeStatus status) {
     final steps = _getStepStates(status);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -236,23 +246,23 @@ class ClientDemandeDetailScreen extends StatelessWidget {
     );
   }
 
-  List<_StepData> _getStepStates(DemandeDetailStatus status) {
+  List<_StepData> _getStepStates(_DemandeStatus status) {
     switch (status) {
-      case DemandeDetailStatus.enAttente:
-      case DemandeDetailStatus.rejete:
-      case DemandeDetailStatus.brouillon:
+      case _DemandeStatus.enAttente:
+      case _DemandeStatus.rejete:
+      case _DemandeStatus.brouillon:
         return [
           _StepData(circleState: _CircleState.active, icon: Icons.edit_outlined, lineActive: false),
           _StepData(circleState: _CircleState.inactive, icon: Icons.access_time, lineActive: false),
           _StepData(circleState: _CircleState.inactive, icon: Icons.check, lineActive: false),
         ];
-      case DemandeDetailStatus.enCours:
+      case _DemandeStatus.enCours:
         return [
           _StepData(circleState: _CircleState.done, icon: Icons.check, lineActive: true),
           _StepData(circleState: _CircleState.active, icon: Icons.access_time, lineActive: false),
           _StepData(circleState: _CircleState.inactive, icon: Icons.check, lineActive: false),
         ];
-      case DemandeDetailStatus.valide:
+      case _DemandeStatus.valide:
         return [
           _StepData(circleState: _CircleState.done, icon: Icons.check, lineActive: true),
           _StepData(circleState: _CircleState.done, icon: Icons.check, lineActive: true),
@@ -261,11 +271,9 @@ class ClientDemandeDetailScreen extends StatelessWidget {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // Card document principal avec field.png comme aperçu
-  // -------------------------------------------------------------------------
+  // ── Card document ────────────────────────────────────────────────────────
 
-  Widget _buildDocumentCard(String titre, String version) {
+  Widget _buildDocumentCard(String titre) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
@@ -283,12 +291,10 @@ class ClientDemandeDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // En-tête de la card
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
               child: Row(
                 children: [
-                  // Icône earmark-text.svg
                   Container(
                     width: 36,
                     height: 36,
@@ -302,35 +308,23 @@ class ClientDemandeDetailScreen extends StatelessWidget {
                         width: 20,
                         height: 20,
                         colorFilter: const ColorFilter.mode(
-                          AppColors.textSecondary,
-                          BlendMode.srcIn,
-                        ),
+                            AppColors.textSecondary, BlendMode.srcIn),
                       ),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(titre,
-                            style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textDark)),
-                        Text(version,
-                            style: const TextStyle(
-                                fontSize: 11,
-                                color: AppColors.textSecondary)),
-                      ],
-                    ),
+                    child: Text(titre,
+                        style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textDark)),
                   ),
                   const Icon(Icons.open_in_new,
                       size: 20, color: AppColors.textSecondary),
                 ],
               ),
             ),
-            // Aperçu avec field.png
             ClipRRect(
               borderRadius:
                   const BorderRadius.vertical(bottom: Radius.circular(14)),
@@ -347,65 +341,18 @@ class ClientDemandeDetailScreen extends StatelessWidget {
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Section Documents justificatifs
-  // -------------------------------------------------------------------------
+  // ── Bouton télécharger PDF ───────────────────────────────────────────────
 
-  Widget _buildDocumentsSection(List<DocumentJustificatif> documents) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'demande_detail.supporting_documents'.tr(),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textDark,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Container(
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.borderDivider),
-            ),
-            child: Column(
-              children: documents.asMap().entries.map((entry) {
-                final isLast = entry.key == documents.length - 1;
-                return Column(
-                  children: [
-                    _DocumentJustificatifItem(doc: entry.value),
-                    if (!isLast)
-                      Divider(
-                          height: 1,
-                          indent: 16,
-                          endIndent: 16,
-                          color: AppColors.borderDivider),
-                  ],
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // -------------------------------------------------------------------------
-  // Bouton Télécharger PDF (statut Validé uniquement)
-  // -------------------------------------------------------------------------
-
-  Widget _buildDownloadButton(BuildContext context) {
+  Widget _buildDownloadButton(BuildContext context, String id) {
     return SafeArea(
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: GestureDetector(
-          // TODO: Implémenter le téléchargement PDF via le service dédié
-          onTap: () {},
+          onTap: () {
+            // ignore: avoid_print
+            print('[DemandeDetail] PDF URL: ${BaseUrl.requestPdf(id)}');
+          },
           child: Container(
             height: 54,
             decoration: BoxDecoration(
@@ -415,7 +362,8 @@ class ClientDemandeDetailScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.download_outlined, color: AppColors.white, size: 20),
+                const Icon(Icons.download_outlined,
+                    color: AppColors.white, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   'demande_detail.download_pdf'.tr(),
@@ -431,110 +379,37 @@ class ClientDemandeDetailScreen extends StatelessWidget {
       ),
     );
   }
+
+  _DemandeStatus _parseStatus(String raw) {
+    switch (raw.toUpperCase()) {
+      case 'EN_COURS':   return _DemandeStatus.enCours;
+      case 'VALIDEE':    return _DemandeStatus.valide;
+      case 'REJETEE':    return _DemandeStatus.rejete;
+      case 'BROUILLON':  return _DemandeStatus.brouillon;
+      default:           return _DemandeStatus.enAttente;
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
-// Item document justificatif – icône earmark-text.svg
+// Bouton retour simple
 // ---------------------------------------------------------------------------
 
-class _DocumentJustificatifItem extends StatelessWidget {
-  final DocumentJustificatif doc;
-
-  const _DocumentJustificatifItem({required this.doc});
-
+class _BackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          // Icône earmark-text.svg
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.gray,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: SvgPicture.asset(
-                'assets/icons/earmark-text.svg',
-                width: 20,
-                height: 20,
-                colorFilter: const ColorFilter.mode(
-                  AppColors.textSecondary,
-                  BlendMode.srcIn,
-                ),
-              ),
-            ),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppColors.primaryDark,
+            borderRadius: BorderRadius.circular(10),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(doc.nom,
-                    style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textDark)),
-                const SizedBox(height: 2),
-                Text(doc.taille,
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.textSecondary)),
-              ],
-            ),
-          ),
-          if (doc.verifie)
-            Text('demande_detail.verified'.tr(),
-                style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.primary)),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Badge header – TOUS avec fond coloré (comme sur la photo)
-// ---------------------------------------------------------------------------
-
-class _HeaderBadge extends StatelessWidget {
-  final DemandeDetailStatus status;
-
-  const _HeaderBadge({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    switch (status) {
-      case DemandeDetailStatus.enAttente:
-        return _badge('demandes.pending'.tr(), AppColors.statusPending, AppColors.statusPendingLight);
-      case DemandeDetailStatus.enCours:
-        return _badge('demandes.in_progress'.tr(), AppColors.statusInProgress, AppColors.statusInProgressLight);
-      case DemandeDetailStatus.valide:
-        return _badge('profile.validated'.tr(), AppColors.statusValidated, AppColors.statusValidatedLight);
-      case DemandeDetailStatus.rejete:
-        return _badge('profile.rejected'.tr(), AppColors.statusRejected, AppColors.statusRejectedLight);
-      case DemandeDetailStatus.brouillon:
-        return _badge('demandes.draft'.tr(), AppColors.statusDraft, AppColors.statusDraftLight);
-    }
-  }
-
-  Widget _badge(String label, Color textColor, Color bgColor) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: textColor,
+          child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
         ),
       ),
     );
@@ -545,29 +420,24 @@ class _HeaderBadge extends StatelessWidget {
 // Stepper components
 // ---------------------------------------------------------------------------
 
+enum _DemandeStatus { enAttente, enCours, valide, rejete, brouillon }
 enum _CircleState { active, done, inactive }
 
 class _StepData {
   final _CircleState circleState;
   final IconData icon;
   final bool lineActive;
-
-  const _StepData({
-    required this.circleState,
-    required this.icon,
-    required this.lineActive,
-  });
+  const _StepData({required this.circleState, required this.icon, required this.lineActive});
 }
 
 class _StepCircle extends StatelessWidget {
   final _CircleState state;
   final IconData icon;
-
   const _StepCircle({required this.state, required this.icon});
 
   @override
   Widget build(BuildContext context) {
-    final isActive = state == _CircleState.active || state == _CircleState.done;
+    final isActive = state != _CircleState.inactive;
     return Container(
       width: 36,
       height: 36,
@@ -588,7 +458,6 @@ class _StepCircle extends StatelessWidget {
 
 class _StepLine extends StatelessWidget {
   final bool active;
-
   const _StepLine({required this.active});
 
   @override
@@ -596,6 +465,44 @@ class _StepLine extends StatelessWidget {
     return Container(
       height: 2,
       color: active ? AppColors.primaryDark : AppColors.borderGray,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Badge header
+// ---------------------------------------------------------------------------
+
+class _HeaderBadge extends StatelessWidget {
+  final _DemandeStatus status;
+  const _HeaderBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    switch (status) {
+      case _DemandeStatus.enAttente:
+        return _badge('demandes.pending'.tr(), AppColors.statusPending, AppColors.statusPendingLight);
+      case _DemandeStatus.enCours:
+        return _badge('demandes.in_progress'.tr(), AppColors.statusInProgress, AppColors.statusInProgressLight);
+      case _DemandeStatus.valide:
+        return _badge('profile.validated'.tr(), AppColors.statusValidated, AppColors.statusValidatedLight);
+      case _DemandeStatus.rejete:
+        return _badge('profile.rejected'.tr(), AppColors.statusRejected, AppColors.statusRejectedLight);
+      case _DemandeStatus.brouillon:
+        return _badge('demandes.draft'.tr(), AppColors.statusDraft, AppColors.statusDraftLight);
+    }
+  }
+
+  Widget _badge(String label, Color textColor, Color bgColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(label,
+          style: TextStyle(
+              fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
     );
   }
 }

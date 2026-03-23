@@ -48,15 +48,13 @@ class WelcomeScreen extends StatelessWidget {
                 children: [
                   SizedBox(
                     width: ResponsiveUtils.getResponsiveWidth(context, 406),
-                    height: ResponsiveUtils.getResponsiveHeight(context, 38),
                     child: Text(
-                      'SECURELINK',
+                      'SECURE FORMS',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilySofiaSans,
                         fontWeight: FontWeight.w700,
-                        fontSize: ResponsiveUtils.getResponsiveFontSize(context, 32),
-                        height: 1.0,
+                        fontSize: ResponsiveUtils.getResponsiveFontSize(context, 42),
                         color: AppColors.white,
                       ),
                     ),
@@ -64,9 +62,8 @@ class WelcomeScreen extends StatelessWidget {
                   SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 16)),
                   SizedBox(
                     width: ResponsiveUtils.getResponsiveWidth(context, 406),
-                    height: ResponsiveUtils.getResponsiveHeight(context, 56),
                     child: Text(
-                      'welcome.subtitle'.tr(),
+                      'La transmission sécrisée de confiance',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilySofiaSans,

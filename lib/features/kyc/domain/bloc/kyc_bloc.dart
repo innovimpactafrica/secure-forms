@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/kyc/data/models/identity_document_model.dart';
 import 'package:secure_link/features/kyc/data/repositories/identity_document_repository.dart';
 import 'kyc_event.dart';
@@ -31,10 +32,44 @@ class KycBloc extends Bloc<KycEvent, KycState> {
       emit(const KycRequired());
       return;
     }
+
+    // 1. Vérifier d'abord le cache local
     final prefs = await SharedPreferences.getInstance();
-    final completed = prefs.getBool(_kycKey) ?? false;
-    _log('SharedPrefs[$_kycKey] = $completed → ${completed ? "KycCompleted" : "KycRequired"}');
-    emit(completed ? const KycCompleted() : const KycRequired());
+    final cachedCompleted = prefs.getBool(_kycKey) ?? false;
+    if (cachedCompleted) {
+      _log('Cache local: KYC déjà completé → KycCompleted');
+      emit(const KycCompleted());
+      return;
+    }
+
+    // 2. Vérifier via l'API si les documents ont été soumis
+    try {
+      final token = UserSession.instance.accessToken;
+      if (token.isEmpty) {
+        emit(const KycRequired());
+        return;
+      }
+      final docs = await _repository.getDocuments(token);
+      _log('API: ${docs.length} document(s) trouvé(s)');
+
+      // KYC considéré complet si au moins RECTO et SELFIE ont été soumis
+      final hasRecto = docs.any((d) => d.kind.toUpperCase() == 'RECTO');
+      final hasSelfie = docs.any((d) => d.kind.toUpperCase() == 'SELFIE');
+      final apiCompleted = hasRecto && hasSelfie;
+
+      _log('hasRecto=$hasRecto hasSelfie=$hasSelfie → ${apiCompleted ? "KycCompleted" : "KycRequired"}');
+
+      if (apiCompleted) {
+        // Sauvegarder localement pour éviter l'appel API au prochain démarrage
+        await prefs.setBool(_kycKey, true);
+        emit(const KycCompleted());
+      } else {
+        emit(const KycRequired());
+      }
+    } catch (e) {
+      _log('Erreur vérification API KYC: $e → fallback KycRequired');
+      emit(const KycRequired());
+    }
   }
 
   Future<void> _onMarkCompleted(

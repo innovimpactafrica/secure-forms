@@ -1,72 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
-
-// ─────────────────────────────────────────────────────────────────
-// MODÈLE DE NOTIFICATION
-// ─────────────────────────────────────────────────────────────────
-enum NotifType { urgent, success, warning, info }
-
-class NotifItem {
-  final String title;
-  final String subtitle;
-  final String time;
-  final NotifType type;
-
-  const NotifItem({
-    required this.title,
-    required this.subtitle,
-    required this.time,
-    required this.type,
-  });
-}
-
-// ─────────────────────────────────────────────────────────────────
-// DONNÉES SIMULÉES — TODO: remplacer par API GET /notifications
-// Quand l'API sera connectée, elle retournera les données déjà traduites
-// ─────────────────────────────────────────────────────────────────
-List<NotifItem> _getNotifsTodayMock(BuildContext context) => [
-  NotifItem(
-    title: 'notifications.id_card_expiring'.tr(),
-    subtitle: 'notifications.id_card_expiring_desc'.tr(),
-    time: 'notifications.today_time'.tr(),
-    type: NotifType.urgent,
-  ),
-  NotifItem(
-    title: 'notifications.driving_license_validated'.tr(),
-    subtitle: 'notifications.driving_license_validated_desc'.tr(),
-    time: 'notifications.today_time_2'.tr(),
-    type: NotifType.success,
-  ),
-  NotifItem(
-    title: 'notifications.verification_pending'.tr(),
-    subtitle: 'notifications.verification_pending_desc'.tr(),
-    time: 'notifications.yesterday_time'.tr(),
-    type: NotifType.warning,
-  ),
-];
-
-List<NotifItem> _getNotifsYesterdayMock(BuildContext context) => [
-  NotifItem(
-    title: 'notifications.driving_license_expiring'.tr(),
-    subtitle: 'notifications.driving_license_expiring_desc'.tr(),
-    time: 'notifications.yesterday_time'.tr(),
-    type: NotifType.urgent,
-  ),
-];
+import 'package:secure_link/features/client/data/models/notification_model.dart';
+import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
+import 'package:secure_link/features/client/domain/bloc/notifications_event.dart';
+import 'package:secure_link/features/client/domain/bloc/notifications_state.dart';
 
 // ─────────────────────────────────────────────────────────────────
 // ÉCRAN NOTIFICATIONS
 // ─────────────────────────────────────────────────────────────────
-class NotificationsScreen extends StatefulWidget {
+class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
 
   @override
-  State<NotificationsScreen> createState() => _NotificationsScreenState();
+  Widget build(BuildContext context) {
+    return const _NotificationsView();
+  }
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> {
+class _NotificationsView extends StatefulWidget {
+  const _NotificationsView();
+
+  @override
+  State<_NotificationsView> createState() => _NotificationsViewState();
+}
+
+class _NotificationsViewState extends State<_NotificationsView> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -76,27 +37,23 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     super.dispose();
   }
 
-  List<NotifItem> _filter(List<NotifItem> items) {
+  List<NotificationModel> _filter(List<NotificationModel> items) {
     if (_searchQuery.isEmpty) return items;
     return items
         .where((n) =>
             n.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            n.subtitle.toLowerCase().contains(_searchQuery.toLowerCase()))
+            n.message.toLowerCase().contains(_searchQuery.toLowerCase()))
         .toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    final todayFiltered = _filter(_getNotifsTodayMock(context));
-    final yesterdayFiltered = _filter(_getNotifsYesterdayMock(context));
-
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // ── Header ──
-            _NotifHeader(),
+            const _NotifHeader(),
             // ── Barre de recherche ──
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
@@ -110,8 +67,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 child: Row(
                   children: [
                     const SizedBox(width: 14),
-                    Icon(Icons.search,
-                        color: AppColors.greyShade500, size: 20),
+                    Icon(Icons.search, color: AppColors.greyShade500, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: TextField(
@@ -141,35 +97,57 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ),
             // ── Liste ──
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                children: [
-                  if (todayFiltered.isNotEmpty) ...[
-                    _SectionLabel(label: 'notifications.today'.tr()),
-                    const SizedBox(height: 12),
-                    ...todayFiltered.map((n) => _NotifCard(item: n)),
-                  ],
-                  if (yesterdayFiltered.isNotEmpty) ...[
-                    const SizedBox(height: 20),
-                    _SectionLabel(label: 'notifications.yesterday'.tr()),
-                    const SizedBox(height: 12),
-                    ...yesterdayFiltered.map((n) => _NotifCard(item: n)),
-                  ],
-                  if (todayFiltered.isEmpty && yesterdayFiltered.isEmpty)
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 60),
-                        child: Text(
-                          'notifications.no_notifications'.tr(),
-                          style: TextStyle(
-                            fontFamily: AppConstants.fontFamilyInter,
-                            fontSize: AppConstants.fontSizeMedium,
-                            color: AppColors.textSecondary,
+              child: BlocBuilder<NotificationsBloc, NotificationsState>(
+                builder: (context, state) {
+                  if (state is NotificationsLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: AppColors.primary),
+                    );
+                  }
+                  if (state is NotificationsError) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.error_outline,
+                              color: AppColors.statusRejected, size: 40),
+                          const SizedBox(height: 12),
+                          Text(
+                            state.message,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
+                          const SizedBox(height: 16),
+                          GestureDetector(
+                            onTap: () => context
+                                .read<NotificationsBloc>()
+                                .add(const LoadNotificationsEvent()),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryDark,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                'archives.retry'.tr(),
+                                style: const TextStyle(
+                                    color: AppColors.white, fontSize: 14),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                ],
+                    );
+                  }
+                  if (state is NotificationsLoaded) {
+                    return _buildList(context, state.notifications);
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
             ),
           ],
@@ -177,10 +155,65 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
     );
   }
+
+  Widget _buildList(BuildContext context, List<NotificationModel> all) {
+    final filtered = _filter(all);
+
+    // Grouper par date (aujourd'hui / hier / autres)
+    final Map<String, List<NotificationModel>> grouped = {};
+    for (final n in filtered) {
+      final key = n.formattedDate;
+      grouped.putIfAbsent(key, () => []).add(n);
+    }
+
+    if (grouped.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 60),
+          child: Text(
+            'notifications.no_notifications'.tr(),
+            style: TextStyle(
+              fontFamily: AppConstants.fontFamilyInter,
+              fontSize: AppConstants.fontSizeMedium,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Ordre d'affichage : today → yesterday → autres
+    final orderedKeys = grouped.keys.toList()
+      ..sort((a, b) {
+        if (a == 'today') return -1;
+        if (b == 'today') return 1;
+        if (a == 'yesterday') return -1;
+        if (b == 'yesterday') return 1;
+        return b.compareTo(a);
+      });
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      children: [
+        for (final key in orderedKeys) ...[
+          _SectionLabel(label: _sectionTitle(key)),
+          const SizedBox(height: 12),
+          ...grouped[key]!.map((n) => _NotifCard(item: n)),
+          const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+
+  String _sectionTitle(String key) {
+    if (key == 'today') return 'notifications.today'.tr();
+    if (key == 'yesterday') return 'notifications.yesterday'.tr();
+    return key;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────
-// HEADER
+// HEADER — identique à l'original
 // ─────────────────────────────────────────────────────────────────
 class _NotifHeader extends StatelessWidget {
   const _NotifHeader();
@@ -200,11 +233,7 @@ class _NotifHeader extends StatelessWidget {
                 color: AppColors.primaryDark,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                Icons.arrow_back,
-                color: AppColors.white,
-                size: 18,
-              ),
+              child: const Icon(Icons.arrow_back, color: AppColors.white, size: 18),
             ),
           ),
           const SizedBox(width: 16),
@@ -224,7 +253,7 @@ class _NotifHeader extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// LABEL DE SECTION (Aujourd'hui / Hier)
+// LABEL DE SECTION — identique à l'original
 // ─────────────────────────────────────────────────────────────────
 class _SectionLabel extends StatelessWidget {
   final String label;
@@ -245,28 +274,32 @@ class _SectionLabel extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// CARD DE NOTIFICATION
+// CARD DE NOTIFICATION — design identique à l'original
 // ─────────────────────────────────────────────────────────────────
 class _NotifCard extends StatelessWidget {
-  final NotifItem item;
+  final NotificationModel item;
   const _NotifCard({required this.item});
 
   Color _borderColor() {
-    switch (item.type) {
-      case NotifType.urgent:
+    switch (item.type.toUpperCase()) {
+      case 'DOCUMENT_EXPIRING':
+      case 'REQUEST_REJECTED':
         return AppColors.statusRejected;
-      case NotifType.success:
+      case 'REQUEST_VALIDATED':
+      case 'DOCUMENT_VALIDATED':
         return AppColors.statusValideGreen;
-      case NotifType.warning:
+      case 'VERIFICATION_PENDING':
+      case 'DOCUMENT_PENDING':
         return AppColors.statusEnAttente;
-      case NotifType.info:
+      default:
         return AppColors.primary;
     }
   }
 
   Widget _icon() {
-    switch (item.type) {
-      case NotifType.urgent:
+    switch (item.type.toUpperCase()) {
+      case 'DOCUMENT_EXPIRING':
+      case 'REQUEST_REJECTED':
         return Container(
           width: 36,
           height: 36,
@@ -286,7 +319,8 @@ class _NotifCard extends StatelessWidget {
             ),
           ),
         );
-      case NotifType.success:
+      case 'REQUEST_VALIDATED':
+      case 'DOCUMENT_VALIDATED':
         return Container(
           width: 36,
           height: 36,
@@ -294,13 +328,11 @@ class _NotifCard extends StatelessWidget {
             color: AppColors.statusValideGreen.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            Icons.check_circle_outline,
-            color: AppColors.statusValideGreen,
-            size: 22,
-          ),
+          child: Icon(Icons.check_circle_outline,
+              color: AppColors.statusValideGreen, size: 22),
         );
-      case NotifType.warning:
+      case 'VERIFICATION_PENDING':
+      case 'DOCUMENT_PENDING':
         return Container(
           width: 36,
           height: 36,
@@ -308,13 +340,10 @@ class _NotifCard extends StatelessWidget {
             color: AppColors.statusEnAttente.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            Icons.warning_amber_rounded,
-            color: AppColors.statusEnAttente,
-            size: 22,
-          ),
+          child: Icon(Icons.warning_amber_rounded,
+              color: AppColors.statusEnAttente, size: 22),
         );
-      case NotifType.info:
+      default:
         return Container(
           width: 36,
           height: 36,
@@ -322,11 +351,7 @@ class _NotifCard extends StatelessWidget {
             color: AppColors.primary.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            Icons.info_outline,
-            color: AppColors.primary,
-            size: 22,
-          ),
+          child: Icon(Icons.info_outline, color: AppColors.primary, size: 22),
         );
     }
   }
@@ -354,15 +379,12 @@ class _NotifCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icône
             _icon(),
             const SizedBox(width: 12),
-            // Contenu
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Titre + heure
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -379,7 +401,7 @@ class _NotifCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        item.time,
+                        item.timeFormatted,
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilyInter,
                           fontSize: 10,
@@ -390,9 +412,8 @@ class _NotifCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  // Sous-titre
                   Text(
-                    item.subtitle,
+                    item.message,
                     style: TextStyle(
                       fontFamily: AppConstants.fontFamilyInter,
                       fontSize: AppConstants.fontSizeRegular,

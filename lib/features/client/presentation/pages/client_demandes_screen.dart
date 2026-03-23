@@ -1,36 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
-
-// ---------------------------------------------------------------------------
-// Models – will be replaced by real API models once connected
-// ---------------------------------------------------------------------------
-
-enum DemandeStatus { brouillon, enAttente, enCours, valide, rejete }
-
-class DemandeItem {
-  final String id;
-  final String title;
-  final String institution;
-  final String date;
-  final DemandeStatus status;
-  final String iconAsset;
-
-  const DemandeItem({
-    required this.id,
-    required this.title,
-    required this.institution,
-    required this.date,
-    required this.status,
-    required this.iconAsset,
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
+import 'package:secure_link/features/client/data/models/demande_model.dart';
+import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_bloc.dart';
+import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_event.dart';
+import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_state.dart';
 
 class ClientDemandesScreen extends StatefulWidget {
   const ClientDemandesScreen({super.key});
@@ -40,53 +18,9 @@ class ClientDemandesScreen extends StatefulWidget {
 }
 
 class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
-  // TODO: Replace with BLoC state – DemandesBloc
   int _selectedFilter = 0;
   final TextEditingController _searchController = TextEditingController();
-
-  // TODO: Replace with data coming from DemandesBloc / DemandesRepository
-  List<DemandeItem> get _allDemandes => [
-    DemandeItem(
-      id: '1',
-      title: 'demandes.account_opening'.tr(),
-      institution: 'demandes.national_bank'.tr(),
-      date: '18/12/2025',
-      status: DemandeStatus.enAttente,
-      iconAsset: 'assets/icons/logo.svg',
-    ),
-    DemandeItem(
-      id: '2',
-      title: 'demandes.transfer_request'.tr(),
-      institution: 'demandes.national_bank'.tr(),
-      date: '12/12/2025',
-      status: DemandeStatus.valide,
-      iconAsset: 'assets/icons/logo (1).svg',
-    ),
-    DemandeItem(
-      id: '3',
-      title: 'demandes.sale_deed'.tr(),
-      institution: 'demandes.notary_x'.tr(),
-      date: '05/12/2025',
-      status: DemandeStatus.enCours,
-      iconAsset: 'assets/icons/logo.svg',
-    ),
-    DemandeItem(
-      id: '4',
-      title: 'demandes.loan_request'.tr(),
-      institution: 'demandes.modern_credit'.tr(),
-      date: '12/11/2025',
-      status: DemandeStatus.valide,
-      iconAsset: 'assets/icons/logo.svg',
-    ),
-    DemandeItem(
-      id: '5',
-      title: 'demandes.card_opposition'.tr(),
-      institution: 'demandes.national_bank'.tr(),
-      date: '04/11/2025',
-      status: DemandeStatus.rejete,
-      iconAsset: 'assets/icons/logo.svg',
-    ),
-  ];
+  final ScrollController _scrollController = ScrollController();
 
   static const List<String> _filterLabels = [
     'demandes.all',
@@ -96,52 +30,41 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
     'demandes.rejected',
   ];
 
-  // Convertit le statut en String pour le passer à la page de détail
-  // TODO: Supprimer quand l'API sera connectée (on passera un vrai ID)
-  String _statusToString(DemandeStatus status) {
-    switch (status) {
-      case DemandeStatus.enAttente:
-        return 'enAttente';
-      case DemandeStatus.enCours:
-        return 'enCours';
-      case DemandeStatus.valide:
-        return 'valide';
-      case DemandeStatus.rejete:
-        return 'rejete';
-      case DemandeStatus.brouillon:
-        return 'brouillon';
-    }
+  static const List<String?> _filterStatuses = [
+    null,
+    'BROUILLON',
+    'EN_COURS',
+    'VALIDEE',
+    'REJETEE',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+    _scrollController.addListener(_onScroll);
   }
 
-  List<DemandeItem> get _filteredDemandes {
-    // TODO: Move filtering logic to BLoC when API connected
-    final query = _searchController.text.toLowerCase();
-    List<DemandeItem> list = _allDemandes;
+  void _load() {
+    context.read<DemandesBloc>().add(LoadDemandesEvent(
+          status: _filterStatuses[_selectedFilter],
+          search: _searchController.text.trim().isEmpty
+              ? null
+              : _searchController.text.trim(),
+        ));
+  }
 
-    if (_selectedFilter != 0) {
-      final statusMap = {
-        1: DemandeStatus.brouillon,
-        2: DemandeStatus.enCours,
-        3: DemandeStatus.valide,
-        4: DemandeStatus.rejete,
-      };
-      list = list.where((d) => d.status == statusMap[_selectedFilter]).toList();
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 100) {
+      context.read<DemandesBloc>().add(const LoadMoreDemandesEvent());
     }
-
-    if (query.isNotEmpty) {
-      list = list
-          .where((d) =>
-              d.title.toLowerCase().contains(query) ||
-              d.institution.toLowerCase().contains(query))
-          .toList();
-    }
-
-    return list;
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -156,17 +79,12 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
             _buildHeader(context),
             _buildSearchBar(),
             _buildFilterBar(),
-            // TODO: Wrap with BlocBuilder<DemandesBloc, DemandesState>
-            Expanded(child: _buildDemandesList()),
+            Expanded(child: _buildList()),
           ],
         ),
       ),
     );
   }
-
-  // -------------------------------------------------------------------------
-  // Header
-  // -------------------------------------------------------------------------
 
   Widget _buildHeader(BuildContext context) {
     return Padding(
@@ -192,16 +110,16 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
             children: [
               Text(
                 'demandes.title'.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textDark,
                 ),
               ),
-              SizedBox(height: 2),
+              const SizedBox(height: 2),
               Text(
                 'demandes.subtitle'.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
                   color: AppColors.textSecondary,
@@ -213,10 +131,6 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
       ),
     );
   }
-
-  // -------------------------------------------------------------------------
-  // Search bar
-  // -------------------------------------------------------------------------
 
   Widget _buildSearchBar() {
     return Padding(
@@ -236,11 +150,14 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
             Expanded(
               child: TextField(
                 controller: _searchController,
-                onChanged: (_) => setState(() {}),
+                onSubmitted: (_) => _load(),
+                onChanged: (v) {
+                  if (v.isEmpty) _load();
+                },
                 style: const TextStyle(fontSize: 14, color: AppColors.textDark),
                 decoration: InputDecoration(
                   hintText: 'demandes.search_placeholder'.tr(),
-                  hintStyle: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                  hintStyle: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
@@ -252,10 +169,6 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
       ),
     );
   }
-
-  // -------------------------------------------------------------------------
-  // Filter bar
-  // -------------------------------------------------------------------------
 
   Widget _buildFilterBar() {
     return Padding(
@@ -270,7 +183,10 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
           itemBuilder: (context, index) {
             final isSelected = _selectedFilter == index;
             return GestureDetector(
-              onTap: () => setState(() => _selectedFilter = index),
+              onTap: () {
+                setState(() => _selectedFilter = index);
+                _load();
+              },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -294,67 +210,99 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Demandes list
-  // -------------------------------------------------------------------------
-
-  Widget _buildDemandesList() {
-    final items = _filteredDemandes;
-
-    if (items.isEmpty) {
-      return Center(
-        child: Text(
-          'demandes.no_demandes'.tr(),
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _DemandeCard(
-            item: item,
-            onTap: () {
-              // TODO: When API connected, pass only item.id and load from DemandesRepository
-              // On passe un Map simple pour éviter les imports croisés entre fichiers
-              Navigator.of(context).pushNamed(
-                AppRoutes.clientDemandeDetail,
-                arguments: {
-                  'id': item.id,
-                  'titre': item.title,
-                  'institution': item.institution,
-                  'status': _statusToString(item.status),
-                  'reference': 'REQ-2024-00${item.id}',
-                  'datesoumission': '${'demande_detail.submitted_on'.tr()} 15/12, 10h00',
-                  'dateEstimee': '${'demande_detail.estimated'.tr()} : 17/12',
-                  'documentVersion': '${'demande_detail.version'.tr()} 1.1',
-                },
+  Widget _buildList() {
+    return BlocConsumer<DemandesBloc, DemandesState>(
+      listener: (context, state) {
+        if (state is DraftDeleted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Brouillon supprimé')),
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state is DemandesLoading) {
+          return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+        }
+        if (state is DemandesError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(state.message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppColors.statusRejected)),
+                  const SizedBox(height: 16),
+                  TextButton(onPressed: _load, child: const Text('Réessayer')),
+                ],
+              ),
+            ),
+          );
+        }
+        if (state is DemandesLoaded) {
+          if (state.demandes.isEmpty) {
+            return Center(
+              child: Text(
+                'demandes.no_demandes'.tr(),
+                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              ),
+            );
+          }
+          return ListView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            itemCount: state.demandes.length + (state.isLoadingMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == state.demandes.length) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                );
+              }
+              final item = state.demandes[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _DemandeCard(
+                  item: item,
+                  onTap: () => Navigator.of(context).pushNamed(
+                    AppRoutes.clientDemandeDetail,
+                    arguments: {'id': item.id},
+                  ),
+                  onDeleteDraft: item.isDraft
+                      ? () => context
+                          .read<DemandesBloc>()
+                          .add(DeleteDraftEvent(item.id))
+                      : null,
+                ),
               );
             },
-          ),
-        );
+          );
+        }
+        return const SizedBox.shrink();
       },
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Demande Card Widget
+// Demande Card
 // ---------------------------------------------------------------------------
 
 class _DemandeCard extends StatelessWidget {
-  final DemandeItem item;
+  final DemandeModel item;
   final VoidCallback onTap;
+  final VoidCallback? onDeleteDraft;
 
-  const _DemandeCard({required this.item, required this.onTap});
+  const _DemandeCard({
+    required this.item,
+    required this.onTap,
+    this.onDeleteDraft,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final statusCfg = _statusConfig(item.status);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -382,7 +330,7 @@ class _DemandeCard extends StatelessWidget {
               ),
               child: Center(
                 child: SvgPicture.asset(
-                  item.iconAsset,
+                  'assets/icons/logo.svg',
                   width: 32,
                   height: 32,
                 ),
@@ -394,7 +342,7 @@ class _DemandeCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.title,
+                    item.formType.isNotEmpty ? item.formType : item.requestNumber,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -404,7 +352,7 @@ class _DemandeCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${item.institution} • ${item.date}',
+                    '${item.organisationName} • ${item.createdAt}',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
@@ -416,87 +364,66 @@ class _DemandeCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            _StatusBadge(status: item.status),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusCfg.bgColor,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    statusCfg.label,
+                    style: TextStyle(
+                      fontSize: AppConstants.fontSizeRegular,
+                      fontWeight: FontWeight.w500,
+                      color: statusCfg.textColor,
+                    ),
+                  ),
+                ),
+                if (onDeleteDraft != null) ...[
+                  const SizedBox(height: 6),
+                  GestureDetector(
+                    onTap: onDeleteDraft,
+                    child: SvgPicture.asset(
+                      'assets/icons/iconamoon_trash.svg',
+                      width: 18,
+                      height: 18,
+                      colorFilter: const ColorFilter.mode(
+                          AppColors.statusRejected, BlendMode.srcIn),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ],
         ),
       ),
     );
   }
-}
 
-// ---------------------------------------------------------------------------
-// Status Badge Widget
-// ---------------------------------------------------------------------------
-
-class _StatusBadge extends StatelessWidget {
-  final DemandeStatus status;
-
-  const _StatusBadge({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    final config = _statusConfig(status);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: config.bgColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        config.label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: config.textColor,
-        ),
-      ),
-    );
-  }
-
-  _StatusConfig _statusConfig(DemandeStatus status) {
-    switch (status) {
-      case DemandeStatus.brouillon:
-        return _StatusConfig(
-          label: 'demandes.draft'.tr(),
-          textColor: AppColors.statusDraft,
-          bgColor: AppColors.statusDraftLight,
-        );
-      case DemandeStatus.enAttente:
-        return _StatusConfig(
-          label: 'demandes.pending'.tr(),
-          textColor: AppColors.statusPending,
-          bgColor: AppColors.statusPendingLight,
-        );
-      case DemandeStatus.enCours:
-        return _StatusConfig(
-          label: 'demandes.in_progress'.tr(),
-          textColor: AppColors.statusInProgress,
-          bgColor: AppColors.statusInProgressLight,
-        );
-      case DemandeStatus.valide:
-        return _StatusConfig(
-          label: 'profile.validated'.tr(),
-          textColor: AppColors.statusValidated,
-          bgColor: AppColors.statusValidatedLight,
-        );
-      case DemandeStatus.rejete:
-        return _StatusConfig(
-          label: 'profile.rejected'.tr(),
-          textColor: AppColors.statusRejected,
-          bgColor: AppColors.statusRejectedLight,
-        );
+  _StatusCfg _statusConfig(String status) {
+    switch (status.toUpperCase()) {
+      case 'EN_ATTENTE':
+        return _StatusCfg('demandes.pending'.tr(), AppColors.statusPending, AppColors.statusPendingLight);
+      case 'EN_COURS':
+        return _StatusCfg('demandes.in_progress'.tr(), AppColors.statusInProgress, AppColors.statusInProgressLight);
+      case 'VALIDEE':
+        return _StatusCfg('demandes.validated'.tr(), AppColors.statusValidated, AppColors.statusValidatedLight);
+      case 'REJETEE':
+        return _StatusCfg('demandes.rejected'.tr(), AppColors.statusRejected, AppColors.statusRejectedLight);
+      case 'BROUILLON':
+        return _StatusCfg('demandes.draft'.tr(), AppColors.statusDraft, AppColors.statusDraftLight);
+      default:
+        return _StatusCfg(status, AppColors.statusDraft, AppColors.statusDraftLight);
     }
   }
 }
 
-class _StatusConfig {
+class _StatusCfg {
   final String label;
   final Color textColor;
   final Color bgColor;
-
-  const _StatusConfig({
-    required this.label,
-    required this.textColor,
-    required this.bgColor,
-  });
+  const _StatusCfg(this.label, this.textColor, this.bgColor);
 }

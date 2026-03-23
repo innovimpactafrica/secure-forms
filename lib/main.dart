@@ -3,12 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:app_links/app_links.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
+import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
+import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_bloc.dart';
 import 'package:secure_link/features/auth/presentation/pages/login_screen.dart';
 import 'package:secure_link/features/auth/presentation/pages/create_password_screen.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
-import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'features/splash/presentation/pages/splash_screen.dart';
 import 'features/auth/presentation/pages/welcome_screen.dart';
 import 'features/auth/presentation/pages/otp_verification_screen.dart';
@@ -111,6 +110,8 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
       providers: [
         BlocProvider(create: (_) => ProfileBloc()),
         BlocProvider(create: (_) => UserBloc()),
+        BlocProvider(create: (_) => NotificationsBloc()),
+        BlocProvider(create: (_) => DemandesBloc()),
       ],
       child: MaterialApp(
         title: 'Secure Link',
@@ -147,7 +148,10 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
           AppRoutes.login: (context) => const LoginScreen(),
           '/success': (context) => const SuccessScreen(),
           AppRoutes.clientHome: (context) => const ClientHomeScreen(),
-          AppRoutes.clientDemandes: (context) => const ClientDemandesScreen(),
+          AppRoutes.clientDemandes: (context) => BlocProvider(
+            create: (_) => DemandesBloc(),
+            child: const ClientDemandesScreen(),
+          ),
           AppRoutes.clientBanques: (context) => const ClientBanquesScreen(),
           AppRoutes.clientFormulaires: (context) => const ClientFormulairesScreen(),
           AppRoutes.clientMethode: (context) => const ClientMethodeScreen(),

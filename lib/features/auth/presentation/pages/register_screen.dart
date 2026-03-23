@@ -82,7 +82,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is RegisterSuccess) {
-            // ✅ Capturer le BLoC ET les données AVANT tout
+          
             final authBloc = context.read<AuthBloc>();
             final email = state.email;
             final sessionToken = state.sessionToken;
@@ -106,7 +106,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => BlocProvider.value(
-                    value: authBloc, // ✅ transmet le même BLoC
+                    value: authBloc, 
                     child: OtpVerificationScreen(
                       email: email,
                       sessionToken: sessionToken,
@@ -158,8 +158,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         Image.asset(
-                          'assets/images/securelink.png',
-                          height: AppConstants.logoHeight,
+                          'assets/images/secureforms_logo.png',
+                          height: 82,
                           fit: BoxFit.contain,
                         ),
                       ],

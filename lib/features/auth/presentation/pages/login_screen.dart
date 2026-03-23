@@ -5,11 +5,14 @@ import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/user_session.dart';
+import 'package:secure_link/core/utils/session_storage.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_event.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_state.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
+import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
+import 'package:secure_link/features/client/domain/bloc/notifications_event.dart';
 import 'package:secure_link/features/auth/presentation/pages/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -49,12 +52,19 @@ class _LoginScreenState extends State<LoginScreen> {
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
-            // Stocker le token dans UserSession
             UserSession.instance.accessToken = state.accessToken;
             // ignore: avoid_print
             print('[LoginScreen] Login réussi → token stocké (longueur: ${state.accessToken.length})');
-            // Charger le profil utilisateur via l'API
+            // Persister la session
+            SessionStorage.instance.save(
+              token: state.accessToken,
+              refreshToken: state.refreshToken,
+              name: '${state.firstName} ${state.lastName}'.trim(),
+            );
+            // Charger profil + photo en parallèle dès le login
             context.read<UserBloc>().add(LoadUserProfile(state.accessToken));
+            context.read<UserBloc>().add(LoadProfilePictureEvent(state.accessToken));
+            context.read<NotificationsBloc>().add(const LoadNotificationsEvent());
             Navigator.of(context).pushNamedAndRemoveUntil(
               AppRoutes.clientHome,
               (route) => false,
@@ -99,8 +109,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 size: AppConstants.iconSizeMedium),
                           ),
                         ),
-                        Image.asset('assets/images/securelink.png',
-                            height: AppConstants.logoHeight, fit: BoxFit.contain),
+                        Image.asset('assets/images/secureforms_logo.png',
+                            height: 82, fit: BoxFit.contain),
                       ],
                     ),
                   ),

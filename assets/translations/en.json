@@ -207,7 +207,11 @@
     "no_archives": "No archive found",
     "view": "View",
     "download": "Download",
-    "share": "Share"
+    "share": "Share",
+    "download_success": "PDF downloaded successfully",
+    "download_error": "Download failed",
+    "open": "Open",
+    "retry": "Retry"
   },
   "face_verification": {
     "title": "Identity verification",
@@ -249,7 +253,6 @@
     "validated": "Validated",
     "rejected": "Rejected",
     "no_demandes": "No request found",
-    "pending": "Pending",
     "account_opening": "Account opening",
     "transfer_request": "Transfer request",
     "sale_deed": "Sale deed",
