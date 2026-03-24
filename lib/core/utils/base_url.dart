@@ -52,7 +52,8 @@ class BaseUrl {
   static String requestPdf(String id)  => '$currentBaseUrl/requests/$id/pdf';
 
   // ========== HOME ENDPOINTS ==========
-  static const String getHomeData = '$currentBaseUrl/home';
+  static const String getHomeData       = '$currentBaseUrl/home';
+  static const String clientStatistics  = '$currentBaseUrl/clients/statistics';
 
   static String buildUrl(String endpoint, {Map<String, dynamic>? params}) {
     if (params == null || params.isEmpty) return endpoint;

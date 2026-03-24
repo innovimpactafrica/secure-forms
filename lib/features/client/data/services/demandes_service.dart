@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:secure_link/core/utils/base_url.dart';
 import '../models/demande_model.dart';
@@ -30,12 +31,19 @@ class DemandesService {
 
     final uri = Uri.parse(BaseUrl.recentRequests).replace(queryParameters: params);
     final response = await _client.get(uri, headers: _headers(accessToken));
-
+    debugPrint('[RecentRequests] status=${response.statusCode}');
     if (response.statusCode == 200) {
       final decoded = jsonDecode(response.body);
       final List<dynamic> list = decoded is List
           ? decoded
           : (decoded['items'] ?? decoded['data'] ?? decoded['requests'] ?? []);
+      debugPrint('[RecentRequests] count=${list.length}');
+      if (list.isNotEmpty) {
+        final first = list.first as Map<String, dynamic>;
+        debugPrint('[RecentRequests] first keys=${first.keys.toList()}');
+        debugPrint('[RecentRequests] formName=${first["formName"]} formType=${first["formType"]} form=${first["form"]}');
+        debugPrint('[RecentRequests] organisationName=${first["organisationName"]} organisation=${first["organisation"]}');
+      }
       return list.map((e) => DemandeModel.fromJson(e as Map<String, dynamic>)).toList();
     }
     throw Exception('Erreur demandes récentes: ${response.statusCode}');
@@ -84,8 +92,12 @@ class DemandesService {
   }) async {
     final uri = Uri.parse(BaseUrl.requestById(id));
     final response = await _client.get(uri, headers: _headers(accessToken));
+    debugPrint('[DemandesService] GET $uri → ${response.statusCode}');
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      debugPrint('[DemandesService] submittedForms raw=${json['submittedForms']}');
+      debugPrint('[DemandesService] requiredDocuments raw=${json['requiredDocuments']}');
+      return json;
     }
     throw Exception('Erreur détail demande: ${response.statusCode}');
   }

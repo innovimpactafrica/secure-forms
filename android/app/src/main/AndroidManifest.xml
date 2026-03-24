@@ -44,6 +44,14 @@
                     android:host="secure.innovimpactdev.cloud"/>
             </intent-filter>
 
+            <!--  Custom scheme secureforms:// pour le KYC -->
+<intent-filter>
+    <action android:name="android.intent.action.VIEW"/>
+    <category android:name="android.intent.category.DEFAULT"/>
+    <category android:name="android.intent.category.BROWSABLE"/>
+    <data android:scheme="secureforms" android:host="kyc"/>
+</intent-filter>
+
         </activity>
 
         <meta-data

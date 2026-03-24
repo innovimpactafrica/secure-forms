@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:app_links/app_links.dart';
+import 'package:secure_link/features/home/domain/bloc/home_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_bloc.dart';
@@ -30,6 +31,9 @@ import 'features/client/presentation/pages/detail_demande/detail_ouverture_compt
 import 'features/client/presentation/pages/client_profil_screen.dart';
 import 'features/client/presentation/pages/detail_demande/detail_ouverture_compte_continuer_screen.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
+import 'package:secure_link/features/kyc/presentation/pages/kyc_gate_page.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,46 +67,94 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
   }
 
   Future<void> _initDeepLinks() async {
-    _appLinks = AppLinks();
+  _appLinks = AppLinks();
 
-    // Cas 1 : app ouverte en arrière-plan
-    _appLinks.uriLinkStream.listen((uri) {
-      _handleDeepLink(uri);
-    });
+  // Cas 1 : app en arrière-plan
+  _appLinks.uriLinkStream.listen((uri) {
+    _handleDeepLink(uri);
+  });
 
-    // Cas 2 : app fermée — lien qui l'a ouverte
-    final initialUri = await _appLinks.getInitialLink();
-    if (initialUri != null) {
-      await Future.delayed(const Duration(milliseconds: 500));
-      _handleDeepLink(initialUri);
-    }
+  // Cas 2 : app fermée
+  final initialUri = await _appLinks.getInitialLink();
+  if (initialUri != null) {
+    // Délai augmenté pour laisser le navigator se monter
+    await Future.delayed(const Duration(milliseconds: 800));
+    _handleDeepLink(initialUri);
   }
+}
 
-  void _handleDeepLink(Uri uri) {
-    if (uri.host == 'secure.innovimpactdev.cloud') {
+void _handleDeepLink(Uri uri) {
+  debugPrint('=== DEEP LINK RECU ===');
+  debugPrint('scheme: ${uri.scheme}');
+  debugPrint('host: ${uri.host}');
+  debugPrint('path: ${uri.path}');
+  debugPrint('query: ${uri.queryParameters}');
+  debugPrint('======================');
 
-      // https://secure.innovimpactdev.cloud/mobile/login
-      // → ouvre LoginScreen
-      if (uri.path.contains('/mobile/login')) {
+  if (uri.host == 'secure.innovimpactdev.cloud') {
+
+    if (uri.path.contains('/mobile/login')) {
+      _navigateWhenReady(() {
         _navigatorKey.currentState?.pushNamedAndRemoveUntil(
           AppRoutes.login,
           (route) => false,
         );
-      }
+      });
+    }
 
-      // https://secure.innovimpactdev.cloud/auth/setup-password?token=xxx
-      // → ouvre CreatePasswordScreen
-      else if (uri.path.contains('setup-password')) {
-        final token = uri.queryParameters['token'] ?? '';
-        if (token.isNotEmpty) {
+    else if (uri.path.contains('setup-password')) {
+      final token = uri.queryParameters['token'] ?? '';
+      if (token.isNotEmpty) {
+        _navigateWhenReady(() {
           _navigatorKey.currentState?.pushNamed(
             AppRoutes.createPassword,
             arguments: token,
           );
-        }
+        });
       }
     }
+
+    else if (uri.path.contains('/kyc')) {
+      final jwt = uri.queryParameters['jwt'] ?? '';
+      _navigateWhenReady(() {
+        _navigatorKey.currentState?.pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => KycGatePage(
+              fromDeepLink: true,
+              jwt: jwt,
+            ),
+          ),
+          (route) => false,
+        );
+      });
+    }
   }
+
+  else if (uri.scheme == 'secureforms' && uri.host == 'kyc') {
+    final jwt = uri.queryParameters['jwt'] ?? '';
+    _navigateWhenReady(() {
+      _navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) => KycGatePage(
+            fromDeepLink: true,
+            jwt: jwt,
+          ),
+        ),
+        (route) => false,
+      );
+    });
+  }
+}
+
+void _navigateWhenReady(VoidCallback action) {
+  if (_navigatorKey.currentState != null) {
+    action();
+  } else {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      action();
+    });
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +164,7 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
         BlocProvider(create: (_) => UserBloc()),
         BlocProvider(create: (_) => NotificationsBloc()),
         BlocProvider(create: (_) => DemandesBloc()),
+        BlocProvider(create: (_) => HomeBloc()),
       ],
       child: MaterialApp(
         title: 'Secure Link',

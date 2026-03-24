@@ -20,6 +20,9 @@ import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
 import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
 import 'package:secure_link/features/client/presentation/pages/step2_documents_screen.dart';
+import 'package:secure_link/features/home/domain/bloc/home_bloc.dart';
+import 'package:secure_link/features/home/domain/bloc/home_event.dart';
+import 'package:secure_link/features/home/domain/bloc/home_state.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_event.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_state.dart';
@@ -54,6 +57,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       }
       context.read<ProfileBloc>().add(const LoadDocumentTypesEvent());
       context.read<DemandesBloc>().add(const LoadRecentDemandesEvent(limit: 5));
+      context.read<HomeBloc>().add(const LoadClientStatisticsEvent());
     });
   }
 
@@ -586,60 +590,69 @@ class _StatsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-      child: Column(
-        children: [
-          Row(
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        final stats = state is HomeStatisticsLoaded ? state.statistics : null;
+        final total      = stats != null ? stats.total.toString().padLeft(2, '0')      : '--';
+        final inProgress = stats != null ? stats.inProgress.toString().padLeft(2, '0') : '--';
+        final pending    = stats != null ? stats.pending.toString().padLeft(2, '0')    : '--';
+        final validated  = stats != null ? stats.validated.toString().padLeft(2, '0')  : '--';
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+          child: Column(
             children: [
-              Expanded(
-                child: _StatCard(
-                  label: 'home.total_requests'.tr(),
-                  value: '12',
-                  iconPath: 'assets/icons/logo.svg',
-                  iconColor: AppColors.textBlack45,
-                  borderColor: AppColors.progressTrack,
-                  applyColorFilter: false,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _StatCard(
+                      label: 'home.total_requests'.tr(),
+                      value: total,
+                      iconPath: 'assets/icons/logo.svg',
+                      iconColor: AppColors.textBlack45,
+                      borderColor: AppColors.progressTrack,
+                      applyColorFilter: false,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _StatCard(
+                      label: 'home.in_progress'.tr(),
+                      value: inProgress,
+                      iconPath: 'assets/icons/bi_clock-history.svg',
+                      iconColor: AppColors.primary,
+                      borderColor: AppColors.primary,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _StatCard(
-                  label: 'home.in_progress'.tr(),
-                  value: '10',
-                  iconPath: 'assets/icons/bi_clock-history.svg',
-                  iconColor: AppColors.primary,
-                  borderColor: AppColors.primary,
-                ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _StatCard(
+                      label: 'home.pending'.tr(),
+                      value: pending,
+                      iconPath: 'assets/icons/carbon_rule-draft.svg',
+                      iconColor: AppColors.statusEnAttente,
+                      borderColor: AppColors.statusEnAttente,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _StatCard(
+                      label: 'home.validated'.tr(),
+                      value: validated,
+                      iconPath: 'assets/icons/bi_check2-circle (1).svg',
+                      iconColor: AppColors.statusValideGreen,
+                      borderColor: AppColors.statusValideGreen,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _StatCard(
-                  label: 'home.pending'.tr(),
-                  value: '01',
-                  iconPath: 'assets/icons/carbon_rule-draft.svg',
-                  iconColor: AppColors.statusEnAttente,
-                  borderColor: AppColors.statusEnAttente,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _StatCard(
-                  label: 'home.validated'.tr(),
-                  value: '10',
-                  iconPath: 'assets/icons/bi_check2-circle (1).svg',
-                  iconColor: AppColors.statusValideGreen,
-                  borderColor: AppColors.statusValideGreen,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -870,7 +883,7 @@ class _RecentDemandesSection extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: state.demandes.length,
-                  separatorBuilder: (_, __) => SizedBox(height: AppConstants.paddingLarge),
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, index) =>
                       _RecentDemandeCard(demande: state.demandes[index]),
                 );
@@ -891,77 +904,87 @@ class _RecentDemandeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusCfg = _statusConfig(demande.status);
+    // Nom affiché : formType > formName > requestNumber
+    final title = demande.formType.isNotEmpty
+        ? demande.formType
+        : demande.requestNumber;
+    // Sous-titre : organisation + date, on masque si vide
+    final org = demande.organisationName;
+    final date = demande.createdAt;
+    final subtitle = [if (org.isNotEmpty) org, if (date.isNotEmpty) date].join(' • ');
+
     return GestureDetector(
       onTap: () => Navigator.of(context).pushNamed(
         AppRoutes.clientDemandeDetail,
         arguments: {'id': demande.id},
       ),
       child: Container(
-        height: AppConstants.cardDemandeHeight,
-        padding: EdgeInsets.fromLTRB(
-            AppConstants.paddingLarge, 10, AppConstants.paddingSmall, 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-          border: Border.all(color: AppColors.whiteOverlay),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadowLight,
-              blurRadius: 48,
-              offset: const Offset(0, 2),
-            ),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.borderDivider),
+          boxShadow: const [
+            BoxShadow(color: AppColors.shadowDark, blurRadius: 6, offset: Offset(0, 2)),
           ],
         ),
         child: Row(
           children: [
-            SvgPicture.asset(
-              'assets/icons/logo.svg',
-              width: AppConstants.cardIconSize,
-              height: AppConstants.cardIconSize,
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.gray,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: SvgPicture.asset(
+                  'assets/icons/logo.svg',
+                  width: 22,
+                  height: 22,
+                ),
+              ),
             ),
-            SizedBox(width: AppConstants.paddingLarge),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    demande.formType.isNotEmpty ? demande.formType : demande.requestNumber,
-                    style: TextStyle(
-                      fontFamily: AppConstants.fontFamilySofiaSans,
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      fontSize: AppConstants.fontSizeLarge,
                       color: AppColors.textDark,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Text(
-                    '${demande.organisationName} • ${demande.createdAt}',
-                    style: TextStyle(
-                      fontFamily: AppConstants.fontFamilyInter,
-                      fontWeight: FontWeight.w400,
-                      fontSize: AppConstants.fontSizeRegular,
-                      color: AppColors.textSecondary,
+                  if (subtitle.isNotEmpty) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  ],
                 ],
               ),
             ),
+            const SizedBox(width: 8),
             Container(
-              padding: EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingSmall, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 color: statusCfg.bgColor,
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 statusCfg.label,
                 style: TextStyle(
-                  fontFamily: AppConstants.fontFamilyInter,
-                  fontWeight: FontWeight.w500,
-                  fontSize: AppConstants.fontSizeRegular,
-                  height: 1.0,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                   color: statusCfg.textColor,
                 ),
               ),
@@ -975,13 +998,15 @@ class _RecentDemandeCard extends StatelessWidget {
   _StatusCfg _statusConfig(String status) {
     switch (status.toUpperCase()) {
       case 'EN_ATTENTE':
-        return _StatusCfg('home.pending'.tr(), AppColors.statusPending, AppColors.statusPendingLight);
+      case 'SOUMISE':
+        return _StatusCfg('demandes.pending'.tr(), AppColors.statusPending, AppColors.statusPendingLight);
       case 'EN_COURS':
         return _StatusCfg('demandes.in_progress'.tr(), AppColors.statusInProgress, AppColors.statusInProgressLight);
       case 'VALIDEE':
-        return _StatusCfg('home.validated'.tr(), AppColors.statusValidated, AppColors.statusValidatedLight);
+      case 'VALIDATION_FINALE':
+        return _StatusCfg('demandes.validated'.tr(), AppColors.statusValidated, AppColors.statusValidatedLight);
       case 'REJETEE':
-        return _StatusCfg('profile.rejected'.tr(), AppColors.statusRejected, AppColors.statusRejectedLight);
+        return _StatusCfg('demandes.rejected'.tr(), AppColors.statusRejected, AppColors.statusRejectedLight);
       case 'BROUILLON':
         return _StatusCfg('demandes.draft'.tr(), AppColors.statusDraft, AppColors.statusDraftLight);
       default:

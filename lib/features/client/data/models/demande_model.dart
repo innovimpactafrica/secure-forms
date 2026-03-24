@@ -1,3 +1,37 @@
+class SubmittedFormItem {
+  final String label;
+  final String pdfUrl;
+  final String fileName;
+
+  const SubmittedFormItem({
+    required this.label,
+    required this.pdfUrl,
+    required this.fileName,
+  });
+
+  factory SubmittedFormItem.fromJson(Map<String, dynamic> json) {
+    return SubmittedFormItem(
+      label: json['label']?.toString() ?? '',
+      pdfUrl: json['pdfUrl']?.toString() ?? '',
+      fileName: json['fileName']?.toString() ?? '',
+    );
+  }
+}
+
+class RequiredDocumentItem {
+  final String id;
+  final String label;
+
+  const RequiredDocumentItem({required this.id, required this.label});
+
+  factory RequiredDocumentItem.fromJson(Map<String, dynamic> json) {
+    return RequiredDocumentItem(
+      id: json['id']?.toString() ?? '',
+      label: json['label']?.toString() ?? '',
+    );
+  }
+}
+
 class DemandeModel {
   final String id;
   final String requestNumber;
@@ -7,7 +41,9 @@ class DemandeModel {
   final String category;
   final String createdAt;
   final bool isDraft;
-  final String? pdfUrl; // URL MinIO directe depuis submittedForm.pdfUrl
+  final String? pdfUrl;
+  final List<SubmittedFormItem> submittedForms;
+  final List<RequiredDocumentItem> requiredDocuments;
 
   const DemandeModel({
     required this.id,
@@ -19,26 +55,39 @@ class DemandeModel {
     required this.createdAt,
     this.isDraft = false,
     this.pdfUrl,
+    this.submittedForms = const [],
+    this.requiredDocuments = const [],
   });
 
   factory DemandeModel.fromJson(Map<String, dynamic> json) {
     final org = json['organisation'] as Map<String, dynamic>?;
     final form = json['form'] as Map<String, dynamic>?;
     final submitted = json['submittedForm'] as Map<String, dynamic>?;
+
+    final submittedFormsList = (json['submittedForms'] as List?)?.map(
+      (e) => SubmittedFormItem.fromJson(e as Map<String, dynamic>),
+    ).toList() ?? [];
+
+    final requiredDocsList = (json['requiredDocuments'] as List?)?.map(
+      (e) => RequiredDocumentItem.fromJson(e as Map<String, dynamic>),
+    ).toList() ?? [];
+
     return DemandeModel(
       id: json['id']?.toString() ?? '',
       requestNumber: json['requestNumber']?.toString() ?? json['id']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
-      // La réponse API retourne formName directement (pas form.name)
-      formType: json['formName']?.toString() ??
-          form?['name']?.toString() ??
-          json['formType']?.toString() ?? '',
-      organisationName: json['organisationName']?.toString() ??
+      formType: (json['formName']?.toString()?.isNotEmpty == true ? json['formName'].toString() : null) ??
+          (form?['name']?.toString()?.isNotEmpty == true ? form!['name'].toString() : null) ??
+          (json['formType']?.toString()?.isNotEmpty == true ? json['formType'].toString() : null) ??
+          '',
+      organisationName: (json['organisationName']?.toString()?.isNotEmpty == true ? json['organisationName'].toString() : null) ??
           org?['name']?.toString() ?? '',
       category: org?['sector']?.toString() ?? json['category']?.toString() ?? '',
       createdAt: _parseDate(json['createdAt']?.toString() ?? ''),
       isDraft: json['status']?.toString() == 'BROUILLON',
       pdfUrl: submitted?['pdfUrl']?.toString() ?? json['pdfUrl']?.toString(),
+      submittedForms: submittedFormsList,
+      requiredDocuments: requiredDocsList,
     );
   }
 

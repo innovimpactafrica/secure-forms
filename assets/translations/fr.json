@@ -287,6 +287,8 @@
     "reference": "Référence",
     "submitted_on": "Soumis le",
     "estimated": "Estimé",
-    "version": "Version"
+    "version": "Version",
+    "complete": "Complet",
+    "required_documents": "Documents requis"
   }
 }

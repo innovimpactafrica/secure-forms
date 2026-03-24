@@ -7,10 +7,6 @@ import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/client/data/models/demande_model.dart';
 import 'package:secure_link/features/client/data/repositories/demandes_repository.dart';
 
-// ---------------------------------------------------------------------------
-// Page principale — charge depuis l'API via l'id
-// ---------------------------------------------------------------------------
-
 class ClientDemandeDetailScreen extends StatefulWidget {
   const ClientDemandeDetailScreen({super.key});
 
@@ -44,9 +40,19 @@ class _ClientDemandeDetailScreenState
 
     try {
       final token = UserSession.instance.accessToken;
+      debugPrint('[DemandeDetail] loading id=$id');
       final demande = await _repo.getRequestById(accessToken: token, id: id);
+      debugPrint('[DemandeDetail] submittedForms=${demande.submittedForms.length}');
+      debugPrint('[DemandeDetail] requiredDocuments=${demande.requiredDocuments.length}');
+      for (final f in demande.submittedForms) {
+        debugPrint('[DemandeDetail] pdf label=${f.label} fileName=${f.fileName}');
+      }
+      for (final d in demande.requiredDocuments) {
+        debugPrint('[DemandeDetail] doc id=${d.id} label=${d.label}');
+      }
       if (mounted) setState(() { _demande = demande; _loading = false; });
     } catch (e) {
+      debugPrint('[DemandeDetail] ERROR: $e');
       if (mounted) setState(() { _loading = false; _error = e.toString().replaceAll('Exception: ', ''); });
     }
   }
@@ -100,7 +106,7 @@ class _ClientDemandeDetailScreenState
     final status = _parseStatus(d.status);
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.backgroundLight,
       body: Column(
         children: [
           Expanded(
@@ -110,12 +116,49 @@ class _ClientDemandeDetailScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeader(context, d.organisationName, status),
-                    _buildRefRow(d.requestNumber, d.createdAt),
-                    _buildStepper(status),
-                    _buildDocumentCard(
-                        d.formType.isNotEmpty ? d.formType : d.requestNumber),
-                    const SizedBox(height: 32),
+                    // ── Zone header blanche ──────────────────────────────
+                    Container(
+                      color: AppColors.white,
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeader(context, d.formType.isNotEmpty ? d.formType : d.requestNumber, d.organisationName, status),
+                          const SizedBox(height: 16),
+                          _buildRefRow(d.requestNumber, d.createdAt),
+                          const SizedBox(height: 20),
+                          _buildStepper(status),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // ── PDFs soumis ──────────────────────────────────────
+                    if (d.submittedForms.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _buildDocCard(d),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    // ── Documents requis ─────────────────────────────────
+                    if (d.requiredDocuments.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                        child: Text(
+                          'demande_detail.required_documents'.tr(),
+                          style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textDark),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _buildRequiredDocsCard(d),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -127,122 +170,111 @@ class _ClientDemandeDetailScreenState
     );
   }
 
-  // ── Header ──────────────────────────────────────────────────────────────
+  // ── Header ───────────────────────────────────────────────────────────────
 
-  Widget _buildHeader(
-      BuildContext context, String institution, _DemandeStatus status) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.primaryDark,
-                borderRadius: BorderRadius.circular(10),
+  Widget _buildHeader(BuildContext context, String title, String institution, _DemandeStatus status) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.primaryDark,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textDark),
               ),
-              child:
-                  const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'demande_detail.new_request'.tr(),
+              const SizedBox(height: 3),
+              Text(institution,
                   style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark),
-                ),
-                const SizedBox(height: 2),
-                Text(institution,
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.textSecondary)),
-              ],
-            ),
+                      fontSize: 12, color: AppColors.textSecondary)),
+            ],
           ),
-          _HeaderBadge(status: status),
-        ],
-      ),
+        ),
+        const SizedBox(width: 8),
+        _HeaderBadge(status: status),
+      ],
     );
   }
 
-  // ── Référence + date ─────────────────────────────────────────────────────
+  // ── Référence + date ──────────────────────────────────────────────────────
 
   Widget _buildRefRow(String reference, String date) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(reference,
-              style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textDark)),
-          const SizedBox(height: 4),
-          Text('${'demande_detail.submitted_on'.tr()} $date',
-              style: const TextStyle(
-                  fontSize: 12, color: AppColors.textSecondary)),
-          const SizedBox(height: 20),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(reference,
+            style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark)),
+        const SizedBox(height: 3),
+        Text('${'demande_detail.submitted_on'.tr()} $date',
+            style: const TextStyle(
+                fontSize: 12, color: AppColors.textSecondary)),
+      ],
     );
   }
 
-  // ── Stepper ──────────────────────────────────────────────────────────────
+  // ── Stepper ───────────────────────────────────────────────────────────────
 
   Widget _buildStepper(_DemandeStatus status) {
     final steps = _getStepStates(status);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              _StepCircle(state: steps[0].circleState, icon: steps[0].icon),
-              Expanded(child: _StepLine(active: steps[0].lineActive)),
-              _StepCircle(state: steps[1].circleState, icon: steps[1].icon),
-              Expanded(child: _StepLine(active: steps[1].lineActive)),
-              _StepCircle(state: steps[2].circleState, icon: steps[2].icon),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: 56,
-                child: Text('demande_detail.submitted'.tr(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 11, color: AppColors.textSecondary)),
-              ),
-              SizedBox(
-                width: 56,
-                child: Text('demandes.in_progress'.tr(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 11, color: AppColors.textSecondary)),
-              ),
-              SizedBox(
-                width: 56,
-                child: Text('demande_detail.finalized'.tr(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 11, color: AppColors.textSecondary)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
+    return Column(
+      children: [
+        Row(
+          children: [
+            _StepCircle(state: steps[0].circleState, icon: steps[0].icon),
+            Expanded(child: _StepLine(active: steps[0].lineActive)),
+            _StepCircle(state: steps[1].circleState, icon: steps[1].icon),
+            Expanded(child: _StepLine(active: steps[1].lineActive)),
+            _StepCircle(state: steps[2].circleState, icon: steps[2].icon),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(
+              width: 60,
+              child: Text('demande_detail.submitted'.tr(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontSize: 11, color: AppColors.textSecondary)),
+            ),
+            SizedBox(
+              width: 60,
+              child: Text('demandes.in_progress'.tr(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontSize: 11, color: AppColors.textSecondary)),
+            ),
+            SizedBox(
+              width: 60,
+              child: Text('demande_detail.finalized'.tr(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontSize: 11, color: AppColors.textSecondary)),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -271,77 +303,171 @@ class _ClientDemandeDetailScreenState
     }
   }
 
-  // ── Card document ────────────────────────────────────────────────────────
+  // ── Card PDFs soumis ──────────────────────────────────────────────────────
 
-  Widget _buildDocumentCard(String titre) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.borderDivider),
-          boxShadow: const [
-            BoxShadow(
-                color: AppColors.shadowDark,
-                blurRadius: 8,
-                offset: Offset(0, 2)),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: AppColors.gray,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: SvgPicture.asset(
-                        'assets/icons/earmark-text.svg',
-                        width: 20,
-                        height: 20,
-                        colorFilter: const ColorFilter.mode(
-                            AppColors.textSecondary, BlendMode.srcIn),
+  Widget _buildDocCard(DemandeModel d) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderDivider),
+        boxShadow: const [
+          BoxShadow(color: AppColors.shadowDark, blurRadius: 8, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        children: d.submittedForms.asMap().entries.map((entry) {
+          final i = entry.key;
+          final f = entry.value;
+          final sub = f.fileName;
+          final isGeneric = sub.isEmpty || sub == 'document.pdf.pdf' || sub == f.label;
+          return Column(
+            children: [
+              if (i > 0) const Divider(height: 1, color: AppColors.borderDivider),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: AppColors.gray,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: SvgPicture.asset(
+                          'assets/icons/earmark-text.svg',
+                          width: 22,
+                          height: 22,
+                          colorFilter: const ColorFilter.mode(
+                              AppColors.textSecondary, BlendMode.srcIn),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(titre,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            f.label.isNotEmpty ? f.label : f.fileName,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textDark),
+                          ),
+                          if (!isGeneric) ...[
+                            const SizedBox(height: 2),
+                            Text(sub,
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary)),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: AppColors.statusValidated.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '● ${'demande_detail.complete'.tr()}',
                         style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textDark)),
-                  ),
-                  const Icon(Icons.open_in_new,
-                      size: 20, color: AppColors.textSecondary),
-                ],
+                            color: AppColors.statusValidated),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(bottom: Radius.circular(14)),
-              child: Image.asset(
-                'assets/images/field.png',
-                width: double.infinity,
-                height: 180,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }).toList(),
       ),
     );
   }
 
-  // ── Bouton télécharger PDF ───────────────────────────────────────────────
+  // ── Card documents requis ─────────────────────────────────────────────────
+
+  Widget _buildRequiredDocsCard(DemandeModel d) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderDivider),
+        boxShadow: const [
+          BoxShadow(color: AppColors.shadowDark, blurRadius: 8, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        children: d.requiredDocuments.asMap().entries.map((entry) {
+          final i = entry.key;
+          final doc = entry.value;
+          return Column(
+            children: [
+              if (i > 0) const Divider(height: 1, color: AppColors.borderDivider),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: AppColors.gray,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: SvgPicture.asset(
+                          'assets/icons/earmark-text.svg',
+                          width: 22,
+                          height: 22,
+                          colorFilter: const ColorFilter.mode(
+                              AppColors.textSecondary, BlendMode.srcIn),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        doc.label,
+                        style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textDark),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: AppColors.statusValidated.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'demande_detail.verified'.tr(),
+                        style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.statusValidated),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // ── Bouton télécharger PDF ────────────────────────────────────────────────
 
   Widget _buildDownloadButton(BuildContext context, String id) {
     return SafeArea(
@@ -350,8 +476,7 @@ class _ClientDemandeDetailScreenState
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: GestureDetector(
           onTap: () {
-            // ignore: avoid_print
-            print('[DemandeDetail] PDF URL: ${BaseUrl.requestPdf(id)}');
+            debugPrint('[DemandeDetail] PDF URL: ${BaseUrl.requestPdf(id)}');
           },
           child: Container(
             height: 54,
@@ -382,11 +507,12 @@ class _ClientDemandeDetailScreenState
 
   _DemandeStatus _parseStatus(String raw) {
     switch (raw.toUpperCase()) {
-      case 'EN_COURS':   return _DemandeStatus.enCours;
-      case 'VALIDEE':    return _DemandeStatus.valide;
-      case 'REJETEE':    return _DemandeStatus.rejete;
-      case 'BROUILLON':  return _DemandeStatus.brouillon;
-      default:           return _DemandeStatus.enAttente;
+      case 'EN_COURS':        return _DemandeStatus.enCours;
+      case 'VALIDEE':         return _DemandeStatus.valide;
+      case 'REJETEE':         return _DemandeStatus.rejete;
+      case 'BROUILLON':       return _DemandeStatus.brouillon;
+      case 'VALIDATION_FINALE': return _DemandeStatus.valide;
+      default:                return _DemandeStatus.enAttente;
     }
   }
 }
@@ -417,7 +543,7 @@ class _BackButton extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Stepper components
+// Stepper
 // ---------------------------------------------------------------------------
 
 enum _DemandeStatus { enAttente, enCours, valide, rejete, brouillon }
@@ -481,15 +607,15 @@ class _HeaderBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (status) {
       case _DemandeStatus.enAttente:
-        return _badge('demandes.pending'.tr(), AppColors.statusPending, AppColors.statusPendingLight);
+        return _badge('demandes.pending'.tr(), AppColors.statusPending, AppColors.statusPending.withValues(alpha: 0.15));
       case _DemandeStatus.enCours:
-        return _badge('demandes.in_progress'.tr(), AppColors.statusInProgress, AppColors.statusInProgressLight);
+        return _badge('demandes.in_progress'.tr(), AppColors.statusInProgress, AppColors.statusInProgress.withValues(alpha: 0.15));
       case _DemandeStatus.valide:
-        return _badge('profile.validated'.tr(), AppColors.statusValidated, AppColors.statusValidatedLight);
+        return _badge('profile.validated'.tr(), AppColors.statusValidated, AppColors.statusValidated.withValues(alpha: 0.15));
       case _DemandeStatus.rejete:
-        return _badge('profile.rejected'.tr(), AppColors.statusRejected, AppColors.statusRejectedLight);
+        return _badge('profile.rejected'.tr(), AppColors.statusRejected, AppColors.statusRejected.withValues(alpha: 0.15));
       case _DemandeStatus.brouillon:
-        return _badge('demandes.draft'.tr(), AppColors.statusDraft, AppColors.statusDraftLight);
+        return _badge('demandes.draft'.tr(), AppColors.statusDraft, AppColors.statusDraft.withValues(alpha: 0.15));
     }
   }
 

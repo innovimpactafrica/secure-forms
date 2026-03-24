@@ -272,6 +272,8 @@
     "reference": "Reference",
     "submitted_on": "Submitted on",
     "estimated": "Estimated",
-    "version": "Version"
+    "version": "Version",
+    "complete": "Complete",
+    "required_documents": "Required documents"
   }
 }
