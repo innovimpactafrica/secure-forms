@@ -90,6 +90,7 @@ class ProfileDocumentService {
   Future<UploadedDocumentModel> uploadDocument({
     required String token,
     required File file,
+    File? backFile,
     required String documentTypeId,
     String? issueDate,
     String? expirationDate,
@@ -111,17 +112,27 @@ class ProfileDocumentService {
       request.fields['expirationDate'] = expirationDate;
     }
 
-    final ext = fileName.split('.').last.toLowerCase();
-    final mime = ext == 'png'
-        ? 'image/png'
-        : ext == 'pdf'
-            ? 'application/pdf'
-            : 'image/jpeg';
+    String mimeFor(String path) {
+      final ext = path.split('.').last.toLowerCase();
+      if (ext == 'png') return 'image/png';
+      if (ext == 'pdf') return 'application/pdf';
+      return 'image/jpeg';
+    }
+
     request.files.add(await http.MultipartFile.fromPath(
       'file',
       file.path,
-      contentType: MediaType.parse(mime),
+      contentType: MediaType.parse(mimeFor(file.path)),
     ));
+
+    if (backFile != null) {
+      _log('Ajout verso: ${backFile.path}');
+      request.files.add(await http.MultipartFile.fromPath(
+        'backFile',
+        backFile.path,
+        contentType: MediaType.parse(mimeFor(backFile.path)),
+      ));
+    }
 
     _log('Envoi multipart en cours...');
     final streamed = await request.send();

@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/base_url.dart';
@@ -167,7 +170,6 @@ class _ClientDemandeDetailScreenState
               ),
             ),
           ),
-          if (status == _DemandeStatus.valide) _buildDownloadButton(context, d.id),
         ],
       ),
     );
@@ -681,6 +683,7 @@ class _DocumentViewerSheet extends StatefulWidget {
 
 class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
   Uint8List? _bytes;
+  String? _pdfPath;   // fichier temp pour flutter_pdfview
   bool _loading = true;
   String? _error;
 
@@ -702,7 +705,20 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
       // ignore: avoid_print
       print('[DocumentViewer] status=${response.statusCode} contentType=${response.headers['content-type']} size=${response.bodyBytes.length}');
       if (response.statusCode == 200) {
-        if (mounted) setState(() { _bytes = response.bodyBytes; _loading = false; });
+        final bytes = response.bodyBytes;
+        // Détecter PDF par magic bytes
+        final isPdf = bytes.length >= 4 &&
+            bytes[0] == 0x25 && bytes[1] == 0x50 &&
+            bytes[2] == 0x44 && bytes[3] == 0x46;
+        if (isPdf) {
+          // Écrire dans un fichier temporaire pour flutter_pdfview
+          final dir = await getTemporaryDirectory();
+          final file = File('${dir.path}/viewer_${DateTime.now().millisecondsSinceEpoch}.pdf');
+          await file.writeAsBytes(bytes);
+          if (mounted) setState(() { _pdfPath = file.path; _loading = false; });
+        } else {
+          if (mounted) setState(() { _bytes = bytes; _loading = false; });
+        }
       } else {
         if (mounted) setState(() { _loading = false; _error = 'Erreur ${response.statusCode}'; });
       }
@@ -713,18 +729,13 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
     }
   }
 
-  bool get _isPdf {
-    if (_bytes == null || _bytes!.length < 4) return false;
-    return _bytes![0] == 0x25 && _bytes![1] == 0x50 &&
-           _bytes![2] == 0x44 && _bytes![3] == 0x46;
-  }
 
   @override
   Widget build(BuildContext context) {
     final screenH = MediaQuery.of(context).size.height;
     return Container(
       height: screenH * 0.85,
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      padding: EdgeInsets.fromLTRB(20, 16, 20, _pdfPath != null ? 0 : 24),
       child: Column(
         children: [
           Center(
@@ -775,41 +786,17 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
                           ],
                         ),
                       )
-                    : _bytes != null
-                        ? _isPdf
-                            ? Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.picture_as_pdf,
-                                        size: 80, color: AppColors.statusRejected),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      widget.label,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                        color: AppColors.textDark,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Document PDF • ${(_bytes!.length / 1024).toStringAsFixed(1)} KB',
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          color: AppColors.textSecondary),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    const Text(
-                                      'Téléchargé avec succès ✓',
-                                      style: TextStyle(
-                                          fontSize: 13,
-                                          color: AppColors.statusValideGreen),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : ClipRRect(
+                    : _pdfPath != null
+                        ? PDFView(
+                            filePath: _pdfPath!,
+                            enableSwipe: true,
+                            swipeHorizontal: false,
+                            autoSpacing: true,
+                            pageFling: true,
+                            fitPolicy: FitPolicy.BOTH,
+                          )
+                        : _bytes != null
+                            ? ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: InteractiveViewer(
                                   minScale: 0.5,
@@ -825,10 +812,10 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
                                   ),
                                 ),
                               )
-                        : const Center(
-                            child: Icon(Icons.insert_drive_file_outlined,
-                                size: 80, color: AppColors.primary),
-                          ),
+                            : const Center(
+                                child: Icon(Icons.insert_drive_file_outlined,
+                                    size: 80, color: AppColors.primary),
+                              ),
           ),
         ],
       ),

@@ -83,12 +83,14 @@ class LoadDocumentTypesEvent extends ProfileEvent {
 /// Upload d'un document via l'API
 class UploadProfileDocumentEvent extends ProfileEvent {
   final File file;
+  final File? backFile; // verso (optionnel)
   final String documentTypeId;
   final String? issueDate;
   final String? expirationDate;
 
   const UploadProfileDocumentEvent({
     required this.file,
+    this.backFile,
     required this.documentTypeId,
     this.issueDate,
     this.expirationDate,

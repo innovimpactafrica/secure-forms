@@ -147,6 +147,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final uploaded = await _repository.uploadDocument(
         token: token,
         file: event.file,
+        backFile: event.backFile,
         documentTypeId: event.documentTypeId,
         issueDate: event.issueDate,
         expirationDate: event.expirationDate,

@@ -24,6 +24,7 @@ class ProfileDocumentRepository {
   Future<UploadedDocumentModel> uploadDocument({
     required String token,
     required File file,
+    File? backFile,
     required String documentTypeId,
     String? issueDate,
     String? expirationDate,
@@ -31,6 +32,7 @@ class ProfileDocumentRepository {
       _service.uploadDocument(
         token: token,
         file: file,
+        backFile: backFile,
         documentTypeId: documentTypeId,
         issueDate: issueDate,
         expirationDate: expirationDate,

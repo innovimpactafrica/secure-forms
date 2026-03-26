@@ -17,7 +17,7 @@ import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'package:secure_link/features/kyc/presentation/pages/kyc_step2_face_page.dart';
 import 'complete_profile_header.dart';
-import 'document_upload_modal.dart';
+import 'document_upload_modal.dart' show DocumentUploadModal, showPickerSource;
 import 'document_simple_upload_modal.dart';
 
 /// Étape 2 — Upload des documents (connecté à l'API)

@@ -2,13 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/client/data/models/profile_model.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
+import 'document_upload_modal.dart' show showPickerSource;
 
 /// Modal d'ajout de document SANS vérification d'identité
 /// Design : docsvi.png
@@ -31,8 +31,9 @@ class DocumentSimpleUploadModal extends StatefulWidget {
 class _DocumentSimpleUploadModalState
     extends State<DocumentSimpleUploadModal> {
   File? _selectedFile;
+  File? _backFile;
   bool _isImage = false;
-  final _picker = ImagePicker();
+  bool _showBack = false; // verso masqué par défaut
   late final ProfileBloc _bloc;
 
   @override
@@ -41,55 +42,15 @@ class _DocumentSimpleUploadModalState
     _bloc = context.read<ProfileBloc>();
   }
 
-  Future<void> _pickFile() async {
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      backgroundColor: AppColors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 8),
-            ListTile(
-              leading: Icon(Icons.photo_library_outlined, color: AppColors.primary),
-              title: Text(
-                'profile.gallery'.tr(),
-                style: TextStyle(
-                  fontFamily: AppConstants.fontFamilyInter,
-                  color: AppColors.textDark,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-            ListTile(
-              leading: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
-              title: Text(
-                'profile.take_photo'.tr(),
-                style: TextStyle(
-                  fontFamily: AppConstants.fontFamilyInter,
-                  color: AppColors.textDark,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-
-    if (source == null) return;
-    final XFile? picked = await _picker.pickImage(source: source, imageQuality: 85);
-    if (picked != null && mounted) {
-      setState(() {
-        _selectedFile = File(picked.path);
-        _isImage = true;
-      });
+  Future<void> _pickFile({bool isBack = false}) async {
+    final path = await showPickerSource(context);
+    if (path == null || !mounted) return;
+    final file = File(path);
+    final ext = path.split('.').last.toLowerCase();
+    if (isBack) {
+      setState(() => _backFile = file);
+    } else {
+      setState(() { _selectedFile = file; _isImage = ext != 'pdf'; });
     }
   }
 
@@ -116,6 +77,7 @@ class _DocumentSimpleUploadModalState
     _bloc.add(
       UploadProfileDocumentEvent(
         file: _selectedFile!,
+        backFile: _backFile,
         documentTypeId: widget.documentType.id,
       ),
     );
@@ -226,35 +188,87 @@ class _DocumentSimpleUploadModalState
               ),
               const SizedBox(height: 20),
 
-              // Zone upload
+              // Zone upload principale
               GestureDetector(
-                onTap: _pickFile,
+                onTap: () => _pickFile(),
                 child: Container(
                   width: double.infinity,
-                  height: 150,
+                  height: 120,
                   decoration: BoxDecoration(
                     color: const Color(0xFFEAF4F4),
-                    borderRadius:
-                        BorderRadius.circular(AppConstants.radiusSmall),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.25),
-                    ),
+                    borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
                   ),
                   child: _selectedFile != null && _isImage
                       ? ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                              AppConstants.radiusSmall),
-                          child: Image.file(
-                            _selectedFile!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            errorBuilder: (_, __, ___) =>
-                                const _UploadPlaceholder(hasFile: true),
-                          ),
-                        )
+                          borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                          child: Image.file(_selectedFile!, fit: BoxFit.cover, width: double.infinity,
+                              errorBuilder: (_, __, ___) => const _UploadPlaceholder(hasFile: true)))
                       : _UploadPlaceholder(hasFile: _selectedFile != null),
                 ),
               ),
+              const SizedBox(height: 10),
+
+              // Bouton discret ou zone verso
+              if (!_showBack)
+                GestureDetector(
+                  onTap: () => setState(() => _showBack = true),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.add_circle_outline, size: 16, color: AppColors.primary),
+                      const SizedBox(width: 6),
+                      Text(
+                        'profile.add_back_document'.tr(),
+                        style: TextStyle(
+                          fontFamily: AppConstants.fontFamilyInter,
+                          fontSize: AppConstants.fontSizeRegular,
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else ...[
+                Row(
+                  children: [
+                    Text(
+                      'profile.back_document'.tr(),
+                      style: TextStyle(
+                        fontFamily: AppConstants.fontFamilyInter,
+                        fontSize: AppConstants.fontSizeRegular,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () => setState(() { _showBack = false; _backFile = null; }),
+                      child: Icon(Icons.close, size: 16, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                GestureDetector(
+                  onTap: () => _pickFile(isBack: true),
+                  child: Container(
+                    width: double.infinity,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEAF4F4),
+                      borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+                    ),
+                    child: _backFile != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                            child: Image.file(_backFile!, fit: BoxFit.cover, width: double.infinity,
+                                errorBuilder: (_, __, ___) => const _UploadPlaceholder(hasFile: true)))
+                        : const _UploadPlaceholder(hasFile: false),
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
 
               // Bouton Enregistrer (seul bouton — design docsvi.png)

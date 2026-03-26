@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:dio/dio.dart';
@@ -7,8 +9,6 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/core/utils/base_url.dart';
 import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/client/data/models/archive_model.dart';
 import 'package:secure_link/features/client/data/repositories/demandes_repository.dart';
@@ -286,70 +286,39 @@ class _ArchiveCard extends StatefulWidget {
 class _ArchiveCardState extends State<_ArchiveCard> {
   bool _isDownloading = false;
 
-  // Télécharge le fichier selon le type (request ou document)
-  Future<String?> _downloadFile(BuildContext context) async {
+  // Télécharge le fichier et retourne le chemin local
+  Future<String?> _fetchFile(BuildContext context) async {
     setState(() => _isDownloading = true);
     try {
-      final dir = await getApplicationDocumentsDirectory();
-      final prefix = widget.item.isRequest ? 'demande' : 'doc';
-      final savePath = '${dir.path}/${prefix}_${widget.item.id}.pdf';
+      String? url = widget.item.isRequest
+          ? widget.item.pdfUrl
+          : widget.item.filePath;
 
-      if (widget.item.isRequest) {
-        // Demande → pdfUrl MinIO en cache ou appel API
-        String? url = widget.item.pdfUrl;
-        if (url == null || url.isEmpty) {
-          final token = UserSession.instance.accessToken;
-          final demande = await DemandesRepository()
-              .getRequestById(accessToken: token, id: widget.item.id);
-          url = demande.pdfUrl;
-        }
-        if (url == null || url.isEmpty) {
-          throw Exception('Aucun PDF disponible');
-        }
-        // URL MinIO signée → pas de token nécessaire
-        await Dio().download(url, savePath);
-      } else {
-        // Document profil → filePath MinIO en cache ou endpoint avec token
-        String? url = widget.item.filePath;
-        if (url != null && url.isNotEmpty) {
-          // URL MinIO signée directe
-          await Dio().download(url, savePath);
-        } else {
-          // Fallback : endpoint API avec token Bearer
-          final token = UserSession.instance.accessToken;
-          // ignore: avoid_print
-          print('[ArchiveCard] doc fallback URL: ${BaseUrl.profileDocumentFile(widget.item.id)}');
-          final response = await Dio().get(
-            BaseUrl.profileDocumentFile(widget.item.id),
-            options: Options(
-              headers: {'Authorization': 'Bearer $token'},
-              responseType: ResponseType.json,
-            ),
-          );
-          // ignore: avoid_print
-          print('[ArchiveCard] doc file response: ${response.statusCode} | data: ${response.data}');
-          // Si l'API retourne une URL signée dans le body
-          String? redirectUrl;
-          if (response.data is Map) {
-            redirectUrl = response.data['url']?.toString() ??
-                response.data['fileUrl']?.toString() ??
-                response.data['filePath']?.toString();
-          } else if (response.data is String) {
-            redirectUrl = response.data as String;
-          }
-          if (redirectUrl != null && redirectUrl.isNotEmpty) {
-            await Dio().download(redirectUrl, savePath);
-          } else {
-            // Dernier recours : télécharger directement en binaire
-            await Dio().download(
-              BaseUrl.profileDocumentFile(widget.item.id),
-              savePath,
-              options: Options(headers: {'Authorization': 'Bearer $token'}),
-            );
-          }
-        }
+      final token = UserSession.instance.accessToken;
+
+      if (widget.item.isRequest && (url == null || url.isEmpty)) {
+        final demande = await DemandesRepository()
+            .getRequestById(accessToken: token, id: widget.item.id);
+        url = demande.pdfUrl;
       }
-      return savePath;
+
+      if (url == null || url.isEmpty) {
+        throw Exception('Aucun PDF disponible');
+      }
+
+      // Fichier temporaire pour le viewer
+      final tmp = await getTemporaryDirectory();
+      final tmpPath = '${tmp.path}/view_${widget.item.id}.pdf';
+
+      final options = widget.item.isRequest
+          ? Options(responseType: ResponseType.bytes)
+          : Options(
+              responseType: ResponseType.bytes,
+              headers: {'Authorization': 'Bearer $token'},
+            );
+
+      await Dio().download(url, tmpPath, options: options);
+      return tmpPath;
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -363,35 +332,80 @@ class _ArchiveCardState extends State<_ArchiveCard> {
     }
   }
 
+  // Ouvre le viewer PDF intégré
   void _onView(BuildContext context) {
     if (widget.item.isRequest) {
-      Navigator.of(context).pushNamed(
-        AppRoutes.clientDemandeDetail,
-        arguments: {'id': widget.item.id},
-      );
+      // Pour les demandes : ouvrir le viewer PDF directement
+      _fetchFile(context).then((path) {
+        if (path != null && context.mounted) {
+          _openPdfViewer(context, path);
+        }
+      });
     } else {
-      // Document profil → ouvrir directement après téléchargement
-      _onDownload(context);
+      _fetchFile(context).then((path) {
+        if (path != null && context.mounted) {
+          _openPdfViewer(context, path);
+        }
+      });
     }
   }
 
+  void _openPdfViewer(BuildContext context, String path) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _PdfViewerSheet(
+        label: widget.item.title,
+        filePath: path,
+      ),
+    );
+  }
+
+  // Télécharge dans le dossier Téléchargements public Android
   Future<void> _onDownload(BuildContext context) async {
-    final path = await _downloadFile(context);
-    if (path != null && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('archives.download_success'.tr()),
-        backgroundColor: AppColors.statusValideGreen,
-        action: SnackBarAction(
-          label: 'archives.open'.tr(),
-          textColor: AppColors.white,
-          onPressed: () => OpenFilex.open(path),
-        ),
-      ));
+    final tmpPath = await _fetchFile(context);
+    if (tmpPath == null || !context.mounted) return;
+
+    try {
+      // Dossier public Downloads visible dans le gestionnaire de fichiers
+      final fileName = '${widget.item.title.replaceAll(RegExp(r'[^\w\s]'), '_')}_${widget.item.id}.pdf';
+      final savePath = '/storage/emulated/0/Download/$fileName';
+      await File(tmpPath).copy(savePath);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('archives.download_success'.tr()),
+          backgroundColor: AppColors.statusValideGreen,
+          action: SnackBarAction(
+            label: 'archives.open'.tr(),
+            textColor: AppColors.white,
+            onPressed: () => OpenFilex.open(savePath),
+          ),
+        ));
+      }
+    } catch (_) {
+      // Fallback : ouvrir depuis le fichier temporaire
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('archives.download_success'.tr()),
+          backgroundColor: AppColors.statusValideGreen,
+          action: SnackBarAction(
+            label: 'archives.open'.tr(),
+            textColor: AppColors.white,
+            onPressed: () => OpenFilex.open(tmpPath),
+          ),
+        ));
+      }
     }
   }
 
   Future<void> _onShare(BuildContext context) async {
-    final path = await _downloadFile(context);
+    final path = await _fetchFile(context);
     if (path != null && context.mounted) {
       await Share.shareXFiles(
         [XFile(path)],
@@ -546,6 +560,70 @@ class _ArchiveCardState extends State<_ArchiveCard> {
                       ),
                     ],
                   ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// PDF Viewer Sheet
+// ---------------------------------------------------------------------------
+
+class _PdfViewerSheet extends StatelessWidget {
+  final String label;
+  final String filePath;
+  const _PdfViewerSheet({required this.label, required this.filePath});
+
+  @override
+  Widget build(BuildContext context) {
+    final screenH = MediaQuery.of(context).size.height;
+    return Container(
+      height: screenH * 0.92,
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      child: Column(
+        children: [
+          Center(
+            child: Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.borderGray,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textDark),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: const Icon(Icons.close,
+                    color: AppColors.textSecondary, size: 24),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: PDFView(
+              filePath: filePath,
+              enableSwipe: true,
+              swipeHorizontal: false,
+              autoSpacing: true,
+              pageFling: true,
+              fitPolicy: FitPolicy.BOTH,
+            ),
           ),
         ],
       ),
