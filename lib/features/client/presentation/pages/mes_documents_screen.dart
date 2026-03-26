@@ -87,6 +87,10 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
             state is ProfileDocumentUploadedNeedsVerification ||
             state is ProfileDocumentDeleted ||
             state is ProfileDocumentPatched) {
+          // Vider le cache local des fichiers affichés
+          if (state is ProfileDocumentDeleted) {
+            _localFileCache.clear();
+          }
           _loadData();
         } else if (state is ProfileError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -307,7 +311,6 @@ class _DocumentsGrid extends StatelessWidget {
     required this.onFileSelected,
   });
 
-
   @override
   Widget build(BuildContext context) {
     if (documentTypes.isEmpty) {
@@ -361,6 +364,7 @@ class _DocumentsGrid extends StatelessWidget {
       showModalBottomSheet(
         context: context,
         backgroundColor: AppColors.white,
+        useSafeArea: true, // ✅ protège du navbar
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
@@ -380,7 +384,7 @@ class _DocumentsGrid extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.white,
-      useSafeArea: true,
+      useSafeArea: true, // ✅ protège du navbar
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -605,6 +609,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
   final _expiryDateController = TextEditingController();
   String? _uploadedFilePath;
   bool _isImage = false;
+  late final ProfileBloc _bloc;
 
   bool get _isExisting => widget.existingDocument != null;
 
@@ -615,6 +620,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
   }
 
   void _confirmDelete(BuildContext context) {
+    final documentId = widget.existingDocument!.id;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -654,12 +660,9 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              context.read<ProfileBloc>().add(
-                    DeleteProfileDocumentEvent(
-                      documentId: widget.existingDocument!.id,
-                    ),
-                  );
-              Navigator.of(context).pop();
+              ProfileDocumentRepository.invalidate(documentId);
+              _bloc.add(DeleteProfileDocumentEvent(documentId: documentId));
+              if (mounted) Navigator.of(context).pop();
             },
             child: Text(
               'documents.delete'.tr(),
@@ -675,7 +678,6 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
     );
   }
 
-  /// Convertit une date ISO (2026-03-27) ou dd/MM/yyyy en dd/MM/yyyy
   String _toDisplayDate(String? raw) {
     if (raw == null || raw.isEmpty) return '';
     if (raw.contains('/')) return raw;
@@ -687,6 +689,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
   @override
   void initState() {
     super.initState();
+    _bloc = context.read<ProfileBloc>();
     if (widget.existingDocument != null) {
       _deliveryDateController.text = _toDisplayDate(widget.existingDocument!.issueDate);
       _expiryDateController.text = _toDisplayDate(widget.existingDocument!.expirationDate);
@@ -729,6 +732,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       backgroundColor: AppColors.white,
+      useSafeArea: true, // ✅ protège du navbar pour la sélection photo/galerie
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -762,7 +766,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
     );
     if (source == null) return;
     final XFile? picked = await picker.pickImage(source: source, imageQuality: 85);
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         _uploadedFilePath = picked.path;
         _isImage = true;
@@ -778,13 +782,11 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
     if (_isExisting && _uploadedFilePath == null) {
       if (_deliveryDateController.text.isEmpty ||
           (hasExpiry && _expiryDateController.text.isEmpty)) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'profile.fill_all_fields'.tr(),
-              style: TextStyle(
-                  fontFamily: AppConstants.fontFamilyInter, color: AppColors.white),
-            ),
+            content: Text('profile.fill_all_fields'.tr(),
+                style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.white)),
             backgroundColor: AppColors.statusRejected,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -792,18 +794,12 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
         );
         return;
       }
-      context.read<ProfileBloc>().add(
-            PatchProfileDocumentEvent(
-              documentId: widget.existingDocument!.id,
-              issueDate: _deliveryDateController.text.isNotEmpty
-                  ? _deliveryDateController.text
-                  : null,
-              expirationDate: _expiryDateController.text.isNotEmpty
-                  ? _expiryDateController.text
-                  : null,
-            ),
-          );
-      Navigator.of(context).pop();
+      _bloc.add(PatchProfileDocumentEvent(
+        documentId: widget.existingDocument!.id,
+        issueDate: _deliveryDateController.text.isNotEmpty ? _deliveryDateController.text : null,
+        expirationDate: _expiryDateController.text.isNotEmpty ? _expiryDateController.text : null,
+      ));
+      if (mounted) Navigator.of(context).pop();
       return;
     }
 
@@ -811,13 +807,11 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
     if (_uploadedFilePath == null ||
         _deliveryDateController.text.isEmpty ||
         (hasExpiry && _expiryDateController.text.isEmpty)) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'profile.fill_all_fields'.tr(),
-            style: TextStyle(
-                fontFamily: AppConstants.fontFamilyInter, color: AppColors.white),
-          ),
+          content: Text('profile.fill_all_fields'.tr(),
+              style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.white)),
           backgroundColor: AppColors.statusRejected,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -826,19 +820,13 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
       return;
     }
 
-    context.read<ProfileBloc>().add(
-          UploadProfileDocumentEvent(
-            file: File(_uploadedFilePath!),
-            documentTypeId: widget.documentType.id,
-            issueDate: _deliveryDateController.text.isNotEmpty
-                ? _deliveryDateController.text
-                : null,
-            expirationDate: _expiryDateController.text.isNotEmpty
-                ? _expiryDateController.text
-                : null,
-          ),
-        );
-    Navigator.of(context).pop();
+    _bloc.add(UploadProfileDocumentEvent(
+      file: File(_uploadedFilePath!),
+      documentTypeId: widget.documentType.id,
+      issueDate: _deliveryDateController.text.isNotEmpty ? _deliveryDateController.text : null,
+      expirationDate: _expiryDateController.text.isNotEmpty ? _expiryDateController.text : null,
+    ));
+    if (mounted) Navigator.of(context).pop();
   }
 
   @override
@@ -1207,16 +1195,18 @@ class _DocumentImage extends StatefulWidget {
 class _DocumentImageState extends State<_DocumentImage> {
   Uint8List? _bytes;
   bool _loading = true;
+  late final ProfileDocumentRepository _repo;
 
   @override
   void initState() {
     super.initState();
+    _repo = context.read<ProfileBloc>().repository;
     _loadImage();
   }
 
   Future<void> _loadImage() async {
     try {
-      final bytes = await context.read<ProfileBloc>().repository.getDocumentFile(
+      final bytes = await _repo.getDocumentFile(
             token: UserSession.instance.accessToken,
             documentId: widget.documentId,
           );
@@ -1290,11 +1280,13 @@ class _DocumentOptionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 32 + bottomPadding), // ✅ espace au-dessus du navbar
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Handle
           Center(
             child: Container(
               width: AppConstants.modalHandleWidth,
@@ -1306,6 +1298,7 @@ class _DocumentOptionsSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
+          // Titre
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -1330,6 +1323,7 @@ class _DocumentOptionsSheet extends StatelessWidget {
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: AppColors.white,
+                  useSafeArea: true, // ✅ protège du navbar
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   ),
@@ -1370,7 +1364,7 @@ class _DocumentOptionsSheet extends StatelessWidget {
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: AppColors.white,
-                  useSafeArea: true,
+                  useSafeArea: true, // ✅ protège du navbar
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   ),
@@ -1468,9 +1462,10 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
   @override
   Widget build(BuildContext context) {
     final screenH = MediaQuery.of(context).size.height;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Container(
       height: screenH * 0.85,
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 24 + bottomPadding), // ✅ espace au-dessus du navbar
       child: Column(
         children: [
           Center(

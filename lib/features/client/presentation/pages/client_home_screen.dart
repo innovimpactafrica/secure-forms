@@ -429,6 +429,14 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
             if (userState is UserLoaded) {
               completion = userState.user.profileCompletion;
             }
+            // Déclencher le chargement de la complétion réelle si pas encore fait
+            if (profileState is ProfileInProgress || profileState is ProfileLoading) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (context.mounted) {
+                  context.read<ProfileBloc>().add(const LoadDocumentTypesEvent());
+                }
+              });
+            }
           }
 
           final isCompleted = completion >= 100;

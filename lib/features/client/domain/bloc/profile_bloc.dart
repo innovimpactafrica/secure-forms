@@ -55,6 +55,22 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ) async {
     final token = UserSession.instance.accessToken;
     _log('LoadDocumentTypes — token présent: ${token.isNotEmpty}');
+
+    // Si déjà chargé et pas de force refresh, réémettre l'état actuel
+    if (!event.forceRefresh && _documentTypes.isNotEmpty && _uploadedDocuments.isNotEmpty) {
+      _log('LoadDocumentTypes — données en cache, skip API');
+      final currentProfile = _currentProfile(state).copyWith(
+        progressPercent: _completion.completion / 100.0,
+      );
+      emit(ProfileDocumentsLoaded(
+        profile: currentProfile,
+        documentTypes: _documentTypes,
+        uploadedDocuments: _uploadedDocuments,
+        completion: _completion,
+      ));
+      return;
+    }
+
     emit(const ProfileLoading());
     try {
       _log('Chargement types de documents...');
@@ -112,6 +128,22 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ));
 
     try {
+      // Si un document du même type existe déjà, le supprimer avant d'uploader
+      final existing = _uploadedDocuments
+          .where((d) => d.documentTypeId == event.documentTypeId)
+          .firstOrNull;
+      if (existing != null) {
+        _log('Document existant trouvé id=${existing.id} — suppression avant re-upload');
+        try {
+          await _repository.deleteDocument(token: token, documentId: existing.id);
+          // Invalider le cache de l'ancien fichier
+          ProfileDocumentRepository.invalidate(existing.id);
+          _log('Suppression préalable réussie ✓');
+        } catch (e) {
+          _log('Suppression préalable échouée (on continue quand même): $e');
+        }
+      }
+
       final uploaded = await _repository.uploadDocument(
         token: token,
         file: event.file,
@@ -121,7 +153,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       );
       _log('Upload réussi ✓ id=${uploaded.id} status=${uploaded.status}');
 
-      // Recharger la liste et la complétion
+      // Recharger la liste et la complétion (forcer car données changées)
       _uploadedDocuments = await _repository.getDocuments(token);
       _completion = await _repository.getProfileCompletion(token);
       _log('Complétion après upload: ${_completion.completion}%');
@@ -130,7 +162,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         progressPercent: _completion.completion / 100.0,
       );
 
-      // Trouver le type pour savoir si vérification identité requise
       final docType = _documentTypes.firstWhere(
         (t) => t.id == event.documentTypeId,
         orElse: () => DocumentTypeModel(

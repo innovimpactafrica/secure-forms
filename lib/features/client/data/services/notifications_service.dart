@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:secure_link/core/utils/base_url.dart';
+import 'package:secure_link/core/utils/http_client.dart';
 import '../models/notification_model.dart';
 
 class NotificationsService {
   final http.Client _client;
-  NotificationsService({http.Client? client}) : _client = client ?? http.Client();
+  NotificationsService({http.Client? client})
+      : _client = client ?? HttpClientSingleton.instance;
 
   Future<List<NotificationModel>> getNotifications({
     required String accessToken,

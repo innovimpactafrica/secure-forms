@@ -76,7 +76,8 @@ class CompleteProfileEvent extends ProfileEvent {
 
 /// Charger les types de documents disponibles + complétion
 class LoadDocumentTypesEvent extends ProfileEvent {
-  const LoadDocumentTypesEvent();
+  final bool forceRefresh;
+  const LoadDocumentTypesEvent({this.forceRefresh = false});
 }
 
 /// Upload d'un document via l'API

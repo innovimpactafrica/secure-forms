@@ -1,12 +1,15 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:secure_link/core/utils/base_url.dart';
+import 'package:secure_link/core/utils/http_client.dart';
 import '../models/demande_model.dart';
 
 class DemandesService {
   final http.Client _client;
-  DemandesService({http.Client? client}) : _client = client ?? http.Client();
+  DemandesService({http.Client? client}) : _client = client ?? HttpClientSingleton.instance;
 
   Map<String, String> _headers(String token) => {
         'Authorization': 'Bearer $token',

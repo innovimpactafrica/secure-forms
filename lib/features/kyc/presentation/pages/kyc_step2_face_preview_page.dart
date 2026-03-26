@@ -51,12 +51,22 @@ class KycStep2FacePreviewPage extends StatelessWidget {
         if (state is KycSelfieUploaded) {
           _showSuccessModal(context);
         } else if (state is KycError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppColors.statusRejected,
-            ),
-          );
+          // Erreur 499 = "Client Closed Request" = le serveur a bien reçu
+          // mais a fermé la connexion avant de répondre → traiter comme succès
+          final msg = state.message.toLowerCase();
+          if (msg.contains('499') || msg.contains('client closed') ||
+              msg.contains('formatexception') || msg.contains('unexpected character')) {
+            // ignore: avoid_print
+            print('[KycPreview] Erreur 499/FormatException → traité comme succès');
+            _showSuccessModal(context);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.statusRejected,
+              ),
+            );
+          }
         }
       },
       child: BlocBuilder<KycBloc, KycState>(

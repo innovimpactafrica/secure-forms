@@ -23,7 +23,8 @@
     "invalid_email": "Invalid email",
     "login_button": "log in",
     "no_account": "Don't have an account? ",
-    "register": "Sign up"
+    "register": "Sign up",
+    "continue_registration": "Continue my registration"
   },
   "register": {
     "title": "Sign up",
@@ -275,5 +276,15 @@
     "version": "Version",
     "complete": "Complete",
     "required_documents": "Required documents"
+  },
+  "resume_registration": {
+    "title": "Continue my registration",
+    "subtitle": "You validated your identity by OTP but haven't created your password yet? Enter your email or phone: we'll send you a code, then a link to set your password.",
+    "field_label": "Username",
+    "field_hint": "Email or phone",
+    "email_hint": "Use the same email address as at registration.",
+    "send_button": "Send code",
+    "already_account": "Already have an account? ",
+    "login_link": "Log in"
   }
 }

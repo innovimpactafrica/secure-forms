@@ -3,12 +3,13 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:secure_link/core/utils/base_url.dart';
+import 'package:secure_link/core/utils/http_client.dart';
 import '../models/identity_document_model.dart';
 
 class IdentityDocumentService {
   final http.Client _client;
   IdentityDocumentService({http.Client? client})
-      : _client = client ?? http.Client();
+      : _client = client ?? HttpClientSingleton.instance;
 
   Map<String, String> _authHeaders(String token) => {
         'Accept': 'application/json',

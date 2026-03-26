@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:secure_link/core/services/fcm_service.dart';
 import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/auth/data/models/user_profile_model.dart';
 import 'package:secure_link/features/auth/data/services/user_profile_service.dart';
@@ -32,18 +33,30 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     LoadUserProfile event,
     Emitter<UserState> emit,
   ) async {
+    // Si déjà chargé avec le même token, ne pas refaire l'appel
+    if (state is UserLoaded && _cachedUser != null && event.accessToken == UserSession.instance.accessToken) {
+      print('=== USER PROFILE: déjà chargé, skip ===');
+      return;
+    }
     emit(UserLoading());
     try {
       final user = await _service.getProfile(event.accessToken);
       print('=== USER PROFILE LOADED: firstName=${user.firstName} lastName=${user.lastName} ===');
       _cachedUser = user;
-      // Persister l'userId pour le KYC au prochain démarrage
       UserSession.instance.userId = user.id;
       _persistUserId(user.id);
+      // Envoyer le token FCM et s'abonner au topic après chargement du profil
+      FcmService.onUserLoggedIn(user.id);
       emit(UserLoaded(user));
     } catch (e) {
       print('=== USER PROFILE ERROR: $e ===');
-      emit(UserError(e.toString().replaceAll('Exception: ', '')));
+      // Si on a un cache, émettre quand même UserLoaded pour ne pas bloquer l'UI
+      if (_cachedUser != null) {
+        print('=== USER PROFILE: utilisation du cache après erreur ===');
+        emit(UserLoaded(_cachedUser!));
+      } else {
+        emit(UserError(e.toString().replaceAll('Exception: ', '')));
+      }
     }
   }
 

@@ -4,5 +4,6 @@ abstract class NotificationsEvent {
 
 class LoadNotificationsEvent extends NotificationsEvent {
   final bool unreadOnly;
-  const LoadNotificationsEvent({this.unreadOnly = false});
+  final bool forceRefresh;
+  const LoadNotificationsEvent({this.unreadOnly = false, this.forceRefresh = false});
 }

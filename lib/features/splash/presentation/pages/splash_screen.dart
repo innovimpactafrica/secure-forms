@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_messaging/firebase_messaging.dart'; // 👈 NOUVEAU
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/session_storage.dart';
@@ -10,6 +11,7 @@ import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart'
 import 'package:secure_link/features/client/domain/bloc/notifications_event.dart';
 import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/auth/data/services/auth_service.dart';
+import 'package:secure_link/core/services/fcm_service.dart'; // 👈 NOUVEAU
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -62,6 +64,9 @@ class _SplashScreenState extends State<SplashScreen>
       userBloc.add(LoadProfilePictureEvent(token));
       userBloc.add(LoadUserProfile(token));
 
+      // 👇 NOUVEAU — Envoyer le token FCM au backend si session active
+      _sendFcmTokenOnRestore();
+
       // Attendre UserLoaded ou UserError (max 5s)
       final result = await userBloc.stream
           .where((s) => s is UserLoaded || s is UserError)
@@ -89,6 +94,8 @@ class _SplashScreenState extends State<SplashScreen>
                 role: UserSession.instance.role,
                 userId: UserSession.instance.userId,
               );
+              // 👇 NOUVEAU — Renvoyer le token FCM après refresh
+              _sendFcmTokenOnRestore();
               if (!mounted) return;
               Navigator.of(context).pushReplacementNamed(AppRoutes.clientHome);
               return;
@@ -104,6 +111,18 @@ class _SplashScreenState extends State<SplashScreen>
       }
     } else {
       Navigator.of(context).pushReplacementNamed(AppRoutes.welcome);
+    }
+  }
+
+  // 👇 NOUVEAU — Récupère et envoie le token FCM au backend
+  Future<void> _sendFcmTokenOnRestore() async {
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        await FcmService.sendTokenToBackend(fcmToken);
+      }
+    } catch (e) {
+      print('[SplashScreen] Erreur envoi token FCM: $e');
     }
   }
 

@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:secure_link/core/utils/base_url.dart';
+import 'package:secure_link/core/utils/http_client.dart';
 import '../models/auth_request.dart';
 import '../models/auth_response.dart';
 
 class AuthService {
   final http.Client _client;
-  AuthService({http.Client? client}) : _client = client ?? http.Client();
+  AuthService({http.Client? client}) : _client = client ?? HttpClientSingleton.instance;
 
   Map<String, String> get _headers => {
         'Content-Type': 'application/json',
@@ -106,5 +107,34 @@ class AuthService {
       return SetupPasswordResponse.fromJson(data);
     }
     throw Exception(data['message'] ?? 'Erreur création mot de passe');
+  }
+
+  // POST /api/auth/register/client/resume-setup/request-otp
+  Future<void> resumeSetupRequestOtp({required String email}) async {
+    final response = await _client.post(
+      Uri.parse(BaseUrl.resumeSetupRequestOtp),
+      headers: _headers,
+      body: jsonEncode({'email': email}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(data['message'] ?? 'Erreur envoi OTP');
+    }
+  }
+
+  // POST /api/auth/register/client/resume-setup/verify-otp
+  Future<void> resumeSetupVerifyOtp({
+    required String email,
+    required String otp,
+  }) async {
+    final response = await _client.post(
+      Uri.parse(BaseUrl.resumeSetupVerifyOtp),
+      headers: _headers,
+      body: jsonEncode({'email': email, 'otp': otp}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(data['message'] ?? 'OTP incorrect ou expiré');
+    }
   }
 }

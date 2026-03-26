@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:secure_link/core/utils/base_url.dart';
+import 'package:secure_link/core/utils/http_client.dart';
 import '../models/user_profile_model.dart';
 
 class UserProfileService {
   final http.Client _client;
-  UserProfileService({http.Client? client}) : _client = client ?? http.Client();
+  UserProfileService({http.Client? client}) : _client = client ?? HttpClientSingleton.instance;
 
   Future<UserProfileModel> getProfile(String accessToken) async {
     final response = await _client.get(

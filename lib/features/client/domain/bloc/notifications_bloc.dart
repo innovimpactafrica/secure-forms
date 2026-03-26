@@ -17,9 +17,19 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     LoadNotificationsEvent event,
     Emitter<NotificationsState> emit,
   ) async {
-    emit(const NotificationsLoading());
+    // Ne pas refaire l'appel si déjà chargé et pas de force refresh
+    if (state is NotificationsLoaded && !event.forceRefresh) {
+      print('[NotificationsBloc] déjà chargé, skip');
+      return;
+    }
+    // Ne pas émettre Loading si déjà des données (avoid flicker)
+    if (state is! NotificationsLoaded) emit(const NotificationsLoading());
     try {
       final token = UserSession.instance.accessToken;
+      if (token.isEmpty) {
+        emit(const NotificationsError('Token absent'));
+        return;
+      }
       print('[NotificationsBloc] LoadNotifications — unreadOnly=${event.unreadOnly}');
       final notifs = await _service.getNotifications(
         accessToken: token,
@@ -29,7 +39,10 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       emit(NotificationsLoaded(notifs));
     } catch (e) {
       print('[NotificationsBloc] ERREUR: $e');
-      emit(NotificationsError(e.toString().replaceAll('Exception: ', '')));
+      // Garder l'état précédent si on avait des données
+      if (state is! NotificationsLoaded) {
+        emit(NotificationsError(e.toString().replaceAll('Exception: ', '')));
+      }
     }
   }
 }

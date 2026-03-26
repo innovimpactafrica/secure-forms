@@ -11,6 +11,8 @@ class BaseUrl {
   static const String logout                = '$currentBaseUrl/auth/logout';
   static const String refreshToken          = '$currentBaseUrl/auth/refresh';
   static const String setupPassword         = '$currentBaseUrl/auth/setup-password';
+  static const String resumeSetupRequestOtp = '$currentBaseUrl/auth/register/client/resume-setup/request-otp';
+  static const String resumeSetupVerifyOtp  = '$currentBaseUrl/auth/register/client/resume-setup/verify-otp';
   // ========== USER ENDPOINTS ==========
   static const String getUserProfile = '$currentBaseUrl/auth/profile';
   static const String updateProfile  = '$currentBaseUrl/user/update';
@@ -48,6 +50,7 @@ class BaseUrl {
   // ========== HOME ENDPOINTS ==========
   static const String getHomeData       = '$currentBaseUrl/home';
   static const String clientStatistics  = '$currentBaseUrl/clients/statistics';
+
   static String buildUrl(String endpoint, {Map<String, dynamic>? params}) {
     if (params == null || params.isEmpty) return endpoint;
     final queryString = params.entries.map((e) => '${e.key}=${e.value}').join('&');

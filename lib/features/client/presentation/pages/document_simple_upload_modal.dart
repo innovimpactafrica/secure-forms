@@ -33,6 +33,13 @@ class _DocumentSimpleUploadModalState
   File? _selectedFile;
   bool _isImage = false;
   final _picker = ImagePicker();
+  late final ProfileBloc _bloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc = context.read<ProfileBloc>();
+  }
 
   Future<void> _pickFile() async {
     final source = await showModalBottomSheet<ImageSource>(
@@ -47,8 +54,7 @@ class _DocumentSimpleUploadModalState
           children: [
             const SizedBox(height: 8),
             ListTile(
-              leading: Icon(Icons.photo_library_outlined,
-                  color: AppColors.primary),
+              leading: Icon(Icons.photo_library_outlined, color: AppColors.primary),
               title: Text(
                 'profile.gallery'.tr(),
                 style: TextStyle(
@@ -60,8 +66,7 @@ class _DocumentSimpleUploadModalState
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
             ListTile(
-              leading:
-                  Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+              leading: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
               title: Text(
                 'profile.take_photo'.tr(),
                 style: TextStyle(
@@ -79,9 +84,8 @@ class _DocumentSimpleUploadModalState
     );
 
     if (source == null) return;
-    final XFile? picked =
-        await _picker.pickImage(source: source, imageQuality: 85);
-    if (picked != null) {
+    final XFile? picked = await _picker.pickImage(source: source, imageQuality: 85);
+    if (picked != null && mounted) {
       setState(() {
         _selectedFile = File(picked.path);
         _isImage = true;
@@ -91,6 +95,7 @@ class _DocumentSimpleUploadModalState
 
   void _onEnregistrer() {
     if (_selectedFile == null) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -102,21 +107,20 @@ class _DocumentSimpleUploadModalState
           ),
           backgroundColor: AppColors.statusRejected,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
       return;
     }
 
-    context.read<ProfileBloc>().add(
-          UploadProfileDocumentEvent(
-            file: _selectedFile!,
-            documentTypeId: widget.documentType.id,
-          ),
-        );
+    _bloc.add(
+      UploadProfileDocumentEvent(
+        file: _selectedFile!,
+        documentTypeId: widget.documentType.id,
+      ),
+    );
 
-    Navigator.of(context).pop();
+    if (mounted) Navigator.of(context).pop();
   }
 
   @override

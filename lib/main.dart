@@ -12,7 +12,7 @@ import 'package:secure_link/features/auth/presentation/pages/login_screen.dart';
 import 'package:secure_link/features/auth/presentation/pages/create_password_screen.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/core/services/fcm_service.dart';
-import 'package:secure_link/core/utils/navigator_key.dart'; // 👈 NOUVEAU
+import 'package:secure_link/core/utils/navigator_key.dart'; 
 import 'features/splash/presentation/pages/splash_screen.dart';
 import 'features/auth/presentation/pages/welcome_screen.dart';
 import 'features/auth/presentation/pages/otp_verification_screen.dart';
@@ -34,6 +34,8 @@ import 'features/client/presentation/pages/client_demande_detail_screen.dart';
 import 'features/client/presentation/pages/detail_demande/detail_ouverture_compte_brouillon_screen.dart';
 import 'features/client/presentation/pages/client_profil_screen.dart';
 import 'features/client/presentation/pages/detail_demande/detail_ouverture_compte_continuer_screen.dart';
+import 'features/auth/presentation/pages/resume_registration_screen.dart';
+import 'features/auth/presentation/pages/resume_registration_otp_screen.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/features/kyc/presentation/pages/kyc_gate_page.dart';
 import 'firebase_options.dart';
@@ -213,6 +215,14 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
               builder: (_) => CreatePasswordScreen(token: token),
             );
           }
+          if (settings.name == AppRoutes.resumeRegistrationOtp) {
+            final args = settings.arguments as Map<String, dynamic>? ?? {};
+            return MaterialPageRoute(
+              builder: (_) => ResumeRegistrationOtpScreen(
+                email: args['email']?.toString() ?? '',
+              ),
+            );
+          }
           return null;
         },
         routes: {
@@ -221,6 +231,7 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
           AppRoutes.login: (context) => const LoginScreen(),
           '/success': (context) => const SuccessScreen(),
           AppRoutes.clientHome: (context) => const ClientHomeScreen(),
+          AppRoutes.resumeRegistration: (context) => const ResumeRegistrationScreen(),
           AppRoutes.clientDemandes: (context) => BlocProvider(
             create: (_) => DemandesBloc(),
             child: const ClientDemandesScreen(),

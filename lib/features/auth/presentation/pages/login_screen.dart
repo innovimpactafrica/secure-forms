@@ -297,6 +297,23 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 10),
+                        // Lien Continuer mon inscription
+                        GestureDetector(
+                          onTap: () => Navigator.of(context)
+                              .pushNamed(AppRoutes.resumeRegistration),
+                          child: Text(
+                            'login.continue_registration'.tr(),
+                            style: const TextStyle(
+                              fontFamily: AppConstants.fontFamilyInter,
+                              fontSize: AppConstants.fontSizeMedium,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.primary,
+                              decoration: TextDecoration.underline,
+                              decorationColor: AppColors.primary,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),

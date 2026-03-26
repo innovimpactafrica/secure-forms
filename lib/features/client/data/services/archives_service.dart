@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:secure_link/core/utils/base_url.dart';
+import 'package:secure_link/core/utils/http_client.dart';
 import '../models/archive_model.dart';
 
 class ArchivesService {
   final http.Client _client;
-  ArchivesService({http.Client? client}) : _client = client ?? http.Client();
+  ArchivesService({http.Client? client}) : _client = client ?? HttpClientSingleton.instance;
 
   Future<List<ArchiveModel>> getArchives({
     required String accessToken,

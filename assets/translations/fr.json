@@ -23,7 +23,8 @@
     "invalid_email": "Email invalide",
     "login_button": "se connecter",
     "no_account": "Vous n'avez pas de compte ? ",
-    "register": "S'inscrire"
+    "register": "S'inscrire",
+    "continue_registration": "Continuer mon inscription"
   },
   "password": {
     "create_title": "Créez votre mot de passe",
@@ -290,5 +291,15 @@
     "version": "Version",
     "complete": "Complet",
     "required_documents": "Documents requis"
+  },
+  "resume_registration": {
+    "title": "Continuer mon inscription",
+    "subtitle": "Vous avez validé votre identité par OTP mais vous n'avez pas encore créé votre mot de passe ? Saisissez votre email : nous vous enverrons un code, puis un lien pour définir votre mot de passe.",
+    "field_label": "Nom d'utilisateur",
+    "field_hint": "Email ou téléphone",
+    "email_hint": "Utilisez la même adresse email qu'à l'inscription.",
+    "send_button": "Envoyer le code",
+    "already_account": "Vous avez déjà un compte ? ",
+    "login_link": "Connectez-vous"
   }
 }

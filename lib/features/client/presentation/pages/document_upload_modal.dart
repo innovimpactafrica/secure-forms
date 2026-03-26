@@ -33,10 +33,12 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
   final _expiryDateController = TextEditingController();
   String? _uploadedFilePath;
   bool _isImage = false;
+  late final ProfileBloc _bloc;
 
   @override
   void initState() {
     super.initState();
+    _bloc = context.read<ProfileBloc>();
     if (widget.existingDocument != null) {
       _deliveryDateController.text = widget.existingDocument!.issueDate ?? '';
       _expiryDateController.text = widget.existingDocument!.expirationDate ?? '';
@@ -124,7 +126,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
       source: source,
       imageQuality: 85,
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         _uploadedFilePath = picked.path;
         _isImage = true;
@@ -138,6 +140,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
     if (_uploadedFilePath == null ||
         _deliveryDateController.text.isEmpty ||
         (hasExpiry && _expiryDateController.text.isEmpty)) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -155,20 +158,20 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
       return;
     }
 
-    context.read<ProfileBloc>().add(
-          UploadProfileDocumentEvent(
-            file: File(_uploadedFilePath!),
-            documentTypeId: widget.documentType.id,
-            issueDate: _deliveryDateController.text.isNotEmpty
-                ? _deliveryDateController.text
-                : null,
-            expirationDate: _expiryDateController.text.isNotEmpty
-                ? _expiryDateController.text
-                : null,
-          ),
-        );
+    _bloc.add(
+      UploadProfileDocumentEvent(
+        file: File(_uploadedFilePath!),
+        documentTypeId: widget.documentType.id,
+        issueDate: _deliveryDateController.text.isNotEmpty
+            ? _deliveryDateController.text
+            : null,
+        expirationDate: _expiryDateController.text.isNotEmpty
+            ? _expiryDateController.text
+            : null,
+      ),
+    );
 
-    Navigator.of(context).pop();
+    if (mounted) Navigator.of(context).pop();
   }
 
   @override

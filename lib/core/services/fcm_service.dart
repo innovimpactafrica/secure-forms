@@ -25,6 +25,12 @@ class FcmService {
   static Future<void> initialize() async {
     await _createAndroidChannel();
     await _initializeLocalNotifications();
+    // Forcer l'affichage des notifications FCM quand l'app est au premier plan
+    await _messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
     await _requestPermission();
   }
 
@@ -78,25 +84,25 @@ class FcmService {
     _messaging.onTokenRefresh.listen(sendTokenToBackend);
   }
 
-  // ✅ Envoi du token FCM au backend
-  static Future<void> sendTokenToBackend(String token) async {
+  // ✅ Envoi du token FCM au backend + abonnement au topic utilisateur
+  static Future<void> sendTokenToBackend(String fcmToken) async {
     try {
       final accessToken = UserSession.instance.accessToken;
+      final userId = UserSession.instance.userId;
 
-      // Si l'utilisateur n'est pas encore connecté, on ne fait rien
-      // Le token sera renvoyé après login
       if (accessToken.isEmpty) {
         print('[FCM] Pas de session active — token mis en attente');
         return;
       }
 
+      // 1. Envoyer le token au backend
       final response = await http.post(
         Uri.parse(BaseUrl.registerFcmToken),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
-        body: jsonEncode({'fcmToken': token}),
+        body: jsonEncode({'fcmToken': fcmToken}),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -104,27 +110,59 @@ class FcmService {
       } else {
         print('[FCM] ⚠️ Erreur envoi token: ${response.statusCode} — ${response.body}');
       }
+
+      // 2. S'abonner au topic utilisateur : secureform_fcm_{userId}
+      if (userId.isNotEmpty) {
+        final topic = 'secureform_fcm_$userId';
+        await _messaging.subscribeToTopic(topic);
+        print('[FCM] ✅ Abonné au topic: $topic');
+      } else {
+        print('[FCM] ⚠️ userId vide — abonnement topic impossible');
+      }
     } catch (e) {
       print('[FCM] ❌ Exception envoi token: $e');
+    }
+  }
+
+  /// À appeler après login réussi pour s'assurer que le token est envoyé
+  /// et que l'abonnement au topic est fait avec le bon userId
+  static Future<void> onUserLoggedIn(String userId) async {
+    print('[FCM] onUserLoggedIn userId=$userId');
+    final fcmToken = await _messaging.getToken();
+    if (fcmToken != null) {
+      await sendTokenToBackend(fcmToken);
     }
   }
 
   static void _listenToMessages() {
     // App OUVERTE → afficher manuellement
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('[FCM] onMessage reçu: messageId=${message.messageId}');
+      print('[FCM] onMessage notification: title=${message.notification?.title} body=${message.notification?.body}');
+      print('[FCM] onMessage data: ${message.data}');
+
       final notification = message.notification;
-      if (notification == null) return;
+
+      // Si pas de notification block → construire depuis les data
+      final title = notification?.title ?? message.data['title'] ?? message.data['subject'] ?? 'Secure Forms';
+      final body  = notification?.body  ?? message.data['body']  ?? message.data['message'] ?? '';
+
+      if (title.isEmpty && body.isEmpty) {
+        print('[FCM] Message sans contenu affichable — ignoré');
+        return;
+      }
 
       _localNotifications.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
+        message.hashCode,
+        title,
+        body,
         NotificationDetails(
           android: AndroidNotificationDetails(
             _channel.id,
             _channel.name,
             importance: Importance.high,
             priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
           ),
           iOS: const DarwinNotificationDetails(
             presentAlert: true,
@@ -138,6 +176,7 @@ class FcmService {
 
     // App EN FOND → tap sur la notification
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('[FCM] onMessageOpenedApp: ${message.data}');
       _handleNavigation(message.data);
     });
   }
@@ -152,57 +191,67 @@ class FcmService {
 
   // Navigation selon les données envoyées par le backend
   static void _handleNavigation(Map<String, dynamic> data) {
-    final screen = data['screen'];
-    print('[FCM] Navigation vers: $screen');
+    print('[FCM] data reçu pour navigation: $data');
 
-    switch (screen) {
-      case 'demandes':
-        navigatorKey.currentState?.pushNamed(AppRoutes.clientDemandes);
-        break;
-      case 'detail_demande':
-        navigatorKey.currentState?.pushNamed(
-          AppRoutes.detailDemande,
-          arguments: data,
-        );
-        break;
-      case 'detail_virement':
-        navigatorKey.currentState?.pushNamed(
-          AppRoutes.detailVirement,
-          arguments: data,
-        );
-        break;
-      case 'detail_acte_vente':
-        navigatorKey.currentState?.pushNamed(
-          AppRoutes.detailActeVente,
-          arguments: data,
-        );
-        break;
-      case 'detail_pret':
-        navigatorKey.currentState?.pushNamed(
-          AppRoutes.detailPret,
-          arguments: data,
-        );
-        break;
-      case 'detail_ouverture_compte':
-        navigatorKey.currentState?.pushNamed(
-          AppRoutes.detailOuvertureCompte,
-          arguments: data,
-        );
-        break;
-      case 'detail_ouverture_compte_brouillon':
-        navigatorKey.currentState?.pushNamed(
-          AppRoutes.detailOuvertureCompteBrouillon,
-          arguments: data,
-        );
-        break;
-      case 'profil':
-        navigatorKey.currentState?.pushNamed(AppRoutes.clientProfil);
-        break;
-      case 'notifications':
-      default:
-        navigatorKey.currentState?.pushNamed(AppRoutes.clientHome);
-        break;
-    }
+    final relatedType = data['relatedType']?.toString() ?? '';
+    final relatedId   = data['relatedId']?.toString() ?? '';
+    final type        = data['type']?.toString() ?? '';
+    final screen      = data['screen']?.toString() ?? '';
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      final nav = navigatorKey.currentState;
+      if (nav == null) return;
+
+      // Cas 1 : notification liée à une demande
+      if (relatedType == 'request' && relatedId.isNotEmpty) {
+        print('[FCM] → détail demande id=$relatedId');
+        nav.pushNamed(AppRoutes.clientDemandeDetail, arguments: {'id': relatedId});
+        return;
+      }
+
+      // Cas 2 : type de notification
+      switch (type) {
+        // Demandes
+        case 'REQUEST_VALIDATED':
+        case 'REQUEST_REJECTED':
+        case 'REQUEST_UPDATED':
+        case 'REQUEST_PENDING':
+        case 'REQUEST_IN_PROGRESS':
+          if (relatedId.isNotEmpty) {
+            nav.pushNamed(AppRoutes.clientDemandeDetail, arguments: {'id': relatedId});
+          } else {
+            nav.pushNamed(AppRoutes.clientDemandes);
+          }
+          return;
+
+        // Documents / KYC / Profil
+        case 'DOCUMENT_VALIDATED':
+        case 'DOCUMENT_REJECTED':
+        case 'DOCUMENT_EXPIRING':
+        case 'KYC_VALIDATED':
+        case 'KYC_REJECTED':
+        case 'PROFILE_UPDATED':
+          nav.pushNamed(AppRoutes.clientProfil);
+          return;
+
+        // Notifications générales
+        case 'NEW_MESSAGE':
+        case 'SYSTEM':
+          nav.pushNamed(AppRoutes.clientHome);
+          return;
+      }
+
+      // Cas 3 : champ screen explicite
+      switch (screen) {
+        case 'demandes':      nav.pushNamed(AppRoutes.clientDemandes); return;
+        case 'profil':        nav.pushNamed(AppRoutes.clientProfil);   return;
+        case 'notifications': nav.pushNamed(AppRoutes.clientHome);     return;
+      }
+
+      // Fallback
+      print('[FCM] Aucune navigation spécifique → home');
+      nav.pushNamed(AppRoutes.clientHome);
+    });
   }
 
   static void _handleNavigationFromPayload(String? payload) {

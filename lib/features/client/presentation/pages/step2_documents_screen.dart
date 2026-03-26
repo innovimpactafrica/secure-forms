@@ -10,6 +10,7 @@ import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
 import 'package:secure_link/features/client/data/models/profile_model.dart';
+import 'package:secure_link/features/client/data/repositories/profile_document_repository.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
@@ -395,6 +396,7 @@ class _DocumentsGrid extends StatelessWidget {
       showModalBottomSheet(
         context: context,
         backgroundColor: AppColors.white,
+        useSafeArea: true, // ✅ protège du navbar
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
@@ -413,6 +415,7 @@ class _DocumentsGrid extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.white,
+      useSafeArea: true, // ✅ protège du navbar
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -472,7 +475,6 @@ class _DocumentCard extends StatelessWidget {
   String _formatDate(String? date) {
     if (date == null || date.isEmpty) return '';
     try {
-      // Format API: jj/mm/aaaa ou ISO
       if (date.contains('/')) return date;
       final parsed = DateTime.tryParse(date);
       if (parsed == null) return date;
@@ -728,8 +730,9 @@ class _DocumentOptionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 32 + bottomPadding), // ✅ espace au-dessus du navbar
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -770,6 +773,7 @@ class _DocumentOptionsSheet extends StatelessWidget {
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: AppColors.white,
+                  useSafeArea: true, // ✅ protège du navbar
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   ),
@@ -813,6 +817,7 @@ class _DocumentOptionsSheet extends StatelessWidget {
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: AppColors.white,
+                  useSafeArea: true, // ✅ protège du navbar
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   ),
@@ -874,16 +879,19 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
   Uint8List? _bytes;
   bool _loading = true;
   String? _error;
+  late final ProfileDocumentRepository _repo;
 
   @override
   void initState() {
     super.initState();
+    // Capturer le repository avant tout appel async pour éviter l'écran rouge
+    _repo = context.read<ProfileBloc>().repository;
     _loadFile();
   }
 
   Future<void> _loadFile() async {
     try {
-      final bytes = await context.read<ProfileBloc>().repository.getDocumentFile(
+      final bytes = await _repo.getDocumentFile(
             token: UserSession.instance.accessToken,
             documentId: widget.existing.id,
           );
@@ -900,7 +908,6 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
 
   bool get _isPdf {
     if (_bytes == null || _bytes!.length < 4) return false;
-    // Signature PDF : %PDF
     return _bytes![0] == 0x25 && _bytes![1] == 0x50 &&
            _bytes![2] == 0x44 && _bytes![3] == 0x46;
   }
@@ -908,9 +915,10 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
   @override
   Widget build(BuildContext context) {
     final screenH = MediaQuery.of(context).size.height;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Container(
       height: screenH * 0.85,
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 24 + bottomPadding), // ✅ espace au-dessus du navbar
       child: Column(
         children: [
           // Handle
