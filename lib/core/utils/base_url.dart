@@ -1,10 +1,8 @@
 class BaseUrl {
   static const String _dev  = 'http://86.106.181.31:3002';
   static const String _prod = 'https://api.secure.innovimpactdev.cloud/api';
-
   
   static const String currentBaseUrl = _prod;
-
   // ========== AUTH ENDPOINTS ==========
   static const String registerStep1         = '$currentBaseUrl/auth/register/client/step1';
   static const String verifyRegistrationOtp = '$currentBaseUrl/auth/register/client/verify-otp';
@@ -13,16 +11,13 @@ class BaseUrl {
   static const String logout                = '$currentBaseUrl/auth/logout';
   static const String refreshToken          = '$currentBaseUrl/auth/refresh';
   static const String setupPassword         = '$currentBaseUrl/auth/setup-password';
-
   // ========== USER ENDPOINTS ==========
   static const String getUserProfile = '$currentBaseUrl/auth/profile';
   static const String updateProfile  = '$currentBaseUrl/user/update';
-
   // ========== KYC - IDENTITY DOCUMENTS ==========
   static const String identityDocuments = '$currentBaseUrl/users/profile/identity-documents';
   static String identityDocumentFile(String documentId) =>
       '$currentBaseUrl/users/profile/identity-documents/$documentId/file';
-
   // ========== PROFILE DOCUMENTS ==========
   static const String profileDocumentTypes = '$currentBaseUrl/users/profile/document-types';
   static const String profileCompletion    = '$currentBaseUrl/users/profile/completion';
@@ -33,7 +28,6 @@ class BaseUrl {
       '$currentBaseUrl/users/profile/documents/$documentId';
   static const String updateUserProfile = '$currentBaseUrl/users/me/profile';
   static const String getProfilePicture = '$currentBaseUrl/users/me/profile-picture';
-
   // ========== CLIENT ENDPOINTS ==========
   static const String getClientDemandes  = '$currentBaseUrl/client/demandes';
   static const String createDemande      = '$currentBaseUrl/client/demandes/create';
@@ -43,23 +37,21 @@ class BaseUrl {
   static const String getBanques         = '$currentBaseUrl/client/banques';
   static const String getArchives        = '$currentBaseUrl/clients/archives';
   static const String getNotifications   = '$currentBaseUrl/clients/notifications';
-
+  // ========== FCM ENDPOINTS ==========  👈 NOUVEAU
+  static const String registerFcmToken   = '$currentBaseUrl/clients/fcm-token';
   // ========== DEMANDES ENDPOINTS ==========
   static const String recentRequests   = '$currentBaseUrl/clients/recent-requests';
   static const String requests         = '$currentBaseUrl/requests';
   static String requestById(String id) => '$currentBaseUrl/requests/$id';
   static String draftById(String id)   => '$currentBaseUrl/requests/draft/$id';
   static String requestPdf(String id)  => '$currentBaseUrl/requests/$id/pdf';
-
   // ========== HOME ENDPOINTS ==========
   static const String getHomeData       = '$currentBaseUrl/home';
   static const String clientStatistics  = '$currentBaseUrl/clients/statistics';
-
   static String buildUrl(String endpoint, {Map<String, dynamic>? params}) {
     if (params == null || params.isEmpty) return endpoint;
     final queryString = params.entries.map((e) => '${e.key}=${e.value}').join('&');
     return '$endpoint?$queryString';
   }
-
   static String buildUrlWithId(String endpoint, String id) => '$endpoint/$id';
 }

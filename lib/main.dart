@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:app_links/app_links.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:secure_link/features/home/domain/bloc/home_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
@@ -9,6 +11,8 @@ import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_b
 import 'package:secure_link/features/auth/presentation/pages/login_screen.dart';
 import 'package:secure_link/features/auth/presentation/pages/create_password_screen.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
+import 'package:secure_link/core/services/fcm_service.dart';
+import 'package:secure_link/core/utils/navigator_key.dart'; // 👈 NOUVEAU
 import 'features/splash/presentation/pages/splash_screen.dart';
 import 'features/auth/presentation/pages/welcome_screen.dart';
 import 'features/auth/presentation/pages/otp_verification_screen.dart';
@@ -32,12 +36,27 @@ import 'features/client/presentation/pages/client_profil_screen.dart';
 import 'features/client/presentation/pages/detail_demande/detail_ouverture_compte_continuer_screen.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/features/kyc/presentation/pages/kyc_gate_page.dart';
+import 'firebase_options.dart';
 
-
+// Handler background OBLIGATOIREMENT top-level
+@pragma('vm:entry-point')
+Future<void> firebaseBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('[FCM] Message background: ${message.messageId}');
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Enregistrer le handler background
+  FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
+
+  // Initialiser FCM
+  await FcmService.initialize();
 
   runApp(
     EasyLocalization(
@@ -57,67 +76,84 @@ class SecureLinkApp extends StatefulWidget {
 }
 
 class _SecureLinkAppState extends State<SecureLinkApp> {
-  final _navigatorKey = GlobalKey<NavigatorState>();
+  // ✅ SUPPRIMÉ : _navigatorKey local — on utilise le global de navigator_key.dart
   late final AppLinks _appLinks;
 
   @override
   void initState() {
     super.initState();
     _initDeepLinks();
+    // Vérifier si app lancée depuis une notification
+    FcmService.checkInitialMessage();
   }
 
   Future<void> _initDeepLinks() async {
-  _appLinks = AppLinks();
+    _appLinks = AppLinks();
 
-  // Cas 1 : app en arrière-plan
-  _appLinks.uriLinkStream.listen((uri) {
-    _handleDeepLink(uri);
-  });
+    // Cas 1 : app en arrière-plan
+    _appLinks.uriLinkStream.listen((uri) {
+      _handleDeepLink(uri);
+    });
 
-  // Cas 2 : app fermée
-  final initialUri = await _appLinks.getInitialLink();
-  if (initialUri != null) {
-    // Délai augmenté pour laisser le navigator se monter
-    await Future.delayed(const Duration(milliseconds: 800));
-    _handleDeepLink(initialUri);
-  }
-}
-
-void _handleDeepLink(Uri uri) {
-  debugPrint('=== DEEP LINK RECU ===');
-  debugPrint('scheme: ${uri.scheme}');
-  debugPrint('host: ${uri.host}');
-  debugPrint('path: ${uri.path}');
-  debugPrint('query: ${uri.queryParameters}');
-  debugPrint('======================');
-
-  if (uri.host == 'secure.innovimpactdev.cloud') {
-
-    if (uri.path.contains('/mobile/login')) {
-      _navigateWhenReady(() {
-        _navigatorKey.currentState?.pushNamedAndRemoveUntil(
-          AppRoutes.login,
-          (route) => false,
-        );
-      });
+    // Cas 2 : app fermée
+    final initialUri = await _appLinks.getInitialLink();
+    if (initialUri != null) {
+      await Future.delayed(const Duration(milliseconds: 800));
+      _handleDeepLink(initialUri);
     }
+  }
 
-    else if (uri.path.contains('setup-password')) {
-      final token = uri.queryParameters['token'] ?? '';
-      if (token.isNotEmpty) {
+  void _handleDeepLink(Uri uri) {
+    debugPrint('=== DEEP LINK RECU ===');
+    debugPrint('scheme: ${uri.scheme}');
+    debugPrint('host: ${uri.host}');
+    debugPrint('path: ${uri.path}');
+    debugPrint('query: ${uri.queryParameters}');
+    debugPrint('======================');
+
+    if (uri.host == 'secure.innovimpactdev.cloud') {
+
+      if (uri.path.contains('/mobile/login')) {
         _navigateWhenReady(() {
-          _navigatorKey.currentState?.pushNamed(
-            AppRoutes.createPassword,
-            arguments: token,
+          navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            AppRoutes.login,
+            (route) => false,
+          );
+        });
+      }
+
+      else if (uri.path.contains('setup-password')) {
+        final token = uri.queryParameters['token'] ?? '';
+        if (token.isNotEmpty) {
+          _navigateWhenReady(() {
+            navigatorKey.currentState?.pushNamed(
+              AppRoutes.createPassword,
+              arguments: token,
+            );
+          });
+        }
+      }
+
+      else if (uri.path.contains('/kyc')) {
+        final jwt = uri.queryParameters['jwt'] ?? '';
+        _navigateWhenReady(() {
+          navigatorKey.currentState?.pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => KycGatePage(
+                fromDeepLink: true,
+                jwt: jwt,
+              ),
+            ),
+            (route) => false,
           );
         });
       }
     }
 
-    else if (uri.path.contains('/kyc')) {
+    else if (uri.scheme == 'secureforms' && uri.host == 'kyc') {
       final jwt = uri.queryParameters['jwt'] ?? '';
       _navigateWhenReady(() {
-        _navigatorKey.currentState?.pushAndRemoveUntil(
+        navigatorKey.currentState?.pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (_) => KycGatePage(
               fromDeepLink: true,
@@ -130,31 +166,15 @@ void _handleDeepLink(Uri uri) {
     }
   }
 
-  else if (uri.scheme == 'secureforms' && uri.host == 'kyc') {
-    final jwt = uri.queryParameters['jwt'] ?? '';
-    _navigateWhenReady(() {
-      _navigatorKey.currentState?.pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (_) => KycGatePage(
-            fromDeepLink: true,
-            jwt: jwt,
-          ),
-        ),
-        (route) => false,
-      );
-    });
-  }
-}
-
-void _navigateWhenReady(VoidCallback action) {
-  if (_navigatorKey.currentState != null) {
-    action();
-  } else {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  void _navigateWhenReady(VoidCallback action) {
+    if (navigatorKey.currentState != null) {
       action();
-    });
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        action();
+      });
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +188,7 @@ void _navigateWhenReady(VoidCallback action) {
       ],
       child: MaterialApp(
         title: 'Secure Link',
-        navigatorKey: _navigatorKey,
+        navigatorKey: navigatorKey, // ✅ utilise le global key
         debugShowCheckedModeBanner: false,
         localizationsDelegates: context.localizationDelegates,
         supportedLocales: context.supportedLocales,

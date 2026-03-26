@@ -390,6 +390,25 @@ class _DocumentsGrid extends StatelessWidget {
     DocumentTypeModel docType,
     UploadedDocumentModel? existing,
   ) {
+    if (existing != null) {
+      // Document déjà uploadé → afficher les options Visualiser / Modifier
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: AppColors.white,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (_) => BlocProvider.value(
+          value: context.read<ProfileBloc>(),
+          child: _DocumentOptionsSheet(
+            documentType: docType,
+            existing: existing,
+          ),
+        ),
+      );
+      return;
+    }
+    // Pas encore uploadé → ouvrir directement le modal d'ajout
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -690,6 +709,335 @@ class _DocumentImageState extends State<_DocumentImage> {
           size: 36,
           color: AppColors.primary,
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// OPTIONS SHEET — Visualiser / Modifier
+// ─────────────────────────────────────────────────────────────────
+class _DocumentOptionsSheet extends StatelessWidget {
+  final DocumentTypeModel documentType;
+  final UploadedDocumentModel existing;
+
+  const _DocumentOptionsSheet({
+    required this.documentType,
+    required this.existing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              width: AppConstants.modalHandleWidth,
+              height: AppConstants.modalHandleHeight,
+              decoration: BoxDecoration(
+                color: AppColors.modalHandle,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Titre
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              documentType.title,
+              style: TextStyle(
+                fontFamily: AppConstants.fontFamilySofiaSans,
+                fontWeight: FontWeight.w700,
+                fontSize: AppConstants.fontSizeXXLarge,
+                color: AppColors.textDark,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Bouton Visualiser
+          SizedBox(
+            width: double.infinity,
+            height: AppConstants.logoutButtonHeight,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: AppColors.white,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  builder: (_) => BlocProvider.value(
+                    value: context.read<ProfileBloc>(),
+                    child: _DocumentViewerSheet(
+                      documentType: documentType,
+                      existing: existing,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.visibility_outlined, size: 18),
+              label: Text(
+                'Visualiser',
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontWeight: FontWeight.w600,
+                  fontSize: AppConstants.fontSizeLarge,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryDark,
+                foregroundColor: AppColors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Bouton Modifier
+          SizedBox(
+            width: double.infinity,
+            height: AppConstants.logoutButtonHeight,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: AppColors.white,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  builder: (_) => BlocProvider.value(
+                    value: context.read<ProfileBloc>(),
+                    child: documentType.isForIdentityVerification
+                        ? DocumentUploadModal(
+                            documentType: documentType,
+                            existingDocument: existing,
+                          )
+                        : DocumentSimpleUploadModal(
+                            documentType: documentType,
+                            existingDocument: existing,
+                          ),
+                  ),
+                );
+              },
+              icon: Icon(Icons.edit_outlined, size: 18, color: AppColors.primaryDark),
+              label: Text(
+                'Modifier',
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontWeight: FontWeight.w600,
+                  fontSize: AppConstants.fontSizeLarge,
+                  color: AppColors.primaryDark,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: AppColors.primaryDark),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// VIEWER SHEET — Affiche le document en intégralité
+// ─────────────────────────────────────────────────────────────────
+class _DocumentViewerSheet extends StatefulWidget {
+  final DocumentTypeModel documentType;
+  final UploadedDocumentModel existing;
+
+  const _DocumentViewerSheet({
+    required this.documentType,
+    required this.existing,
+  });
+
+  @override
+  State<_DocumentViewerSheet> createState() => _DocumentViewerSheetState();
+}
+
+class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
+  Uint8List? _bytes;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFile();
+  }
+
+  Future<void> _loadFile() async {
+    try {
+      final bytes = await context.read<ProfileBloc>().repository.getDocumentFile(
+            token: UserSession.instance.accessToken,
+            documentId: widget.existing.id,
+          );
+      if (mounted) {
+        setState(() {
+          _bytes = Uint8List.fromList(bytes);
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() { _loading = false; _error = e.toString(); });
+    }
+  }
+
+  bool get _isPdf {
+    if (_bytes == null || _bytes!.length < 4) return false;
+    // Signature PDF : %PDF
+    return _bytes![0] == 0x25 && _bytes![1] == 0x50 &&
+           _bytes![2] == 0x44 && _bytes![3] == 0x46;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenH = MediaQuery.of(context).size.height;
+    return Container(
+      height: screenH * 0.85,
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      child: Column(
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              width: AppConstants.modalHandleWidth,
+              height: AppConstants.modalHandleHeight,
+              decoration: BoxDecoration(
+                color: AppColors.modalHandle,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                widget.documentType.title,
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontWeight: FontWeight.w700,
+                  fontSize: AppConstants.fontSizeXXLarge,
+                  color: AppColors.textDark,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Icon(Icons.close, color: AppColors.textSecondary, size: AppConstants.iconSizeLarge),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Contenu
+          Expanded(
+            child: _loading
+                ? Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(AppColors.primaryDark),
+                    ),
+                  )
+                : _error != null
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.error_outline, color: AppColors.statusRejected, size: 48),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Impossible de charger le document',
+                              style: TextStyle(
+                                fontFamily: AppConstants.fontFamilyInter,
+                                color: AppColors.textSecondary,
+                                fontSize: AppConstants.fontSizeMedium,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _bytes != null
+                        ? _isPdf
+                            ? Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.picture_as_pdf,
+                                        size: 80, color: AppColors.statusRejected),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      widget.documentType.title,
+                                      style: TextStyle(
+                                        fontFamily: AppConstants.fontFamilySofiaSans,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: AppConstants.fontSizeLarge,
+                                        color: AppColors.textDark,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Document PDF • ${(_bytes!.length / 1024).toStringAsFixed(1)} KB',
+                                      style: TextStyle(
+                                        fontFamily: AppConstants.fontFamilyInter,
+                                        fontSize: AppConstants.fontSizeMedium,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Téléchargé avec succès ✓',
+                                      style: TextStyle(
+                                        fontFamily: AppConstants.fontFamilyInter,
+                                        fontSize: AppConstants.fontSizeRegular,
+                                        color: AppColors.statusValideGreen,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                                child: InteractiveViewer(
+                                  minScale: 0.5,
+                                  maxScale: 4.0,
+                                  child: Image.memory(
+                                    _bytes!,
+                                    fit: BoxFit.contain,
+                                    width: double.infinity,
+                                    errorBuilder: (_, __, ___) => Center(
+                                      child: Icon(
+                                        Icons.insert_drive_file_outlined,
+                                        size: 80,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              )
+                        : Center(
+                            child: Icon(
+                              Icons.insert_drive_file_outlined,
+                              size: 80,
+                              color: AppColors.primary,
+                            ),
+                          ),
+          ),
+        ],
       ),
     );
   }

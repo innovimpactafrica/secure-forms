@@ -14,6 +14,8 @@ import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
 import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/notifications_event.dart';
 import 'package:secure_link/features/auth/presentation/pages/register_screen.dart';
+import 'package:secure_link/core/services/fcm_service.dart'; // 👈 NOUVEAU
+import 'package:firebase_messaging/firebase_messaging.dart'; // 👈 NOUVEAU
 import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
@@ -56,7 +58,6 @@ class _LoginScreenState extends State<LoginScreen> {
             UserSession.instance.accessToken = state.accessToken;
             UserSession.instance.refreshToken = state.refreshToken;
             UserSession.instance.userId = _extractUserIdFromJwt(state.accessToken);
-            // ignore: avoid_print
             print('[LoginScreen] Login réussi → token stocké (longueur: ${state.accessToken.length})');
             // Persister la session
             SessionStorage.instance.save(
@@ -68,6 +69,10 @@ class _LoginScreenState extends State<LoginScreen> {
             context.read<UserBloc>().add(LoadUserProfile(state.accessToken));
             context.read<UserBloc>().add(LoadProfilePictureEvent(state.accessToken));
             context.read<NotificationsBloc>().add(const LoadNotificationsEvent());
+
+            // 👇 NOUVEAU — Envoyer le token FCM au backend après login
+            _sendFcmTokenAfterLogin();
+
             Navigator.of(context).pushNamedAndRemoveUntil(
               AppRoutes.clientHome,
               (route) => false,
@@ -304,6 +309,18 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // 👇 NOUVEAU — Récupère le token FCM et l'envoie au backend
+  Future<void> _sendFcmTokenAfterLogin() async {
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        await FcmService.sendTokenToBackend(fcmToken);
+      }
+    } catch (e) {
+      print('[LoginScreen] Erreur envoi token FCM: $e');
+    }
+  }
+
   InputDecoration _inputDecoration({
     required String hint,
     required IconData prefixIcon,
@@ -380,7 +397,6 @@ String _extractUserIdFromJwt(String token) {
 }
 
 /// Utilisé uniquement depuis le deep link KYC.
-/// Même UI que LoginScreen, mais après login → callback au lieu de clientHome.
 class LoginScreenDeepLink extends StatefulWidget {
   final VoidCallback onLoginSuccess;
   const LoginScreenDeepLink({super.key, required this.onLoginSuccess});
@@ -410,6 +426,18 @@ class _LoginScreenDeepLinkState extends State<LoginScreenDeepLink> {
         ));
   }
 
+  // 👇 NOUVEAU — Même logique que LoginScreen
+  Future<void> _sendFcmTokenAfterLogin() async {
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        await FcmService.sendTokenToBackend(fcmToken);
+      }
+    } catch (e) {
+      print('[LoginScreenDeepLink] Erreur envoi token FCM: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -417,7 +445,6 @@ class _LoginScreenDeepLinkState extends State<LoginScreenDeepLink> {
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
-            // Même logique que LoginScreen
             UserSession.instance.accessToken = state.accessToken;
             UserSession.instance.refreshToken = state.refreshToken;
             UserSession.instance.userId =
@@ -431,7 +458,10 @@ class _LoginScreenDeepLinkState extends State<LoginScreenDeepLink> {
             context.read<UserBloc>().add(LoadProfilePictureEvent(state.accessToken));
             context.read<NotificationsBloc>().add(const LoadNotificationsEvent());
 
-            // ← Seule différence : callback au lieu de pushNamedAndRemoveUntil
+            // 👇 NOUVEAU — Envoyer le token FCM au backend après login
+            _sendFcmTokenAfterLogin();
+
+            // Seule différence : callback au lieu de pushNamedAndRemoveUntil
             widget.onLoginSuccess();
 
           } else if (state is AuthFailure) {

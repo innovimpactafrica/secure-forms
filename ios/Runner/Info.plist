@@ -64,5 +64,17 @@
         </array>
     </dict>
 </array>
+
+<!-- Background modes pour les notifications push iOS -->
+<key>UIBackgroundModes</key>
+<array>
+    <string>fetch</string>
+    <string>remote-notification</string>
+</array>
+
+<!-- Message affiché lors de la demande de permission -->
+<key>NSUserNotificationUsageDescription</key>
+<string>Nous vous envoyons des notifications pour vous tenir informé</string>
+
 </dict>
 </plist>

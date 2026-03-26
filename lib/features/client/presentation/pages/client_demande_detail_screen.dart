@@ -1,7 +1,10 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:http/http.dart' as http;
 import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/base_url.dart';
 import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/client/data/models/demande_model.dart';
@@ -324,65 +327,80 @@ class _ClientDemandeDetailScreenState
           return Column(
             children: [
               if (i > 0) const Divider(height: 1, color: AppColors.borderDivider),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: AppColors.gray,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Center(
-                        child: SvgPicture.asset(
-                          'assets/icons/earmark-text.svg',
-                          width: 22,
-                          height: 22,
-                          colorFilter: const ColorFilter.mode(
-                              AppColors.textSecondary, BlendMode.srcIn),
+              InkWell(
+                onTap: f.pdfUrl.isNotEmpty
+                    ? () => _openViewer(
+                          context,
+                          label: f.label.isNotEmpty ? f.label : f.fileName,
+                          url: f.pdfUrl,
+                          useToken: false,
+                        )
+                    : null,
+                borderRadius: BorderRadius.circular(14),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: AppColors.gray,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: SvgPicture.asset(
+                            'assets/icons/earmark-text.svg',
+                            width: 22,
+                            height: 22,
+                            colorFilter: const ColorFilter.mode(
+                                AppColors.textSecondary, BlendMode.srcIn),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            f.label.isNotEmpty ? f.label : f.fileName,
-                            style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textDark),
-                          ),
-                          if (!isGeneric) ...[
-                            const SizedBox(height: 2),
-                            Text(sub,
-                                style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              f.label.isNotEmpty ? f.label : f.fileName,
+                              style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textDark),
+                            ),
+                            if (!isGeneric) ...[
+                              const SizedBox(height: 2),
+                              Text(sub,
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textSecondary)),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: AppColors.statusValidated.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        '● ${'demande_detail.complete'.tr()}',
-                        style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.statusValidated),
-                      ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      if (f.pdfUrl.isNotEmpty)
+                        const Icon(Icons.visibility_outlined,
+                            size: 18, color: AppColors.primary)
+                      else
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: AppColors.statusValidated.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '● ${'demande_detail.complete'.tr()}',
+                            style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.statusValidated),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -408,62 +426,71 @@ class _ClientDemandeDetailScreenState
         children: d.requiredDocuments.asMap().entries.map((entry) {
           final i = entry.key;
           final doc = entry.value;
+          final docUrl = BaseUrl.profileDocumentFile(doc.id);
           return Column(
             children: [
               if (i > 0) const Divider(height: 1, color: AppColors.borderDivider),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: AppColors.gray,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Center(
-                        child: SvgPicture.asset(
-                          'assets/icons/earmark-text.svg',
-                          width: 22,
-                          height: 22,
-                          colorFilter: const ColorFilter.mode(
-                              AppColors.textSecondary, BlendMode.srcIn),
+              InkWell(
+                onTap: doc.id.isNotEmpty
+                    ? () => _openViewer(context, label: doc.label, url: docUrl, useToken: true)
+                    : null,
+                borderRadius: BorderRadius.circular(14),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: AppColors.gray,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: SvgPicture.asset(
+                            'assets/icons/earmark-text.svg',
+                            width: 22,
+                            height: 22,
+                            colorFilter: const ColorFilter.mode(
+                                AppColors.textSecondary, BlendMode.srcIn),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        doc.label,
-                        style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textDark),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          doc.label,
+                          style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textDark),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: AppColors.statusValidated.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        'demande_detail.verified'.tr(),
-                        style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.statusValidated),
-                      ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      const Icon(Icons.visibility_outlined,
+                          size: 18, color: AppColors.primary),
+                    ],
+                  ),
                 ),
               ),
             ],
           );
         }).toList(),
       ),
+    );
+  }
+
+  // ── Ouvrir le viewer ──────────────────────────────────────────────────────
+
+  void _openViewer(BuildContext context, {required String label, required String url, required bool useToken}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _DocumentViewerSheet(label: label, url: url, useToken: useToken),
     );
   }
 
@@ -629,6 +656,182 @@ class _HeaderBadge extends StatelessWidget {
       child: Text(label,
           style: TextStyle(
               fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Viewer de document (image ou PDF via URL)
+// ---------------------------------------------------------------------------
+
+class _DocumentViewerSheet extends StatefulWidget {
+  final String label;
+  final String url;
+  final bool useToken;
+
+  const _DocumentViewerSheet({
+    required this.label,
+    required this.url,
+    required this.useToken,
+  });
+
+  @override
+  State<_DocumentViewerSheet> createState() => _DocumentViewerSheetState();
+}
+
+class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
+  Uint8List? _bytes;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFile();
+  }
+
+  Future<void> _loadFile() async {
+    try {
+      final token = UserSession.instance.accessToken;
+      final headers = widget.useToken
+          ? {'Authorization': 'Bearer $token', 'Accept': '*/*'}
+          : <String, String>{};
+      // ignore: avoid_print
+      print('[DocumentViewer] GET ${widget.url} useToken=${widget.useToken}');
+      final response = await http.get(Uri.parse(widget.url), headers: headers);
+      // ignore: avoid_print
+      print('[DocumentViewer] status=${response.statusCode} contentType=${response.headers['content-type']} size=${response.bodyBytes.length}');
+      if (response.statusCode == 200) {
+        if (mounted) setState(() { _bytes = response.bodyBytes; _loading = false; });
+      } else {
+        if (mounted) setState(() { _loading = false; _error = 'Erreur ${response.statusCode}'; });
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('[DocumentViewer] ERROR: $e');
+      if (mounted) setState(() { _loading = false; _error = e.toString(); });
+    }
+  }
+
+  bool get _isPdf {
+    if (_bytes == null || _bytes!.length < 4) return false;
+    return _bytes![0] == 0x25 && _bytes![1] == 0x50 &&
+           _bytes![2] == 0x44 && _bytes![3] == 0x46;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenH = MediaQuery.of(context).size.height;
+    return Container(
+      height: screenH * 0.85,
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      child: Column(
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.borderGray,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.label,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textDark),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: const Icon(Icons.close, color: AppColors.textSecondary, size: 24),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                : _error != null
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.error_outline,
+                                color: AppColors.statusRejected, size: 48),
+                            const SizedBox(height: 12),
+                            Text(_error!,
+                                style: const TextStyle(
+                                    color: AppColors.textSecondary, fontSize: 14)),
+                          ],
+                        ),
+                      )
+                    : _bytes != null
+                        ? _isPdf
+                            ? Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.picture_as_pdf,
+                                        size: 80, color: AppColors.statusRejected),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      widget.label,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                        color: AppColors.textDark,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Document PDF • ${(_bytes!.length / 1024).toStringAsFixed(1)} KB',
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          color: AppColors.textSecondary),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    const Text(
+                                      'Téléchargé avec succès ✓',
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          color: AppColors.statusValideGreen),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: InteractiveViewer(
+                                  minScale: 0.5,
+                                  maxScale: 4.0,
+                                  child: Image.memory(
+                                    _bytes!,
+                                    fit: BoxFit.contain,
+                                    width: double.infinity,
+                                    errorBuilder: (_, __, ___) => const Center(
+                                      child: Icon(Icons.insert_drive_file_outlined,
+                                          size: 80, color: AppColors.primary),
+                                    ),
+                                  ),
+                                ),
+                              )
+                        : const Center(
+                            child: Icon(Icons.insert_drive_file_outlined,
+                                size: 80, color: AppColors.primary),
+                          ),
+          ),
+        ],
+      ),
     );
   }
 }

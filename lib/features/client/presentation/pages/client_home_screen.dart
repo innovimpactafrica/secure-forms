@@ -312,7 +312,7 @@ class _WelcomeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -477,7 +477,7 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
           final percent = '$completion%';
 
           return Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -487,7 +487,7 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
                     fontFamily: AppConstants.fontFamilySofiaSans,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
-                    color: AppColors.progressFill,
+                    color: AppColors.primaryDark,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -506,7 +506,7 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
                       child: Container(
                         height: 7,
                         decoration: BoxDecoration(
-                          color: AppColors.primary,
+                          color: AppColors.progressFill,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -522,7 +522,7 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
                       fontFamily: AppConstants.fontFamilyInter,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
+                      color: AppColors.progressFill,
                     ),
                   ),
                 ),
@@ -739,8 +739,28 @@ class _StatCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────
 // SEARCH BAR
 // ─────────────────────────────────────────────────────────────────
-class _SearchBarSection extends StatelessWidget {
+class _SearchBarSection extends StatefulWidget {
   const _SearchBarSection();
+
+  @override
+  State<_SearchBarSection> createState() => _SearchBarSectionState();
+}
+
+class _SearchBarSectionState extends State<_SearchBarSection> {
+  final _controller = TextEditingController();
+
+  void _search(String value) {
+    context.read<DemandesBloc>().add(LoadRecentDemandesEvent(
+          limit: 5,
+          search: value.trim().isEmpty ? null : value.trim(),
+        ));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -759,29 +779,45 @@ class _SearchBarSection extends StatelessWidget {
             Icon(Icons.search, color: AppColors.greyShade500, size: 22),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                'home.search_placeholder'.tr(),
+              child: TextField(
+                controller: _controller,
+                onChanged: _search,
+                onSubmitted: _search,
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilyInter,
                   fontSize: AppConstants.fontSizeMedium,
-                  color: AppColors.greyShade500,
-                  fontWeight: FontWeight.w400,
+                  color: AppColors.textBlack87,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'home.search_placeholder'.tr(),
+                  hintStyle: TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    fontSize: AppConstants.fontSizeMedium,
+                    color: AppColors.greyShade500,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(6),
-              child: Container(
-                width: 38,
-                height: 38,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryDark,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_forward,
-                  color: AppColors.white,
-                  size: 18,
+            GestureDetector(
+              onTap: () => _search(_controller.text),
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryDark,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward,
+                    color: AppColors.white,
+                    size: 18,
+                  ),
                 ),
               ),
             ),
@@ -912,6 +948,9 @@ class _RecentDemandeCard extends StatelessWidget {
     final org = demande.organisationName;
     final date = demande.createdAt;
     final subtitle = [if (org.isNotEmpty) org, if (date.isNotEmpty) date].join(' • ');
+
+    // ignore: avoid_print
+    print('[RecentDemandeCard] id=${demande.id} | title="$title" | subtitle="$subtitle" | formType="${demande.formType}" | requestNumber="${demande.requestNumber}" | org="$org" | date="$date"');
 
     return GestureDetector(
       onTap: () => Navigator.of(context).pushNamed(

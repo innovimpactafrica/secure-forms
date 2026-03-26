@@ -64,6 +64,11 @@ class DemandeModel {
     final form = json['form'] as Map<String, dynamic>?;
     final submitted = json['submittedForm'] as Map<String, dynamic>?;
 
+    // ignore: avoid_print
+    print('[DemandeModel.fromJson] keys=${json.keys.toList()}');
+    // ignore: avoid_print
+    print('[DemandeModel.fromJson] formName=${json["formName"]} | formType=${json["formType"]} | form=$form | organisationName=${json["organisationName"]} | organisation=$org | createdAt=${json["createdAt"]}');
+
     final submittedFormsList = (json['submittedForms'] as List?)?.map(
       (e) => SubmittedFormItem.fromJson(e as Map<String, dynamic>),
     ).toList() ?? [];
@@ -79,11 +84,16 @@ class DemandeModel {
       formType: (json['formName']?.toString()?.isNotEmpty == true ? json['formName'].toString() : null) ??
           (form?['name']?.toString()?.isNotEmpty == true ? form!['name'].toString() : null) ??
           (json['formType']?.toString()?.isNotEmpty == true ? json['formType'].toString() : null) ??
+          (json['type']?.toString()?.isNotEmpty == true ? json['type'].toString() : null) ??
           '',
       organisationName: (json['organisationName']?.toString()?.isNotEmpty == true ? json['organisationName'].toString() : null) ??
-          org?['name']?.toString() ?? '',
+          org?['name']?.toString() ??
+          (json['institution']?.toString()?.isNotEmpty == true ? json['institution'].toString() : null) ??
+          '',
       category: org?['sector']?.toString() ?? json['category']?.toString() ?? '',
-      createdAt: _parseDate(json['createdAt']?.toString() ?? ''),
+      createdAt: _parseDate(
+        (json['createdAt'] ?? json['date'])?.toString() ?? '',
+      ),
       isDraft: json['status']?.toString() == 'BROUILLON',
       pdfUrl: submitted?['pdfUrl']?.toString() ?? json['pdfUrl']?.toString(),
       submittedForms: submittedFormsList,

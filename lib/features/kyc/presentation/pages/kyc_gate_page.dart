@@ -6,6 +6,8 @@ import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'package:secure_link/features/kyc/presentation/pages/kyc_intro_page.dart';
 import 'package:secure_link/features/auth/presentation/pages/login_screen.dart';
+import 'dart:convert';
+import 'package:secure_link/core/utils/session_storage.dart';
 
 class KycGatePage extends StatefulWidget {
   final bool fromDeepLink;
@@ -38,14 +40,34 @@ class _KycGatePageState extends State<KycGatePage> {
   }
 
   void _handleDeepLinkRoute() {
-  final isLoggedIn = UserSession.instance.accessToken.isNotEmpty;
-  debugPrint('[KycGatePage] fromDeepLink=true isLoggedIn=$isLoggedIn');
-  
-  if (isLoggedIn) {
-    _goToKyc();
-  } else {
-    _goToLoginThenKyc();
+  final deepLinkJwt = widget.jwt;
+  final mobileUserId = UserSession.instance.userId;
+  final deepLinkUserId = deepLinkJwt.isNotEmpty
+      ? _extractUserIdFromJwt(deepLinkJwt)
+      : '';
+
+  debugPrint('[KycGatePage] mobileUserId=$mobileUserId deepLinkUserId=$deepLinkUserId');
+
+  // Pas de JWT → comportement normal
+  if (deepLinkJwt.isEmpty) {
+    if (UserSession.instance.accessToken.isNotEmpty) {
+      _goToKyc();
+    } else {
+      _goToLoginThenKyc();
+    }
+    return;
   }
+
+  // Même utilisateur web et mobile → KYC direct
+  if (mobileUserId.isNotEmpty && mobileUserId == deepLinkUserId) {
+    debugPrint('[KycGatePage] Même utilisateur → KYC direct');
+    _goToKyc();
+    return;
+  }
+
+  // Utilisateur différent OU non connecté → déconnexion + login
+  debugPrint('[KycGatePage] Utilisateur différent → déconnexion + login');
+  _logoutAndGoToLogin(deepLinkJwt);
 }
 
 void _goToKyc() {
@@ -86,6 +108,68 @@ void _goToLoginThenKyc() {
   );
 }
 
+void _logoutAndGoToLogin(String deepLinkJwt) {
+  UserSession.instance.clear();
+  SessionStorage.instance.clear();
+
+  Navigator.of(context).pushAndRemoveUntil(
+    MaterialPageRoute(
+      builder: (newContext) => LoginScreenDeepLink(
+        onLoginSuccess: () {
+          final loggedUserId = UserSession.instance.userId;
+          final expectedUserId = _extractUserIdFromJwt(deepLinkJwt);
+
+          debugPrint('[KycGatePage] loggedUserId=$loggedUserId expectedUserId=$expectedUserId');
+
+          if (loggedUserId == expectedUserId) {
+            // Bon utilisateur → KYC en utilisant le context du LoginScreen
+            final userId = UserSession.instance.userId;
+            Navigator.of(newContext).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => BlocProvider(
+                  create: (_) => KycBloc(userId: userId),
+                  child: const KycIntroPage(),
+                ),
+              ),
+              (route) => false,
+            );
+          } else {
+            ScaffoldMessenger.of(newContext).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Connectez-vous avec le compte utilisé sur le web.',
+                ),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 4),
+              ),
+            );
+            // Re-login avec le bon context
+            Navigator.of(newContext).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => LoginScreenDeepLink(
+                  onLoginSuccess: () {
+                    final userId = UserSession.instance.userId;
+                    Navigator.of(newContext).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider(
+                          create: (_) => KycBloc(userId: userId),
+                          child: const KycIntroPage(),
+                        ),
+                      ),
+                      (route) => false,
+                    );
+                  },
+                ),
+              ),
+              (route) => false,
+            );
+          }
+        },
+      ),
+    ),
+    (route) => false,
+  );
+}
  
 
   @override
@@ -173,68 +257,16 @@ void _goToLoginThenKyc() {
   }
 }
 
-/*
-class _LoginBridgeScreen extends StatelessWidget {
-  final void Function(String userId) onLoginSuccess;
-
-  const _LoginBridgeScreen({required this.onLoginSuccess});
-
-  @override
-  Widget build(BuildContext context) {
-    // On écoute le UserSession après login pour récupérer le userId
-    return _LoginScreenWrapper(onLoginSuccess: onLoginSuccess);
+String _extractUserIdFromJwt(String token) {
+  try {
+    final parts = token.split('.');
+    if (parts.length != 3) return '';
+    final normalized = base64Url.normalize(parts[1]);
+    final decoded = utf8.decode(base64Url.decode(normalized));
+    final map = jsonDecode(decoded) as Map<String, dynamic>;
+    return map['sub']?.toString() ?? '';
+  } catch (_) {
+    return '';
   }
 }
 
-class _LoginScreenWrapper extends StatefulWidget {
-  final void Function(String userId) onLoginSuccess;
-  const _LoginScreenWrapper({required this.onLoginSuccess});
-
-  @override
-  State<_LoginScreenWrapper> createState() => _LoginScreenWrapperState();
-}
-
-class _LoginScreenWrapperState extends State<_LoginScreenWrapper> {
-  @override
-  Widget build(BuildContext context) {
-    // On utilise un NotificationListener sur le Navigator pour détecter
-    // quand LoginScreen a réussi et stocké le token dans UserSession
-    return _PostLoginDetector(
-      onLoginSuccess: widget.onLoginSuccess,
-    );
-  }
-}
-
-class _PostLoginDetector extends StatefulWidget {
-  final void Function(String userId) onLoginSuccess;
-  const _PostLoginDetector({required this.onLoginSuccess});
-
-  @override
-  State<_PostLoginDetector> createState() => _PostLoginDetectorState();
-}
-
-class _PostLoginDetectorState extends State<_PostLoginDetector>
-    with WidgetsBindingObserver {
-    @override
-     void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    }
-
-    @override
-    void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-    }
-
-     @override
-    void didChangeAppLifecycleState(AppLifecycleState state) {}
-
-     @override
-     Widget build(BuildContext context) {
-      return LoginScreenDeepLink(
-     onLoginSuccess: () => widget.onLoginSuccess(UserSession.instance.userId),
-     );
-     }
-   }
-   */

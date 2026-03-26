@@ -31,18 +31,25 @@ class DemandesService {
 
     final uri = Uri.parse(BaseUrl.recentRequests).replace(queryParameters: params);
     final response = await _client.get(uri, headers: _headers(accessToken));
-    debugPrint('[RecentRequests] status=${response.statusCode}');
+    // ignore: avoid_print
+    print('[RecentRequests] status=${response.statusCode}');
     if (response.statusCode == 200) {
       final decoded = jsonDecode(response.body);
+      // ignore: avoid_print
+      print('[RecentRequests] decoded type=${decoded.runtimeType}');
+      // ignore: avoid_print
+      print('[RecentRequests] raw body=${response.body.substring(0, response.body.length.clamp(0, 800))}');
       final List<dynamic> list = decoded is List
           ? decoded
           : (decoded['items'] ?? decoded['data'] ?? decoded['requests'] ?? []);
-      debugPrint('[RecentRequests] count=${list.length}');
+      // ignore: avoid_print
+      print('[RecentRequests] count=${list.length}');
       if (list.isNotEmpty) {
         final first = list.first as Map<String, dynamic>;
-        debugPrint('[RecentRequests] first keys=${first.keys.toList()}');
-        debugPrint('[RecentRequests] formName=${first["formName"]} formType=${first["formType"]} form=${first["form"]}');
-        debugPrint('[RecentRequests] organisationName=${first["organisationName"]} organisation=${first["organisation"]}');
+        // ignore: avoid_print
+        print('[RecentRequests] first keys=${first.keys.toList()}');
+        // ignore: avoid_print
+        print('[RecentRequests] first full=$first');
       }
       return list.map((e) => DemandeModel.fromJson(e as Map<String, dynamic>)).toList();
     }

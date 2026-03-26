@@ -37,8 +37,17 @@ class DemandesBloc extends Bloc<DemandesEvent, DemandesState> {
         category: event.category,
         search: event.search,
       );
+      // ignore: avoid_print
+      print('[RecentDemandes] count=${demandes.length}');
+      for (var i = 0; i < demandes.length; i++) {
+        final d = demandes[i];
+        // ignore: avoid_print
+        print('[RecentDemandes][$i] id=${d.id} | formType="${d.formType}" | requestNumber="${d.requestNumber}" | organisationName="${d.organisationName}" | createdAt="${d.createdAt}" | status="${d.status}"');
+      }
       emit(RecentDemandesLoaded(demandes));
     } catch (e) {
+      // ignore: avoid_print
+      print('[RecentDemandes] ERROR: $e');
       emit(DemandesError(e.toString().replaceAll('Exception: ', '')));
     }
   }
