@@ -254,6 +254,7 @@
     "all": "All",
     "draft": "Draft",
     "in_progress": "In progress",
+    "pending": "Pending",
     "validated": "Validated",
     "rejected": "Rejected",
     "no_demandes": "No request found",
