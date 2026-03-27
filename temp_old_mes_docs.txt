@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/base_url.dart';
@@ -15,7 +14,6 @@ import 'package:secure_link/features/client/data/repositories/profile_document_r
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
-import 'document_upload_modal.dart' show showPickerSource;
 import 'face_verification_screen.dart';
 
 /// Page "Mes documents" accessible depuis le profil.
@@ -132,21 +130,13 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                               textAlign: TextAlign.center,
                             ),
                           )
-                        : RefreshIndicator(
-                            color: AppColors.primaryDark,
-                            onRefresh: () async {
-                              setState(() { _isLoading = true; _error = null; });
-                              await _loadData();
-                            },
-                            child: SingleChildScrollView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                              child: _DocumentsGrid(
-                                documentTypes: _documentTypes,
-                                uploadedDocuments: _uploadedDocuments,
-                                localFileCache: _localFileCache,
-                                onFileSelected: _onFileSelected,
-                              ),
+                        : SingleChildScrollView(
+                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                            child: _DocumentsGrid(
+                              documentTypes: _documentTypes,
+                              uploadedDocuments: _uploadedDocuments,
+                              localFileCache: _localFileCache,
+                              onFileSelected: _onFileSelected,
                             ),
                           ),
               ),
@@ -618,8 +608,6 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
   final _deliveryDateController = TextEditingController();
   final _expiryDateController = TextEditingController();
   String? _uploadedFilePath;
-  String? _backFilePath;
-  bool _showBack = false;
   bool _isImage = false;
   late final ProfileBloc _bloc;
 
@@ -739,15 +727,51 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
     }
   }
 
-  Future<void> _pickFile({bool isBack = false}) async {
-    final path = await showPickerSource(context);
-    if (path == null || !mounted) return;
-    final ext = path.split('.').last.toLowerCase();
-    if (isBack) {
-      setState(() => _backFilePath = path);
-    } else {
-      setState(() { _uploadedFilePath = path; _isImage = ext != 'pdf'; });
-      widget.onFileSelected?.call(path);
+  Future<void> _pickFile() async {
+    final picker = ImagePicker();
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: AppColors.white,
+      useSafeArea: true, // ✅ protège du navbar pour la sélection photo/galerie
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            ListTile(
+              leading: Icon(Icons.photo_library_outlined, color: AppColors.primary),
+              title: Text('profile.gallery'.tr(),
+                  style: TextStyle(
+                      fontFamily: AppConstants.fontFamilyInter,
+                      color: AppColors.textDark,
+                      fontWeight: FontWeight.w500)),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+              title: Text('profile.take_photo'.tr(),
+                  style: TextStyle(
+                      fontFamily: AppConstants.fontFamilyInter,
+                      color: AppColors.textDark,
+                      fontWeight: FontWeight.w500)),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+    final XFile? picked = await picker.pickImage(source: source, imageQuality: 85);
+    if (picked != null && mounted) {
+      setState(() {
+        _uploadedFilePath = picked.path;
+        _isImage = true;
+      });
+      widget.onFileSelected?.call(picked.path);
     }
   }
 
@@ -798,7 +822,6 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
 
     _bloc.add(UploadProfileDocumentEvent(
       file: File(_uploadedFilePath!),
-      backFile: _backFilePath != null ? File(_backFilePath!) : null,
       documentTypeId: widget.documentType.id,
       issueDate: _deliveryDateController.text.isNotEmpty ? _deliveryDateController.text : null,
       expirationDate: _expiryDateController.text.isNotEmpty ? _expiryDateController.text : null,
@@ -936,85 +959,31 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
             // Zone upload (masquée si document validé)
             if (_canEditPhoto) ...[
               GestureDetector(
-                onTap: () => _pickFile(),
+                onTap: _pickFile,
                 child: Container(
                   width: double.infinity,
-                  height: 120,
+                  height: 140,
                   decoration: BoxDecoration(
                     color: AppColors.documentCardBackground,
                     borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                    border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3)),
                   ),
                   child: _uploadedFilePath != null && _isImage
                       ? ClipRRect(
-                          borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                          child: Image.file(File(_uploadedFilePath!), fit: BoxFit.cover, width: double.infinity,
-                              errorBuilder: (_, __, ___) => const _UploadPlaceholder(hasFile: true)))
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusSmall),
+                          child: Image.file(
+                            File(_uploadedFilePath!),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            errorBuilder: (_, __, ___) =>
+                                const _UploadPlaceholder(hasFile: true),
+                          ),
+                        )
                       : _UploadPlaceholder(hasFile: _uploadedFilePath != null),
                 ),
               ),
-              const SizedBox(height: 10),
-
-              // Bouton discret ou zone verso
-              if (!_showBack)
-                GestureDetector(
-                  onTap: () => setState(() => _showBack = true),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.add_circle_outline, size: 16, color: AppColors.primary),
-                      const SizedBox(width: 6),
-                      Text(
-                        'profile.add_back_document'.tr(),
-                        style: TextStyle(
-                          fontFamily: AppConstants.fontFamilyInter,
-                          fontSize: AppConstants.fontSizeRegular,
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else ...[
-                Row(
-                  children: [
-                    Text(
-                      'profile.back_document'.tr(),
-                      style: TextStyle(
-                        fontFamily: AppConstants.fontFamilyInter,
-                        fontSize: AppConstants.fontSizeRegular,
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: () => setState(() { _showBack = false; _backFilePath = null; }),
-                      child: Icon(Icons.close, size: 16, color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                GestureDetector(
-                  onTap: () => _pickFile(isBack: true),
-                  child: Container(
-                    width: double.infinity,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: AppColors.documentCardBackground,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-                    ),
-                    child: _backFilePath != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                            child: Image.file(File(_backFilePath!), fit: BoxFit.cover, width: double.infinity,
-                                errorBuilder: (_, __, ___) => const _UploadPlaceholder(hasFile: true)))
-                        : const _UploadPlaceholder(hasFile: false),
-                  ),
-                ),
-              ],
               const SizedBox(height: 20),
             ] else ...[
               Container(
@@ -1226,42 +1195,26 @@ class _DocumentImage extends StatefulWidget {
 class _DocumentImageState extends State<_DocumentImage> {
   Uint8List? _bytes;
   bool _loading = true;
-  bool _isPdf = false;
-  String? _pdfPath;
-  ProfileDocumentRepository? _repo;
+  late final ProfileDocumentRepository _repo;
 
   @override
   void initState() {
     super.initState();
-    // Ne pas accéder au context ici — utiliser didChangeDependencies
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_repo == null) {
-      _repo = context.read<ProfileBloc>().repository;
-      _loadImage();
-    }
+    _repo = context.read<ProfileBloc>().repository;
+    _loadImage();
   }
 
   Future<void> _loadImage() async {
     try {
-      final bytes = await _repo!.getDocumentFile(
-        token: UserSession.instance.accessToken,
-        documentId: widget.documentId,
-      );
-      final data = Uint8List.fromList(bytes);
-      final pdf = data.length >= 4 &&
-          data[0] == 0x25 && data[1] == 0x50 &&
-          data[2] == 0x44 && data[3] == 0x46;
-      if (pdf) {
-        final dir = await getTemporaryDirectory();
-        final file = File('${dir.path}/thumb_${widget.documentId}.pdf');
-        await file.writeAsBytes(data);
-        if (mounted) setState(() { _isPdf = true; _pdfPath = file.path; _loading = false; });
-      } else {
-        if (mounted) setState(() { _bytes = data; _loading = false; });
+      final bytes = await _repo.getDocumentFile(
+            token: UserSession.instance.accessToken,
+            documentId: widget.documentId,
+          );
+      if (mounted) {
+        setState(() {
+          _bytes = Uint8List.fromList(bytes);
+          _loading = false;
+        });
       }
     } catch (_) {
       if (mounted) setState(() => _loading = false);
@@ -1282,20 +1235,6 @@ class _DocumentImageState extends State<_DocumentImage> {
               valueColor: AlwaysStoppedAnimation(AppColors.primary),
             ),
           ),
-        ),
-      );
-    }
-    if (_isPdf && _pdfPath != null) {
-      return IgnorePointer(
-        child: PDFView(
-          filePath: _pdfPath!,
-          enableSwipe: false,
-          autoSpacing: false,
-          pageFling: false,
-          pageSnap: false,
-          fitPolicy: FitPolicy.WIDTH,
-          enableRenderDuringScale: false,
-          useBestQuality: true,
         ),
       );
     }
@@ -1524,53 +1463,46 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
   Widget build(BuildContext context) {
     final screenH = MediaQuery.of(context).size.height;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final isPdfReady = _bytes != null && _isPdf;
     return Container(
-      height: screenH,
+      height: screenH * 0.85,
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 24 + bottomPadding), // ✅ espace au-dessus du navbar
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: Column(
-              children: [
-                Center(
-                  child: Container(
-                    width: AppConstants.modalHandleWidth,
-                    height: AppConstants.modalHandleHeight,
-                    decoration: BoxDecoration(
-                      color: AppColors.modalHandle,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.label,
-                        style: TextStyle(
-                          fontFamily: AppConstants.fontFamilySofiaSans,
-                          fontWeight: FontWeight.w700,
-                          fontSize: AppConstants.fontSizeXXLarge,
-                          color: AppColors.textDark,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Icon(Icons.close,
-                          color: AppColors.textSecondary,
-                          size: AppConstants.iconSizeLarge),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-              ],
+          Center(
+            child: Container(
+              width: AppConstants.modalHandleWidth,
+              height: AppConstants.modalHandleHeight,
+              decoration: BoxDecoration(
+                color: AppColors.modalHandle,
+                borderRadius: BorderRadius.circular(999),
+              ),
             ),
           ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.label,
+                  style: TextStyle(
+                    fontFamily: AppConstants.fontFamilySofiaSans,
+                    fontWeight: FontWeight.w700,
+                    fontSize: AppConstants.fontSizeXXLarge,
+                    color: AppColors.textDark,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Icon(Icons.close,
+                    color: AppColors.textSecondary,
+                    size: AppConstants.iconSizeLarge),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           Expanded(
             child: _loading
                 ? Center(
@@ -1597,24 +1529,57 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
                       )
                     : _bytes != null
                         ? _isPdf
-                            ? _PdfBytesViewer(bytes: _bytes!)
-                            : Padding(
-                                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                                  child: InteractiveViewer(
-                                    minScale: 0.5,
-                                    maxScale: 4.0,
-                                    child: Image.memory(
-                                      _bytes!,
-                                      fit: BoxFit.contain,
-                                      width: double.infinity,
-                                      errorBuilder: (_, __, ___) => Center(
-                                        child: Icon(
-                                          Icons.insert_drive_file_outlined,
-                                          size: 80,
-                                          color: AppColors.primary,
-                                        ),
+                            ? Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.picture_as_pdf,
+                                        size: 80, color: AppColors.statusRejected),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      widget.label,
+                                      style: TextStyle(
+                                        fontFamily: AppConstants.fontFamilySofiaSans,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: AppConstants.fontSizeLarge,
+                                        color: AppColors.textDark,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Document PDF • ${(_bytes!.length / 1024).toStringAsFixed(1)} KB',
+                                      style: TextStyle(
+                                        fontFamily: AppConstants.fontFamilyInter,
+                                        fontSize: AppConstants.fontSizeMedium,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Téléchargé avec succès ✓',
+                                      style: TextStyle(
+                                        fontFamily: AppConstants.fontFamilyInter,
+                                        fontSize: AppConstants.fontSizeRegular,
+                                        color: AppColors.statusValideGreen,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                                child: InteractiveViewer(
+                                  minScale: 0.5,
+                                  maxScale: 4.0,
+                                  child: Image.memory(
+                                    _bytes!,
+                                    fit: BoxFit.contain,
+                                    width: double.infinity,
+                                    errorBuilder: (_, __, ___) => Center(
+                                      child: Icon(
+                                        Icons.insert_drive_file_outlined,
+                                        size: 80,
+                                        color: AppColors.primary,
                                       ),
                                     ),
                                   ),
@@ -1629,63 +1594,6 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
                           ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────
-// PDF VIEWER — écrit les bytes dans un fichier temp puis affiche
-// ─────────────────────────────────────────────────────────────────
-class _PdfBytesViewer extends StatefulWidget {
-  final Uint8List bytes;
-  const _PdfBytesViewer({required this.bytes});
-
-  @override
-  State<_PdfBytesViewer> createState() => _PdfBytesViewerState();
-}
-
-class _PdfBytesViewerState extends State<_PdfBytesViewer> {
-  String? _tempPath;
-
-  @override
-  void initState() {
-    super.initState();
-    _writeTempFile();
-  }
-
-  Future<void> _writeTempFile() async {
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/doc_viewer_${DateTime.now().millisecondsSinceEpoch}.pdf');
-    await file.writeAsBytes(widget.bytes);
-    if (mounted) setState(() => _tempPath = file.path);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_tempPath == null) {
-      return Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation(AppColors.primaryDark),
-        ),
-      );
-    }
-    return InteractiveViewer(
-      minScale: 1.0,
-      maxScale: 4.0,
-      child: SizedBox.expand(
-        child: PDFView(
-          filePath: _tempPath!,
-          enableSwipe: true,
-          swipeHorizontal: false,
-          autoSpacing: false,
-          pageFling: false,
-          pageSnap: false,
-          fitPolicy: FitPolicy.WIDTH,
-          enableRenderDuringScale: true,
-          useBestQuality: true,
-          nightMode: false,
-        ),
       ),
     );
   }

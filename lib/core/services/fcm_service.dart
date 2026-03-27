@@ -84,7 +84,7 @@ class FcmService {
     _messaging.onTokenRefresh.listen(sendTokenToBackend);
   }
 
-  // ✅ Envoi du token FCM au backend + abonnement au topic utilisateur
+  //  Envoi du token FCM au backend + abonnement au topic utilisateur
   static Future<void> sendTokenToBackend(String fcmToken) async {
     try {
       final accessToken = UserSession.instance.accessToken;
@@ -106,21 +106,21 @@ class FcmService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('[FCM] ✅ Token envoyé au backend avec succès');
+        print('[FCM]  Token envoyé au backend avec succès');
       } else {
-        print('[FCM] ⚠️ Erreur envoi token: ${response.statusCode} — ${response.body}');
+        print('[FCM]  Erreur envoi token: ${response.statusCode} — ${response.body}');
       }
 
       // 2. S'abonner au topic utilisateur : secureform_fcm_{userId}
       if (userId.isNotEmpty) {
         final topic = 'secureform_fcm_$userId';
         await _messaging.subscribeToTopic(topic);
-        print('[FCM] ✅ Abonné au topic: $topic');
+        print('[FCM]  Abonné au topic: $topic');
       } else {
-        print('[FCM] ⚠️ userId vide — abonnement topic impossible');
+        print('[FCM]  userId vide — abonnement topic impossible');
       }
     } catch (e) {
-      print('[FCM] ❌ Exception envoi token: $e');
+      print('[FCM]  Exception envoi token: $e');
     }
   }
 

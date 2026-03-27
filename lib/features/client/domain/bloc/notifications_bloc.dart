@@ -11,6 +11,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       : _service = service ?? NotificationsService(),
         super(const NotificationsInitial()) {
     on<LoadNotificationsEvent>(_onLoad);
+    on<ResetNotificationsEvent>((_, emit) => emit(const NotificationsInitial()));
   }
 
   Future<void> _onLoad(

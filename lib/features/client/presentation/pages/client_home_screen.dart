@@ -103,10 +103,11 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           ),
         ).then((result) {
           // ignore: avoid_print
-          print('[ClientHome] Retour depuis KycGatePage -> re-check KYC');
+          print('[ClientHome] Retour depuis KycIntroPage result=$result -> re-check KYC');
           _kycGateOpen = false;
-          final userClickedBack = result == true;
-          if (mounted && userClickedBack && _kycBloc.state is KycRequired) {
+          // Re-déclencher que l'utilisateur ait cliqué la flèche (true)
+          // ou utilisé le geste/bouton retour Android (null)
+          if (mounted && _kycBloc.state is KycRequired) {
             _kycTriggered = false;
             _pushKycIntro(withDelay: true);
           }
@@ -182,17 +183,28 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
               return Scaffold(
                 backgroundColor: AppColors.white,
                 body: SafeArea(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _HomeHeader(initials: user?.initials ?? ''),
-                        _WelcomeSection(firstName: user?.firstName ?? ''),
-                        _ProfileProgressSection(),
-                        _StatsGrid(),
-                        _SearchBarSection(),
-                        _RecentDemandesSection(),
-                      ],
+                  child: RefreshIndicator(
+                    color: AppColors.primaryDark,
+                    onRefresh: () async {
+                      context.read<ProfileBloc>().add(const LoadDocumentTypesEvent(forceRefresh: true));
+                      context.read<DemandesBloc>().add(const LoadRecentDemandesEvent(limit: 5));
+                      context.read<HomeBloc>().add(const LoadClientStatisticsEvent());
+                      context.read<NotificationsBloc>().add(const LoadNotificationsEvent());
+                      await Future.delayed(const Duration(milliseconds: 800));
+                    },
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _HomeHeader(initials: user?.initials ?? ''),
+                          _WelcomeSection(firstName: user?.firstName ?? ''),
+                          _ProfileProgressSection(),
+                          _StatsGrid(),
+                          _SearchBarSection(),
+                          _RecentDemandesSection(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -758,6 +770,7 @@ class _SearchBarSectionState extends State<_SearchBarSection> {
   final _controller = TextEditingController();
 
   void _search(String value) {
+    FocusScope.of(context).unfocus();
     context.read<DemandesBloc>().add(LoadRecentDemandesEvent(
           limit: 5,
           search: value.trim().isEmpty ? null : value.trim(),
@@ -789,7 +802,6 @@ class _SearchBarSectionState extends State<_SearchBarSection> {
             Expanded(
               child: TextField(
                 controller: _controller,
-                onChanged: _search,
                 onSubmitted: _search,
                 style: TextStyle(
                   fontFamily: AppConstants.fontFamilyInter,

@@ -101,6 +101,13 @@ class ProfileDocumentService {
     _log('POST $url | documentTypeId=$documentTypeId | file=$fileName | size=${(fileSize / 1024).toStringAsFixed(1)}KB');
     if (issueDate != null) _log('issueDate=$issueDate');
     if (expirationDate != null) _log('expirationDate=$expirationDate');
+    _log('token vide: ${token.isEmpty} | Authorization header: Bearer ${token.length > 20 ? token.substring(0, 20) : token}...');
+    _log('backFile présent: ${backFile != null}');
+    if (backFile != null) {
+      final backName = backFile.path.split(Platform.pathSeparator).last;
+      final backSize = await backFile.length();
+      _log('backFile=$backName | size=${(backSize / 1024).toStringAsFixed(1)}KB');
+    }
 
     final request = http.MultipartRequest('POST', Uri.parse(url));
     request.headers.addAll(_authHeaders(token));
@@ -125,19 +132,35 @@ class ProfileDocumentService {
       contentType: MediaType.parse(mimeFor(file.path)),
     ));
 
+    // Nom du champ verso — à aligner avec le backend
+    // Valeurs possibles : 'backFile', 'back_file', 'backDocument', 'back'
+    const backFieldName = 'backFile';
+
     if (backFile != null) {
-      _log('Ajout verso: ${backFile.path}');
+      _log('Ajout verso avec champ="$backFieldName": ${backFile.path}');
       request.files.add(await http.MultipartFile.fromPath(
-        'backFile',
+        backFieldName,
         backFile.path,
         contentType: MediaType.parse(mimeFor(backFile.path)),
       ));
     }
 
+    // ── LOG COMPLET de la requête multipart ──────────────────────
+    _log('=== MULTIPART REQUEST DETAILS ===');
+    _log('URL: $url');
+    _log('Fields envoyés:');
+    request.fields.forEach((k, v) => _log('  $k = $v'));
+    _log('Files envoyés:');
+    for (final f in request.files) {
+      _log('  field="${f.field}" filename="${f.filename}" contentType=${f.contentType} length=${f.length}');
+    }
+    _log('=================================');
+
     _log('Envoi multipart en cours...');
     final streamed = await request.send();
     final response = await http.Response.fromStream(streamed);
     _log('POST $url → ${response.statusCode}');
+    _log('Response headers: ${response.headers}');
     _log('Réponse body: ${response.body}');
 
     if (response.statusCode == 200 || response.statusCode == 201) {

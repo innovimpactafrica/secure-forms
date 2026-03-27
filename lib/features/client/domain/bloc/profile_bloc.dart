@@ -117,6 +117,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     final token = UserSession.instance.accessToken;
     _log('UploadProfileDocument — documentTypeId=${event.documentTypeId}');
     _log('issueDate=${event.issueDate} expirationDate=${event.expirationDate}');
+    _log('token vide: ${token.isEmpty} | token (50 premiers chars): ${token.length > 50 ? token.substring(0, 50) : token}');
+    _log('backFile présent: ${event.backFile != null}');
+    if (event.backFile != null) _log('backFile path: ${event.backFile!.path}');
 
     final currentProfile = _currentProfile(state);
 
@@ -133,17 +136,19 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           .where((d) => d.documentTypeId == event.documentTypeId)
           .firstOrNull;
       if (existing != null) {
-        _log('Document existant trouvé id=${existing.id} — suppression avant re-upload');
+        _log('Document existant trouvé id=${existing.id} status=${existing.status} — suppression avant re-upload');
         try {
           await _repository.deleteDocument(token: token, documentId: existing.id);
-          // Invalider le cache de l'ancien fichier
           ProfileDocumentRepository.invalidate(existing.id);
           _log('Suppression préalable réussie ✓');
         } catch (e) {
           _log('Suppression préalable échouée (on continue quand même): $e');
         }
+      } else {
+        _log('Aucun document existant pour typeId=${event.documentTypeId} — upload direct');
       }
 
+      _log('Lancement upload POST...');
       final uploaded = await _repository.uploadDocument(
         token: token,
         file: event.file,

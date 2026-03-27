@@ -144,7 +144,14 @@ class _NotificationsViewState extends State<_NotificationsView> {
                     );
                   }
                   if (state is NotificationsLoaded) {
-                    return _buildList(context, state.notifications);
+                    return RefreshIndicator(
+                      color: AppColors.primaryDark,
+                      onRefresh: () async {
+                        context.read<NotificationsBloc>().add(const LoadNotificationsEvent());
+                        await Future.delayed(const Duration(milliseconds: 800));
+                      },
+                      child: _buildList(context, state.notifications),
+                    );
                   }
                   return const SizedBox.shrink();
                 },

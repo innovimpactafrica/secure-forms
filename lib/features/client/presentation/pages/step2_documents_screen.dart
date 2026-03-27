@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
@@ -17,7 +20,7 @@ import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'package:secure_link/features/kyc/presentation/pages/kyc_step2_face_page.dart';
 import 'complete_profile_header.dart';
-import 'document_upload_modal.dart' show DocumentUploadModal, showPickerSource;
+import 'document_upload_modal.dart' show DocumentUploadModal;
 import 'document_simple_upload_modal.dart';
 
 /// Étape 2 — Upload des documents (connecté à l'API)
@@ -649,24 +652,41 @@ class _DocumentImage extends StatefulWidget {
 class _DocumentImageState extends State<_DocumentImage> {
   Uint8List? _bytes;
   bool _loading = true;
+  bool _isPdf = false;
+  String? _pdfPath;
+  ProfileDocumentRepository? _repo;
 
   @override
   void initState() {
     super.initState();
-    _loadImage();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_repo == null) {
+      _repo = context.read<ProfileBloc>().repository;
+      _loadImage();
+    }
   }
 
   Future<void> _loadImage() async {
     try {
-      final bytes = await context.read<ProfileBloc>().repository.getDocumentFile(
+      final bytes = await _repo!.getDocumentFile(
             token: UserSession.instance.accessToken,
             documentId: widget.documentId,
           );
-      if (mounted) {
-        setState(() {
-          _bytes = Uint8List.fromList(bytes);
-          _loading = false;
-        });
+      final data = Uint8List.fromList(bytes);
+      final pdf = data.length >= 4 &&
+          data[0] == 0x25 && data[1] == 0x50 &&
+          data[2] == 0x44 && data[3] == 0x46;
+      if (pdf) {
+        final dir = await getTemporaryDirectory();
+        final file = File('${dir.path}/thumb_${widget.documentId}.pdf');
+        await file.writeAsBytes(data);
+        if (mounted) setState(() { _isPdf = true; _pdfPath = file.path; _loading = false; });
+      } else {
+        if (mounted) setState(() { _bytes = data; _loading = false; });
       }
     } catch (_) {
       if (mounted) setState(() => _loading = false);
@@ -687,6 +707,20 @@ class _DocumentImageState extends State<_DocumentImage> {
               valueColor: AlwaysStoppedAnimation(AppColors.primary),
             ),
           ),
+        ),
+      );
+    }
+    if (_isPdf && _pdfPath != null) {
+      return IgnorePointer(
+        child: PDFView(
+          filePath: _pdfPath!,
+          enableSwipe: false,
+          autoSpacing: false,
+          pageFling: false,
+          pageSnap: false,
+          fitPolicy: FitPolicy.WIDTH,
+          enableRenderDuringScale: false,
+          useBestQuality: true,
         ),
       );
     }
@@ -768,17 +802,18 @@ class _DocumentOptionsSheet extends StatelessWidget {
             height: AppConstants.logoutButtonHeight,
             child: ElevatedButton.icon(
               onPressed: () {
+                final bloc = context.read<ProfileBloc>();
                 Navigator.of(context).pop();
                 showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: AppColors.white,
-                  useSafeArea: true, // ✅ protège du navbar
+                  useSafeArea: true,
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   ),
                   builder: (_) => BlocProvider.value(
-                    value: context.read<ProfileBloc>(),
+                    value: bloc,
                     child: _DocumentViewerSheet(
                       documentType: documentType,
                       existing: existing,
@@ -812,17 +847,18 @@ class _DocumentOptionsSheet extends StatelessWidget {
             height: AppConstants.logoutButtonHeight,
             child: OutlinedButton.icon(
               onPressed: () {
+                final bloc = context.read<ProfileBloc>();
                 Navigator.of(context).pop();
                 showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: AppColors.white,
-                  useSafeArea: true, // ✅ protège du navbar
+                  useSafeArea: true,
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   ),
                   builder: (_) => BlocProvider.value(
-                    value: context.read<ProfileBloc>(),
+                    value: bloc,
                     child: documentType.isForIdentityVerification
                         ? DocumentUploadModal(
                             documentType: documentType,
@@ -879,12 +915,12 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
   Uint8List? _bytes;
   bool _loading = true;
   String? _error;
+  String? _pdfPath;
   late final ProfileDocumentRepository _repo;
 
   @override
   void initState() {
     super.initState();
-    // Capturer le repository avant tout appel async pour éviter l'écran rouge
     _repo = context.read<ProfileBloc>().repository;
     _loadFile();
   }
@@ -892,68 +928,75 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
   Future<void> _loadFile() async {
     try {
       final bytes = await _repo.getDocumentFile(
-            token: UserSession.instance.accessToken,
-            documentId: widget.existing.id,
-          );
-      if (mounted) {
-        setState(() {
-          _bytes = Uint8List.fromList(bytes);
-          _loading = false;
-        });
+        token: UserSession.instance.accessToken,
+        documentId: widget.existing.id,
+      );
+      final data = Uint8List.fromList(bytes);
+      final isPdf = data.length >= 4 &&
+          data[0] == 0x25 && data[1] == 0x50 &&
+          data[2] == 0x44 && data[3] == 0x46;
+      if (isPdf) {
+        final dir = await getTemporaryDirectory();
+        final file = File('${dir.path}/viewer_step2_${widget.existing.id}.pdf');
+        await file.writeAsBytes(data);
+        if (mounted) setState(() { _pdfPath = file.path; _loading = false; });
+      } else {
+        if (mounted) setState(() { _bytes = data; _loading = false; });
       }
     } catch (e) {
       if (mounted) setState(() { _loading = false; _error = e.toString(); });
     }
   }
 
-  bool get _isPdf {
-    if (_bytes == null || _bytes!.length < 4) return false;
-    return _bytes![0] == 0x25 && _bytes![1] == 0x50 &&
-           _bytes![2] == 0x44 && _bytes![3] == 0x46;
-  }
+  bool get _isPdf => _pdfPath != null;
 
   @override
   Widget build(BuildContext context) {
     final screenH = MediaQuery.of(context).size.height;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Container(
-      height: screenH * 0.85,
-      padding: EdgeInsets.fromLTRB(20, 16, 20, 24 + bottomPadding), // ✅ espace au-dessus du navbar
+      height: screenH,
       child: Column(
         children: [
-          // Handle
-          Center(
-            child: Container(
-              width: AppConstants.modalHandleWidth,
-              height: AppConstants.modalHandleHeight,
-              decoration: BoxDecoration(
-                color: AppColors.modalHandle,
-                borderRadius: BorderRadius.circular(999),
-              ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: Column(
+              children: [
+                Center(
+                  child: Container(
+                    width: AppConstants.modalHandleWidth,
+                    height: AppConstants.modalHandleHeight,
+                    decoration: BoxDecoration(
+                      color: AppColors.modalHandle,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        widget.documentType.title,
+                        style: TextStyle(
+                          fontFamily: AppConstants.fontFamilySofiaSans,
+                          fontWeight: FontWeight.w700,
+                          fontSize: AppConstants.fontSizeXXLarge,
+                          color: AppColors.textDark,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Icon(Icons.close, color: AppColors.textSecondary, size: AppConstants.iconSizeLarge),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                widget.documentType.title,
-                style: TextStyle(
-                  fontFamily: AppConstants.fontFamilySofiaSans,
-                  fontWeight: FontWeight.w700,
-                  fontSize: AppConstants.fontSizeXXLarge,
-                  color: AppColors.textDark,
-                ),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Icon(Icons.close, color: AppColors.textSecondary, size: AppConstants.iconSizeLarge),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Contenu
           Expanded(
             child: _loading
                 ? Center(
@@ -979,59 +1022,42 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
                           ],
                         ),
                       )
-                    : _bytes != null
+                    : _bytes != null || _pdfPath != null
                         ? _isPdf
-                            ? Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.picture_as_pdf,
-                                        size: 80, color: AppColors.statusRejected),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      widget.documentType.title,
-                                      style: TextStyle(
-                                        fontFamily: AppConstants.fontFamilySofiaSans,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: AppConstants.fontSizeLarge,
-                                        color: AppColors.textDark,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Document PDF • ${(_bytes!.length / 1024).toStringAsFixed(1)} KB',
-                                      style: TextStyle(
-                                        fontFamily: AppConstants.fontFamilyInter,
-                                        fontSize: AppConstants.fontSizeMedium,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Téléchargé avec succès ✓',
-                                      style: TextStyle(
-                                        fontFamily: AppConstants.fontFamilyInter,
-                                        fontSize: AppConstants.fontSizeRegular,
-                                        color: AppColors.statusValideGreen,
-                                      ),
-                                    ),
-                                  ],
+                            ? InteractiveViewer(
+                                minScale: 1.0,
+                                maxScale: 4.0,
+                                child: SizedBox.expand(
+                                  child: PDFView(
+                                    filePath: _pdfPath!,
+                                    enableSwipe: true,
+                                    swipeHorizontal: false,
+                                    autoSpacing: false,
+                                    pageFling: false,
+                                    pageSnap: false,
+                                    fitPolicy: FitPolicy.WIDTH,
+                                    enableRenderDuringScale: true,
+                                    useBestQuality: true,
+                                  ),
                                 ),
                               )
-                            : ClipRRect(
-                                borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                                child: InteractiveViewer(
-                                  minScale: 0.5,
-                                  maxScale: 4.0,
-                                  child: Image.memory(
-                                    _bytes!,
-                                    fit: BoxFit.contain,
-                                    width: double.infinity,
-                                    errorBuilder: (_, __, ___) => Center(
-                                      child: Icon(
-                                        Icons.insert_drive_file_outlined,
-                                        size: 80,
-                                        color: AppColors.primary,
+                            : Padding(
+                                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                                  child: InteractiveViewer(
+                                    minScale: 0.5,
+                                    maxScale: 4.0,
+                                    child: Image.memory(
+                                      _bytes!,
+                                      fit: BoxFit.contain,
+                                      width: double.infinity,
+                                      errorBuilder: (_, __, ___) => Center(
+                                        child: Icon(
+                                          Icons.insert_drive_file_outlined,
+                                          size: 80,
+                                          color: AppColors.primary,
+                                        ),
                                       ),
                                     ),
                                   ),

@@ -787,13 +787,20 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
                         ),
                       )
                     : _pdfPath != null
-                        ? PDFView(
-                            filePath: _pdfPath!,
-                            enableSwipe: true,
-                            swipeHorizontal: false,
-                            autoSpacing: true,
-                            pageFling: true,
-                            fitPolicy: FitPolicy.BOTH,
+                        ? InteractiveViewer(
+                            minScale: 1.0,
+                            maxScale: 4.0,
+                            child: PDFView(
+                              filePath: _pdfPath!,
+                              enableSwipe: true,
+                              swipeHorizontal: false,
+                              autoSpacing: true,
+                              pageFling: false,
+                              pageSnap: false,
+                              fitPolicy: FitPolicy.WIDTH,
+                              enableRenderDuringScale: true,
+                              useBestQuality: true,
+                            ),
                           )
                         : _bytes != null
                             ? ClipRRect(

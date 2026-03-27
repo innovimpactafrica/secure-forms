@@ -7,3 +7,7 @@ class LoadNotificationsEvent extends NotificationsEvent {
   final bool forceRefresh;
   const LoadNotificationsEvent({this.unreadOnly = false, this.forceRefresh = false});
 }
+
+class ResetNotificationsEvent extends NotificationsEvent {
+  const ResetNotificationsEvent();
+}

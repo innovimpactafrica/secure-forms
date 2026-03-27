@@ -1,6 +1,7 @@
 {
   "welcome": {
     "title": "Welcome to",
+    "tagline": "Trusted secure transmission",
     "subtitle": "Simplify your administrative procedures securely",
     "start_button": "Get Started"
   },
@@ -143,7 +144,9 @@
     "save": "Save",
     "gallery": "Photo gallery",
     "take_photo": "Take a photo",
-    "file_selected": "File selected",
+    "pick_file": "Choose a file",
+    "add_back_document": "+ Add back side (verso)",
+    "back_document": "Back side document",
     "click_upload": "Click to Upload",
     "file_format": "PDF, JPG, PNG up to 10 MB",
     "fill_all_fields": "Please fill in all fields and upload a document.",

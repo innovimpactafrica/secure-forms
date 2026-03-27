@@ -5,11 +5,18 @@ import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import '../../../../utils/responsive_utils.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
   @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  @override
   Widget build(BuildContext context) {
+    // context.locale force le rebuild de toute la page quand la langue change
+    context.locale;
     return Scaffold(
       body: SizedBox(
         width: ResponsiveUtils.getScreenWidth(context),
@@ -33,10 +40,17 @@ class WelcomeScreen extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black,
-                  ],
+                  colors: [Colors.transparent, Colors.black],
+                ),
+              ),
+            ),
+            // Globe langue — haut gauche
+            SafeArea(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12, left: 16),
+                  child: _LanguageToggle(),
                 ),
               ),
             ),
@@ -63,7 +77,7 @@ class WelcomeScreen extends StatelessWidget {
                   SizedBox(
                     width: ResponsiveUtils.getResponsiveWidth(context, 406),
                     child: Text(
-                      'La transmission sécrisée de confiance',
+                      'welcome.tagline'.tr(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilySofiaSans,
@@ -105,6 +119,51 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LanguageToggle extends StatefulWidget {
+  const _LanguageToggle();
+
+  @override
+  State<_LanguageToggle> createState() => _LanguageToggleState();
+}
+
+class _LanguageToggleState extends State<_LanguageToggle> {
+  @override
+  Widget build(BuildContext context) {
+    // context.locale force le rebuild quand la langue change
+    final isFr = context.locale.languageCode == 'fr';
+    return GestureDetector(
+      onTap: () async {
+        final newLocale = isFr ? const Locale('en') : const Locale('fr');
+        await context.setLocale(newLocale);
+        if (mounted) setState(() {});
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.18),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.2),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.language, color: Colors.white, size: 20),
+            const SizedBox(width: 7),
+            Text(
+              isFr ? 'FR' : 'EN',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],

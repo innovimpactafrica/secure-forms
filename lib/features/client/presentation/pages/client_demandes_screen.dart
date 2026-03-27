@@ -242,41 +242,56 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
         }
         if (state is DemandesLoaded) {
           if (state.demandes.isEmpty) {
-            return Center(
-              child: Text(
-                'demandes.no_demandes'.tr(),
-                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            return RefreshIndicator(
+              color: AppColors.primaryDark,
+              onRefresh: () async { _load(); await Future.delayed(const Duration(milliseconds: 800)); },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 80),
+                    child: Center(
+                      child: Text(
+                        'demandes.no_demandes'.tr(),
+                        style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             );
           }
-          return ListView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            itemCount: state.demandes.length + (state.isLoadingMore ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == state.demandes.length) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                );
-              }
-              final item = state.demandes[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _DemandeCard(
-                  item: item,
-                  onTap: () => Navigator.of(context).pushNamed(
-                    AppRoutes.clientDemandeDetail,
-                    arguments: {'id': item.id},
+          return RefreshIndicator(
+            color: AppColors.primaryDark,
+            onRefresh: () async { _load(); await Future.delayed(const Duration(milliseconds: 800)); },
+            child: ListView.builder(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              itemCount: state.demandes.length + (state.isLoadingMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == state.demandes.length) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  );
+                }
+                final item = state.demandes[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _DemandeCard(
+                    item: item,
+                    onTap: () => Navigator.of(context).pushNamed(
+                      AppRoutes.clientDemandeDetail,
+                      arguments: {'id': item.id},
+                    ),
+                    onDeleteDraft: item.isDraft
+                        ? () => context.read<DemandesBloc>().add(DeleteDraftEvent(item.id))
+                        : null,
                   ),
-                  onDeleteDraft: item.isDraft
-                      ? () => context
-                          .read<DemandesBloc>()
-                          .add(DeleteDraftEvent(item.id))
-                      : null,
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         }
         return const SizedBox.shrink();

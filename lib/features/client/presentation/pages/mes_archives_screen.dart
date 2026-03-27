@@ -133,18 +133,40 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
         if (state is ArchivesLoaded) {
           final items = _applySearch(state.archives);
           if (items.isEmpty) {
-            return Center(
-              child: Text('archives.no_archives'.tr(),
-                  style: const TextStyle(
-                      fontSize: 14, color: AppColors.textSecondary)),
+            return RefreshIndicator(
+              color: AppColors.primaryDark,
+              onRefresh: () async {
+                _bloc.add(LoadArchivesEvent(status: _filterStatuses[_selectedFilter]));
+                await Future.delayed(const Duration(milliseconds: 800));
+              },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 80),
+                    child: Center(
+                      child: Text('archives.no_archives'.tr(),
+                          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                    ),
+                  ),
+                ],
+              ),
             );
           }
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-            itemCount: items.length,
-            itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _ArchiveCard(item: items[index]),
+          return RefreshIndicator(
+            color: AppColors.primaryDark,
+            onRefresh: () async {
+              _bloc.add(LoadArchivesEvent(status: _filterStatuses[_selectedFilter]));
+              await Future.delayed(const Duration(milliseconds: 800));
+            },
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              itemCount: items.length,
+              itemBuilder: (context, index) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _ArchiveCard(item: items[index]),
+              ),
             ),
           );
         }
@@ -621,8 +643,11 @@ class _PdfViewerSheet extends StatelessWidget {
               enableSwipe: true,
               swipeHorizontal: false,
               autoSpacing: true,
-              pageFling: true,
-              fitPolicy: FitPolicy.BOTH,
+              pageFling: false,
+              pageSnap: false,
+              fitPolicy: FitPolicy.WIDTH,
+              enableRenderDuringScale: true,
+              useBestQuality: true,
             ),
           ),
         ],
