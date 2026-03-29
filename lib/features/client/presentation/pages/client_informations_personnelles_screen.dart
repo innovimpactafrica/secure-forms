@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/user_session.dart';
+import 'package:secure_link/core/utils/country_code.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
@@ -22,7 +23,6 @@ class ClientInformationsPersonnellesScreen extends StatefulWidget {
 
 class _ClientInformationsPersonnellesScreenState
     extends State<ClientInformationsPersonnellesScreen> {
-  // TODO: Initialiser ces controllers avec les données de l'API (ProfileRepository)
   final TextEditingController _prenomController = TextEditingController();
   final TextEditingController _nomController = TextEditingController();
   final TextEditingController _telephoneController = TextEditingController();
@@ -35,6 +35,7 @@ class _ClientInformationsPersonnellesScreenState
   // Photo de profil locale (avant upload) ou bytes depuis l'API
   File? _localPicture;
   Uint8List? _pictureBytes;
+  CountryCode _selectedCountry = kCountryCodes.first;
 
   @override
   void initState() {
@@ -45,14 +46,24 @@ class _ClientInformationsPersonnellesScreenState
     final user = bloc.cachedUser ??
         (bloc.state is UserLoaded ? (bloc.state as UserLoaded).user : null);
     // ignore: avoid_print
-    print('[InfosPerso] initState — cachedUser=${bloc.cachedUser?.firstName} state=${bloc.state.runtimeType}');
+    print(
+        '[InfosPerso] initState — cachedUser=${bloc.cachedUser?.firstName} state=${bloc.state.runtimeType}');
     // ignore: avoid_print
-    print('[InfosPerso] user trouvé: firstName=${user?.firstName} lastName=${user?.lastName} email=${user?.email} phone=${user?.phone}');
+    print(
+        '[InfosPerso] user trouvé: firstName=${user?.firstName} lastName=${user?.lastName} email=${user?.email} phone=${user?.phone}');
     if (user != null) {
       _prenomController.text = user.firstName;
       _nomController.text = user.lastName;
       _emailController.text = user.email;
-      final phone = user.phone.replaceAll('+221', '').replaceAll(' ', '').trim();
+      final matchedCountry = kCountryCodes.firstWhere(
+        (c) => user.phone.startsWith(c.dialCode),
+        orElse: () => kCountryCodes.first,
+      );
+      _selectedCountry = matchedCountry;
+      final phone = user.phone
+          .replaceAll(matchedCountry.dialCode, '')
+          .replaceAll(' ', '')
+          .trim();
       _telephoneController.text = phone;
     } else {
       // ignore: avoid_print
@@ -62,18 +73,19 @@ class _ClientInformationsPersonnellesScreenState
     // Photo de profil
     _pictureBytes = bloc.profilePictureBytes;
     // ignore: avoid_print
-    print('[InfosPerso] profilePictureBytes en cache: ${_pictureBytes != null ? "${_pictureBytes!.length} bytes" : "null"}');
+    print(
+        '[InfosPerso] profilePictureBytes en cache: ${_pictureBytes != null ? "${_pictureBytes!.length} bytes" : "null"}');
     if (_pictureBytes == null) {
       bloc.add(LoadProfilePictureEvent(UserSession.instance.accessToken));
     }
   }
 
   List<String> get _situationsMatrimoniales => [
-    'profile.single'.tr(),
-    'profile.married'.tr(),
-    'profile.divorced'.tr(),
-    'profile.widowed'.tr(),
-  ];
+        'profile.single'.tr(),
+        'profile.married'.tr(),
+        'profile.divorced'.tr(),
+        'profile.widowed'.tr(),
+      ];
 
   @override
   void dispose() {
@@ -107,19 +119,32 @@ class _ClientInformationsPersonnellesScreenState
               ),
               backgroundColor: AppColors.statusValideGreen,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
             ),
           );
         } else if (state is UserLoaded) {
           // ignore: avoid_print
-          print('[InfosPerso] UserLoaded reçu → firstName=${state.user.firstName} lastName=${state.user.lastName}');
+          print(
+              '[InfosPerso] UserLoaded reçu → firstName=${state.user.firstName} lastName=${state.user.lastName}');
           final user = state.user;
           setState(() {
-            if (_prenomController.text.isEmpty) _prenomController.text = user.firstName;
-            if (_nomController.text.isEmpty) _nomController.text = user.lastName;
-            if (_emailController.text.isEmpty) _emailController.text = user.email;
+            if (_prenomController.text.isEmpty)
+              _prenomController.text = user.firstName;
+            if (_nomController.text.isEmpty)
+              _nomController.text = user.lastName;
+            if (_emailController.text.isEmpty)
+              _emailController.text = user.email;
             if (_telephoneController.text.isEmpty) {
-              final phone = user.phone.replaceAll('+221', '').replaceAll(' ', '').trim();
+              final matchedCountry = kCountryCodes.firstWhere(
+                (c) => user.phone.startsWith(c.dialCode),
+                orElse: () => kCountryCodes.first,
+              );
+              _selectedCountry = matchedCountry;
+              final phone = user.phone
+                  .replaceAll(matchedCountry.dialCode, '')
+                  .replaceAll(' ', '')
+                  .trim();
               _telephoneController.text = phone;
             }
           });
@@ -135,7 +160,8 @@ class _ClientInformationsPersonnellesScreenState
               ),
               backgroundColor: AppColors.statusRejected,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
             ),
           );
         }
@@ -173,7 +199,9 @@ class _ClientInformationsPersonnellesScreenState
   Widget _buildAvatarSection(BuildContext context) {
     final bloc = context.read<UserBloc>();
     final initials = bloc.cachedUser?.initials ??
-        (bloc.state is UserLoaded ? (bloc.state as UserLoaded).user.initials : '??');
+        (bloc.state is UserLoaded
+            ? (bloc.state as UserLoaded).user.initials
+            : '??');
 
     return Center(
       child: Padding(
@@ -233,6 +261,66 @@ class _ClientInformationsPersonnellesScreenState
     );
   }
 
+  void _showCountryPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        maxChildSize: 0.9,
+        minChildSize: 0.4,
+        builder: (_, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.borderLight,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: kCountryCodes.length,
+                  itemBuilder: (_, i) {
+                    final country = kCountryCodes[i];
+                    return ListTile(
+                      leading: Text(country.flag,
+                          style: const TextStyle(fontSize: 24)),
+                      title: Text(country.name,
+                          style: const TextStyle(
+                            fontFamily: AppConstants.fontFamilyInter,
+                            fontSize: AppConstants.fontSizeMedium,
+                          )),
+                      trailing: Text(country.dialCode,
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontFamily: AppConstants.fontFamilyInter,
+                          )),
+                      onTap: () {
+                        setState(() => _selectedCountry = country);
+                        Navigator.of(context).pop();
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _pickProfilePicture(BuildContext context) async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
@@ -246,7 +334,8 @@ class _ClientInformationsPersonnellesScreenState
           children: [
             const SizedBox(height: 8),
             ListTile(
-              leading: Icon(Icons.photo_library_outlined, color: AppColors.primary),
+              leading:
+                  Icon(Icons.photo_library_outlined, color: AppColors.primary),
               title: Text('profile.gallery'.tr(),
                   style: TextStyle(
                       fontFamily: AppConstants.fontFamilyInter,
@@ -255,7 +344,8 @@ class _ClientInformationsPersonnellesScreenState
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
             ListTile(
-              leading: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+              leading:
+                  Icon(Icons.camera_alt_outlined, color: AppColors.primary),
               title: Text('profile.take_photo'.tr(),
                   style: TextStyle(
                       fontFamily: AppConstants.fontFamilyInter,
@@ -269,17 +359,18 @@ class _ClientInformationsPersonnellesScreenState
       ),
     );
     if (source == null) return;
-    final picked = await ImagePicker().pickImage(source: source, imageQuality: 85);
+    final picked =
+        await ImagePicker().pickImage(source: source, imageQuality: 85);
     if (picked == null) return;
     final file = File(picked.path);
     setState(() => _localPicture = file);
     // ignore: use_build_context_synchronously
     context.read<UserBloc>().add(
-      UpdateProfilePictureEvent(
-        accessToken: UserSession.instance.accessToken,
-        file: file,
-      ),
-    );
+          UpdateProfilePictureEvent(
+            accessToken: UserSession.instance.accessToken,
+            file: file,
+          ),
+        );
   }
 
   // -------------------------------------------------------------------------
@@ -488,32 +579,38 @@ class _ClientInformationsPersonnellesScreenState
       ),
       child: Row(
         children: [
-          const SizedBox(width: 14),
-          // Drapeau Sénégal
-          ClipOval(
-            child: Image.asset(
-              'assets/images/flag_sn-1x1.png',
-              width: 24,
-              height: 24,
-              fit: BoxFit.cover,
+          // ── Sélecteur pays (même style que l'inscription) ──
+          GestureDetector(
+            onTap: () => _showCountryPicker(context),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_selectedCountry.flag,
+                      style: const TextStyle(fontSize: AppConstants.flagSize)),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.keyboard_arrow_down,
+                      color: AppColors.textSecondary,
+                      size: AppConstants.chevronSize),
+                ],
+              ),
             ),
           ),
-          const SizedBox(width: 6),
-          const Icon(Icons.keyboard_arrow_down,
-              color: AppColors.textSecondary, size: 16),
-          const SizedBox(width: 8),
-          // Séparateur
-          Container(width: 1, height: 20, color: AppColors.borderDivider),
+          // ── Séparateur ──
+          Container(width: 1, height: 20, color: AppColors.borderGray),
           const SizedBox(width: 10),
-          const Text(
-            '+221',
-            style: TextStyle(
+          // ── Indicatif dynamique ──
+          Text(
+            _selectedCountry.dialCode,
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
               color: AppColors.textDark,
             ),
           ),
           const SizedBox(width: 8),
+          // ── Champ numéro ──
           Expanded(
             child: TextField(
               controller: _telephoneController,
@@ -522,8 +619,8 @@ class _ClientInformationsPersonnellesScreenState
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 hintText: '77 123 45 67',
-                hintStyle: TextStyle(
-                    fontSize: 15, color: AppColors.textSecondary),
+                hintStyle:
+                    TextStyle(fontSize: 15, color: AppColors.textSecondary),
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
               ),
@@ -646,8 +743,7 @@ class _ClientInformationsPersonnellesScreenState
               label,
               style: TextStyle(
                 fontSize: 14,
-                fontWeight:
-                    isSelected ? FontWeight.w600 : FontWeight.w400,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 color: AppColors.textDark,
               ),
             ),
