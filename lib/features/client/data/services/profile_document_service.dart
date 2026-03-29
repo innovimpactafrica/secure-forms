@@ -127,19 +127,15 @@ class ProfileDocumentService {
     }
 
     request.files.add(await http.MultipartFile.fromPath(
-      'file',
+      'files',
       file.path,
       contentType: MediaType.parse(mimeFor(file.path)),
     ));
 
-    // Nom du champ verso — à aligner avec le backend
-    // Valeurs possibles : 'backFile', 'back_file', 'backDocument', 'back'
-    const backFieldName = 'backFile';
-
     if (backFile != null) {
-      _log('Ajout verso avec champ="$backFieldName": ${backFile.path}');
+      _log('Ajout verso avec champ="files": ${backFile.path}');
       request.files.add(await http.MultipartFile.fromPath(
-        backFieldName,
+        'files',
         backFile.path,
         contentType: MediaType.parse(mimeFor(backFile.path)),
       ));
@@ -164,13 +160,75 @@ class ProfileDocumentService {
     _log('Réponse body: ${response.body}');
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final decoded = jsonDecode(response.body);
+      // Le backend retourne un tableau [{...}, {...}] ou un objet {...}
+      final Map<String, dynamic> data = decoded is List
+          ? (decoded.first as Map<String, dynamic>)
+          : (decoded as Map<String, dynamic>);
       _log('Upload réussi ✓ id=${data['id']} status=${data['status']}');
       return UploadedDocumentModel.fromJson(data);
     }
     final err = jsonDecode(response.body) as Map<String, dynamic>;
     _log('ERREUR upload: ${err['message']}');
     throw Exception(err['message'] ?? 'Erreur upload document');
+  }
+
+  /// PATCH /api/users/profile/documents/{id} — remplace le fichier et/ou les dates
+  Future<void> replaceDocumentFile({
+    required String token,
+    required String documentId,
+    File? file,
+    String? issueDate,
+    String? expirationDate,
+  }) async {
+    final url = BaseUrl.deleteProfileDocument(documentId);
+    _log('PATCH $url (multipart)');
+
+    final request = http.MultipartRequest('PATCH', Uri.parse(url));
+    request.headers.addAll(_authHeaders(token));
+
+    // Convertir les dates ISO en jj/mm/aaaa si nécessaire
+    String? _toDisplayDate(String? raw) {
+      if (raw == null || raw.isEmpty) return null;
+      if (raw.contains('/')) return raw; // déjà au bon format
+      final parsed = DateTime.tryParse(raw);
+      if (parsed == null) return raw;
+      return '${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}';
+    }
+
+    final formattedIssue = _toDisplayDate(issueDate);
+    final formattedExpiry = _toDisplayDate(expirationDate);
+
+    if (formattedIssue != null) {
+      request.fields['issueDate'] = formattedIssue;
+      _log('issueDate=$formattedIssue');
+    }
+    if (formattedExpiry != null) {
+      request.fields['expirationDate'] = formattedExpiry;
+      _log('expirationDate=$formattedExpiry');
+    }
+
+    if (file != null) {
+      final ext = file.path.split('.').last.toLowerCase();
+      String mime = 'image/jpeg';
+      if (ext == 'png') mime = 'image/png';
+      if (ext == 'pdf') mime = 'application/pdf';
+      request.files.add(await http.MultipartFile.fromPath('file', file.path,
+          contentType: MediaType.parse(mime)));
+      _log('Fichier de remplacement: ${file.path}');
+    }
+
+    _log('Fields: ${request.fields}');
+    _log('Files: ${request.files.map((f) => f.filename).toList()}');
+
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+    _log('PATCH $url → ${response.statusCode} | body: ${response.body}');
+    if (response.statusCode == 200) {
+      _log('Document $documentId modifié ✓');
+      return;
+    }
+    throw Exception('Erreur modification document: ${response.body}');
   }
 
   /// PATCH /api/users/profile/documents/{id}
@@ -217,6 +275,15 @@ class ProfileDocumentService {
     }
     _log('ERREUR delete document $documentId: ${response.body}');
     throw Exception('Erreur suppression document');
+  }
+
+  /// GET fichier depuis URL MinIO signée directe (sans token)
+  Future<List<int>> getDocumentFileFromUrl(String url) async {
+    _log('GET MinIO direct: $url');
+    final response = await _client.get(Uri.parse(url));
+    _log('MinIO → ${response.statusCode} | ${response.bodyBytes.length} bytes');
+    if (response.statusCode == 200) return response.bodyBytes;
+    throw Exception('Erreur téléchargement MinIO: ${response.statusCode}');
   }
 
   /// GET /api/users/profile/documents/{documentId}/file

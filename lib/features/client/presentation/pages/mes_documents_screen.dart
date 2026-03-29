@@ -37,6 +37,8 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
   // documentTypeId -> chemin fichier local pour affichage instantané
   final Map<String, String> _localFileCache = {};
 
+  int _refreshKey = 0; // force rebuild des _DocumentImage après modification
+
   void _onFileSelected(String documentTypeId, String filePath) {
     setState(() => _localFileCache[documentTypeId] = filePath);
   }
@@ -49,13 +51,11 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
 
   Future<void> _loadData() async {
     final token = UserSession.instance.accessToken;
-    // ignore: avoid_print
-    print('[MesDocumentsScreen] Chargement documents — token présent: ${token.isNotEmpty}');
     try {
       final types = await _repository.getDocumentTypes(token);
       final docs = await _repository.getDocuments(token);
       // ignore: avoid_print
-      print('[MesDocumentsScreen] ${types.length} type(s) | ${docs.length} document(s) uploadé(s)');
+      print('[MesDocumentsScreen] ${docs.length} doc(s) — backFileIds: ${docs.map((d) => "${d.documentTypeTitle}:backId=${d.backFileId}").join(", ")}');
       if (mounted) {
         setState(() {
           _documentTypes = types;
@@ -64,8 +64,6 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
         });
       }
     } catch (e) {
-      // ignore: avoid_print
-      print('[MesDocumentsScreen] ERREUR: $e');
       if (mounted) setState(() { _error = e.toString().replaceAll('Exception: ', ''); _isLoading = false; });
     }
   }
@@ -89,11 +87,17 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
             state is ProfileDocumentUploadedNeedsVerification ||
             state is ProfileDocumentDeleted ||
             state is ProfileDocumentPatched) {
-          // Vider le cache local des fichiers affichés
           if (state is ProfileDocumentDeleted) {
             _localFileCache.clear();
           }
-          _loadData();
+          ProfileDocumentRepository.clearCache();
+          // Délai pour laisser le backend finaliser l'indexation
+          Future.delayed(const Duration(milliseconds: 1500), () {
+            if (!mounted) return;
+            _loadData().then((_) {
+              if (mounted) setState(() => _refreshKey++);
+            });
+          });
         } else if (state is ProfileError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -146,6 +150,7 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                                 uploadedDocuments: _uploadedDocuments,
                                 localFileCache: _localFileCache,
                                 onFileSelected: _onFileSelected,
+                                refreshKey: _refreshKey,
                               ),
                             ),
                           ),
@@ -313,12 +318,14 @@ class _DocumentsGrid extends StatelessWidget {
   final List<UploadedDocumentModel> uploadedDocuments;
   final Map<String, String> localFileCache;
   final void Function(String documentTypeId, String filePath) onFileSelected;
+  final int refreshKey;
 
   const _DocumentsGrid({
     required this.documentTypes,
     required this.uploadedDocuments,
     required this.localFileCache,
     required this.onFileSelected,
+    this.refreshKey = 0,
   });
 
   @override
@@ -359,6 +366,7 @@ class _DocumentsGrid extends StatelessWidget {
           uploadedDocument: uploaded,
           localFilePath: localFileCache[docType.id],
           onTap: () => _showUpdateModal(context, docType, uploaded),
+          refreshKey: refreshKey,
         );
       },
     );
@@ -418,12 +426,14 @@ class _DocumentCard extends StatelessWidget {
   final UploadedDocumentModel? uploadedDocument;
   final String? localFilePath;
   final VoidCallback onTap;
+  final int refreshKey;
 
   const _DocumentCard({
     required this.documentType,
     required this.uploadedDocument,
     required this.onTap,
     this.localFilePath,
+    this.refreshKey = 0,
   });
 
   Color _statusColor() {
@@ -510,15 +520,21 @@ class _DocumentCard extends StatelessWidget {
                           fit: BoxFit.cover,
                           width: double.infinity,
                           errorBuilder: (_, __, ___) => _DocumentImage(
-                            key: ValueKey(uploadedDocument?.id ?? ''),
+                            key: ValueKey('${uploadedDocument?.id}_$refreshKey'),
                             documentId: uploadedDocument!.id,
                           ),
                         )
                       : hasDoc
-                          ? _DocumentImage(
-                              key: ValueKey(uploadedDocument!.id + (uploadedDocument!.uploadedAt?.toIso8601String() ?? '')),
-                              documentId: uploadedDocument!.id,
-                            )
+                          ? (uploadedDocument!.backFileId != null
+                              ? _DocumentImageDouble(
+                                  key: ValueKey('${uploadedDocument!.id}_${uploadedDocument!.backFileId}_$refreshKey'),
+                                  id1: uploadedDocument!.id,
+                                  id2: uploadedDocument!.backFileId!,
+                                )
+                              : _DocumentImage(
+                                  key: ValueKey('${uploadedDocument!.id}_$refreshKey'),
+                                  documentId: uploadedDocument!.id,
+                                ))
                           : Center(
                               child: Icon(
                                 Icons.add_photo_alternate_outlined,
@@ -1326,7 +1342,27 @@ class _DocumentImageState extends State<_DocumentImage> {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// OPTIONS SHEET — Visualiser / Modifier
+// WIDGET 2 IMAGES VERTICALES pour la card
+// ─────────────────────────────────────────────────────────────────
+class _DocumentImageDouble extends StatelessWidget {
+  final String id1;
+  final String id2;
+  const _DocumentImageDouble({super.key, required this.id1, required this.id2});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(child: SizedBox.expand(child: _DocumentImage(key: ValueKey(id1), documentId: id1))),
+        Container(height: 1, color: AppColors.borderLight),
+        Expanded(child: SizedBox.expand(child: _DocumentImage(key: ValueKey(id2), documentId: id2))),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// OPTIONS SHEET — Visualiser / Modifier / Supprimer
 // ─────────────────────────────────────────────────────────────────
 class _DocumentOptionsSheet extends StatelessWidget {
   final DocumentTypeModel documentType;
@@ -1339,140 +1375,405 @@ class _DocumentOptionsSheet extends StatelessWidget {
     this.onFileSelected,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(20, 16, 20, 32 + bottomPadding), // ✅ espace au-dessus du navbar
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Handle
-          Center(
-            child: Container(
-              width: AppConstants.modalHandleWidth,
-              height: AppConstants.modalHandleHeight,
-              decoration: BoxDecoration(
-                color: AppColors.modalHandle,
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          // Titre
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              documentType.title,
-              style: TextStyle(
-                fontFamily: AppConstants.fontFamilySofiaSans,
-                fontWeight: FontWeight.w700,
-                fontSize: AppConstants.fontSizeXXLarge,
-                color: AppColors.textDark,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          // Bouton Visualiser
-          SizedBox(
-            width: double.infinity,
-            height: AppConstants.logoutButtonHeight,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: AppColors.white,
-                  useSafeArea: true, // ✅ protège du navbar
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                  ),
-                  builder: (_) => _DocumentViewerSheet(
-                    label: documentType.title,
-                    documentId: existing.id,
-                  ),
-                );
-              },
-              icon: const Icon(Icons.visibility_outlined, size: 18),
-              label: Text(
-                'Visualiser',
-                style: TextStyle(
-                  fontFamily: AppConstants.fontFamilySofiaSans,
-                  fontWeight: FontWeight.w600,
-                  fontSize: AppConstants.fontSizeLarge,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryDark,
-                foregroundColor: AppColors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          // Bouton Modifier
-          SizedBox(
-            width: double.infinity,
-            height: AppConstants.logoutButtonHeight,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: AppColors.white,
-                  useSafeArea: true, // ✅ protège du navbar
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                  ),
-                  builder: (_) => BlocProvider.value(
-                    value: context.read<ProfileBloc>(),
-                    child: _DocumentUpdateModal(
-                      documentType: documentType,
-                      existingDocument: existing,
-                      onFileSelected: onFileSelected,
-                    ),
-                  ),
-                );
-              },
-              icon: Icon(Icons.edit_outlined, size: 18, color: AppColors.primaryDark),
-              label: Text(
-                'Modifier',
-                style: TextStyle(
-                  fontFamily: AppConstants.fontFamilySofiaSans,
-                  fontWeight: FontWeight.w600,
-                  fontSize: AppConstants.fontSizeLarge,
-                  color: AppColors.primaryDark,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppColors.primaryDark),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-                ),
-              ),
-            ),
+  void _openSingleFileModal(BuildContext context, String fileId, String label) {
+    final bloc = context.read<ProfileBloc>();
+    Navigator.of(context).pop();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.white,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) => BlocProvider.value(
+        value: bloc,
+        child: _SingleFileUpdateModal(fileId: fileId, label: label, documentType: documentType, existing: existing),
+      ),
+    );
+  }
+
+  void _confirmDeleteFile(BuildContext context, String fileId, String label) {
+    final bloc = context.read<ProfileBloc>();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusMedium)),
+        title: Text('${'documents.delete'.tr()} $label', style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w700, fontSize: AppConstants.fontSizeLarge, color: AppColors.textDark)),
+        content: Text('documents.delete_file_confirm'.tr(),
+            style: TextStyle(fontFamily: AppConstants.fontFamilyInter, fontSize: AppConstants.fontSizeMedium, color: AppColors.textSecondary)),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(),
+              child: Text('documents.cancel'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.textSecondary))),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Navigator.of(context).pop();
+              ProfileDocumentRepository.invalidate(fileId);
+              bloc.add(DeleteProfileDocumentEvent(documentId: fileId));
+            },
+            child: Text('documents.delete'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.statusRejected, fontWeight: FontWeight.w600)),
           ),
         ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hasTwo = existing.backFileId != null;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(20, 16, 20, 32 + bottomPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Center(child: Container(width: AppConstants.modalHandleWidth, height: AppConstants.modalHandleHeight,
+                decoration: BoxDecoration(color: AppColors.modalHandle, borderRadius: BorderRadius.circular(999)))),
+            const SizedBox(height: 20),
+            Align(alignment: Alignment.centerLeft,
+                child: Text(documentType.title, style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w700, fontSize: AppConstants.fontSizeXXLarge, color: AppColors.textDark))),
+            const SizedBox(height: 24),
+            // Visualiser
+            SizedBox(
+              width: double.infinity, height: AppConstants.logoutButtonHeight,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: AppColors.white, useSafeArea: true,
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+                    builder: (_) => _DocumentViewerSheet(label: documentType.title, existing: existing));
+                },
+                icon: const Icon(Icons.visibility_outlined, size: 18),
+                label: Text('documents.view'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge)),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryDark, foregroundColor: AppColors.white, elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Modifier
+            _outlinedBtn(context, Icons.edit_outlined, 'documents.modify'.tr(), () {
+              if (!hasTwo) {
+                _openSingleFileModal(context, existing.id, 'Document 1');
+              } else {
+                final bloc = context.read<ProfileBloc>();
+                Navigator.of(context).pop();
+                _showSubChoiceModifier(context, bloc);
+              }
+            }),
+            const SizedBox(height: 8),
+            // Supprimer
+            _dangerBtn(context, Icons.delete_outline, 'documents.delete'.tr(), () {
+              if (!hasTwo) {
+                _confirmDeleteFile(context, existing.id, 'Document 1');
+              } else {
+                final bloc = context.read<ProfileBloc>();
+                Navigator.of(context).pop();
+                _showSubChoiceSupprimer(context, bloc);
+              }
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSubChoiceModifier(BuildContext context, ProfileBloc bloc) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.white,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        final bp = MediaQuery.of(ctx).padding.bottom;
+        return BlocProvider.value(
+          value: bloc,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(20, 16, 20, 24 + bp),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(child: Container(width: AppConstants.modalHandleWidth, height: AppConstants.modalHandleHeight,
+                    decoration: BoxDecoration(color: AppColors.modalHandle, borderRadius: BorderRadius.circular(999)))),
+                const SizedBox(height: 16),
+                Align(alignment: Alignment.centerLeft,
+                    child: Text('documents.modify_choose'.tr(),
+                        style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w700, fontSize: AppConstants.fontSizeLarge, color: AppColors.textDark))),
+                const SizedBox(height: 16),
+                SizedBox(width: double.infinity, height: AppConstants.logoutButtonHeight,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      showModalBottomSheet(
+                        context: ctx,
+                        isScrollControlled: true,
+                        backgroundColor: AppColors.white,
+                        useSafeArea: true,
+                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+                        builder: (_) => BlocProvider.value(value: bloc,
+                            child: _SingleFileUpdateModal(fileId: existing.id, label: 'Document 1', documentType: documentType, existing: existing)),
+                      );
+                    },
+                    icon: Icon(Icons.edit_outlined, size: 18, color: AppColors.primaryDark),
+                    label: Text('documents.modify_doc1'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge, color: AppColors.primaryDark)),
+                    style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.primaryDark), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(width: double.infinity, height: AppConstants.logoutButtonHeight,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      showModalBottomSheet(
+                        context: ctx,
+                        isScrollControlled: true,
+                        backgroundColor: AppColors.white,
+                        useSafeArea: true,
+                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+                        builder: (_) => BlocProvider.value(value: bloc,
+                            child: _SingleFileUpdateModal(fileId: existing.backFileId!, label: 'Document 2', documentType: documentType, existing: existing)),
+                      );
+                    },
+                    icon: Icon(Icons.edit_outlined, size: 18, color: AppColors.primaryDark),
+                    label: Text('documents.modify_doc2'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge, color: AppColors.primaryDark)),
+                    style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.primaryDark), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSubChoiceSupprimer(BuildContext context, ProfileBloc bloc) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.white,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        final bp = MediaQuery.of(ctx).padding.bottom;
+        return BlocProvider.value(
+          value: bloc,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(20, 16, 20, 24 + bp),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(child: Container(width: AppConstants.modalHandleWidth, height: AppConstants.modalHandleHeight,
+                    decoration: BoxDecoration(color: AppColors.modalHandle, borderRadius: BorderRadius.circular(999)))),
+                const SizedBox(height: 16),
+                Align(alignment: Alignment.centerLeft,
+                    child: Text('documents.delete_choose'.tr(),
+                        style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w700, fontSize: AppConstants.fontSizeLarge, color: AppColors.textDark))),
+                const SizedBox(height: 16),
+                SizedBox(width: double.infinity, height: AppConstants.logoutButtonHeight,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      _confirmDeleteFileDirect(ctx, bloc, existing.id, 'Document 1');
+                    },
+                    icon: Icon(Icons.delete_outline, size: 18, color: AppColors.statusRejected),
+                    label: Text('documents.delete_doc1'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge, color: AppColors.statusRejected)),
+                    style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.statusRejected), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(width: double.infinity, height: AppConstants.logoutButtonHeight,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      _confirmDeleteFileDirect(ctx, bloc, existing.backFileId!, 'Document 2');
+                    },
+                    icon: Icon(Icons.delete_outline, size: 18, color: AppColors.statusRejected),
+                    label: Text('documents.delete_doc2'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge, color: AppColors.statusRejected)),
+                    style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.statusRejected), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _confirmDeleteFileDirect(BuildContext context, ProfileBloc bloc, String fileId, String label) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusMedium)),
+        title: Text('${'documents.delete'.tr()} $label', style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w700, fontSize: AppConstants.fontSizeLarge, color: AppColors.textDark)),
+        content: Text('documents.delete_file_confirm'.tr(),
+            style: TextStyle(fontFamily: AppConstants.fontFamilyInter, fontSize: AppConstants.fontSizeMedium, color: AppColors.textSecondary)),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(),
+              child: Text('documents.cancel'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.textSecondary))),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              ProfileDocumentRepository.invalidate(fileId);
+              bloc.add(DeleteProfileDocumentEvent(documentId: fileId));
+            },
+            child: Text('documents.delete'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.statusRejected, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _outlinedBtn(BuildContext context, IconData icon, String label, VoidCallback onTap) => SizedBox(
+    width: double.infinity, height: AppConstants.logoutButtonHeight,
+    child: OutlinedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 18, color: AppColors.primaryDark),
+      label: Text(label, style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge, color: AppColors.primaryDark)),
+      style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.primaryDark),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+    ),
+  );
+
+  Widget _dangerBtn(BuildContext context, IconData icon, String label, VoidCallback onTap) => SizedBox(
+    width: double.infinity, height: AppConstants.logoutButtonHeight,
+    child: OutlinedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 18, color: AppColors.statusRejected),
+      label: Text(label, style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge, color: AppColors.statusRejected)),
+      style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.statusRejected),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+    ),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MODAL MODIFICATION D'UN SEUL FICHIER
+// ─────────────────────────────────────────────────────────────────
+class _SingleFileUpdateModal extends StatefulWidget {
+  final String fileId;
+  final String label;
+  final DocumentTypeModel documentType;
+  final UploadedDocumentModel existing;
+
+  const _SingleFileUpdateModal({required this.fileId, required this.label, required this.documentType, required this.existing});
+
+  @override
+  State<_SingleFileUpdateModal> createState() => _SingleFileUpdateModalState();
+}
+
+class _SingleFileUpdateModalState extends State<_SingleFileUpdateModal> {
+  String? _filePath;
+  String? _secondFilePath;
+  late final ProfileBloc _bloc;
+
+  @override
+  void initState() { super.initState(); _bloc = context.read<ProfileBloc>(); }
+
+  Future<void> _pickFile({bool isSecond = false}) async {
+    final path = await showPickerSource(context);
+    if (path == null || !mounted) return;
+    setState(() => isSecond ? _secondFilePath = path : _filePath = path);
+  }
+
+  void _onEnvoyer() {
+    if (_filePath == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Veuillez sélectionner un fichier.', style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.white)),
+        backgroundColor: AppColors.statusRejected, behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ));
+      return;
+    }
+    ProfileDocumentRepository.invalidate(widget.fileId);
+    _bloc.add(ReplaceProfileDocumentFileEvent(
+      documentId: widget.fileId,
+      file: File(_filePath!),
+      issueDate: widget.existing.issueDate,
+      expirationDate: widget.existing.expirationDate,
+    ));
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isImage = _filePath != null && !_filePath!.endsWith('.pdf');
+    final isImage2 = _secondFilePath != null && !_secondFilePath!.endsWith('.pdf');
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 16, left: 20, right: 20, top: 16),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(child: Container(width: AppConstants.modalHandleWidth, height: AppConstants.modalHandleHeight,
+                decoration: BoxDecoration(color: AppColors.modalHandle, borderRadius: BorderRadius.circular(999)))),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('${'documents.modify_doc_label'.tr()} ${widget.label}', style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w700, fontSize: AppConstants.fontSizeXXLarge, color: AppColors.textDark)),
+                GestureDetector(onTap: () => Navigator.of(context).pop(),
+                    child: Icon(Icons.close, color: AppColors.textSecondary, size: AppConstants.iconSizeLarge)),
+              ],
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: () => _pickFile(),
+              child: Container(
+                width: double.infinity, height: 140,
+                decoration: BoxDecoration(color: AppColors.documentCardBackground,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.3))),
+                child: _filePath != null && isImage
+                    ? ClipRRect(borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                        child: Image.file(File(_filePath!), fit: BoxFit.cover, width: double.infinity))
+                    : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        Icon(_filePath != null ? Icons.insert_drive_file_outlined : Icons.cloud_upload_outlined, size: 36, color: AppColors.primary),
+                        const SizedBox(height: 8),
+                        Text(_filePath != null ? 'documents.file_selected'.tr() : 'documents.click_to_upload'.tr(),
+                            style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeMedium, color: AppColors.primary)),
+                        if (_filePath == null)
+                          Text('PDF, JPG, PNG jusqu\'à 10 Mo',
+                              style: TextStyle(fontFamily: AppConstants.fontFamilyInter, fontSize: AppConstants.fontSizeRegular, color: AppColors.textSecondary)),
+                      ]),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(width: double.infinity, height: AppConstants.logoutButtonHeight,
+              child: ElevatedButton(onPressed: _onEnvoyer,
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryDark, elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+                child: Text('documents.send_for_validation'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, color: AppColors.white, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(width: double.infinity, height: AppConstants.logoutButtonHeight,
+              child: OutlinedButton(onPressed: () => Navigator.of(context).pop(),
+                style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.primaryDark),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+                child: Text('documents.cancel'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, color: AppColors.primaryDark, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge)),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────
-// VIEWER SHEET — charge le fichier via l'API avec token
+// VIEWER SHEET — Affiche recto + verso avec PageView horizontal
 // ─────────────────────────────────────────────────────────────────
 class _DocumentViewerSheet extends StatefulWidget {
   final String label;
-  final String documentId;
+  final UploadedDocumentModel existing;
 
   const _DocumentViewerSheet({
     required this.label,
-    required this.documentId,
+    required this.existing,
   });
 
   @override
@@ -1480,51 +1781,65 @@ class _DocumentViewerSheet extends StatefulWidget {
 }
 
 class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
-  Uint8List? _bytes;
+  final List<Map<String, dynamic>> _pages = [];
   bool _loading = true;
-  String? _error;
+  int _currentPage = 0;
+  late final PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    _loadFile();
+    _pageController = PageController();
+    _loadFiles();
   }
 
-  Future<void> _loadFile() async {
-    try {
-      final token = UserSession.instance.accessToken;
-      final url = BaseUrl.profileDocumentFile(widget.documentId);
-      // ignore: avoid_print
-      print('[DocumentViewer] GET $url');
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'},
-      );
-      // ignore: avoid_print
-      print('[DocumentViewer] status=${response.statusCode} contentType=${response.headers['content-type']} size=${response.bodyBytes.length}');
-      if (response.statusCode == 200) {
-        if (mounted) setState(() { _bytes = response.bodyBytes; _loading = false; });
-      } else {
-        if (mounted) setState(() { _loading = false; _error = 'Erreur ${response.statusCode}'; });
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadFiles() async {
+    final token = UserSession.instance.accessToken;
+    final ids = [
+      widget.existing.id,
+      if (widget.existing.backFileId != null) widget.existing.backFileId!,
+    ];
+    final results = <Map<String, dynamic>>[];
+    for (final id in ids) {
+      try {
+        final url = BaseUrl.profileDocumentFile(id);
+        final response = await http.get(
+          Uri.parse(url),
+          headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'},
+        );
+        if (response.statusCode == 200) {
+          final data = response.bodyBytes;
+          final isPdf = data.length >= 4 &&
+              data[0] == 0x25 && data[1] == 0x50 &&
+              data[2] == 0x44 && data[3] == 0x46;
+          if (isPdf) {
+            final dir = await getTemporaryDirectory();
+            final file = File('${dir.path}/viewer_mes_docs_$id.pdf');
+            await file.writeAsBytes(data);
+            results.add({'pdfPath': file.path});
+          } else {
+            results.add({'bytes': data});
+          }
+        } else {
+          results.add({'error': 'Erreur ${response.statusCode}'});
+        }
+      } catch (e) {
+        results.add({'error': e.toString()});
       }
-    } catch (e) {
-      // ignore: avoid_print
-      print('[DocumentViewer] ERROR: $e');
-      if (mounted) setState(() { _loading = false; _error = e.toString(); });
     }
-  }
-
-  bool get _isPdf {
-    if (_bytes == null || _bytes!.length < 4) return false;
-    return _bytes![0] == 0x25 && _bytes![1] == 0x50 &&
-           _bytes![2] == 0x44 && _bytes![3] == 0x46;
+    if (mounted) setState(() { _pages.addAll(results); _loading = false; });
   }
 
   @override
   Widget build(BuildContext context) {
     final screenH = MediaQuery.of(context).size.height;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final isPdfReady = _bytes != null && _isPdf;
+    final total = _pages.length;
     return Container(
       height: screenH,
       child: Column(
@@ -1559,6 +1874,24 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    if (!_loading && total > 1)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryDark.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '${_currentPage + 1}/$total',
+                          style: TextStyle(
+                            fontFamily: AppConstants.fontFamilyInter,
+                            fontSize: AppConstants.fontSizeRegular,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryDark,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(width: 8),
                     GestureDetector(
                       onTap: () => Navigator.of(context).pop(),
                       child: Icon(Icons.close,
@@ -1578,104 +1911,125 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
                       valueColor: AlwaysStoppedAnimation(AppColors.primaryDark),
                     ),
                   )
-                : _error != null
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.error_outline,
-                                color: AppColors.statusRejected, size: 48),
-                            const SizedBox(height: 12),
-                            Text(_error!,
-                                style: TextStyle(
-                                  fontFamily: AppConstants.fontFamilyInter,
-                                  color: AppColors.textSecondary,
-                                  fontSize: AppConstants.fontSizeMedium,
-                                )),
-                          ],
-                        ),
-                      )
-                    : _bytes != null
-                        ? _isPdf
-                            ? _PdfBytesViewer(bytes: _bytes!)
-                            : Padding(
-                                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                                  child: InteractiveViewer(
-                                    minScale: 0.5,
-                                    maxScale: 4.0,
-                                    child: Image.memory(
-                                      _bytes!,
-                                      fit: BoxFit.contain,
-                                      width: double.infinity,
-                                      errorBuilder: (_, __, ___) => Center(
-                                        child: Icon(
-                                          Icons.insert_drive_file_outlined,
-                                          size: 80,
-                                          color: AppColors.primary,
+                : total == 0
+                    ? Center(child: Icon(Icons.insert_drive_file_outlined, size: 80, color: AppColors.primary))
+                    : Stack(
+                        children: [
+                          PageView.builder(
+                            controller: _pageController,
+                            itemCount: total,
+                            onPageChanged: (i) => setState(() => _currentPage = i),
+                            itemBuilder: (_, i) => _buildPage(_pages[i]),
+                          ),
+                          if (total > 1 && _currentPage == 0)
+                            Positioned(
+                              bottom: 32,
+                              left: 0,
+                              right: 0,
+                              child: Center(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.textDark.withValues(alpha: 0.65),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.swipe, color: AppColors.white, size: 16),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'documents.swipe_hint'.tr(),
+                                        style: TextStyle(
+                                          fontFamily: AppConstants.fontFamilyInter,
+                                          fontSize: AppConstants.fontSizeRegular,
+                                          color: AppColors.white,
                                         ),
                                       ),
-                                    ),
+                                    ],
                                   ),
                                 ),
-                              )
-                        : Center(
-                            child: Icon(
-                              Icons.insert_drive_file_outlined,
-                              size: 80,
-                              color: AppColors.primary,
+                              ),
                             ),
-                          ),
+                        ],
+                      ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPage(Map<String, dynamic> page) {
+    if (page['error'] != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, color: AppColors.statusRejected, size: 48),
+            const SizedBox(height: 12),
+            Text(
+              page['error'] as String,
+              style: TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                color: AppColors.textSecondary,
+                fontSize: AppConstants.fontSizeMedium,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    if (page['pdfPath'] != null) {
+      return _PdfBytesViewer(filePath: page['pdfPath'] as String);
+    }
+    if (page['bytes'] != null) {
+      return _ZoomablePage(bytes: page['bytes'] as Uint8List);
+    }
+    return Center(child: Icon(Icons.insert_drive_file_outlined, size: 80, color: AppColors.primary));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// PAGE ZOOMABLE
+// ─────────────────────────────────────────────────────────────────
+class _ZoomablePage extends StatelessWidget {
+  final Uint8List bytes;
+  const _ZoomablePage({required this.bytes});
+
+  @override
+  Widget build(BuildContext context) {
+    return InteractiveViewer(
+      minScale: 0.8,
+      maxScale: 4.0,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Image.memory(
+            bytes,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Icon(Icons.insert_drive_file_outlined, size: 80, color: AppColors.primary),
+          ),
+        ),
       ),
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────
-// PDF VIEWER — écrit les bytes dans un fichier temp puis affiche
+// PDF VIEWER — affiche un PDF depuis un chemin fichier
 // ─────────────────────────────────────────────────────────────────
-class _PdfBytesViewer extends StatefulWidget {
-  final Uint8List bytes;
-  const _PdfBytesViewer({required this.bytes});
-
-  @override
-  State<_PdfBytesViewer> createState() => _PdfBytesViewerState();
-}
-
-class _PdfBytesViewerState extends State<_PdfBytesViewer> {
-  String? _tempPath;
-
-  @override
-  void initState() {
-    super.initState();
-    _writeTempFile();
-  }
-
-  Future<void> _writeTempFile() async {
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/doc_viewer_${DateTime.now().millisecondsSinceEpoch}.pdf');
-    await file.writeAsBytes(widget.bytes);
-    if (mounted) setState(() => _tempPath = file.path);
-  }
+class _PdfBytesViewer extends StatelessWidget {
+  final String filePath;
+  const _PdfBytesViewer({required this.filePath});
 
   @override
   Widget build(BuildContext context) {
-    if (_tempPath == null) {
-      return Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation(AppColors.primaryDark),
-        ),
-      );
-    }
     return InteractiveViewer(
       minScale: 1.0,
       maxScale: 4.0,
       child: SizedBox.expand(
         child: PDFView(
-          filePath: _tempPath!,
+          filePath: filePath,
           enableSwipe: true,
           swipeHorizontal: false,
           autoSpacing: false,

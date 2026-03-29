@@ -353,6 +353,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                         Navigator.of(context).pop();
                         context.read<NotificationsBloc>().add(const ResetNotificationsEvent());
                         context.read<ProfileBloc>().add(const ResetProfileEvent());
+                        context.read<UserBloc>().add(ClearUserProfile());
                         SessionStorage.instance.clear();
                         Navigator.of(context)
                             .pushNamedAndRemoveUntil('/login', (r) => false);

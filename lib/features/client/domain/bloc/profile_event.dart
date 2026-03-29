@@ -83,10 +83,11 @@ class LoadDocumentTypesEvent extends ProfileEvent {
 /// Upload d'un document via l'API
 class UploadProfileDocumentEvent extends ProfileEvent {
   final File file;
-  final File? backFile; // verso (optionnel)
+  final File? backFile;
   final String documentTypeId;
   final String? issueDate;
   final String? expirationDate;
+  final bool skipPreDelete; // true quand la suppression est déjà faite en amont
 
   const UploadProfileDocumentEvent({
     required this.file,
@@ -94,6 +95,7 @@ class UploadProfileDocumentEvent extends ProfileEvent {
     required this.documentTypeId,
     this.issueDate,
     this.expirationDate,
+    this.skipPreDelete = false,
   });
 }
 
@@ -101,6 +103,20 @@ class UploadProfileDocumentEvent extends ProfileEvent {
 class DeleteProfileDocumentEvent extends ProfileEvent {
   final String documentId;
   const DeleteProfileDocumentEvent({required this.documentId});
+}
+
+/// Remplacer le fichier d'un document individuel via PATCH
+class ReplaceProfileDocumentFileEvent extends ProfileEvent {
+  final String documentId;
+  final File file;
+  final String? issueDate;
+  final String? expirationDate;
+  const ReplaceProfileDocumentFileEvent({
+    required this.documentId,
+    required this.file,
+    this.issueDate,
+    this.expirationDate,
+  });
 }
 
 /// Modifier les dates d'un document existant (PATCH)

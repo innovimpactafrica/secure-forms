@@ -38,6 +38,23 @@ class ProfileDocumentRepository {
         expirationDate: expirationDate,
       );
 
+  Future<void> replaceDocumentFile({
+    required String token,
+    required String documentId,
+    File? file,
+    String? issueDate,
+    String? expirationDate,
+  }) async {
+    _fileCache.remove(documentId);
+    return _service.replaceDocumentFile(
+      token: token,
+      documentId: documentId,
+      file: file,
+      issueDate: issueDate,
+      expirationDate: expirationDate,
+    );
+  }
+
   Future<void> patchDocument({
     required String token,
     required String documentId,
@@ -63,8 +80,23 @@ class ProfileDocumentRepository {
   Future<List<int>> getDocumentFile({
     required String token,
     required String documentId,
+    String? directUrl, // URL MinIO signée directe (nouveau format)
   }) async {
-    // Retourner depuis le cache si disponible
+    // Si URL directe disponible, l'utiliser sans passer par l'endpoint /file
+    if (directUrl != null && directUrl.isNotEmpty) {
+      final cacheKey = 'url:$directUrl';
+      if (_fileCache.containsKey(cacheKey)) {
+        // ignore: avoid_print
+        print('[ProfileDocumentRepository] Cache HIT (url) pour $documentId');
+        return _fileCache[cacheKey]!;
+      }
+      // ignore: avoid_print
+      print('[ProfileDocumentRepository] Téléchargement MinIO direct: $directUrl');
+      final bytes = await _service.getDocumentFileFromUrl(directUrl);
+      _fileCache[cacheKey] = bytes;
+      return bytes;
+    }
+    // Ancien format : endpoint /file avec token
     if (_fileCache.containsKey(documentId)) {
       // ignore: avoid_print
       print('[ProfileDocumentRepository] Cache HIT pour $documentId');

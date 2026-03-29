@@ -55,7 +55,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       if (userState is UserLoaded && userState.user.id != _lastUserId) {
         _initKycBloc(userState.user.id);
       }
-      context.read<ProfileBloc>().add(const LoadDocumentTypesEvent());
+      context.read<ProfileBloc>().add(const LoadDocumentTypesEvent(forceRefresh: true));
       context.read<DemandesBloc>().add(const LoadRecentDemandesEvent(limit: 5));
       context.read<HomeBloc>().add(const LoadClientStatisticsEvent());
     });

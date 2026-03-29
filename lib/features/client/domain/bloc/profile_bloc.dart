@@ -37,6 +37,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<LoadDocumentTypesEvent>(_onLoadDocumentTypes);
     on<UploadProfileDocumentEvent>(_onUploadProfileDocument);
     on<DeleteProfileDocumentEvent>(_onDeleteProfileDocument);
+    on<ReplaceProfileDocumentFileEvent>(_onReplaceProfileDocumentFile);
     on<PatchProfileDocumentEvent>(_onPatchProfileDocument);
     on<FetchDocumentImageEvent>(_onFetchDocumentImage);
   }
@@ -131,21 +132,26 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ));
 
     try {
-      // Si un document du même type existe déjà, le supprimer avant d'uploader
-      final existing = _uploadedDocuments
-          .where((d) => d.documentTypeId == event.documentTypeId)
-          .firstOrNull;
-      if (existing != null) {
-        _log('Document existant trouvé id=${existing.id} status=${existing.status} — suppression avant re-upload');
-        try {
-          await _repository.deleteDocument(token: token, documentId: existing.id);
-          ProfileDocumentRepository.invalidate(existing.id);
-          _log('Suppression préalable réussie ✓');
-        } catch (e) {
-          _log('Suppression préalable échouée (on continue quand même): $e');
+      // Ne supprimer l'existant QUE si ce n'est pas déjà fait en amont (SingleFileUpdateModal)
+      // On skip la suppression préalable si event.skipPreDelete est true
+      if (!event.skipPreDelete) {
+        final existing = _uploadedDocuments
+            .where((d) => d.documentTypeId == event.documentTypeId)
+            .firstOrNull;
+        if (existing != null) {
+          _log('Document existant trouvé id=${existing.id} status=${existing.status} — suppression avant re-upload');
+          try {
+            await _repository.deleteDocument(token: token, documentId: existing.id);
+            ProfileDocumentRepository.invalidate(existing.id);
+            _log('Suppression préalable réussie ✓');
+          } catch (e) {
+            _log('Suppression préalable échouée (on continue quand même): $e');
+          }
+        } else {
+          _log('Aucun document existant pour typeId=${event.documentTypeId} — upload direct');
         }
       } else {
-        _log('Aucun document existant pour typeId=${event.documentTypeId} — upload direct');
+        _log('skipPreDelete=true — suppression déjà faite en amont');
       }
 
       _log('Lancement upload POST...');
@@ -236,6 +242,62 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       ));
     } catch (e) {
       _log('ERREUR DeleteProfileDocument: $e');
+      emit(ProfileError(message: e.toString().replaceAll('Exception: ', '')));
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // REMPLACER FICHIER INDIVIDUEL VIA PATCH
+  // ─────────────────────────────────────────────────────────────────
+  Future<void> _onReplaceProfileDocumentFile(
+    ReplaceProfileDocumentFileEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    final token = UserSession.instance.accessToken;
+    _log('ReplaceProfileDocumentFile — documentId=${event.documentId}');
+    final currentProfile = _currentProfile(state);
+    emit(ProfileDocumentUploading(
+      profile: currentProfile,
+      documentTypes: _documentTypes,
+      uploadedDocuments: _uploadedDocuments,
+      completion: _completion,
+    ));
+    try {
+      await _repository.replaceDocumentFile(
+        token: token,
+        documentId: event.documentId,
+        file: event.file,
+        issueDate: event.issueDate,
+        expirationDate: event.expirationDate,
+      );
+      _log('Remplacement réussi ✓');
+      // Invalider le cache pour forcer le rechargement de la nouvelle image
+      ProfileDocumentRepository.invalidate(event.documentId);
+      ProfileDocumentRepository.clearCache();
+      _uploadedDocuments = await _repository.getDocuments(token);
+      _completion = await _repository.getProfileCompletion(token);
+      // Forcer un timestamp de refresh pour que les widgets _DocumentImage se recréent
+      final refreshTs = DateTime.now().millisecondsSinceEpoch;
+      final updatedProfile = currentProfile.copyWith(
+        progressPercent: _completion.completion / 100.0,
+      );
+      // Émettre d'abord un état intermédiaire pour forcer le rebuild
+      emit(ProfileDocumentDeleted(
+        profile: updatedProfile,
+        documentTypes: _documentTypes,
+        uploadedDocuments: [],
+        completion: _completion,
+      ));
+      await Future.delayed(const Duration(milliseconds: 50));
+      emit(ProfileDocumentUploadedSuccess(
+        profile: updatedProfile,
+        documentTypes: _documentTypes,
+        uploadedDocuments: _uploadedDocuments,
+        completion: _completion,
+      ));
+      _log('refreshTs=$refreshTs');
+    } catch (e) {
+      _log('ERREUR ReplaceProfileDocumentFile: $e');
       emit(ProfileError(message: e.toString().replaceAll('Exception: ', '')));
     }
   }
@@ -417,6 +479,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       completion: 50,
       requiredDocuments: [],
     );
+    // Vider le cache des fichiers pour le nouvel utilisateur
+    ProfileDocumentRepository.clearCache();
     emit(const ProfileInProgress(
         profile: ProfileModel(progressPercent: 0.50)));
   }

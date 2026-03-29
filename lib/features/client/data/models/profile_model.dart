@@ -137,15 +137,16 @@ class DocumentTypeModel {
 
 /// Document uploadé retourné par GET /api/users/profile/documents
 class UploadedDocumentModel {
-  final String id;
+  final String id;              // id du premier fichier (files[0].id)
   final String documentTypeId;
   final String documentTypeTitle;
   final String status;
   final String? issueDate;
   final String? expirationDate;
   final DateTime? uploadedAt;
-  /// URL du fichier : GET /api/users/profile/documents/{id}/file
-  final String? fileUrl;
+  final String? fileUrl;        // URL MinIO signée directe (files[0].filePath)
+  final String? backFileId;     // id du deuxième fichier si présent (files[1].id)
+  final String? backFileUrl;    // URL MinIO signée du verso (files[1].filePath)
 
   const UploadedDocumentModel({
     required this.id,
@@ -156,21 +157,54 @@ class UploadedDocumentModel {
     this.expirationDate,
     this.uploadedAt,
     this.fileUrl,
+    this.backFileId,
+    this.backFileUrl,
   });
 
   factory UploadedDocumentModel.fromJson(Map<String, dynamic> json) {
-    final id = json['id']?.toString() ?? '';
+    // Nouveau format bundle : {bundleKey, documentTypeId, files:[{id, filePath}]}
+    // Format réponse upload : [{id, filePath, documentTypeId, status, ...}]
+    final files = (json['files'] as List<dynamic>? ?? []);
+    final firstFile  = files.isNotEmpty ? files[0] as Map<String, dynamic> : null;
+    final secondFile = files.length > 1  ? files[1] as Map<String, dynamic> : null;
+
+    // id : files[0].id > json['id']
+    final id = firstFile?['id']?.toString()
+        ?? json['id']?.toString()
+        ?? '';
+
+    // fileUrl : files[0].filePath > json['filePath'] > json['fileUrl']
+    final fileUrl = firstFile?['filePath']?.toString()
+        ?? json['filePath']?.toString()
+        ?? json['fileUrl']?.toString();
+
+    final backFileId  = secondFile?['id']?.toString();
+    final backFileUrl = secondFile?['filePath']?.toString();
+
+    final documentTypeId = (json['documentTypeId']
+        ?? json['documentType']?['id']
+        ?? '').toString();
+
+    final documentTypeTitle = (json['label']
+        ?? json['documentType']?['title']
+        ?? json['documentTypeTitle']
+        ?? '').toString();
+
     return UploadedDocumentModel(
       id: id,
-      documentTypeId: (json['documentType']?['id'] ?? json['documentTypeId'] ?? '').toString(),
-      documentTypeTitle: (json['documentType']?['title'] ?? json['documentTypeTitle'] ?? '').toString(),
+      documentTypeId: documentTypeId,
+      documentTypeTitle: documentTypeTitle,
       status: json['status']?.toString() ?? 'PENDING',
       issueDate: json['issueDate']?.toString(),
       expirationDate: json['expirationDate']?.toString(),
-      uploadedAt: json['uploadedAt'] != null
-          ? DateTime.tryParse(json['uploadedAt'].toString())
-          : null,
-      fileUrl: json['fileUrl']?.toString(),
+      uploadedAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
+          : json['uploadedAt'] != null
+              ? DateTime.tryParse(json['uploadedAt'].toString())
+              : null,
+      fileUrl: fileUrl,
+      backFileId: backFileId,
+      backFileUrl: backFileUrl,
     );
   }
 }
