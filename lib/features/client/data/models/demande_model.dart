@@ -40,6 +40,8 @@ class DemandeModel {
   final String organisationName;
   final String category;
   final String createdAt;
+  final String? inProgressAt;
+  final String? finalizedAt;
   final bool isDraft;
   final String? pdfUrl;
   final List<SubmittedFormItem> submittedForms;
@@ -53,6 +55,8 @@ class DemandeModel {
     required this.organisationName,
     required this.category,
     required this.createdAt,
+    this.inProgressAt,
+    this.finalizedAt,
     this.isDraft = false,
     this.pdfUrl,
     this.submittedForms = const [],
@@ -68,6 +72,8 @@ class DemandeModel {
     print('[DemandeModel.fromJson] keys=${json.keys.toList()}');
     // ignore: avoid_print
     print('[DemandeModel.fromJson] formName=${json["formName"]} | formType=${json["formType"]} | form=$form | organisationName=${json["organisationName"]} | organisation=$org | createdAt=${json["createdAt"]}');
+    // ignore: avoid_print
+    print('[DemandeModel.fromJson] inProgressAt=${json["inProgressAt"]} | processedAt=${json["processedAt"]} | finalizedAt=${json["finalizedAt"]} | validatedAt=${json["validatedAt"]}');
 
     final submittedFormsList = (json['submittedForms'] as List?)?.map(
       (e) => SubmittedFormItem.fromJson(e as Map<String, dynamic>),
@@ -94,11 +100,25 @@ class DemandeModel {
       createdAt: _parseDate(
         (json['createdAt'] ?? json['date'])?.toString() ?? '',
       ),
+      inProgressAt: _parseDateOrNull(json['updatedAt']),
+      finalizedAt: _parseDateOrNull(json['finalizedAt']),
       isDraft: json['status']?.toString() == 'BROUILLON',
       pdfUrl: submitted?['pdfUrl']?.toString() ?? json['pdfUrl']?.toString(),
       submittedForms: submittedFormsList,
       requiredDocuments: requiredDocsList,
     );
+  }
+
+  static String? _parseDateOrNull(dynamic raw) {
+    if (raw == null) return null;
+    final s = raw.toString();
+    if (s.isEmpty || s == 'null') return null;
+    try {
+      final dt = DateTime.parse(s);
+      return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+    } catch (_) {
+      return null;
+    }
   }
 
   static String _parseDate(String raw) {

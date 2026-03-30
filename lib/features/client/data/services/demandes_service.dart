@@ -104,10 +104,25 @@ class DemandesService {
     final response = await _client.get(uri, headers: _headers(accessToken));
     debugPrint('[DemandesService] GET $uri → ${response.statusCode}');
     if (response.statusCode == 200) {
-      final json = jsonDecode(response.body) as Map<String, dynamic>;
-      debugPrint('[DemandesService] submittedForms raw=${json['submittedForms']}');
-      debugPrint('[DemandesService] requiredDocuments raw=${json['requiredDocuments']}');
-      return json;
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
+debugPrint('[DemandesService] submittedForms raw=${json['submittedForms']}');
+debugPrint('[DemandesService] requiredDocuments raw=${json['requiredDocuments']}');
+
+// 👇 LOGS DATES — à supprimer après
+debugPrint('[DemandesService] ===== TOUS LES CHAMPS DE DATES =====');
+debugPrint('[DemandesService] createdAt=${json['createdAt']}');
+debugPrint('[DemandesService] updatedAt=${json['updatedAt']}');
+debugPrint('[DemandesService] submittedAt=${json['submittedAt']}');
+debugPrint('[DemandesService] inProgressAt=${json['inProgressAt']}');
+debugPrint('[DemandesService] processedAt=${json['processedAt']}');
+debugPrint('[DemandesService] completedAt=${json['completedAt']}');
+debugPrint('[DemandesService] finalizedAt=${json['finalizedAt']}');
+debugPrint('[DemandesService] validatedAt=${json['validatedAt']}');
+debugPrint('[DemandesService] rejectedAt=${json['rejectedAt']}');
+debugPrint('[DemandesService] ALL KEYS=${json.keys.toList()}');
+debugPrint('[DemandesService] =====================================');
+
+return json;
     }
     throw Exception('Erreur détail demande: ${response.statusCode}');
   }

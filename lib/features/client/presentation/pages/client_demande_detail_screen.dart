@@ -241,6 +241,7 @@ class _ClientDemandeDetailScreenState
 
   Widget _buildStepper(_DemandeStatus status) {
     final steps = _getStepStates(status);
+    final d = _demande!;
     return Column(
       children: [
         Row(
@@ -265,17 +266,35 @@ class _ClientDemandeDetailScreenState
             ),
             SizedBox(
               width: 60,
-              child: Text('demandes.in_progress'.tr(),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontSize: 11, color: AppColors.textSecondary)),
+              child: Column(
+                children: [
+                  Text('demandes.in_progress'.tr(),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontSize: 11, color: AppColors.textSecondary)),
+                  if (d.inProgressAt != null)
+                    Text(d.inProgressAt!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                ],
+              ),
             ),
             SizedBox(
               width: 60,
-              child: Text('demande_detail.finalized'.tr(),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontSize: 11, color: AppColors.textSecondary)),
+              child: Column(
+                children: [
+                  Text('demande_detail.finalized'.tr(),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontSize: 11, color: AppColors.textSecondary)),
+                  if (d.finalizedAt != null)
+                    Text(d.finalizedAt!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                ],
+              ),
             ),
           ],
         ),
