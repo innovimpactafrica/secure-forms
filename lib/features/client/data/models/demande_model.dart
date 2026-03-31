@@ -83,6 +83,19 @@ class DemandeModel {
       (e) => RequiredDocumentItem.fromJson(e as Map<String, dynamic>),
     ).toList() ?? [];
 
+    final tracking = (json['tracking'] as List?) ?? [];
+
+    String? submittedAt;
+    String? inProgressAt;
+    String? finalizedAt;
+    for (final t in tracking) {
+      final s = t['status']?.toString().toUpperCase() ?? '';
+      final d = t['date']?.toString();
+      if (s == 'SOUMISE') submittedAt = _parseDateOrNull(d);
+      if (s == 'EN_COURS') inProgressAt = _parseDateOrNull(d);
+      if (s == 'VALIDATION_FINALE' || s == 'VALIDEE') finalizedAt = _parseDateOrNull(d);
+    }
+
     return DemandeModel(
       id: json['id']?.toString() ?? '',
       requestNumber: json['requestNumber']?.toString() ?? json['id']?.toString() ?? '',
@@ -97,11 +110,11 @@ class DemandeModel {
           (json['institution']?.toString()?.isNotEmpty == true ? json['institution'].toString() : null) ??
           '',
       category: org?['sector']?.toString() ?? json['category']?.toString() ?? '',
-      createdAt: _parseDate(
+      createdAt: submittedAt ?? _parseDate(
         (json['createdAt'] ?? json['date'])?.toString() ?? '',
       ),
-      inProgressAt: _parseDateOrNull(json['updatedAt']),
-      finalizedAt: _parseDateOrNull(json['finalizedAt']),
+      inProgressAt: inProgressAt,
+      finalizedAt: finalizedAt,
       isDraft: json['status']?.toString() == 'BROUILLON',
       pdfUrl: submitted?['pdfUrl']?.toString() ?? json['pdfUrl']?.toString(),
       submittedForms: submittedFormsList,

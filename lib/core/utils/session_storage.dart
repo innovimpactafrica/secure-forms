@@ -11,6 +11,7 @@ class SessionStorage {
   static const String _keyEmail         = 'session_email';
   static const String _keyRole          = 'session_role';
   static const String _keyUserId        = 'session_user_id';
+  static const String _keyProfileBannerShown = 'profile_banner_shown_'; // + userId
 
   Future<void> save({
     required String token,
@@ -51,5 +52,23 @@ class SessionStorage {
     await prefs.remove(_keyRole);
     await prefs.remove(_keyUserId);
     UserSession.instance.clear();
+  }
+
+  /// Retourne true si le banner "profil 100%" a déjà été affiché pour cet utilisateur
+  static Future<bool> hasShownProfileCompleteBanner(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('$_keyProfileBannerShown$userId') ?? false;
+  }
+
+  /// Marque le banner comme affiché pour cet utilisateur
+  static Future<void> markProfileCompleteBannerShown(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('$_keyProfileBannerShown$userId', true);
+  }
+
+  /// Réinitialise le banner (quand la complétion redescend sous 100)
+  static Future<void> resetProfileCompleteBanner(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('$_keyProfileBannerShown$userId');
   }
 }

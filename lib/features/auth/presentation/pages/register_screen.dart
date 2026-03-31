@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/auth/data/models/auth_request.dart';
@@ -8,7 +9,6 @@ import 'package:secure_link/features/auth/domain/bloc/auth_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_event.dart';
 import 'package:secure_link/features/auth/domain/bloc/auth_state.dart';
 import 'package:secure_link/features/auth/presentation/pages/otp_verification_screen.dart';
-import 'package:secure_link/core/utils/country_code.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -28,7 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   String _selectedGender = 'register.male';
   String _selectedMaritalStatus = '';
-  CountryCode _selectedCountry = kCountryCodes.first;
+  String _fullPhone = ''; // numéro complet avec indicatif
 
   final List<String> _maritalStatusOptions = [
     'profile.single',
@@ -50,66 +50,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   };
 
 
- void _showCountryPicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        maxChildSize: 0.9,
-        minChildSize: 0.4,
-        builder: (_, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              const SizedBox(height: 12),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.borderLight,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: kCountryCodes.length,
-                  itemBuilder: (_, i) {
-                    final country = kCountryCodes[i];
-                    return ListTile(
-                      leading: Text(country.flag,
-                          style: const TextStyle(fontSize: 24)),
-                      title: Text(country.name,
-                          style: const TextStyle(
-                            fontFamily: AppConstants.fontFamilyInter,
-                            fontSize: AppConstants.fontSizeMedium,
-                          )),
-                      trailing: Text(country.dialCode,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontFamily: AppConstants.fontFamilyInter,
-                          )),
-                      onTap: () {
-                        setState(() => _selectedCountry = country);
-                        Navigator.of(context).pop();
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   void dispose() {
     _firstNameController.dispose();
@@ -128,7 +68,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               lastName: _lastNameController.text.trim(),
               firstName: _firstNameController.text.trim(),
               email: _emailController.text.trim(),
-              phone: '${_selectedCountry.dialCode}${_phoneController.text.trim()}',
+              phone: _fullPhone,
               address: 'Dakar',
               dateOfBirth: _birthDateController.text.trim(),
               gender: _genderMap[_selectedGender] ?? 'HOMME',
@@ -149,7 +89,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             final authBloc = context.read<AuthBloc>();
             final email = state.email;
             final sessionToken = state.sessionToken;
-            final phone = _phoneController.text.trim();
 
             // 1. Afficher le modal de succès
             showModalBottomSheet(
@@ -160,8 +99,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               isScrollControlled: true,
               useSafeArea: true,
               builder: (_) => _RegisterSuccessBottomSheet(
-                phone: phone,
-                dialCode: _selectedCountry.dialCode,
+                phone: _phoneController.text.trim(),
+                dialCode: '',
               ),
             );
 
@@ -284,10 +223,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             const SizedBox(height: AppConstants.paddingLarge),
 
-                            _PhoneField(
+                            _IntlPhoneField(
                               controller: _phoneController,
-                              selectedCountry: _selectedCountry,
-                              onCountryTap: () => _showCountryPicker(context),
+                              onChanged: (phone) => _fullPhone = phone.completeNumber,
                             ),
                             const SizedBox(height: AppConstants.paddingLarge),
 
@@ -505,15 +443,13 @@ class _FormField extends StatelessWidget {
   }
 }
 
-class _PhoneField extends StatelessWidget {
+class _IntlPhoneField extends StatelessWidget {
   final TextEditingController controller;
-  final CountryCode selectedCountry;
-  final VoidCallback onCountryTap;
+  final void Function(dynamic phone) onChanged;
 
-  const _PhoneField({
+  const _IntlPhoneField({
     required this.controller,
-    required this.selectedCountry,
-    required this.onCountryTap,
+    required this.onChanged,
   });
 
   @override
@@ -523,43 +459,26 @@ class _PhoneField extends StatelessWidget {
       children: [
         _FieldLabel(label: 'register.phone'.tr()),
         const SizedBox(height: 6),
-        TextFormField(
+        IntlPhoneField(
           controller: controller,
-          keyboardType: TextInputType.phone,
-          validator: (v) => v!.isEmpty ? 'login.required_field'.tr() : null,
+          initialCountryCode: 'SN',
+          onChanged: onChanged,
           style: const TextStyle(
             fontFamily: AppConstants.fontFamilyInter,
             fontSize: AppConstants.fontSizeMedium,
             color: AppColors.textDark,
           ),
+          dropdownTextStyle: const TextStyle(
+            fontFamily: AppConstants.fontFamilyInter,
+            fontSize: AppConstants.fontSizeMedium,
+            color: AppColors.textDark,
+          ),
           decoration: InputDecoration(
-            hintText: 'register.phone_hint'.tr(),
+            hintText: '77 123 45 67',
             hintStyle: const TextStyle(
               fontFamily: AppConstants.fontFamilyInter,
               color: AppColors.hintText,
               fontSize: AppConstants.fontSizeMedium,
-            ),
-            prefixIcon: GestureDetector(
-              onTap: onCountryTap,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(selectedCountry.flag,
-                        style: const TextStyle(fontSize: AppConstants.flagSize)),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.keyboard_arrow_down,
-                        color: AppColors.textSecondary,
-                        size: AppConstants.chevronSize),
-                    const SizedBox(width: 4),
-                    Container(
-                        width: AppConstants.separatorWidth,
-                        height: AppConstants.separatorHeight,
-                        color: AppColors.borderLight),
-                  ],
-                ),
-              ),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             filled: true,
@@ -574,8 +493,7 @@ class _PhoneField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-              borderSide: const BorderSide(color: AppColors.primary,
-                  width: AppConstants.borderWidthMedium),
+              borderSide: const BorderSide(color: AppColors.primary, width: AppConstants.borderWidthMedium),
             ),
           ),
         ),

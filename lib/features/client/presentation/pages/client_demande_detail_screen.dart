@@ -257,42 +257,44 @@ class _ClientDemandeDetailScreenState
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // Soumise
             SizedBox(
               width: 60,
               child: Text('demande_detail.submitted'.tr(),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontSize: 11, color: AppColors.textSecondary)),
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
             ),
+            // En cours
             SizedBox(
               width: 60,
               child: Column(
                 children: [
+                  if (status == _DemandeStatus.enAttente)
+                    Image.asset('assets/images/sablier.png', width: 24, height: 24),
                   Text('demandes.in_progress'.tr(),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          fontSize: 11, color: AppColors.textSecondary)),
+                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   if (d.inProgressAt != null)
                     Text(d.inProgressAt!,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                        style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600)),
                 ],
               ),
             ),
+            // Finalisé
             SizedBox(
               width: 60,
               child: Column(
                 children: [
+                  if (status == _DemandeStatus.enAttente || status == _DemandeStatus.enCours)
+                    Image.asset('assets/images/sablier.png', width: 24, height: 24),
                   Text('demande_detail.finalized'.tr(),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          fontSize: 11, color: AppColors.textSecondary)),
+                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   if (d.finalizedAt != null)
                     Text(d.finalizedAt!,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                        style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600)),
                 ],
               ),
             ),

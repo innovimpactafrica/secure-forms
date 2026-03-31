@@ -5,10 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/core/utils/country_code.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
@@ -32,10 +32,9 @@ class _ClientInformationsPersonnellesScreenState
 
   late String _selectedGender;
   String? _selectedSituation;
-  // Photo de profil locale (avant upload) ou bytes depuis l'API
   File? _localPicture;
   Uint8List? _pictureBytes;
-  CountryCode _selectedCountry = kCountryCodes.first;
+  String _fullPhone = '';
 
   @override
   void initState() {
@@ -55,16 +54,26 @@ class _ClientInformationsPersonnellesScreenState
       _prenomController.text = user.firstName;
       _nomController.text = user.lastName;
       _emailController.text = user.email;
-      final matchedCountry = kCountryCodes.firstWhere(
-        (c) => user.phone.startsWith(c.dialCode),
-        orElse: () => kCountryCodes.first,
-      );
-      _selectedCountry = matchedCountry;
-      final phone = user.phone
-          .replaceAll(matchedCountry.dialCode, '')
-          .replaceAll(' ', '')
-          .trim();
-      _telephoneController.text = phone;
+      _fullPhone = user.phone;
+      // Extraire seulement le numéro local sans l'indicatif pour IntlPhoneField
+      final localNumber = _extractLocalNumber(user.phone);
+      _telephoneController.text = localNumber;
+      // Date de naissance
+      if (user.dateOfBirth.isNotEmpty) {
+        final dt = DateTime.tryParse(user.dateOfBirth);
+        if (dt != null) {
+          _dateNaissanceController.text =
+              '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+        }
+      }
+      // Situation matrimoniale
+      if (user.maritalStatus.isNotEmpty) {
+        _selectedSituation = _maritalStatusToLabel(user.maritalStatus);
+      }
+      // Genre
+      if (user.gender.isNotEmpty) {
+        _selectedGender = _genderToLabel(user.gender);
+      }
     } else {
       // ignore: avoid_print
       print('[InfosPerso] Aucun user en cache → rechargement profil');
@@ -86,6 +95,52 @@ class _ClientInformationsPersonnellesScreenState
         'profile.divorced'.tr(),
         'profile.widowed'.tr(),
       ];
+
+  /// Convertit la valeur API (ex: "CELIBATAIRE") en label traduit
+  String? _maritalStatusToLabel(String apiValue) {
+    switch (apiValue.toUpperCase()) {
+      case 'CELIBATAIRE': return 'profile.single'.tr();
+      case 'MARIE':       return 'profile.married'.tr();
+      case 'DIVORCE':     return 'profile.divorced'.tr();
+      case 'VEUF':        return 'profile.widowed'.tr();
+      default:            return null;
+    }
+  }
+
+  String _genderToLabel(String apiValue) {
+    switch (apiValue.toUpperCase()) {
+      case 'FEMME': return 'profile.female'.tr();
+      default:      return 'profile.male'.tr();
+    }
+  }
+
+  /// Retire l'indicatif du numéro complet pour n'avoir que le numéro local
+  /// Ex: "+221779947443" -> "779947443"
+  String _extractLocalNumber(String fullPhone) {
+    if (fullPhone.isEmpty) return '';
+    // Liste des indicatifs courants triés par longueur décroissante
+    const dialCodes = [
+      '+1', '+7', '+20', '+27', '+30', '+31', '+32', '+33', '+34', '+36',
+      '+39', '+40', '+41', '+43', '+44', '+45', '+46', '+47', '+48', '+49',
+      '+51', '+52', '+53', '+54', '+55', '+56', '+57', '+58', '+60', '+61',
+      '+62', '+63', '+64', '+65', '+66', '+81', '+82', '+84', '+86', '+90',
+      '+91', '+92', '+93', '+94', '+95', '+98', '+212', '+213', '+216',
+      '+218', '+220', '+221', '+222', '+223', '+224', '+225', '+226', '+227',
+      '+228', '+229', '+230', '+231', '+232', '+233', '+234', '+235', '+236',
+      '+237', '+238', '+239', '+240', '+241', '+242', '+243', '+244', '+245',
+      '+246', '+247', '+248', '+249', '+250', '+251', '+252', '+253', '+254',
+      '+255', '+256', '+257', '+258', '+260', '+261', '+262', '+263', '+264',
+      '+265', '+266', '+267', '+268', '+269',
+    ];
+    // Trier par longueur décroissante pour matcher le plus long en premier
+    final sorted = [...dialCodes]..sort((a, b) => b.length.compareTo(a.length));
+    for (final code in sorted) {
+      if (fullPhone.startsWith(code)) {
+        return fullPhone.substring(code.length);
+      }
+    }
+    return fullPhone;
+  }
 
   @override
   void dispose() {
@@ -136,16 +191,21 @@ class _ClientInformationsPersonnellesScreenState
             if (_emailController.text.isEmpty)
               _emailController.text = user.email;
             if (_telephoneController.text.isEmpty) {
-              final matchedCountry = kCountryCodes.firstWhere(
-                (c) => user.phone.startsWith(c.dialCode),
-                orElse: () => kCountryCodes.first,
-              );
-              _selectedCountry = matchedCountry;
-              final phone = user.phone
-                  .replaceAll(matchedCountry.dialCode, '')
-                  .replaceAll(' ', '')
-                  .trim();
-              _telephoneController.text = phone;
+              _fullPhone = user.phone;
+              _telephoneController.text = _extractLocalNumber(user.phone);
+            }
+            if (_dateNaissanceController.text.isEmpty && user.dateOfBirth.isNotEmpty) {
+              final dt = DateTime.tryParse(user.dateOfBirth);
+              if (dt != null) {
+                _dateNaissanceController.text =
+                    '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+              }
+            }
+            if (_selectedSituation == null && user.maritalStatus.isNotEmpty) {
+              _selectedSituation = _maritalStatusToLabel(user.maritalStatus);
+            }
+            if (user.gender.isNotEmpty) {
+              _selectedGender = _genderToLabel(user.gender);
             }
           });
         } else if (state is UserError) {
@@ -256,66 +316,6 @@ class _ClientInformationsPersonnellesScreenState
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  void _showCountryPicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        maxChildSize: 0.9,
-        minChildSize: 0.4,
-        builder: (_, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              const SizedBox(height: 12),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.borderLight,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: kCountryCodes.length,
-                  itemBuilder: (_, i) {
-                    final country = kCountryCodes[i];
-                    return ListTile(
-                      leading: Text(country.flag,
-                          style: const TextStyle(fontSize: 24)),
-                      title: Text(country.name,
-                          style: const TextStyle(
-                            fontFamily: AppConstants.fontFamilyInter,
-                            fontSize: AppConstants.fontSizeMedium,
-                          )),
-                      trailing: Text(country.dialCode,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontFamily: AppConstants.fontFamilyInter,
-                          )),
-                      onTap: () {
-                        setState(() => _selectedCountry = country);
-                        Navigator.of(context).pop();
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -570,64 +570,30 @@ class _ClientInformationsPersonnellesScreenState
   // -------------------------------------------------------------------------
 
   Widget _buildPhoneField() {
-    return Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: AppColors.borderGray),
-      ),
-      child: Row(
-        children: [
-          // ── Sélecteur pays (même style que l'inscription) ──
-          GestureDetector(
-            onTap: () => _showCountryPicker(context),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(_selectedCountry.flag,
-                      style: const TextStyle(fontSize: AppConstants.flagSize)),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.keyboard_arrow_down,
-                      color: AppColors.textSecondary,
-                      size: AppConstants.chevronSize),
-                ],
-              ),
-            ),
-          ),
-          // ── Séparateur ──
-          Container(width: 1, height: 20, color: AppColors.borderGray),
-          const SizedBox(width: 10),
-          // ── Indicatif dynamique ──
-          Text(
-            _selectedCountry.dialCode,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textDark,
-            ),
-          ),
-          const SizedBox(width: 8),
-          // ── Champ numéro ──
-          Expanded(
-            child: TextField(
-              controller: _telephoneController,
-              keyboardType: TextInputType.phone,
-              style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                hintText: '77 123 45 67',
-                hintStyle:
-                    TextStyle(fontSize: 15, color: AppColors.textSecondary),
-                isDense: true,
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-        ],
+    return IntlPhoneField(
+      controller: _telephoneController,
+      initialCountryCode: 'SN',
+      onChanged: (phone) => _fullPhone = phone.completeNumber,
+      style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+      dropdownTextStyle: const TextStyle(fontSize: 15, color: AppColors.textDark),
+      decoration: InputDecoration(
+        hintText: '77 123 45 67',
+        hintStyle: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        filled: true,
+        fillColor: AppColors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(100),
+          borderSide: BorderSide(color: AppColors.borderGray),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(100),
+          borderSide: BorderSide(color: AppColors.borderGray),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(100),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+        ),
       ),
     );
   }

@@ -7,6 +7,9 @@ class UserProfileModel {
   final String phone;
   final String role;
   final int profileCompletion;
+  final String dateOfBirth;
+  final String maritalStatus;
+  final String gender;
 
   const UserProfileModel({
     this.id = '',
@@ -17,6 +20,9 @@ class UserProfileModel {
     this.phone = '',
     this.role = '',
     this.profileCompletion = 0,
+    this.dateOfBirth = '',
+    this.maritalStatus = '',
+    this.gender = '',
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +35,9 @@ class UserProfileModel {
       phone: json['phone'] ?? '',
       role: json['role'] ?? '',
       profileCompletion: json['profileCompletion'] ?? 0,
+      dateOfBirth: json['dateOfBirth']?.toString() ?? '',
+      maritalStatus: json['maritalStatus']?.toString() ?? '',
+      gender: json['gender']?.toString() ?? '',
     );
   }
 

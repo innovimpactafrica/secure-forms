@@ -6,6 +6,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:secure_link/core/utils/session_storage.dart';
+import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
 import 'package:secure_link/features/client/data/models/demande_model.dart';
@@ -386,19 +388,34 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
   bool _showCompletedBanner = false;
   int _lastCompletion = -1;
 
+  Future<void> _handleCompletion(int newCompletion) async {
+    final userId = UserSession.instance.userId;
+    // Si la complétion redescend sous 100, réinitialiser le flag
+    if (newCompletion < 100 && _lastCompletion >= 100) {
+      await SessionStorage.resetProfileCompleteBanner(userId);
+    }
+    // Afficher le banner seulement si : vient de passer à 100 ET jamais affiché avant
+    if (newCompletion >= 100 && _lastCompletion >= 0 && _lastCompletion < 100) {
+      final alreadyShown = await SessionStorage.hasShownProfileCompleteBanner(userId);
+      if (!alreadyShown) {
+        await SessionStorage.markProfileCompleteBannerShown(userId);
+        if (mounted) {
+          setState(() => _showCompletedBanner = true);
+          Future.delayed(const Duration(seconds: 3), () {
+            if (mounted) setState(() => _showCompletedBanner = false);
+          });
+        }
+      }
+    }
+    _lastCompletion = newCompletion;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<UserBloc, UserState>(
       listener: (context, userState) {
         if (userState is UserLoaded) {
-          final completion = userState.user.profileCompletion;
-          if (completion >= 100 && _lastCompletion >= 0 && _lastCompletion < 100) {
-            setState(() => _showCompletedBanner = true);
-            Future.delayed(const Duration(seconds: 3), () {
-              if (mounted) setState(() => _showCompletedBanner = false);
-            });
-          }
-          _lastCompletion = completion;
+          _handleCompletion(userState.user.profileCompletion);
         }
       },
       child: BlocListener<ProfileBloc, ProfileState>(
@@ -409,15 +426,7 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
           if (profileState is ProfileDocumentUploadedNeedsVerification) newCompletion = profileState.completion.completion;
           if (profileState is ProfileDocumentPatched) newCompletion = profileState.completion.completion;
           if (profileState is ProfileDocumentDeleted) newCompletion = profileState.completion.completion;
-          if (newCompletion != null) {
-            if (newCompletion >= 100 && _lastCompletion >= 0 && _lastCompletion < 100) {
-              setState(() => _showCompletedBanner = true);
-              Future.delayed(const Duration(seconds: 3), () {
-                if (mounted) setState(() => _showCompletedBanner = false);
-              });
-            }
-            _lastCompletion = newCompletion;
-          }
+          if (newCompletion != null) _handleCompletion(newCompletion);
         },
         child: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, profileState) {
