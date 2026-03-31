@@ -14,6 +14,12 @@ import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
 import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/notifications_event.dart';
 import 'package:secure_link/features/auth/presentation/pages/register_screen.dart';
+import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_bloc.dart';
+import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_event.dart';
+import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
+import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
+import 'package:secure_link/features/home/domain/bloc/home_bloc.dart';
+import 'package:secure_link/features/home/domain/bloc/home_event.dart';
 import 'package:secure_link/core/services/fcm_service.dart'; // 👈 NOUVEAU
 import 'package:firebase_messaging/firebase_messaging.dart'; // 👈 NOUVEAU
 import 'dart:convert';
@@ -30,53 +36,70 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  late final AuthBloc _authBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _authBloc = AuthBloc();
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _authBloc.close();
     super.dispose();
   }
 
   void _onLogin(BuildContext context) {
     if (!_formKey.currentState!.validate()) return;
-    context.read<AuthBloc>().add(
-          LoginRequested(
-            email: _emailController.text.trim(),
-            password: _passwordController.text.trim(),
-          ),
-        );
+    _authBloc.add(
+      LoginRequested(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => AuthBloc(),
+    return BlocProvider.value(
+      value: _authBloc,
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
             UserSession.instance.accessToken = state.accessToken;
             UserSession.instance.refreshToken = state.refreshToken;
             UserSession.instance.userId = _extractUserIdFromJwt(state.accessToken);
-            print('[LoginScreen] Login réussi → token stocké (longueur: ${state.accessToken.length})');
-            // Persister la session
             SessionStorage.instance.save(
               token: state.accessToken,
               refreshToken: state.refreshToken,
               name: '${state.firstName} ${state.lastName}'.trim(),
             );
-            // Charger profil + photo en parallèle dès le login
-            context.read<UserBloc>().add(LoadUserProfile(state.accessToken));
-            context.read<UserBloc>().add(LoadProfilePictureEvent(state.accessToken));
-            context.read<NotificationsBloc>().add(const LoadNotificationsEvent());
-
-            // 👇 NOUVEAU — Envoyer le token FCM au backend après login
-            _sendFcmTokenAfterLogin();
-
+            // Récupérer les références AVANT tout gap async
+            final homeBloc = context.read<HomeBloc>();
+            final demandesBloc = context.read<DemandesBloc>();
+            final userBloc = context.read<UserBloc>();
+            final notifBloc = context.read<NotificationsBloc>();
+            final profileBloc = context.read<ProfileBloc>();
+            // Réinitialiser tous les BLoCs pour effacer les données de l'ancien utilisateur
+            homeBloc.add(const ResetHomeEvent());
+            demandesBloc.add(const ResetDemandesEvent());
+            userBloc.add(ResetUserEvent());
+            notifBloc.add(const ResetNotificationsEvent());
+            profileBloc.add(const ResetProfileEvent());
+            // Naviguer IMMEDIATEMENT
             Navigator.of(context).pushNamedAndRemoveUntil(
               AppRoutes.clientHome,
               (route) => false,
             );
+            // Charger les données du nouvel utilisateur en arrière-plan
+            Future.microtask(() {
+              userBloc.add(LoadUserProfile(state.accessToken));
+              notifBloc.add(const LoadNotificationsEvent());
+              _sendFcmTokenAfterLogin();
+            });
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -179,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 prefixIcon: Icons.email_outlined,
                               ),
                             ),
-                            const SizedBox(height: AppConstants.paddingLarge),
+                            const SizedBox(height: 16),
 
                             // ── Mot de passe ──
                             _FieldLabel(label: 'login.password_label'.tr()),
@@ -208,6 +231,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                         : Icons.visibility_outlined,
                                     color: AppColors.textSecondary,
                                     size: AppConstants.iconSizeMedium,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: GestureDetector(
+                                onTap: () => Navigator.of(context)
+                                    .pushNamed(AppRoutes.forgotPassword),
+                                child: Text(
+                                  'forgot_password.title'.tr(),
+                                  style: const TextStyle(
+                                    fontFamily: AppConstants.fontFamilyInter,
+                                    fontSize: AppConstants.fontSizeRegular,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.primary,
                                   ),
                                 ),
                               ),
@@ -244,11 +284,26 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             child: isLoading
-                                ? const SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2, color: AppColors.white),
+                                ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2, color: AppColors.white),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        'Connexion en cours...',
+                                        style: const TextStyle(
+                                          fontFamily: AppConstants.fontFamilySofiaSans,
+                                          color: AppColors.white,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: AppConstants.fontSizeLarge,
+                                        ),
+                                      ),
+                                    ],
                                   )
                                 : Text(
                                     'login.login_button'.tr(),

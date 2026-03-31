@@ -3,5 +3,10 @@ abstract class HomeEvent {
 }
 
 class LoadClientStatisticsEvent extends HomeEvent {
-  const LoadClientStatisticsEvent();
+  final bool forceRefresh;
+  const LoadClientStatisticsEvent({this.forceRefresh = false});
+}
+
+class ResetHomeEvent extends HomeEvent {
+  const ResetHomeEvent();
 }

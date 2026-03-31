@@ -506,15 +506,9 @@ class _ClientDemandeDetailScreenState
   // ── Ouvrir le viewer ──────────────────────────────────────────────────────
 
   void _openViewer(BuildContext context, {required String label, required String url, required bool useToken}) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => _DocumentViewerSheet(label: label, url: url, useToken: useToken),
-    );
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => _DocumentViewerPage(label: label, url: url, useToken: useToken),
+    ));
   }
 
   // ── Bouton télécharger PDF ────────────────────────────────────────────────
@@ -684,29 +678,31 @@ class _HeaderBadge extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Viewer de document (image ou PDF via URL)
+// Page plein écran — viewer document (image ou PDF)
 // ---------------------------------------------------------------------------
 
-class _DocumentViewerSheet extends StatefulWidget {
+class _DocumentViewerPage extends StatefulWidget {
   final String label;
   final String url;
   final bool useToken;
 
-  const _DocumentViewerSheet({
+  const _DocumentViewerPage({
     required this.label,
     required this.url,
     required this.useToken,
   });
 
   @override
-  State<_DocumentViewerSheet> createState() => _DocumentViewerSheetState();
+  State<_DocumentViewerPage> createState() => _DocumentViewerPageState();
 }
 
-class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
+class _DocumentViewerPageState extends State<_DocumentViewerPage> {
   Uint8List? _bytes;
-  String? _pdfPath;   // fichier temp pour flutter_pdfview
+  String? _pdfPath;
   bool _loading = true;
   String? _error;
+  int _totalPages = 0;
+  int _currentPage = 0;
 
   @override
   void initState() {
@@ -717,24 +713,36 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
   Future<void> _loadFile() async {
     try {
       final token = UserSession.instance.accessToken;
-      final headers = widget.useToken
-          ? {'Authorization': 'Bearer $token', 'Accept': '*/*'}
-          : <String, String>{};
-      // ignore: avoid_print
-      print('[DocumentViewer] GET ${widget.url} useToken=${widget.useToken}');
-      final response = await http.get(Uri.parse(widget.url), headers: headers);
-      // ignore: avoid_print
-      print('[DocumentViewer] status=${response.statusCode} contentType=${response.headers['content-type']} size=${response.bodyBytes.length}');
+      http.Response response;
+
+      // 1. Essai direct (MinIO ou URL publique)
+      if (!widget.useToken) {
+        response = await http
+            .get(Uri.parse(widget.url))
+            .timeout(const Duration(seconds: 20));
+        // 403 / expiré → fallback avec token
+        if (response.statusCode != 200) {
+          response = await http.get(
+            Uri.parse(widget.url),
+            headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'},
+          ).timeout(const Duration(seconds: 30));
+        }
+      } else {
+        response = await http.get(
+          Uri.parse(widget.url),
+          headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'},
+        ).timeout(const Duration(seconds: 30));
+      }
+
       if (response.statusCode == 200) {
         final bytes = response.bodyBytes;
-        // Détecter PDF par magic bytes
         final isPdf = bytes.length >= 4 &&
             bytes[0] == 0x25 && bytes[1] == 0x50 &&
             bytes[2] == 0x44 && bytes[3] == 0x46;
         if (isPdf) {
-          // Écrire dans un fichier temporaire pour flutter_pdfview
           final dir = await getTemporaryDirectory();
-          final file = File('${dir.path}/viewer_${DateTime.now().millisecondsSinceEpoch}.pdf');
+          final file = File(
+              '${dir.path}/viewer_${DateTime.now().millisecondsSinceEpoch}.pdf');
           await file.writeAsBytes(bytes);
           if (mounted) setState(() { _pdfPath = file.path; _loading = false; });
         } else {
@@ -744,109 +752,133 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
         if (mounted) setState(() { _loading = false; _error = 'Erreur ${response.statusCode}'; });
       }
     } catch (e) {
-      // ignore: avoid_print
-      print('[DocumentViewer] ERROR: $e');
       if (mounted) setState(() { _loading = false; _error = e.toString(); });
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    final screenH = MediaQuery.of(context).size.height;
-    return Container(
-      height: screenH * 0.85,
-      padding: EdgeInsets.fromLTRB(20, 16, 20, _pdfPath != null ? 0 : 24),
-      child: Column(
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.borderGray,
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: AppColors.white,
+        elevation: 0,
+        title: Text(
+          widget.label,
+          style: const TextStyle(
+            fontFamily: AppConstants.fontFamilySofiaSans,
+            fontWeight: FontWeight.w600,
+            fontSize: AppConstants.fontSizeLarge,
+            color: AppColors.white,
           ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
+          overflow: TextOverflow.ellipsis,
+        ),
+        actions: [
+          if (!_loading && _pdfPath != null && _totalPages > 1)
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Center(
                 child: Text(
-                  widget.label,
+                  '$_currentPage / $_totalPages',
                   style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark),
-                  overflow: TextOverflow.ellipsis,
+                    fontFamily: AppConstants.fontFamilyInter,
+                    fontSize: AppConstants.fontSizeMedium,
+                    color: AppColors.white,
+                  ),
                 ),
               ),
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: const Icon(Icons.close, color: AppColors.textSecondary, size: 24),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-                : _error != null
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.error_outline,
-                                color: AppColors.statusRejected, size: 48),
-                            const SizedBox(height: 12),
-                            Text(_error!,
-                                style: const TextStyle(
-                                    color: AppColors.textSecondary, fontSize: 14)),
-                          ],
-                        ),
-                      )
-                    : _pdfPath != null
-                        ? InteractiveViewer(
-                            minScale: 1.0,
-                            maxScale: 4.0,
-                            child: PDFView(
-                              filePath: _pdfPath!,
-                              enableSwipe: true,
-                              swipeHorizontal: false,
-                              autoSpacing: true,
-                              pageFling: false,
-                              pageSnap: false,
-                              fitPolicy: FitPolicy.WIDTH,
-                              enableRenderDuringScale: true,
-                              useBestQuality: true,
-                            ),
-                          )
-                        : _bytes != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: InteractiveViewer(
-                                  minScale: 0.5,
-                                  maxScale: 4.0,
-                                  child: Image.memory(
-                                    _bytes!,
-                                    fit: BoxFit.contain,
-                                    width: double.infinity,
-                                    errorBuilder: (_, __, ___) => const Center(
-                                      child: Icon(Icons.insert_drive_file_outlined,
-                                          size: 80, color: AppColors.primary),
-                                    ),
-                                  ),
-                                ),
-                              )
-                            : const Center(
-                                child: Icon(Icons.insert_drive_file_outlined,
-                                    size: 80, color: AppColors.primary),
-                              ),
-          ),
+            ),
         ],
       ),
+      body: _loading
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary))
+          : _error != null
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.error_outline,
+                          color: AppColors.statusRejected, size: 48),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        child: Text(
+                          _error!,
+                          style: const TextStyle(
+                              color: AppColors.white,
+                              fontSize: AppConstants.fontSizeMedium),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : _pdfPath != null
+                  ? Stack(
+                      children: [
+                        SizedBox.expand(
+                          child: PDFView(
+                            filePath: _pdfPath!,
+                            enableSwipe: true,
+                            swipeHorizontal: false,
+                            autoSpacing: true,
+                            pageFling: true,
+                            pageSnap: true,
+                            fitPolicy: FitPolicy.BOTH,
+                            enableRenderDuringScale: true,
+                            useBestQuality: true,
+                            onRender: (pages) {
+                              if (mounted) setState(() => _totalPages = pages ?? 0);
+                            },
+                            onPageChanged: (page, _) {
+                              if (mounted) setState(() => _currentPage = (page ?? 0) + 1);
+                            },
+                          ),
+                        ),
+                        if (_totalPages > 1)
+                          Positioned(
+                            top: 12,
+                            right: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '$_currentPage / $_totalPages',
+                                style: const TextStyle(
+                                  color: AppColors.white,
+                                  fontFamily: AppConstants.fontFamilyInter,
+                                  fontSize: AppConstants.fontSizeRegular,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    )
+                  : _bytes != null
+                      ? InteractiveViewer(
+                          minScale: 0.8,
+                          maxScale: 4.0,
+                          child: Center(
+                            child: Image.memory(
+                              _bytes!,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.insert_drive_file_outlined,
+                                  size: 80,
+                                  color: AppColors.primary),
+                            ),
+                          ),
+                        )
+                      : const Center(
+                          child: Icon(Icons.insert_drive_file_outlined,
+                              size: 80, color: AppColors.primary),
+                        ),
     );
   }
 }

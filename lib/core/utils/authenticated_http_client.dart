@@ -9,19 +9,24 @@ import 'package:secure_link/core/utils/user_session.dart';
 class AuthenticatedHttpClient extends http.BaseClient {
   final http.Client _inner = http.Client();
   bool _isRefreshing = false;
+  static const _timeout = Duration(seconds: 30);
 
   AuthenticatedHttpClient._();
   static final AuthenticatedHttpClient instance = AuthenticatedHttpClient._();
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    // Toujours injecter le token le plus récent depuis UserSession
     final token = UserSession.instance.accessToken;
     if (token.isNotEmpty) {
       request.headers['Authorization'] = 'Bearer $token';
     }
 
-    final response = await _inner.send(request);
+    final http.StreamedResponse response;
+    try {
+      response = await _inner.send(request).timeout(_timeout);
+    } on Exception {
+      rethrow;
+    }
 
     // Si 401 et pas déjà en train de refresh → tenter le refresh
     if (response.statusCode == 401 && !_isRefreshing) {

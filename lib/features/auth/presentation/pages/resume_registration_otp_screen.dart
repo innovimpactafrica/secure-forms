@@ -231,18 +231,17 @@ class _ResumeRegistrationOtpScreenState
                     const SizedBox(height: 24),
 
                     // Timer
-                    Center(
-                      child: Text(
-                        _canResend
-                            ? ''
-                            : 'Renvoyer dans ${_secondsRemaining.toString().padLeft(2, '0')}:00',
-                        style: const TextStyle(
-                          fontFamily: AppConstants.fontFamilyInter,
-                          fontSize: AppConstants.fontSizeMedium,
-                          color: AppColors.textSecondary,
+                    if (!_canResend)
+                      Center(
+                        child: Text(
+                          '${'otp.resend_in'.tr()}${_secondsRemaining.toString().padLeft(2, '0')}',
+                          style: const TextStyle(
+                            fontFamily: AppConstants.fontFamilyInter,
+                            fontSize: AppConstants.fontSizeMedium,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ),
-                    ),
                     const SizedBox(height: 32),
 
                     // Renvoi
@@ -261,9 +260,7 @@ class _ResumeRegistrationOtpScreenState
                           GestureDetector(
                             onTap: _canResend ? _onResend : null,
                             child: Text(
-                              _canResend
-                                  ? 'otp.resend'.tr()
-                                  : '${'otp.resend_in'.tr()}${_secondsRemaining.toString().padLeft(2, '0')}',
+                              'otp.resend'.tr(),
                               style: TextStyle(
                                 fontFamily: AppConstants.fontFamilyInter,
                                 fontSize: AppConstants.fontSizeMedium,

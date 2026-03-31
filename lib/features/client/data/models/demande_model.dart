@@ -136,6 +136,8 @@ class DemandeModel {
 
   static String _parseDate(String raw) {
     if (raw.isEmpty) return '';
+    // Déjà au format jj/mm/aaaa
+    if (RegExp(r'^\d{2}/\d{2}/\d{4}$').hasMatch(raw)) return raw;
     try {
       final dt = DateTime.parse(raw);
       return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';

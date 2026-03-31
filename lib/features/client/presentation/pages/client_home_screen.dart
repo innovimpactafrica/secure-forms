@@ -57,7 +57,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       if (userState is UserLoaded && userState.user.id != _lastUserId) {
         _initKycBloc(userState.user.id);
       }
-      context.read<ProfileBloc>().add(const LoadDocumentTypesEvent(forceRefresh: true));
+      context.read<ProfileBloc>().add(const LoadDocumentTypesEvent());
       context.read<DemandesBloc>().add(const LoadRecentDemandesEvent(limit: 5));
       context.read<HomeBloc>().add(const LoadClientStatisticsEvent());
     });
@@ -189,9 +189,9 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                     color: AppColors.primaryDark,
                     onRefresh: () async {
                       context.read<ProfileBloc>().add(const LoadDocumentTypesEvent(forceRefresh: true));
-                      context.read<DemandesBloc>().add(const LoadRecentDemandesEvent(limit: 5));
-                      context.read<HomeBloc>().add(const LoadClientStatisticsEvent());
-                      context.read<NotificationsBloc>().add(const LoadNotificationsEvent());
+                      context.read<DemandesBloc>().add(const LoadRecentDemandesEvent(limit: 5, forceRefresh: true));
+                      context.read<HomeBloc>().add(const LoadClientStatisticsEvent(forceRefresh: true));
+                      context.read<NotificationsBloc>().add(const LoadNotificationsEvent(forceRefresh: true));
                       await Future.delayed(const Duration(milliseconds: 800));
                     },
                     child: SingleChildScrollView(
@@ -430,8 +430,7 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
         },
         child: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, profileState) {
-          // Lire la complétion depuis le ProfileBloc (GET /api/users/profile/completion)
-          int completion = 50;
+          int? completion; // null = pas encore chargé
           if (profileState is ProfileDocumentsLoaded) {
             completion = profileState.completion.completion;
           } else if (profileState is ProfileDocumentUploadedSuccess) {
@@ -444,21 +443,9 @@ class _ProfileProgressSectionState extends State<_ProfileProgressSection> {
             completion = profileState.completion.completion;
           } else if (profileState is ProfileDocumentUploading) {
             completion = profileState.completion.completion;
-          } else {
-            // Fallback sur UserBloc si ProfileBloc pas encore chargé
-            final userState = context.read<UserBloc>().state;
-            if (userState is UserLoaded) {
-              completion = userState.user.profileCompletion;
-            }
-            // Déclencher le chargement de la complétion réelle si pas encore fait
-            if (profileState is ProfileInProgress || profileState is ProfileLoading) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (context.mounted) {
-                  context.read<ProfileBloc>().add(const LoadDocumentTypesEvent());
-                }
-              });
-            }
           }
+          // Si pas encore chargé depuis l'API, ne rien afficher
+          if (completion == null) return const SizedBox.shrink();
 
           final isCompleted = completion >= 100;
 

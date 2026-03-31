@@ -10,6 +10,7 @@ class UserProfileModel {
   final String dateOfBirth;
   final String maritalStatus;
   final String gender;
+  final String profilePicturePath; // chemin relatif depuis l'API
 
   const UserProfileModel({
     this.id = '',
@@ -23,6 +24,7 @@ class UserProfileModel {
     this.dateOfBirth = '',
     this.maritalStatus = '',
     this.gender = '',
+    this.profilePicturePath = '',
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,7 @@ class UserProfileModel {
       dateOfBirth: json['dateOfBirth']?.toString() ?? '',
       maritalStatus: json['maritalStatus']?.toString() ?? '',
       gender: json['gender']?.toString() ?? '',
+      profilePicturePath: json['profilePicture']?.toString() ?? '',
     );
   }
 

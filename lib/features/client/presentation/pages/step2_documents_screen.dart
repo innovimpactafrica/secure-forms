@@ -35,8 +35,16 @@ class _Step2DocumentsScreenState extends State<Step2DocumentsScreen> {
   @override
   void initState() {
     super.initState();
-    // Toujours recharger pour avoir les données fraîches
-    context.read<ProfileBloc>().add(const LoadDocumentTypesEvent());
+    // Ne recharger que si pas encore de données en cache
+    final state = context.read<ProfileBloc>().state;
+    final hasCache = state is ProfileDocumentsLoaded ||
+        state is ProfileDocumentUploadedSuccess ||
+        state is ProfileDocumentUploadedNeedsVerification ||
+        state is ProfileDocumentPatched ||
+        state is ProfileDocumentDeleted;
+    if (!hasCache) {
+      context.read<ProfileBloc>().add(const LoadDocumentTypesEvent());
+    }
   }
 
   @override
@@ -610,11 +618,14 @@ class _DocumentCard extends StatelessWidget {
                               ? _DocumentImageDouble(
                                   key: ValueKey('${uploadedDocument!.id}_${uploadedDocument!.backFileId}_${uploadedDocument!.uploadedAt?.millisecondsSinceEpoch ?? 0}'),
                                   id1: uploadedDocument!.id,
+                                  url1: uploadedDocument!.fileUrl,
                                   id2: uploadedDocument!.backFileId!,
+                                  url2: uploadedDocument!.backFileUrl,
                                 )
                               : _DocumentImage(
                                   key: ValueKey('${uploadedDocument!.id}_${uploadedDocument!.uploadedAt?.millisecondsSinceEpoch ?? 0}'),
                                   documentId: uploadedDocument!.id,
+                                  directUrl: uploadedDocument!.fileUrl,
                                 ))
                           : Center(
                               child: Icon(
@@ -723,7 +734,8 @@ class _DocumentCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────
 class _DocumentImage extends StatefulWidget {
   final String documentId;
-  const _DocumentImage({super.key, required this.documentId});
+  final String? directUrl;
+  const _DocumentImage({super.key, required this.documentId, this.directUrl});
 
   @override
   State<_DocumentImage> createState() => _DocumentImageState();
@@ -755,6 +767,7 @@ class _DocumentImageState extends State<_DocumentImage> {
       final bytes = await _repo!.getDocumentFile(
             token: UserSession.instance.accessToken,
             documentId: widget.documentId,
+            directUrl: widget.directUrl,
           );
       final data = Uint8List.fromList(bytes);
       final pdf = data.length >= 4 &&
@@ -835,16 +848,18 @@ class _DocumentImageState extends State<_DocumentImage> {
 // ─────────────────────────────────────────────────────────────────
 class _DocumentImageDouble extends StatelessWidget {
   final String id1;
+  final String? url1;
   final String id2;
-  const _DocumentImageDouble({super.key, required this.id1, required this.id2});
+  final String? url2;
+  const _DocumentImageDouble({super.key, required this.id1, this.url1, required this.id2, this.url2});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(child: SizedBox.expand(child: _DocumentImage(key: ValueKey('doc1_$id1'), documentId: id1))),
+        Expanded(child: SizedBox.expand(child: _DocumentImage(key: ValueKey('doc1_$id1'), documentId: id1, directUrl: url1))),
         Container(height: 1, color: AppColors.borderLight),
-        Expanded(child: SizedBox.expand(child: _DocumentImage(key: ValueKey('doc2_$id2'), documentId: id2))),
+        Expanded(child: SizedBox.expand(child: _DocumentImage(key: ValueKey('doc2_$id2'), documentId: id2, directUrl: url2))),
       ],
     );
   }
@@ -945,19 +960,13 @@ class _DocumentOptionsSheet extends StatelessWidget {
               height: AppConstants.logoutButtonHeight,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  final bloc = context.read<ProfileBloc>();
                   Navigator.of(context).pop();
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: AppColors.white,
-                    useSafeArea: true,
-                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-                    builder: (_) => BlocProvider.value(
-                      value: bloc,
-                      child: _DocumentViewerSheet(documentType: documentType, existing: existing),
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => _DocumentViewerPage(
+                      documentType: documentType,
+                      existing: existing,
                     ),
-                  );
+                  ));
                 },
                 icon: const Icon(Icons.visibility_outlined, size: 18),
                 label: Text('documents.view'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge)),
@@ -1343,23 +1352,22 @@ class _SingleFileUpdateModalState extends State<_SingleFileUpdateModal> {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// VIEWER SHEET — Affiche recto + verso avec PageView horizontal
+// PAGE PLEIN ÉCRAN — Visualiser document (comme Gmail)
 // ─────────────────────────────────────────────────────────────────
-class _DocumentViewerSheet extends StatefulWidget {
+class _DocumentViewerPage extends StatefulWidget {
   final DocumentTypeModel documentType;
   final UploadedDocumentModel existing;
 
-  const _DocumentViewerSheet({
+  const _DocumentViewerPage({
     required this.documentType,
     required this.existing,
   });
 
   @override
-  State<_DocumentViewerSheet> createState() => _DocumentViewerSheetState();
+  State<_DocumentViewerPage> createState() => _DocumentViewerPageState();
 }
 
-class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
-  // Liste des fichiers à afficher : [{bytes, pdfPath, error}]
+class _DocumentViewerPageState extends State<_DocumentViewerPage> {
   final List<Map<String, dynamic>> _pages = [];
   bool _loading = true;
   int _currentPage = 0;
@@ -1381,16 +1389,19 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
   }
 
   Future<void> _loadFiles() async {
-    final ids = [
-      widget.existing.id,
-      if (widget.existing.backFileId != null) widget.existing.backFileId!,
+    final token = UserSession.instance.accessToken;
+    final files = [
+      {'id': widget.existing.id, 'url': widget.existing.fileUrl},
+      if (widget.existing.backFileId != null)
+        {'id': widget.existing.backFileId!, 'url': widget.existing.backFileUrl},
     ];
     final results = <Map<String, dynamic>>[];
-    for (final id in ids) {
+    for (final f in files) {
       try {
         final bytes = await _repo.getDocumentFile(
-          token: UserSession.instance.accessToken,
-          documentId: id,
+          token: token,
+          documentId: f['id'] as String,
+          directUrl: f['url'] as String?,
         );
         final data = Uint8List.fromList(bytes);
         final isPdf = data.length >= 4 &&
@@ -1398,7 +1409,7 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
             data[2] == 0x44 && data[3] == 0x46;
         if (isPdf) {
           final dir = await getTemporaryDirectory();
-          final file = File('${dir.path}/viewer_step2_$id.pdf');
+          final file = File('${dir.path}/viewer_step2_${f["id"]}.pdf');
           await file.writeAsBytes(data);
           results.add({'pdfPath': file.path});
         } else {
@@ -1413,123 +1424,84 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final screenH = MediaQuery.of(context).size.height;
     final total = _pages.length;
-    return Container(
-      height: screenH,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: Column(
-              children: [
-                Center(
-                  child: Container(
-                    width: AppConstants.modalHandleWidth,
-                    height: AppConstants.modalHandleHeight,
-                    decoration: BoxDecoration(
-                      color: AppColors.modalHandle,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: AppColors.white,
+        elevation: 0,
+        title: Text(
+          widget.documentType.title,
+          style: const TextStyle(
+            fontFamily: AppConstants.fontFamilySofiaSans,
+            fontWeight: FontWeight.w600,
+            fontSize: AppConstants.fontSizeLarge,
+            color: AppColors.white,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+        actions: [
+          if (!_loading && total > 1)
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Center(
+                child: Text(
+                  '${_currentPage + 1}/$total',
+                  style: const TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    fontSize: AppConstants.fontSizeMedium,
+                    color: AppColors.white,
                   ),
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.documentType.title,
-                        style: TextStyle(
-                          fontFamily: AppConstants.fontFamilySofiaSans,
-                          fontWeight: FontWeight.w700,
-                          fontSize: AppConstants.fontSizeXXLarge,
-                          color: AppColors.textDark,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (!_loading && total > 1)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryDark.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '${_currentPage + 1}/$total',
-                          style: TextStyle(
-                            fontFamily: AppConstants.fontFamilyInter,
-                            fontSize: AppConstants.fontSizeRegular,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primaryDark,
-                          ),
-                        ),
-                      ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Icon(Icons.close, color: AppColors.textSecondary, size: AppConstants.iconSizeLarge),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-              ],
+              ),
             ),
-          ),
-          Expanded(
-            child: _loading
-                ? Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation(AppColors.primaryDark),
-                    ),
-                  )
-                : total == 0
-                    ? Center(child: Icon(Icons.insert_drive_file_outlined, size: 80, color: AppColors.primary))
-                    : Stack(
-                        children: [
-                          PageView.builder(
-                            controller: _pageController,
-                            itemCount: total,
-                            onPageChanged: (i) => setState(() => _currentPage = i),
-                            itemBuilder: (_, i) => _buildPage(_pages[i]),
-                          ),
-                          // Hint glissement (visible uniquement sur la 1ère page si 2 fichiers)
-                          if (total > 1 && _currentPage == 0)
-                            Positioned(
-                              bottom: 32,
-                              left: 0,
-                              right: 0,
-                              child: Center(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.textDark.withValues(alpha: 0.65),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.swipe, color: AppColors.white, size: 16),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        'documents.swipe_hint'.tr(),
-                                        style: TextStyle(
-                                          fontFamily: AppConstants.fontFamilyInter,
-                                          fontSize: AppConstants.fontSizeRegular,
-                                          color: AppColors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-          ),
         ],
       ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          : total == 0
+              ? const Center(child: Icon(Icons.insert_drive_file_outlined, size: 80, color: AppColors.primary))
+              : Stack(
+                  children: [
+                    PageView.builder(
+                      controller: _pageController,
+                      itemCount: total,
+                      onPageChanged: (i) => setState(() => _currentPage = i),
+                      itemBuilder: (_, i) => _buildPage(_pages[i]),
+                    ),
+                    if (total > 1 && _currentPage == 0)
+                      Positioned(
+                        bottom: MediaQuery.of(context).padding.bottom + 24,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.swipe, color: AppColors.white, size: 16),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'documents.swipe_hint'.tr(),
+                                  style: const TextStyle(
+                                    fontFamily: AppConstants.fontFamilyInter,
+                                    fontSize: AppConstants.fontSizeRegular,
+                                    color: AppColors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
     );
   }
 
@@ -1539,43 +1511,93 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, color: AppColors.statusRejected, size: 48),
+            const Icon(Icons.error_outline, color: AppColors.statusRejected, size: 48),
             const SizedBox(height: 12),
-            Text('documents.load_error'.tr(),
-                style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.textSecondary, fontSize: AppConstants.fontSizeMedium)),
+            Text(
+              page['error'] as String,
+              style: const TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                color: AppColors.white,
+                fontSize: AppConstants.fontSizeMedium,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       );
     }
     if (page['pdfPath'] != null) {
-      return InteractiveViewer(
-        minScale: 1.0,
-        maxScale: 4.0,
-        child: SizedBox.expand(
-          child: PDFView(
-            filePath: page['pdfPath'] as String,
-            enableSwipe: true,
-            swipeHorizontal: false,
-            autoSpacing: false,
-            pageFling: false,
-            pageSnap: false,
-            fitPolicy: FitPolicy.WIDTH,
-            enableRenderDuringScale: true,
-            useBestQuality: true,
-          ),
-        ),
-      );
+      return _PdfFullViewer(filePath: page['pdfPath'] as String);
     }
     if (page['bytes'] != null) {
       return _ZoomablePage(bytes: page['bytes'] as Uint8List);
     }
-    return Center(child: Icon(Icons.insert_drive_file_outlined, size: 80, color: AppColors.primary));
+    return const Center(child: Icon(Icons.insert_drive_file_outlined, size: 80, color: AppColors.primary));
   }
 }
 
 // ─────────────────────────────────────────────────────────────────
-// PAGE ZOOMABLE — désactive le swipe du PageView quand zoomé
+// PDF PLEIN ÉCRAN — prend tout l'espace comme Gmail
 // ─────────────────────────────────────────────────────────────────
+class _PdfFullViewer extends StatefulWidget {
+  final String filePath;
+  const _PdfFullViewer({required this.filePath});
+
+  @override
+  State<_PdfFullViewer> createState() => _PdfFullViewerState();
+}
+
+class _PdfFullViewerState extends State<_PdfFullViewer> {
+  int _totalPages = 0;
+  int _currentPage = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        SizedBox.expand(
+          child: PDFView(
+            filePath: widget.filePath,
+            enableSwipe: true,
+            swipeHorizontal: false,
+            autoSpacing: true,
+            pageFling: true,
+            pageSnap: true,
+            fitPolicy: FitPolicy.BOTH,
+            enableRenderDuringScale: true,
+            useBestQuality: true,
+            onRender: (pages) {
+              if (mounted) setState(() => _totalPages = pages ?? 0);
+            },
+            onPageChanged: (page, _) {
+              if (mounted) setState(() => _currentPage = (page ?? 0) + 1);
+            },
+          ),
+        ),
+        if (_totalPages > 1)
+          Positioned(
+            top: 12,
+            right: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '$_currentPage / $_totalPages',
+                style: const TextStyle(
+                  color: AppColors.white,
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontSize: AppConstants.fontSizeRegular,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
 class _ZoomablePage extends StatelessWidget {
   final Uint8List bytes;
   const _ZoomablePage({required this.bytes});

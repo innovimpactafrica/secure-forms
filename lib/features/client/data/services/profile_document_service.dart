@@ -280,7 +280,10 @@ class ProfileDocumentService {
   /// GET fichier depuis URL MinIO signée directe (sans token)
   Future<List<int>> getDocumentFileFromUrl(String url) async {
     _log('GET MinIO direct: $url');
-    final response = await _client.get(Uri.parse(url));
+    final response = await _client.get(Uri.parse(url)).timeout(
+      const Duration(seconds: 30),
+      onTimeout: () => throw Exception('MinIO timeout'),
+    );
     _log('MinIO → ${response.statusCode} | ${response.bodyBytes.length} bytes');
     if (response.statusCode == 200) return response.bodyBytes;
     throw Exception('Erreur téléchargement MinIO: ${response.statusCode}');
@@ -296,6 +299,9 @@ class ProfileDocumentService {
     final response = await _client.get(
       Uri.parse(url),
       headers: _authHeaders(token),
+    ).timeout(
+      const Duration(seconds: 30),
+      onTimeout: () => throw Exception('Timeout téléchargement document'),
     );
     _log('GET $url → ${response.statusCode} | ${response.bodyBytes.length} bytes');
     if (response.statusCode == 200) return response.bodyBytes;

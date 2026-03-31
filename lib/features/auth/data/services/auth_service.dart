@@ -7,6 +7,9 @@ import '../models/auth_response.dart';
 
 class AuthService {
   final http.Client _client;
+  // Client dédié pour le login — sans intercepteur 401, timeout court
+  final http.Client _loginClient = http.Client();
+
   AuthService({http.Client? client}) : _client = client ?? HttpClientSingleton.instance;
 
   Map<String, String> get _headers => {
@@ -28,18 +31,36 @@ class AuthService {
     throw Exception(data['message'] ?? 'Erreur inscription');
   }
 
-  // POST /api/auth/login — Body : { "email": "...", "password": "..." }
+  // POST /api/auth/login — retry automatique jusqu'à 3 tentatives
   Future<LoginResponse> login({required String email, required String password}) async {
-    final response = await _client.post(
-      Uri.parse(BaseUrl.login),
-      headers: _headers,
-      body: jsonEncode({'email': email, 'password': password}),
-    );
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return LoginResponse.fromJson(data);
+    const maxAttempts = 3;
+    Exception? lastError;
+    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        final response = await _loginClient.post(
+          Uri.parse(BaseUrl.login),
+          headers: _headers,
+          body: jsonEncode({'email': email, 'password': password}),
+        ).timeout(const Duration(seconds: 15));
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          return LoginResponse.fromJson(data);
+        }
+        throw Exception(data['message'] ?? 'Erreur connexion');
+      } catch (e) {
+        lastError = e is Exception ? e : Exception(e.toString());
+        // Ne pas retenter si c'est une erreur métier (mauvais mot de passe, etc.)
+        final msg = e.toString();
+        if (!msg.contains('timeout') && !msg.contains('SocketException') &&
+            !msg.contains('connection') && !msg.contains('Connection')) {
+          rethrow;
+        }
+        if (attempt < maxAttempts) {
+          await Future.delayed(Duration(seconds: attempt));
+        }
+      }
     }
-    throw Exception(data['message'] ?? 'Erreur connexion');
+    throw lastError ?? Exception('Erreur connexion');
   }
 
   // POST /api/auth/register/client/verify-otp

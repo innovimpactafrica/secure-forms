@@ -17,3 +17,5 @@ class LoadProfilePictureEvent extends UserEvent {
   final String accessToken;
   LoadProfilePictureEvent(this.accessToken);
 }
+
+class ResetUserEvent extends UserEvent {}

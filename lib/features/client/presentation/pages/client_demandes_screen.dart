@@ -42,7 +42,6 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
   void initState() {
     super.initState();
     _load();
-    _scrollController.addListener(_onScroll);
   }
 
   void _load() {
@@ -54,11 +53,13 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
         ));
   }
 
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 100) {
-      context.read<DemandesBloc>().add(const LoadMoreDemandesEvent());
-    }
+  void _goToPage(int page) {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+    context.read<DemandesBloc>().add(GoToDemandesPageEvent(page));
   }
 
   @override
@@ -211,17 +212,10 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
   }
 
   Widget _buildList() {
-    return BlocConsumer<DemandesBloc, DemandesState>(
-      listener: (context, state) {
-        if (state is DraftDeleted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Brouillon supprimé')),
-          );
-        }
-      },
+    return BlocBuilder<DemandesBloc, DemandesState>(
       builder: (context, state) {
         if (state is DemandesLoading) {
-          return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+          return const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryDark));
         }
         if (state is DemandesError) {
           return Center(
@@ -230,11 +224,13 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  const Icon(Icons.error_outline, color: AppColors.statusRejected, size: 40),
+                  const SizedBox(height: 12),
                   Text(state.message,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: AppColors.statusRejected)),
+                      style: const TextStyle(color: AppColors.statusRejected, fontSize: 14)),
                   const SizedBox(height: 16),
-                  TextButton(onPressed: _load, child: const Text('Réessayer')),
+                  TextButton(onPressed: _load, child: Text('archives.retry'.tr())),
                 ],
               ),
             ),
@@ -242,60 +238,220 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
         }
         if (state is DemandesLoaded) {
           if (state.demandes.isEmpty) {
-            return RefreshIndicator(
-              color: AppColors.primaryDark,
-              onRefresh: () async { _load(); await Future.delayed(const Duration(milliseconds: 800)); },
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 80),
-                    child: Center(
-                      child: Text(
-                        'demandes.no_demandes'.tr(),
-                        style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
-                      ),
-                    ),
-                  ),
-                ],
+            return Center(
+              child: Text(
+                'demandes.no_demandes'.tr(),
+                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
               ),
             );
           }
-          return RefreshIndicator(
-            color: AppColors.primaryDark,
-            onRefresh: () async { _load(); await Future.delayed(const Duration(milliseconds: 800)); },
-            child: ListView.builder(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-              itemCount: state.demandes.length + (state.isLoadingMore ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == state.demandes.length) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                  );
-                }
-                final item = state.demandes[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _DemandeCard(
-                    item: item,
-                    onTap: () => Navigator.of(context).pushNamed(
-                      AppRoutes.clientDemandeDetail,
-                      arguments: {'id': item.id},
+
+          final totalPages = (state.total / 10).ceil().clamp(1, 999);
+
+          return Column(
+            children: [
+              // ── Compteur résultats ──
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                child: Row(
+                  children: [
+                    Text(
+                      '${state.total} ',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryDark,
+                      ),
                     ),
-                    onDeleteDraft: item.isDraft
-                        ? () => context.read<DemandesBloc>().add(DeleteDraftEvent(item.id))
-                        : null,
-                  ),
-                );
-              },
-            ),
+                    Text(
+                      state.total > 1 ? 'demandes.title'.tr().toLowerCase() : 'demandes.title'.tr().toLowerCase(),
+                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    ),
+                    const Spacer(),
+                    Text(
+                      'Page ${state.currentPage}/$totalPages',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ── Liste ──
+              Expanded(
+                child: state.isLoadingMore
+                    ? const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryDark))
+                    : ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        itemCount: state.demandes.length,
+                        itemBuilder: (context, index) {
+                          final item = state.demandes[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _DemandeCard(
+                              item: item,
+                              onTap: () => Navigator.of(context).pushNamed(
+                                AppRoutes.clientDemandeDetail,
+                                arguments: {'id': item.id},
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+
+              // ── Barre de pagination ──
+              if (totalPages > 1)
+                _PaginationBar(
+                  currentPage: state.currentPage,
+                  totalPages: totalPages,
+                  onPageTap: _goToPage,
+                ),
+            ],
           );
         }
         return const SizedBox.shrink();
       },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// BARRE DE PAGINATION
+// ─────────────────────────────────────────────────────────────────
+class _PaginationBar extends StatelessWidget {
+  final int currentPage;
+  final int totalPages;
+  final void Function(int page) onPageTap;
+
+  const _PaginationBar({
+    required this.currentPage,
+    required this.totalPages,
+    required this.onPageTap,
+  });
+
+  List<int?> _buildPageNumbers() {
+    // Affiche max 5 numéros avec ellipses (null = ...)
+    if (totalPages <= 7) {
+      return List.generate(totalPages, (i) => i + 1);
+    }
+    final pages = <int?>[];
+    pages.add(1);
+    if (currentPage > 3) pages.add(null); // ellipse gauche
+    for (int i = (currentPage - 1).clamp(2, totalPages - 1);
+        i <= (currentPage + 1).clamp(2, totalPages - 1);
+        i++) {
+      pages.add(i);
+    }
+    if (currentPage < totalPages - 2) pages.add(null); // ellipse droite
+    pages.add(totalPages);
+    return pages;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pages = _buildPageNumbers();
+    return Container(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 12,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        border: Border(top: BorderSide(color: AppColors.borderDivider)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Bouton précédent
+          _NavButton(
+            icon: Icons.chevron_left,
+            enabled: currentPage > 1,
+            onTap: () => onPageTap(currentPage - 1),
+          ),
+          const SizedBox(width: 8),
+
+          // Numéros de pages
+          ...pages.map((p) {
+            if (p == null) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4),
+                child: Text('...', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+              );
+            }
+            final isActive = p == currentPage;
+            return GestureDetector(
+              onTap: isActive ? null : () => onPageTap(p),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 36,
+                height: 36,
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                decoration: BoxDecoration(
+                  color: isActive ? AppColors.primaryDark : AppColors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isActive ? AppColors.primaryDark : AppColors.borderDivider,
+                    width: 1.2,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    '$p',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                      color: isActive ? AppColors.white : AppColors.textDark,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+
+          const SizedBox(width: 8),
+          // Bouton suivant
+          _NavButton(
+            icon: Icons.chevron_right,
+            enabled: currentPage < totalPages,
+            onTap: () => onPageTap(currentPage + 1),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NavButton extends StatelessWidget {
+  final IconData icon;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _NavButton({required this.icon, required this.enabled, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: enabled ? AppColors.primaryDark : AppColors.greyShade100,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          size: 20,
+          color: enabled ? AppColors.white : AppColors.textSecondary,
+        ),
+      ),
     );
   }
 }
@@ -307,12 +463,10 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
 class _DemandeCard extends StatelessWidget {
   final DemandeModel item;
   final VoidCallback onTap;
-  final VoidCallback? onDeleteDraft;
 
   const _DemandeCard({
     required this.item,
     required this.onTap,
-    this.onDeleteDraft,
   });
 
   @override
@@ -379,38 +533,20 @@ class _DemandeCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusCfg.bgColor,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    statusCfg.label,
-                    style: TextStyle(
-                      fontSize: AppConstants.fontSizeRegular,
-                      fontWeight: FontWeight.w500,
-                      color: statusCfg.textColor,
-                    ),
-                  ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: statusCfg.bgColor,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                statusCfg.label,
+                style: TextStyle(
+                  fontSize: AppConstants.fontSizeRegular,
+                  fontWeight: FontWeight.w500,
+                  color: statusCfg.textColor,
                 ),
-                if (onDeleteDraft != null) ...[
-                  const SizedBox(height: 6),
-                  GestureDetector(
-                    onTap: onDeleteDraft,
-                    child: SvgPicture.asset(
-                      'assets/icons/iconamoon_trash.svg',
-                      width: 18,
-                      height: 18,
-                      colorFilter: const ColorFilter.mode(
-                          AppColors.statusRejected, BlendMode.srcIn),
-                    ),
-                  ),
-                ],
-              ],
+              ),
             ),
           ],
         ),

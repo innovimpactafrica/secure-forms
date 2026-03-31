@@ -22,7 +22,12 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     on<LoadUserProfile>(_onLoadUserProfile);
     on<ClearUserProfile>(_onClearUserProfile);
     on<UpdateProfilePictureEvent>(_onUpdateProfilePicture);
-    // concurrent : profil + photo se chargent en parallèle
+    on<ResetUserEvent>((_, emit) {
+      _profilePictureBytes = null;
+      _cachedUser = null;
+      UserProfileService.invalidateCache();
+      emit(UserInitial());
+    });
     on<LoadProfilePictureEvent>(
       _onLoadProfilePicture,
       transformer: (events, mapper) => events.asyncExpand(mapper),
@@ -33,9 +38,14 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     LoadUserProfile event,
     Emitter<UserState> emit,
   ) async {
-    // Si déjà chargé avec le même token, ne pas refaire l'appel
-    if (state is UserLoaded && _cachedUser != null && event.accessToken == UserSession.instance.accessToken) {
-      print('=== USER PROFILE: déjà chargé, skip ===');
+    // Si déjà en cache, émettre immédiatement sans appel API
+    if (_cachedUser != null) {
+      print('=== USER PROFILE: cache HIT, émission immédiate ===');
+      emit(UserLoaded(_cachedUser!));
+      // Photo aussi en cache ? sinon charger en arrière-plan
+      if (_profilePictureBytes == null) {
+        _loadPictureInBackground(event.accessToken);
+      }
       return;
     }
     emit(UserLoading());
@@ -45,12 +55,14 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       _cachedUser = user;
       UserSession.instance.userId = user.id;
       _persistUserId(user.id);
-      // Envoyer le token FCM et s'abonner au topic après chargement du profil
       FcmService.onUserLoggedIn(user.id);
       emit(UserLoaded(user));
+      // Charger la photo en arrière-plan après avoir émis UserLoaded
+      if (_profilePictureBytes == null) {
+        _loadPictureInBackground(event.accessToken, userId: user.id);
+      }
     } catch (e) {
       print('=== USER PROFILE ERROR: $e ===');
-      // Si on a un cache, émettre quand même UserLoaded pour ne pas bloquer l'UI
       if (_cachedUser != null) {
         print('=== USER PROFILE: utilisation du cache après erreur ===');
         emit(UserLoaded(_cachedUser!));
@@ -58,6 +70,11 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         emit(UserError(e.toString().replaceAll('Exception: ', '')));
       }
     }
+  }
+
+  void _loadPictureInBackground(String accessToken, {String? userId}) {
+    // Déclencher l'événement de chargement photo — traité par son propre handler
+    add(LoadProfilePictureEvent(accessToken));
   }
 
   void _persistUserId(String userId) async {
@@ -83,14 +100,15 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         picture: event.file as File,
       );
       print('=== PATCH /users/me/profile (photo) SUCCESS ===');
-      final bytes = await _service.getProfilePicture(event.accessToken);
+      // Invalider le cache avant de recharger
+      _profilePictureBytes = null;
+      UserProfileService.invalidateCache();
+      final userId = _cachedUser?.id ?? UserSession.instance.userId;
+      final bytes = await _service.getProfilePicture(event.accessToken, userId: userId);
       _profilePictureBytes = Uint8List.fromList(bytes);
       print('=== PROFILE PICTURE REFRESHED: ${_profilePictureBytes!.length} bytes ===');
       emit(UserProfilePictureUpdated(_profilePictureBytes!));
-      // Ré-émettre UserLoaded pour conserver le nom/prénom dans le state
-      if (_cachedUser != null) {
-        emit(UserLoaded(_cachedUser!));
-      }
+      if (_cachedUser != null) emit(UserLoaded(_cachedUser!));
     } catch (e) {
       print('=== UPDATE PROFILE PICTURE ERROR: $e ===');
       emit(UserError(e.toString().replaceAll('Exception: ', '')));
@@ -101,8 +119,15 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     LoadProfilePictureEvent event,
     Emitter<UserState> emit,
   ) async {
+    // Si déjà en cache mémoire, émettre immédiatement
+    if (_profilePictureBytes != null) {
+      print('=== PROFILE PICTURE: cache mémoire UserBloc HIT ===');
+      emit(UserProfilePictureLoaded(_profilePictureBytes!));
+      return;
+    }
     try {
-      final bytes = await _service.getProfilePicture(event.accessToken);
+      final userId = _cachedUser?.id ?? UserSession.instance.userId;
+      final bytes = await _service.getProfilePicture(event.accessToken, userId: userId);
       _profilePictureBytes = Uint8List.fromList(bytes);
       print('=== PROFILE PICTURE LOADED: ${_profilePictureBytes!.length} bytes ===');
       emit(UserProfilePictureLoaded(_profilePictureBytes!));

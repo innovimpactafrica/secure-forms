@@ -74,23 +74,16 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     emit(const ProfileLoading());
     try {
-      _log('Chargement types de documents...');
-      _documentTypes = await _repository.getDocumentTypes(token);
-      _log('${_documentTypes.length} type(s) chargé(s)');
-      for (final t in _documentTypes) {
-        _log('  → id=${t.id} title=${t.title} identityVerif=${t.isForIdentityVerification} required=${t.isRequired}');
-      }
-
-      _log('Chargement complétion profil...');
-      _completion = await _repository.getProfileCompletion(token);
-      _log('Complétion: ${_completion.completion}%');
-
-      _log('Chargement documents uploadés...');
-      _uploadedDocuments = await _repository.getDocuments(token);
-      _log('${_uploadedDocuments.length} document(s) uploadé(s)');
-      for (final d in _uploadedDocuments) {
-        _log('  → id=${d.id} typeId=${d.documentTypeId} title=${d.documentTypeTitle} status=${d.status}');
-      }
+      _log('Chargement types + complétion + documents en parallèle...');
+      final results = await Future.wait([
+        _repository.getDocumentTypes(token),
+        _repository.getProfileCompletion(token),
+        _repository.getDocuments(token),
+      ]);
+      _documentTypes = results[0] as List<DocumentTypeModel>;
+      _completion = results[1] as ProfileCompletionModel;
+      _uploadedDocuments = results[2] as List<UploadedDocumentModel>;
+      _log('${_documentTypes.length} type(s), ${_uploadedDocuments.length} doc(s), complétion=${_completion.completion}%');
 
       final currentProfile = _currentProfile(state).copyWith(
         progressPercent: _completion.completion / 100.0,
@@ -165,9 +158,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       );
       _log('Upload réussi ✓ id=${uploaded.id} status=${uploaded.status}');
 
-      // Recharger la liste et la complétion (forcer car données changées)
-      _uploadedDocuments = await _repository.getDocuments(token);
-      _completion = await _repository.getProfileCompletion(token);
+      // Recharger la liste et la complétion en parallèle
+      final refreshed = await Future.wait([
+        _repository.getDocuments(token),
+        _repository.getProfileCompletion(token),
+      ]);
+      _uploadedDocuments = refreshed[0] as List<UploadedDocumentModel>;
+      _completion = refreshed[1] as ProfileCompletionModel;
       _log('Complétion après upload: ${_completion.completion}%');
 
       final updatedProfile = currentProfile.copyWith(
@@ -226,8 +223,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       await _repository.deleteDocument(token: token, documentId: event.documentId);
       _log('Suppression réussie ✓');
 
-      _uploadedDocuments = await _repository.getDocuments(token);
-      _completion = await _repository.getProfileCompletion(token);
+      final refreshed = await Future.wait([
+        _repository.getDocuments(token),
+        _repository.getProfileCompletion(token),
+      ]);
+      _uploadedDocuments = refreshed[0] as List<UploadedDocumentModel>;
+      _completion = refreshed[1] as ProfileCompletionModel;
       _log('Complétion après suppression: ${_completion.completion}%');
 
       final updatedProfile = currentProfile.copyWith(
@@ -274,8 +275,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       // Invalider le cache pour forcer le rechargement de la nouvelle image
       ProfileDocumentRepository.invalidate(event.documentId);
       ProfileDocumentRepository.clearCache();
-      _uploadedDocuments = await _repository.getDocuments(token);
-      _completion = await _repository.getProfileCompletion(token);
+      final refreshed = await Future.wait([
+        _repository.getDocuments(token),
+        _repository.getProfileCompletion(token),
+      ]);
+      _uploadedDocuments = refreshed[0] as List<UploadedDocumentModel>;
+      _completion = refreshed[1] as ProfileCompletionModel;
       // Forcer un timestamp de refresh pour que les widgets _DocumentImage se recréent
       final refreshTs = DateTime.now().millisecondsSinceEpoch;
       final updatedProfile = currentProfile.copyWith(
@@ -320,8 +325,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         expirationDate: event.expirationDate,
       );
       _log('Patch réussi ✓');
-      _uploadedDocuments = await _repository.getDocuments(token);
-      _completion = await _repository.getProfileCompletion(token);
+      final refreshed = await Future.wait([
+        _repository.getDocuments(token),
+        _repository.getProfileCompletion(token),
+      ]);
+      _uploadedDocuments = refreshed[0] as List<UploadedDocumentModel>;
+      _completion = refreshed[1] as ProfileCompletionModel;
       _log('Complétion après patch: ${_completion.completion}%');
       final updatedProfile = currentProfile.copyWith(
         progressPercent: _completion.completion / 100.0,

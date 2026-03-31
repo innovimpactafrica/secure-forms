@@ -326,6 +326,36 @@
     "send_button": "Envoyer le code",
     "already_account": "Vous avez déja  un compte ? ",
     "login_link": "Connectez-vous"
+  },
+  "forgot_password": {
+    "title": "Mot de passe oublié",
+    "subtitle": "Indiquez votre adresse e-mail : nous vous enverrons un code pour choisir un nouveau mot de passe.",
+    "email_label": "Nom d'utilisateur",
+    "email_hint": "Email ou téléphone",
+    "send_button": "Envoyer le code",
+    "back_to_login": "Connectez-vous",
+    "otp_title": "Vérification d'identité",
+    "otp_subtitle": "Saisissez le code à 4 chiffres reçu par e-mail ou SMS.",
+    "otp_sent_info": "Si cet email existe, un code OTP a été envoyé",
+    "verify_button": "Vérifier",
+    "cancel": "Annuler",
+    "no_code": "Vous n'avez pas reçu de code ?",
+    "resend_button": "Renvoyer le code",
+    "resend_in": "Vous pourrez renvoyer un nouveau code dans ",
+    "resend_available": "Vous pouvez renvoyer le code par e-mail.",
+    "new_password_title": "Nouveau mot de passe",
+    "new_password_subtitle": "Au moins 8 caractères : une majuscule, une minuscule, un chiffre et un caractère spécial (@ $ ! % * ? &).",
+    "password_label": "Mot de passe",
+    "confirm_label": "Confirmer le mot de passe",
+    "save_button": "Enregistrer le mot de passe",
+    "success_title": "Mot de passe mis à jour",
+    "success_subtitle": "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+    "login_button": "Connectez-vous",
+    "required_field": "Champ obligatoire",
+    "invalid_email": "Email invalide",
+    "password_mismatch": "Les mots de passe ne correspondent pas",
+    "password_too_short": "Minimum 8 caractères requis",
+    "enter_4_digits": "Veuillez saisir les 4 chiffres du code"
   }
 }
 

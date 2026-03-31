@@ -21,13 +21,32 @@ class DemandesBloc extends Bloc<DemandesEvent, DemandesState> {
     on<LoadDemandesEvent>(_onLoadDemandes);
     on<LoadMoreDemandesEvent>(_onLoadMore);
     on<DeleteDraftEvent>(_onDeleteDraft);
+    on<GoToDemandesPageEvent>(_onGoToPage);
+    on<ResetDemandesEvent>((_, emit) {
+      _currentStatus = null;
+      _currentSector = null;
+      _currentSearch = null;
+      _currentPage = 1;
+      _lastSearch = null;
+      emit(const DemandesInitial());
+    });
   }
+
+  String? _lastSearch;
 
   Future<void> _onLoadRecent(
     LoadRecentDemandesEvent event,
     Emitter<DemandesState> emit,
   ) async {
-    emit(const DemandesLoading());
+    // Cache : skip uniquement si déjà chargé, pas de force refresh ET même recherche
+    if (state is RecentDemandesLoaded &&
+        !event.forceRefresh &&
+        event.search == _lastSearch) {
+      emit(state);
+      return;
+    }
+    _lastSearch = event.search;
+    if (state is! RecentDemandesLoaded) emit(const DemandesLoading());
     try {
       final token = UserSession.instance.accessToken;
       final demandes = await _repository.getRecentRequests(
@@ -37,18 +56,11 @@ class DemandesBloc extends Bloc<DemandesEvent, DemandesState> {
         category: event.category,
         search: event.search,
       );
-      // ignore: avoid_print
-      print('[RecentDemandes] count=${demandes.length}');
-      for (var i = 0; i < demandes.length; i++) {
-        final d = demandes[i];
-        // ignore: avoid_print
-        print('[RecentDemandes][$i] id=${d.id} | formType="${d.formType}" | requestNumber="${d.requestNumber}" | organisationName="${d.organisationName}" | createdAt="${d.createdAt}" | status="${d.status}"');
-      }
       emit(RecentDemandesLoaded(demandes));
     } catch (e) {
-      // ignore: avoid_print
-      print('[RecentDemandes] ERROR: $e');
-      emit(DemandesError(e.toString().replaceAll('Exception: ', '')));
+      if (state is! RecentDemandesLoaded) {
+        emit(DemandesError(e.toString().replaceAll('Exception: ', '')));
+      }
     }
   }
 
@@ -105,6 +117,35 @@ class DemandesBloc extends Bloc<DemandesEvent, DemandesState> {
         demandes: [...current.demandes, ...page.items],
         total: page.total,
         currentPage: nextPage,
+        hasMore: page.hasMore,
+      ));
+    } catch (e) {
+      emit(DemandesError(e.toString().replaceAll('Exception: ', '')));
+    }
+  }
+
+  Future<void> _onGoToPage(
+    GoToDemandesPageEvent event,
+    Emitter<DemandesState> emit,
+  ) async {
+    final current = state;
+    if (current is! DemandesLoaded) return;
+    emit(current.copyWith(isLoadingMore: true));
+    try {
+      final token = UserSession.instance.accessToken;
+      final page = await _repository.getRequests(
+        accessToken: token,
+        status: _currentStatus,
+        sector: _currentSector,
+        search: _currentSearch,
+        page: event.page,
+        limit: _pageSize,
+      );
+      _currentPage = event.page;
+      emit(DemandesLoaded(
+        demandes: page.items,
+        total: page.total,
+        currentPage: event.page,
         hasMore: page.hasMore,
       ));
     } catch (e) {

@@ -8,11 +8,13 @@ class LoadRecentDemandesEvent extends DemandesEvent {
   final String? status;
   final String? category;
   final String? search;
+  final bool forceRefresh;
   const LoadRecentDemandesEvent({
     this.limit = 5,
     this.status,
     this.category,
     this.search,
+    this.forceRefresh = false,
   });
 }
 
@@ -41,4 +43,15 @@ class LoadMoreDemandesEvent extends DemandesEvent {
 class DeleteDraftEvent extends DemandesEvent {
   final String id;
   const DeleteDraftEvent(this.id);
+}
+
+/// Réinitialiser le BLoC (changement d'utilisateur)
+class ResetDemandesEvent extends DemandesEvent {
+  const ResetDemandesEvent();
+}
+
+/// Aller à une page spécifique
+class GoToDemandesPageEvent extends DemandesEvent {
+  final int page;
+  const GoToDemandesPageEvent(this.page);
 }

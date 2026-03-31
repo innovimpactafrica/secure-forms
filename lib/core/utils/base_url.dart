@@ -13,6 +13,9 @@ class BaseUrl {
   static const String setupPassword         = '$currentBaseUrl/auth/setup-password';
   static const String resumeSetupRequestOtp = '$currentBaseUrl/auth/register/client/resume-setup/request-otp';
   static const String resumeSetupVerifyOtp  = '$currentBaseUrl/auth/register/client/resume-setup/verify-otp';
+  static const String forgotPasswordRequestOtp = '$currentBaseUrl/auth/forget-password/request';
+  static const String forgotPasswordResendOtp  = '$currentBaseUrl/auth/forget-password/resend-otp';
+  static const String forgotPasswordReset      = '$currentBaseUrl/auth/forget-password/reset';
   // ========== USER ENDPOINTS ==========
   static const String getUserProfile = '$currentBaseUrl/auth/profile';
   static const String updateProfile  = '$currentBaseUrl/user/update';

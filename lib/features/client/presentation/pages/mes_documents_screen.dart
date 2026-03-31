@@ -382,7 +382,7 @@ class _DocumentsGrid extends StatelessWidget {
       showModalBottomSheet(
         context: context,
         backgroundColor: AppColors.white,
-        useSafeArea: true, // ✅ protège du navbar
+        useSafeArea: true, // protège du navbar
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
@@ -402,7 +402,7 @@ class _DocumentsGrid extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.white,
-      useSafeArea: true, // ✅ protège du navbar
+      useSafeArea: true, //  protège du navbar
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -529,11 +529,14 @@ class _DocumentCard extends StatelessWidget {
                               ? _DocumentImageDouble(
                                   key: ValueKey('${uploadedDocument!.id}_${uploadedDocument!.backFileId}_$refreshKey'),
                                   id1: uploadedDocument!.id,
+                                  url1: uploadedDocument!.fileUrl,
                                   id2: uploadedDocument!.backFileId!,
+                                  url2: uploadedDocument!.backFileUrl,
                                 )
                               : _DocumentImage(
                                   key: ValueKey('${uploadedDocument!.id}_$refreshKey'),
                                   documentId: uploadedDocument!.id,
+                                  directUrl: uploadedDocument!.fileUrl,
                                 ))
                           : Center(
                               child: Icon(
@@ -1233,7 +1236,8 @@ class _ModalDateField extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────
 class _DocumentImage extends StatefulWidget {
   final String documentId;
-  const _DocumentImage({super.key, required this.documentId});
+  final String? directUrl; // URL MinIO signée directe
+  const _DocumentImage({super.key, required this.documentId, this.directUrl});
 
   @override
   State<_DocumentImage> createState() => _DocumentImageState();
@@ -1266,6 +1270,7 @@ class _DocumentImageState extends State<_DocumentImage> {
       final bytes = await _repo!.getDocumentFile(
         token: UserSession.instance.accessToken,
         documentId: widget.documentId,
+        directUrl: widget.directUrl,
       );
       final data = Uint8List.fromList(bytes);
       final pdf = data.length >= 4 &&
@@ -1346,16 +1351,18 @@ class _DocumentImageState extends State<_DocumentImage> {
 // ─────────────────────────────────────────────────────────────────
 class _DocumentImageDouble extends StatelessWidget {
   final String id1;
+  final String? url1;
   final String id2;
-  const _DocumentImageDouble({super.key, required this.id1, required this.id2});
+  final String? url2;
+  const _DocumentImageDouble({super.key, required this.id1, this.url1, required this.id2, this.url2});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(child: SizedBox.expand(child: _DocumentImage(key: ValueKey(id1), documentId: id1))),
+        Expanded(child: SizedBox.expand(child: _DocumentImage(key: ValueKey(id1), documentId: id1, directUrl: url1))),
         Container(height: 1, color: AppColors.borderLight),
-        Expanded(child: SizedBox.expand(child: _DocumentImage(key: ValueKey(id2), documentId: id2))),
+        Expanded(child: SizedBox.expand(child: _DocumentImage(key: ValueKey(id2), documentId: id2, directUrl: url2))),
       ],
     );
   }
@@ -1440,9 +1447,12 @@ class _DocumentOptionsSheet extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: AppColors.white, useSafeArea: true,
-                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-                    builder: (_) => _DocumentViewerSheet(label: documentType.title, existing: existing));
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => _DocumentViewerPage(
+                      label: documentType.title,
+                      existing: existing,
+                    ),
+                  ));
                 },
                 icon: const Icon(Icons.visibility_outlined, size: 18),
                 label: Text('documents.view'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge)),
@@ -1801,39 +1811,60 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
 
   Future<void> _loadFiles() async {
     final token = UserSession.instance.accessToken;
-    final ids = [
-      widget.existing.id,
-      if (widget.existing.backFileId != null) widget.existing.backFileId!,
+    final files = [
+      {'id': widget.existing.id, 'url': widget.existing.fileUrl},
+      if (widget.existing.backFileId != null)
+        {'id': widget.existing.backFileId!, 'url': widget.existing.backFileUrl},
     ];
     final results = <Map<String, dynamic>>[];
-    for (final id in ids) {
+    for (final f in files) {
       try {
-        final url = BaseUrl.profileDocumentFile(id);
-        final response = await http.get(
-          Uri.parse(url),
-          headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'},
+        final data = await _fetchFile(
+          token: token,
+          fileId: f['id'] as String,
+          directUrl: f['url'] as String?,
         );
-        if (response.statusCode == 200) {
-          final data = response.bodyBytes;
-          final isPdf = data.length >= 4 &&
-              data[0] == 0x25 && data[1] == 0x50 &&
-              data[2] == 0x44 && data[3] == 0x46;
-          if (isPdf) {
-            final dir = await getTemporaryDirectory();
-            final file = File('${dir.path}/viewer_mes_docs_$id.pdf');
-            await file.writeAsBytes(data);
-            results.add({'pdfPath': file.path});
-          } else {
-            results.add({'bytes': data});
-          }
+        final isPdf = data.length >= 4 &&
+            data[0] == 0x25 && data[1] == 0x50 &&
+            data[2] == 0x44 && data[3] == 0x46;
+        if (isPdf) {
+          final dir = await getTemporaryDirectory();
+          final file = File('${dir.path}/viewer_mes_docs_${f["id"]}.pdf');
+          await file.writeAsBytes(data);
+          results.add({'pdfPath': file.path});
         } else {
-          results.add({'error': 'Erreur ${response.statusCode}'});
+          results.add({'bytes': data});
         }
       } catch (e) {
         results.add({'error': e.toString()});
       }
     }
     if (mounted) setState(() { _pages.addAll(results); _loading = false; });
+  }
+
+  /// Essaie d'abord l'URL MinIO directe, fallback sur l'endpoint /file avec token
+  Future<Uint8List> _fetchFile({
+    required String token,
+    required String fileId,
+    String? directUrl,
+  }) async {
+    // 1. Essai URL MinIO directe
+    if (directUrl != null && directUrl.isNotEmpty) {
+      try {
+        final res = await http.get(Uri.parse(directUrl))
+            .timeout(const Duration(seconds: 20));
+        if (res.statusCode == 200) return res.bodyBytes;
+        // 403/expired → fallback
+      } catch (_) {}
+    }
+    // 2. Fallback endpoint /file avec Bearer token
+    final url = BaseUrl.profileDocumentFile(fileId);
+    final res = await http.get(
+      Uri.parse(url),
+      headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'},
+    ).timeout(const Duration(seconds: 30));
+    if (res.statusCode == 200) return res.bodyBytes;
+    throw Exception('Erreur ${res.statusCode}');
   }
 
   @override
@@ -1923,7 +1954,7 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
                           ),
                           if (total > 1 && _currentPage == 0)
                             Positioned(
-                              bottom: 32,
+                              bottom: MediaQuery.of(context).padding.bottom + 24,
                               left: 0,
                               right: 0,
                               child: Center(
@@ -1986,6 +2017,282 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
       return _ZoomablePage(bytes: page['bytes'] as Uint8List);
     }
     return Center(child: Icon(Icons.insert_drive_file_outlined, size: 80, color: AppColors.primary));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// PAGE PLEIN ÉCRAN — Visualiser document (remplace le bottom sheet)
+// ─────────────────────────────────────────────────────────────────
+class _DocumentViewerPage extends StatefulWidget {
+  final String label;
+  final UploadedDocumentModel existing;
+  const _DocumentViewerPage({required this.label, required this.existing});
+
+  @override
+  State<_DocumentViewerPage> createState() => _DocumentViewerPageState();
+}
+
+class _DocumentViewerPageState extends State<_DocumentViewerPage> {
+  final List<Map<String, dynamic>> _pages = [];
+  bool _loading = true;
+  int _currentPage = 0;
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    _loadFiles();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadFiles() async {
+    final token = UserSession.instance.accessToken;
+    final files = [
+      {'id': widget.existing.id, 'url': widget.existing.fileUrl},
+      if (widget.existing.backFileId != null)
+        {'id': widget.existing.backFileId!, 'url': widget.existing.backFileUrl},
+    ];
+    final results = <Map<String, dynamic>>[];
+    for (final f in files) {
+      try {
+        final data = await _fetchFile(
+          token: token,
+          fileId: f['id'] as String,
+          directUrl: f['url'] as String?,
+        );
+        final isPdf = data.length >= 4 &&
+            data[0] == 0x25 && data[1] == 0x50 &&
+            data[2] == 0x44 && data[3] == 0x46;
+        if (isPdf) {
+          final dir = await getTemporaryDirectory();
+          final file = File('${dir.path}/viewer_page_${f["id"]}.pdf');
+          await file.writeAsBytes(data);
+          results.add({'pdfPath': file.path});
+        } else {
+          results.add({'bytes': data});
+        }
+      } catch (e) {
+        results.add({'error': e.toString()});
+      }
+    }
+    if (mounted) setState(() { _pages.addAll(results); _loading = false; });
+  }
+
+  Future<Uint8List> _fetchFile({
+    required String token,
+    required String fileId,
+    String? directUrl,
+  }) async {
+    if (directUrl != null && directUrl.isNotEmpty) {
+      try {
+        final res = await http.get(Uri.parse(directUrl))
+            .timeout(const Duration(seconds: 20));
+        if (res.statusCode == 200) return res.bodyBytes;
+      } catch (_) {}
+    }
+    final url = BaseUrl.profileDocumentFile(fileId);
+    final res = await http.get(
+      Uri.parse(url),
+      headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'},
+    ).timeout(const Duration(seconds: 30));
+    if (res.statusCode == 200) return res.bodyBytes;
+    throw Exception('Erreur ${res.statusCode}');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = _pages.length;
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: AppColors.white,
+        elevation: 0,
+        title: Text(
+          widget.label,
+          style: const TextStyle(
+            fontFamily: AppConstants.fontFamilySofiaSans,
+            fontWeight: FontWeight.w600,
+            fontSize: AppConstants.fontSizeLarge,
+            color: AppColors.white,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+        actions: [
+          if (!_loading && total > 1)
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Center(
+                child: Text(
+                  '${_currentPage + 1}/$total',
+                  style: const TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    fontSize: AppConstants.fontSizeMedium,
+                    color: AppColors.white,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+      body: _loading
+          ? Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(AppColors.primary),
+              ),
+            )
+          : total == 0
+              ? Center(
+                  child: Icon(Icons.insert_drive_file_outlined,
+                      size: 80, color: AppColors.primary),
+                )
+              : Stack(
+                  children: [
+                    PageView.builder(
+                      controller: _pageController,
+                      itemCount: total,
+                      onPageChanged: (i) => setState(() => _currentPage = i),
+                      itemBuilder: (_, i) => _buildPage(_pages[i]),
+                    ),
+                    if (total > 1 && _currentPage == 0)
+                      Positioned(
+                        bottom: MediaQuery.of(context).padding.bottom + 24,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.swipe,
+                                    color: AppColors.white, size: 16),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'documents.swipe_hint'.tr(),
+                                  style: const TextStyle(
+                                    fontFamily: AppConstants.fontFamilyInter,
+                                    fontSize: AppConstants.fontSizeRegular,
+                                    color: AppColors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+    );
+  }
+
+  Widget _buildPage(Map<String, dynamic> page) {
+    if (page['error'] != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline,
+                color: AppColors.statusRejected, size: 48),
+            const SizedBox(height: 12),
+            Text(
+              page['error'] as String,
+              style: const TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                color: AppColors.white,
+                fontSize: AppConstants.fontSizeMedium,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+    if (page['pdfPath'] != null) {
+      return _PdfFullViewer(filePath: page['pdfPath'] as String);
+    }
+    if (page['bytes'] != null) {
+      return _ZoomablePage(bytes: page['bytes'] as Uint8List);
+    }
+    return const Center(
+        child: Icon(Icons.insert_drive_file_outlined,
+            size: 80, color: AppColors.primary));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// PDF PLEIN ÉCRAN — prend tout l'espace comme Gmail
+// ─────────────────────────────────────────────────────────────────
+class _PdfFullViewer extends StatefulWidget {
+  final String filePath;
+  const _PdfFullViewer({required this.filePath});
+
+  @override
+  State<_PdfFullViewer> createState() => _PdfFullViewerState();
+}
+
+class _PdfFullViewerState extends State<_PdfFullViewer> {
+  int _totalPages = 0;
+  int _currentPage = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        SizedBox.expand(
+          child: PDFView(
+            filePath: widget.filePath,
+            enableSwipe: true,
+            swipeHorizontal: false,
+            autoSpacing: true,
+            pageFling: true,
+            pageSnap: true,
+            fitPolicy: FitPolicy.BOTH,
+            enableRenderDuringScale: true,
+            useBestQuality: true,
+            nightMode: false,
+            onRender: (pages) {
+              if (mounted) setState(() => _totalPages = pages ?? 0);
+            },
+            onPageChanged: (page, _) {
+              if (mounted) setState(() => _currentPage = (page ?? 0) + 1);
+            },
+          ),
+        ),
+        if (_totalPages > 1)
+          Positioned(
+            top: 12,
+            right: 12,
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '$_currentPage / $_totalPages',
+                style: const TextStyle(
+                  color: AppColors.white,
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontSize: AppConstants.fontSizeRegular,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 }
 
