@@ -101,15 +101,25 @@ class ProfileDocumentRepository {
     }
 
     // 3. Téléchargement
-    print('[Repo] Téléchargement: $documentId');
     List<int> bytes;
     if (directUrl != null && directUrl.isNotEmpty) {
       try {
         bytes = await _service.getDocumentFileFromUrl(directUrl);
-      } catch (_) {
-        // URL MinIO expirée ou invalide → fallback endpoint /file
-        print('[Repo] MinIO échoué, fallback /file: $documentId');
-        bytes = await _service.getDocumentFile(token: token, documentId: documentId);
+      } catch (e) {
+        // URL MinIO expirée ou invalide → fallback endpoint /file avec token
+        final objectKey = _extractObjectKey(directUrl);
+        if (objectKey != null) {
+          try {
+            bytes = await _service.getDocumentFileFromStorageProxy(
+              token: token,
+              objectKey: objectKey,
+            );
+          } catch (_) {
+            bytes = await _service.getDocumentFile(token: token, documentId: documentId);
+          }
+        } else {
+          bytes = await _service.getDocumentFile(token: token, documentId: documentId);
+        }
       }
     } else {
       bytes = await _service.getDocumentFile(token: token, documentId: documentId);
@@ -161,5 +171,19 @@ class ProfileDocumentRepository {
   static void invalidate(String documentId) {
     _fileCache.remove(documentId);
     _deleteDiskCache(documentId);
+  }
+
+  /// Extrait la objectKey depuis une URL MinIO signée
+  /// Ex: https://minio.../bucket/profiles/documents/xxx.pdf?X-Amz-... → profiles/documents/xxx.pdf
+  static String? _extractObjectKey(String url) {
+    try {
+      final uri = Uri.parse(url);
+      final parts = uri.path.split('/');
+      // parts[0] = '', parts[1] = bucket, parts[2..] = objectKey
+      if (parts.length >= 3) {
+        return parts.sublist(2).join('/');
+      }
+    } catch (_) {}
+    return null;
   }
 }

@@ -1889,21 +1889,25 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
     required String fileId,
     String? directUrl,
   }) async {
-    // 1. Essai URL MinIO directe
     if (directUrl != null && directUrl.isNotEmpty) {
       try {
-        final res = await http.get(Uri.parse(directUrl))
-            .timeout(const Duration(seconds: 20));
+        final res = await http.get(Uri.parse(directUrl)).timeout(const Duration(seconds: 20));
         if (res.statusCode == 200) return res.bodyBytes;
-        // 403/expired → fallback
       } catch (_) {}
     }
-    // 2. Fallback endpoint /file avec Bearer token
+    if (directUrl != null && directUrl.isNotEmpty) {
+      try {
+        final parts = Uri.parse(directUrl).path.split('/');
+        if (parts.length >= 3) {
+          final objectKey = parts.sublist(2).join('/');
+          final proxyUrl = BaseUrl.storageFile(objectKey);
+          final r = await http.get(Uri.parse(proxyUrl), headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'}).timeout(const Duration(seconds: 30));
+          if (r.statusCode == 200) return r.bodyBytes;
+        }
+      } catch (_) {}
+    }
     final url = BaseUrl.profileDocumentFile(fileId);
-    final res = await http.get(
-      Uri.parse(url),
-      headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'},
-    ).timeout(const Duration(seconds: 30));
+    final res = await http.get(Uri.parse(url), headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'}).timeout(const Duration(seconds: 30));
     if (res.statusCode == 200) return res.bodyBytes;
     throw Exception('Erreur ${res.statusCode}');
   }
@@ -2132,16 +2136,23 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
   }) async {
     if (directUrl != null && directUrl.isNotEmpty) {
       try {
-        final res = await http.get(Uri.parse(directUrl))
-            .timeout(const Duration(seconds: 20));
+        final res = await http.get(Uri.parse(directUrl)).timeout(const Duration(seconds: 20));
         if (res.statusCode == 200) return res.bodyBytes;
       } catch (_) {}
     }
+    if (directUrl != null && directUrl.isNotEmpty) {
+      try {
+        final parts = Uri.parse(directUrl).path.split('/');
+        if (parts.length >= 3) {
+          final objectKey = parts.sublist(2).join('/');
+          final proxyUrl = BaseUrl.storageFile(objectKey);
+          final r = await http.get(Uri.parse(proxyUrl), headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'}).timeout(const Duration(seconds: 30));
+          if (r.statusCode == 200) return r.bodyBytes;
+        }
+      } catch (_) {}
+    }
     final url = BaseUrl.profileDocumentFile(fileId);
-    final res = await http.get(
-      Uri.parse(url),
-      headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'},
-    ).timeout(const Duration(seconds: 30));
+    final res = await http.get(Uri.parse(url), headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'}).timeout(const Duration(seconds: 30));
     if (res.statusCode == 200) return res.bodyBytes;
     throw Exception('Erreur ${res.statusCode}');
   }

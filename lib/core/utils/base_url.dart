@@ -29,6 +29,8 @@ class BaseUrl {
   static const String profileDocuments     = '$currentBaseUrl/users/profile/documents';
   static String profileDocumentFile(String documentId) =>
       '$currentBaseUrl/users/profile/documents/$documentId/file';
+  static String storageFile(String objectKey) =>
+      '$currentBaseUrl/storage/files/$objectKey';
   static String deleteProfileDocument(String documentId) =>
       '$currentBaseUrl/users/profile/documents/$documentId';
   static const String updateUserProfile = '$currentBaseUrl/users/me/profile';

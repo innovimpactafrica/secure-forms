@@ -736,14 +736,30 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
   }
 
   Future<void> _load() async {
-    // Refresh proactif du token avant tout téléchargement
     final token = await AuthenticatedHttpClient.instance.ensureFreshToken();
     try {
       Uint8List bytes;
       final isMinIO = widget.url.contains('X-Amz-');
 
       if (isMinIO) {
-        bytes = await compute(_fetchDirect, widget.url);
+        try {
+          bytes = await compute(_fetchDirect, widget.url);
+        } catch (e) {
+          // URL MinIO expirée → essayer le proxy stable /api/storage/files/{key}
+          final objectKey = _extractObjectKey(widget.url);
+          if (objectKey != null) {
+            debugPrint('[Viewer] MinIO expiré → proxy stable: $objectKey');
+            bytes = await compute(_fetchWithToken, {
+              'url': BaseUrl.storageFile(objectKey),
+              'token': token,
+            });
+          } else if (widget.requestId != null) {
+            await _fallbackViaApi(token);
+            return;
+          } else {
+            rethrow;
+          }
+        }
       } else {
         bytes = await compute(_fetchWithToken, {
           'url': widget.url,
@@ -762,7 +778,7 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
         _loading = false;
       });
     } catch (e) {
-      if (widget.url.contains('X-Amz-') && widget.requestId != null) {
+      if (widget.requestId != null) {
         await _fallbackViaApi(token);
       } else {
         if (mounted) setState(() { _loading = false; _error = e.toString(); });
@@ -840,6 +856,16 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
     }
     if (res.statusCode != 200) throw Exception('Erreur ${res.statusCode}');
     return res.bodyBytes;
+  }
+
+  /// Extrait la objectKey depuis une URL MinIO signée
+  static String? _extractObjectKey(String url) {
+    try {
+      final uri = Uri.parse(url);
+      final parts = uri.path.split('/');
+      if (parts.length >= 3) return parts.sublist(2).join('/');
+    } catch (_) {}
+    return null;
   }
 
   @override

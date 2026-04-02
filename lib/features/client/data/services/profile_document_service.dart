@@ -278,15 +278,56 @@ class ProfileDocumentService {
   }
 
   /// GET fichier depuis URL MinIO signée directe (sans token)
+  /// Si 403/404 → fallback via /api/storage/files/{objectKey} avec token
   Future<List<int>> getDocumentFileFromUrl(String url) async {
     _log('GET MinIO direct: $url');
     final response = await _client.get(Uri.parse(url)).timeout(
-      const Duration(seconds: 30),
+      const Duration(seconds: 20),
       onTimeout: () => throw Exception('MinIO timeout'),
     );
     _log('MinIO → ${response.statusCode} | ${response.bodyBytes.length} bytes');
     if (response.statusCode == 200) return response.bodyBytes;
+    // URL expirée → extraire la objectKey et utiliser le proxy stable
+    if (response.statusCode == 403 || response.statusCode == 404) {
+      final objectKey = _extractObjectKey(url);
+      if (objectKey != null) {
+        _log('MinIO expiré → fallback proxy: $objectKey');
+        throw Exception('EXPIRED'); // sera capturé par le repository
+      }
+    }
     throw Exception('Erreur téléchargement MinIO: ${response.statusCode}');
+  }
+
+  /// Extrait la objectKey depuis une URL MinIO signée
+  /// Ex: https://minio.../profiles/documents/xxx.pdf?X-Amz-... → profiles/documents/xxx.pdf
+  String? _extractObjectKey(String url) {
+    try {
+      final uri = Uri.parse(url);
+      // Le path commence par / suivi du bucket puis de la clé
+      // Ex: /secure-forms-bucket/profiles/documents/xxx.pdf
+      final parts = uri.path.split('/');
+      if (parts.length >= 3) {
+        // Ignorer le premier segment vide et le bucket
+        return parts.sublist(2).join('/');
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  /// GET /api/storage/files/{objectKey} — proxy stable (URL ne périme pas)
+  Future<List<int>> getDocumentFileFromStorageProxy({
+    required String token,
+    required String objectKey,
+  }) async {
+    final url = BaseUrl.storageFile(objectKey);
+    _log('GET storage proxy: $url');
+    final response = await _client.get(
+      Uri.parse(url),
+      headers: _authHeaders(token),
+    ).timeout(const Duration(seconds: 30));
+    _log('Storage proxy → ${response.statusCode} | ${response.bodyBytes.length} bytes');
+    if (response.statusCode == 200) return response.bodyBytes;
+    throw Exception('Erreur storage proxy: ${response.statusCode}');
   }
 
   /// GET /api/users/profile/documents/{documentId}/file
