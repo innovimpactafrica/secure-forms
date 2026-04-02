@@ -354,16 +354,16 @@ class _ArchiveCardState extends State<_ArchiveCard> {
     }
   }
 
-  // Ouvre le viewer PDF intégré
+  // Ouvre le détail demande ou le viewer PDF
   void _onView(BuildContext context) {
     if (widget.item.isRequest) {
-      // Pour les demandes : ouvrir le viewer PDF directement
-      _fetchFile(context).then((path) {
-        if (path != null && context.mounted) {
-          _openPdfViewer(context, path);
-        }
-      });
+      // Demande → page détail
+      Navigator.of(context).pushNamed(
+        '/client-demande-detail',
+        arguments: {'id': widget.item.id},
+      );
     } else {
+      // Document → viewer PDF
       _fetchFile(context).then((path) {
         if (path != null && context.mounted) {
           _openPdfViewer(context, path);

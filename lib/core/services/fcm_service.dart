@@ -7,6 +7,12 @@ import 'package:secure_link/core/utils/base_url.dart';
 import 'package:secure_link/core/utils/navigator_key.dart';
 import 'package:secure_link/core/utils/user_session.dart';
 
+// Handler top-level pour les taps sur notifications locales quand app en fond
+@pragma('vm:entry-point')
+void _backgroundNotificationHandler(NotificationResponse response) {
+  // Ne peut pas naviguer ici (pas de context) — géré par onDidReceiveNotificationResponse au réveil
+}
+
 class FcmService {
   static final _messaging = FirebaseMessaging.instance;
   static final _localNotifications = FlutterLocalNotificationsPlugin();
@@ -52,8 +58,10 @@ class FcmService {
     await _localNotifications.initialize(
       const InitializationSettings(android: androidSettings, iOS: iosSettings),
       onDidReceiveNotificationResponse: (response) {
+        // Tap sur notification locale (app ouverte au premier plan)
         _handleNavigationFromPayload(response.payload);
       },
+      onDidReceiveBackgroundNotificationResponse: _backgroundNotificationHandler,
     );
   }
 
@@ -160,9 +168,11 @@ class FcmService {
           android: AndroidNotificationDetails(
             _channel.id,
             _channel.name,
-            importance: Importance.high,
-            priority: Priority.high,
+            importance: Importance.max,
+            priority: Priority.max,
             icon: '@mipmap/ic_launcher',
+            fullScreenIntent: true,
+            actions: const [],
           ),
           iOS: const DarwinNotificationDetails(
             presentAlert: true,
@@ -185,6 +195,7 @@ class FcmService {
   static Future<void> checkInitialMessage() async {
     final message = await _messaging.getInitialMessage();
     if (message != null) {
+      print('[FCM] Message initial (app fermée): ${message.data}');
       _handleNavigation(message.data);
     }
   }
@@ -198,9 +209,13 @@ class FcmService {
     final type        = data['type']?.toString() ?? '';
     final screen      = data['screen']?.toString() ?? '';
 
-    Future.delayed(const Duration(milliseconds: 500), () {
+    void navigate() {
       final nav = navigatorKey.currentState;
-      if (nav == null) return;
+      if (nav == null) {
+        // Retry si navigator pas encore prêt
+        Future.delayed(const Duration(milliseconds: 300), navigate);
+        return;
+      }
 
       // Cas 1 : notification liée à une demande
       if (relatedType == 'request' && relatedId.isNotEmpty) {
@@ -211,7 +226,6 @@ class FcmService {
 
       // Cas 2 : type de notification
       switch (type) {
-        // Demandes
         case 'REQUEST_VALIDATED':
         case 'REQUEST_REJECTED':
         case 'REQUEST_UPDATED':
@@ -224,7 +238,6 @@ class FcmService {
           }
           return;
 
-        // Documents / KYC / Profil
         case 'DOCUMENT_VALIDATED':
         case 'DOCUMENT_REJECTED':
         case 'DOCUMENT_EXPIRING':
@@ -234,7 +247,6 @@ class FcmService {
           nav.pushNamed(AppRoutes.clientProfil);
           return;
 
-        // Notifications générales
         case 'NEW_MESSAGE':
         case 'SYSTEM':
           nav.pushNamed(AppRoutes.clientHome);
@@ -251,7 +263,9 @@ class FcmService {
       // Fallback
       print('[FCM] Aucune navigation spécifique → home');
       nav.pushNamed(AppRoutes.clientHome);
-    });
+    }
+
+    navigate();
   }
 
   static void _handleNavigationFromPayload(String? payload) {

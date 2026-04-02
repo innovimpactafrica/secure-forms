@@ -32,6 +32,20 @@ class _NotificationsViewState extends State<_NotificationsView> {
   String _searchQuery = '';
 
   @override
+  void initState() {
+    super.initState();
+    // Charger si pas encore fait
+    final bloc = context.read<NotificationsBloc>();
+    if (bloc.state is! NotificationsLoaded) {
+      bloc.add(const LoadNotificationsEvent());
+    }
+    // Marquer toutes comme lues dès l'ouverture → badge à 0
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotificationsBloc>().add(const MarkAllNotificationsReadEvent());
+    });
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -400,13 +414,23 @@ class _NotifCard extends StatelessWidget {
                           item.title,
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilySofiaSans,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: item.isRead ? FontWeight.w500 : FontWeight.w700,
                             fontSize: AppConstants.fontSizeMedium,
                             color: AppColors.textDark,
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
+                      if (!item.isRead)
+                        Container(
+                          width: 8, height: 8,
+                          margin: const EdgeInsets.only(top: 4),
+                          decoration: const BoxDecoration(
+                            color: AppColors.statusRejected,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      const SizedBox(width: 4),
                       Text(
                         item.timeFormatted,
                         style: TextStyle(

@@ -8,6 +8,10 @@ class LoadNotificationsEvent extends NotificationsEvent {
   const LoadNotificationsEvent({this.unreadOnly = false, this.forceRefresh = false});
 }
 
+class MarkAllNotificationsReadEvent extends NotificationsEvent {
+  const MarkAllNotificationsReadEvent();
+}
+
 class ResetNotificationsEvent extends NotificationsEvent {
   const ResetNotificationsEvent();
 }

@@ -25,8 +25,6 @@ class NotificationsService {
       },
     );
     print('[NotificationsService] GET ${uri.path} → ${response.statusCode}');
-    print('[NotificationsService] Body: ${response.body}');
-
     if (response.statusCode == 200) {
       final decoded = jsonDecode(response.body);
       final List<dynamic> list = decoded is List
@@ -35,5 +33,20 @@ class NotificationsService {
       return list.map((e) => NotificationModel.fromJson(e as Map<String, dynamic>)).toList();
     }
     throw Exception('Erreur chargement notifications: ${response.statusCode}');
+  }
+
+  Future<void> markRead(String accessToken, List<String> ids) async {
+    await _client.post(
+      Uri.parse(BaseUrl.markNotificationsRead),
+      headers: {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'},
+      body: jsonEncode({'ids': ids}),
+    );
+  }
+
+  Future<void> markAllRead(String accessToken) async {
+    await _client.post(
+      Uri.parse(BaseUrl.markAllNotificationsRead),
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
   }
 }

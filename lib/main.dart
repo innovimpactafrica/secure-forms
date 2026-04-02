@@ -88,8 +88,10 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
   void initState() {
     super.initState();
     _initDeepLinks();
-    // Vérifier si app lancée depuis une notification
-    FcmService.checkInitialMessage();
+    // Vérifier si app lancée depuis une notification (après le premier build)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FcmService.checkInitialMessage();
+    });
   }
 
   Future<void> _initDeepLinks() async {

@@ -1,14 +1,14 @@
-import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/base_url.dart';
+import 'package:secure_link/core/utils/authenticated_http_client.dart';
 import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/client/data/models/demande_model.dart';
 import 'package:secure_link/features/client/data/repositories/demandes_repository.dart';
@@ -356,7 +356,9 @@ class _ClientDemandeDetailScreenState
                           context,
                           label: f.label.isNotEmpty ? f.label : f.fileName,
                           url: f.pdfUrl,
-                          useToken: false,
+                          useToken: true,
+                          requestId: d.id,
+                          formIndex: i,
                         )
                     : null,
                 borderRadius: BorderRadius.circular(14),
@@ -449,13 +451,20 @@ class _ClientDemandeDetailScreenState
         children: d.requiredDocuments.asMap().entries.map((entry) {
           final i = entry.key;
           final doc = entry.value;
-          final docUrl = BaseUrl.profileDocumentFile(doc.id);
           return Column(
             children: [
               if (i > 0) const Divider(height: 1, color: AppColors.borderDivider),
               InkWell(
                 onTap: doc.id.isNotEmpty
-                    ? () => _openViewer(context, label: doc.label, url: docUrl, useToken: true)
+                    ? () {
+                        final url = (doc.fileUrl != null && doc.fileUrl!.isNotEmpty)
+                            ? doc.fileUrl!
+                            : BaseUrl.profileDocumentFile(doc.id);
+                        // Tous les endpoints /api/... nécessitent un token
+                        // Seules les URLs MinIO (X-Amz-) n'en ont pas besoin
+                        final useToken = !url.contains('X-Amz-');
+                        _openViewer(context, label: doc.label, url: url, useToken: useToken);
+                      }
                     : null,
                 borderRadius: BorderRadius.circular(14),
                 child: Padding(
@@ -505,9 +514,9 @@ class _ClientDemandeDetailScreenState
 
   // ── Ouvrir le viewer ──────────────────────────────────────────────────────
 
-  void _openViewer(BuildContext context, {required String label, required String url, required bool useToken}) {
+  void _openViewer(BuildContext context, {required String label, required String url, required bool useToken, String? requestId, int formIndex = 0}) {
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => _DocumentViewerPage(label: label, url: url, useToken: useToken),
+      builder: (_) => _DocumentViewerPage(label: label, url: url, useToken: useToken, requestId: requestId, formIndex: formIndex),
     ));
   }
 
@@ -685,11 +694,15 @@ class _DocumentViewerPage extends StatefulWidget {
   final String label;
   final String url;
   final bool useToken;
+  final String? requestId;
+  final int formIndex; // index dans submittedForms pour le fallback
 
   const _DocumentViewerPage({
     required this.label,
     required this.url,
     required this.useToken,
+    this.requestId,
+    this.formIndex = 0,
   });
 
   @override
@@ -697,63 +710,136 @@ class _DocumentViewerPage extends StatefulWidget {
 }
 
 class _DocumentViewerPageState extends State<_DocumentViewerPage> {
-  Uint8List? _bytes;
-  String? _pdfPath;
+  // Cache statique partagé entre toutes les instances
+  static final Map<String, Uint8List> _cache = {};
+
+  Uint8List? _imageBytes;
+  Uint8List? _pdfBytes;
   bool _loading = true;
   String? _error;
-  int _totalPages = 0;
-  int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadFile();
+    // Vérifier le cache d'abord
+    final cached = _cache[widget.url];
+    if (cached != null) {
+      final isPdf = cached.length >= 4 &&
+          cached[0] == 0x25 && cached[1] == 0x50 &&
+          cached[2] == 0x44 && cached[3] == 0x46;
+      if (isPdf) _pdfBytes = cached;
+      else _imageBytes = cached;
+      _loading = false;
+    } else {
+      _load();
+    }
   }
 
-  Future<void> _loadFile() async {
+  Future<void> _load() async {
+    // Refresh proactif du token avant tout téléchargement
+    final token = await AuthenticatedHttpClient.instance.ensureFreshToken();
     try {
-      final token = UserSession.instance.accessToken;
-      http.Response response;
+      Uint8List bytes;
+      final isMinIO = widget.url.contains('X-Amz-');
 
-      // 1. Essai direct (MinIO ou URL publique)
-      if (!widget.useToken) {
-        response = await http
-            .get(Uri.parse(widget.url))
-            .timeout(const Duration(seconds: 20));
-        // 403 / expiré → fallback avec token
-        if (response.statusCode != 200) {
-          response = await http.get(
-            Uri.parse(widget.url),
-            headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'},
-          ).timeout(const Duration(seconds: 30));
-        }
+      if (isMinIO) {
+        bytes = await compute(_fetchDirect, widget.url);
       } else {
-        response = await http.get(
-          Uri.parse(widget.url),
-          headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'},
-        ).timeout(const Duration(seconds: 30));
+        bytes = await compute(_fetchWithToken, {
+          'url': widget.url,
+          'token': token,
+        });
       }
 
-      if (response.statusCode == 200) {
-        final bytes = response.bodyBytes;
-        final isPdf = bytes.length >= 4 &&
-            bytes[0] == 0x25 && bytes[1] == 0x50 &&
-            bytes[2] == 0x44 && bytes[3] == 0x46;
-        if (isPdf) {
-          final dir = await getTemporaryDirectory();
-          final file = File(
-              '${dir.path}/viewer_${DateTime.now().millisecondsSinceEpoch}.pdf');
-          await file.writeAsBytes(bytes);
-          if (mounted) setState(() { _pdfPath = file.path; _loading = false; });
-        } else {
-          if (mounted) setState(() { _bytes = bytes; _loading = false; });
-        }
+      final isPdf = bytes.length >= 4 &&
+          bytes[0] == 0x25 && bytes[1] == 0x50 &&
+          bytes[2] == 0x44 && bytes[3] == 0x46;
+
+      if (mounted) setState(() {
+        if (isPdf) _pdfBytes = bytes;
+        else _imageBytes = bytes;
+        _cache[widget.url] = bytes;
+        _loading = false;
+      });
+    } catch (e) {
+      if (widget.url.contains('X-Amz-') && widget.requestId != null) {
+        await _fallbackViaApi(token);
       } else {
-        if (mounted) setState(() { _loading = false; _error = 'Erreur ${response.statusCode}'; });
+        if (mounted) setState(() { _loading = false; _error = e.toString(); });
       }
+    }
+  }
+
+  Future<void> _fallbackViaApi(String token) async {
+    try {
+      // Re-refresh au cas où le token aurait expiré entre temps
+      final freshToken = await AuthenticatedHttpClient.instance.ensureFreshToken();
+      final repo = DemandesRepository();
+      final demande = await repo.getRequestById(accessToken: freshToken, id: widget.requestId!);
+
+      // Chercher par index exact d'abord, puis par label, puis premier disponible
+      SubmittedFormItem? form;
+      if (widget.formIndex < demande.submittedForms.length) {
+        final candidate = demande.submittedForms[widget.formIndex];
+        if (candidate.pdfUrl.isNotEmpty) form = candidate;
+      }
+      form ??= demande.submittedForms
+          .where((f) => f.label == widget.label && f.pdfUrl.isNotEmpty)
+          .firstOrNull;
+      form ??= demande.submittedForms
+          .where((f) => f.pdfUrl.isNotEmpty)
+          .firstOrNull;
+
+      if (form == null || form.pdfUrl.isEmpty) throw Exception('PDF introuvable');
+
+      final freshUrl = form.pdfUrl;
+      final isMinIO = freshUrl.contains('X-Amz-');
+      Uint8List bytes;
+      if (isMinIO) {
+        bytes = await compute(_fetchDirect, freshUrl);
+      } else {
+        bytes = await compute(_fetchWithToken, {'url': freshUrl, 'token': freshToken});
+      }
+
+      final isPdf = bytes.length >= 4 &&
+          bytes[0] == 0x25 && bytes[1] == 0x50 &&
+          bytes[2] == 0x44 && bytes[3] == 0x46;
+
+      if (mounted) setState(() {
+        if (isPdf) _pdfBytes = bytes;
+        else _imageBytes = bytes;
+        _cache[freshUrl] = bytes;
+        _loading = false;
+      });
     } catch (e) {
       if (mounted) setState(() { _loading = false; _error = e.toString(); });
     }
+  }
+
+  // Fonctions top-level pour compute (isolate)
+  static Future<Uint8List> _fetchWithToken(Map<String, String> args) async {
+    final rawUrl = args['url']!;
+    final token = args['token']!;
+    debugPrint('[Viewer] GET $rawUrl');
+    final res = await http.get(
+      Uri.parse(rawUrl),
+      headers: {'Authorization': 'Bearer $token'},
+    ).timeout(const Duration(seconds: 30));
+    debugPrint('[Viewer] status=${res.statusCode} bytes=${res.bodyBytes.length}');
+    if (res.statusCode != 200) {
+      debugPrint('[Viewer] error body=${res.body}');
+      throw Exception('Erreur ${res.statusCode}');
+    }
+    return res.bodyBytes;
+  }
+
+  static Future<Uint8List> _fetchDirect(String url) async {
+    final res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 20));
+    if (res.statusCode == 403 || res.statusCode == 404) {
+      throw Exception('EXPIRED_${res.statusCode}');
+    }
+    if (res.statusCode != 200) throw Exception('Erreur ${res.statusCode}');
+    return res.bodyBytes;
   }
 
   @override
@@ -774,104 +860,40 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
           ),
           overflow: TextOverflow.ellipsis,
         ),
-        actions: [
-          if (!_loading && _pdfPath != null && _totalPages > 1)
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Center(
-                child: Text(
-                  '$_currentPage / $_totalPages',
-                  style: const TextStyle(
-                    fontFamily: AppConstants.fontFamilyInter,
-                    fontSize: AppConstants.fontSizeMedium,
-                    color: AppColors.white,
-                  ),
-                ),
-              ),
-            ),
-        ],
       ),
       body: _loading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : _error != null
               ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.error_outline,
-                          color: AppColors.statusRejected, size: 48),
-                      const SizedBox(height: 12),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
-                        child: Text(
-                          _error!,
-                          style: const TextStyle(
-                              color: AppColors.white,
-                              fontSize: AppConstants.fontSizeMedium),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.error_outline,
+                            color: AppColors.statusRejected, size: 48),
+                        const SizedBox(height: 12),
+                        Text(_error!,
+                            style: const TextStyle(
+                                color: AppColors.white, fontSize: 14),
+                            textAlign: TextAlign.center),
+                      ],
+                    ),
                   ),
                 )
-              : _pdfPath != null
-                  ? Stack(
-                      children: [
-                        SizedBox.expand(
-                          child: PDFView(
-                            filePath: _pdfPath!,
-                            enableSwipe: true,
-                            swipeHorizontal: false,
-                            autoSpacing: true,
-                            pageFling: true,
-                            pageSnap: true,
-                            fitPolicy: FitPolicy.BOTH,
-                            enableRenderDuringScale: true,
-                            useBestQuality: true,
-                            onRender: (pages) {
-                              if (mounted) setState(() => _totalPages = pages ?? 0);
-                            },
-                            onPageChanged: (page, _) {
-                              if (mounted) setState(() => _currentPage = (page ?? 0) + 1);
-                            },
-                          ),
-                        ),
-                        if (_totalPages > 1)
-                          Positioned(
-                            top: 12,
-                            right: 12,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '$_currentPage / $_totalPages',
-                                style: const TextStyle(
-                                  color: AppColors.white,
-                                  fontFamily: AppConstants.fontFamilyInter,
-                                  fontSize: AppConstants.fontSizeRegular,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    )
-                  : _bytes != null
+              : _pdfBytes != null
+                  ? SfPdfViewer.memory(_pdfBytes!)
+                  : _imageBytes != null
                       ? InteractiveViewer(
                           minScale: 0.8,
                           maxScale: 4.0,
                           child: Center(
                             child: Image.memory(
-                              _bytes!,
+                              _imageBytes!,
                               fit: BoxFit.contain,
                               errorBuilder: (_, __, ___) => const Icon(
                                   Icons.insert_drive_file_outlined,
-                                  size: 80,
-                                  color: AppColors.primary),
+                                  size: 80, color: AppColors.primary),
                             ),
                           ),
                         )

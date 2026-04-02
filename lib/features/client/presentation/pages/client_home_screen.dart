@@ -245,13 +245,12 @@ class _HomeHeader extends StatelessWidget {
               GestureDetector(
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const NotificationsScreen(),
+                    builder: (_) => BlocProvider.value(
+                      value: context.read<NotificationsBloc>(),
+                      child: const NotificationsScreen(),
+                    ),
                   ),
-                ).then((_) {
-                  if (context.mounted) {
-                    context.read<NotificationsBloc>().add(const LoadNotificationsEvent());
-                  }
-                }),
+                ),
                 child: const _NotifBadge(),
               ),
               const SizedBox(width: 14),

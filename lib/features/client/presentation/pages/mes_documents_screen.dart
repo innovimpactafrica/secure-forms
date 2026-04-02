@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:pdfrx/pdfrx.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
@@ -1244,49 +1245,69 @@ class _DocumentImage extends StatefulWidget {
 }
 
 class _DocumentImageState extends State<_DocumentImage> {
-  Uint8List? _bytes;
   bool _loading = true;
   bool _isPdf = false;
-  String? _pdfPath;
-  ProfileDocumentRepository? _repo;
+  String? _pdfPath;       // fichier temp pour PDF
+  Uint8List? _imageBytes; // bytes pour image via fallback token
+  String? _imageUrl;      // URL directe valide pour CachedNetworkImage
 
   @override
   void initState() {
     super.initState();
-    // Ne pas accéder au context ici — utiliser didChangeDependencies
+    _resolve();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_repo == null) {
-      _repo = context.read<ProfileBloc>().repository;
-      _loadImage();
-    }
-  }
+  Future<void> _resolve() async {
+    final directUrl = widget.directUrl;
+    final fallbackUrl = BaseUrl.profileDocumentFile(widget.documentId);
+    final token = UserSession.instance.accessToken;
 
-  Future<void> _loadImage() async {
+    // Détecte PDF via extension dans le path (avant les query params)
+    final urlPath = (directUrl ?? fallbackUrl).split('?').first.toLowerCase();
+    final looksLikePdf = urlPath.endsWith('.pdf');
+
     try {
-      final bytes = await _repo!.getDocumentFile(
-        token: UserSession.instance.accessToken,
-        documentId: widget.documentId,
-        directUrl: widget.directUrl,
-      );
-      final data = Uint8List.fromList(bytes);
-      final pdf = data.length >= 4 &&
-          data[0] == 0x25 && data[1] == 0x50 &&
-          data[2] == 0x44 && data[3] == 0x46;
-      if (pdf) {
+      if (looksLikePdf) {
+        // ── PDF : télécharge → fichier temp → PdfViewer.file ──
+        final data = await _fetchBytes(directUrl, fallbackUrl, token);
         final dir = await getTemporaryDirectory();
-        final file = File('${dir.path}/thumb_${widget.documentId}.pdf');
+        final file = File('${dir.path}/thumb_mes_docs_${widget.documentId}.pdf');
         await file.writeAsBytes(data);
         if (mounted) setState(() { _isPdf = true; _pdfPath = file.path; _loading = false; });
       } else {
-        if (mounted) setState(() { _bytes = data; _loading = false; });
+        // ── Image : essai URL directe MinIO d'abord ──
+        if (directUrl != null && directUrl.isNotEmpty) {
+          try {
+            final res = await http.get(Uri.parse(directUrl)).timeout(const Duration(seconds: 15));
+            if (res.statusCode == 200) {
+              // URL directe OK → CachedNetworkImage (fluide)
+              if (mounted) setState(() { _imageUrl = directUrl; _loading = false; });
+              return;
+            }
+          } catch (_) {}
+        }
+        // Fallback : endpoint /file avec Bearer token → Image.memory
+        final data = await _fetchBytes(null, fallbackUrl, token);
+        if (mounted) setState(() { _imageBytes = data; _loading = false; });
       }
     } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<Uint8List> _fetchBytes(String? directUrl, String fallbackUrl, String token) async {
+    if (directUrl != null && directUrl.isNotEmpty) {
+      try {
+        final res = await http.get(Uri.parse(directUrl)).timeout(const Duration(seconds: 20));
+        if (res.statusCode == 200) return res.bodyBytes;
+      } catch (_) {}
+    }
+    final res = await http.get(
+      Uri.parse(fallbackUrl),
+      headers: {'Authorization': 'Bearer $token'},
+    ).timeout(const Duration(seconds: 30));
+    if (res.statusCode != 200) throw Exception('${res.statusCode}');
+    return res.bodyBytes;
   }
 
   @override
@@ -1296,8 +1317,7 @@ class _DocumentImageState extends State<_DocumentImage> {
         color: AppColors.documentCardBackground,
         child: Center(
           child: SizedBox(
-            width: 20,
-            height: 20,
+            width: 20, height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation(AppColors.primary),
@@ -1308,22 +1328,51 @@ class _DocumentImageState extends State<_DocumentImage> {
     }
     if (_isPdf && _pdfPath != null) {
       return IgnorePointer(
-        child: PDFView(
-          filePath: _pdfPath!,
-          enableSwipe: false,
-          autoSpacing: false,
-          pageFling: false,
-          pageSnap: false,
-          fitPolicy: FitPolicy.WIDTH,
-          enableRenderDuringScale: false,
-          useBestQuality: true,
+        child: PdfViewer.file(
+          _pdfPath!,
+          params: PdfViewerParams(
+            backgroundColor: AppColors.documentCardBackground,
+            loadingBannerBuilder: (_, __, ___) => Container(
+              color: AppColors.documentCardBackground,
+              child: Center(
+                child: SizedBox(
+                  width: 20, height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       );
     }
-    if (_bytes != null) {
+    if (_imageUrl != null) {
+      return CachedNetworkImage(
+        imageUrl: _imageUrl!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        placeholder: (_, __) => Container(
+          color: AppColors.documentCardBackground,
+          child: Center(
+            child: SizedBox(
+              width: 20, height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation(AppColors.primary),
+              ),
+            ),
+          ),
+        ),
+        errorWidget: (_, __, ___) => _placeholder(),
+      );
+    }
+    if (_imageBytes != null) {
       return SizedBox.expand(
         child: Image.memory(
-          _bytes!,
+          _imageBytes!,
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => _placeholder(),
         ),
@@ -1332,18 +1381,10 @@ class _DocumentImageState extends State<_DocumentImage> {
     return _placeholder();
   }
 
-  Widget _placeholder() {
-    return Container(
-      color: AppColors.documentCardBackground,
-      child: Center(
-        child: Icon(
-          Icons.insert_drive_file_outlined,
-          size: 36,
-          color: AppColors.primary,
-        ),
-      ),
-    );
-  }
+  Widget _placeholder() => Container(
+    color: AppColors.documentCardBackground,
+    child: Center(child: Icon(Icons.insert_drive_file_outlined, size: 36, color: AppColors.primary)),
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -2243,55 +2284,11 @@ class _PdfFullViewer extends StatefulWidget {
 }
 
 class _PdfFullViewerState extends State<_PdfFullViewer> {
-  int _totalPages = 0;
-  int _currentPage = 0;
-
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        SizedBox.expand(
-          child: PDFView(
-            filePath: widget.filePath,
-            enableSwipe: true,
-            swipeHorizontal: false,
-            autoSpacing: true,
-            pageFling: true,
-            pageSnap: true,
-            fitPolicy: FitPolicy.BOTH,
-            enableRenderDuringScale: true,
-            useBestQuality: true,
-            nightMode: false,
-            onRender: (pages) {
-              if (mounted) setState(() => _totalPages = pages ?? 0);
-            },
-            onPageChanged: (page, _) {
-              if (mounted) setState(() => _currentPage = (page ?? 0) + 1);
-            },
-          ),
-        ),
-        if (_totalPages > 1)
-          Positioned(
-            top: 12,
-            right: 12,
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '$_currentPage / $_totalPages',
-                style: const TextStyle(
-                  color: AppColors.white,
-                  fontFamily: AppConstants.fontFamilyInter,
-                  fontSize: AppConstants.fontSizeRegular,
-                ),
-              ),
-            ),
-          ),
-      ],
+    return PdfViewer.file(
+      widget.filePath,
+      params: const PdfViewerParams(),
     );
   }
 }
@@ -2331,23 +2328,6 @@ class _PdfBytesViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InteractiveViewer(
-      minScale: 1.0,
-      maxScale: 4.0,
-      child: SizedBox.expand(
-        child: PDFView(
-          filePath: filePath,
-          enableSwipe: true,
-          swipeHorizontal: false,
-          autoSpacing: false,
-          pageFling: false,
-          pageSnap: false,
-          fitPolicy: FitPolicy.WIDTH,
-          enableRenderDuringScale: true,
-          useBestQuality: true,
-          nightMode: false,
-        ),
-      ),
-    );
+    return PdfViewer.file(filePath, params: const PdfViewerParams());
   }
 }

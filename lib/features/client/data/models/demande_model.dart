@@ -21,13 +21,15 @@ class SubmittedFormItem {
 class RequiredDocumentItem {
   final String id;
   final String label;
+  final String? fileUrl; // URL MinIO signée fraîche depuis l'API
 
-  const RequiredDocumentItem({required this.id, required this.label});
+  const RequiredDocumentItem({required this.id, required this.label, this.fileUrl});
 
   factory RequiredDocumentItem.fromJson(Map<String, dynamic> json) {
     return RequiredDocumentItem(
       id: json['id']?.toString() ?? '',
       label: json['label']?.toString() ?? '',
+      fileUrl: json['fileUrl']?.toString(),
     );
   }
 }

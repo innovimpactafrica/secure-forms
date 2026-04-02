@@ -26,6 +26,12 @@ class NotificationModel {
     );
   }
 
+  NotificationModel copyWith({bool? isRead}) => NotificationModel(
+    id: id, title: title, message: message,
+    type: type, createdAt: createdAt,
+    isRead: isRead ?? this.isRead,
+  );
+
   /// Retourne la date formatée pour l'affichage (aujourd'hui / hier / date)
   String get formattedDate {
     if (createdAt.isEmpty) return '';

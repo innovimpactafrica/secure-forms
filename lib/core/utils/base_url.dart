@@ -42,6 +42,8 @@ class BaseUrl {
   static const String getBanques         = '$currentBaseUrl/client/banques';
   static const String getArchives        = '$currentBaseUrl/clients/archives';
   static const String getNotifications   = '$currentBaseUrl/clients/notifications';
+  static const String markNotificationsRead    = '$currentBaseUrl/clients/notifications/mark-read';
+  static const String markAllNotificationsRead = '$currentBaseUrl/clients/notifications/mark-all-read';
   // ========== FCM ENDPOINTS ==========  👈 NOUVEAU
   static const String registerFcmToken   = '$currentBaseUrl/clients/fcm-token';
   // ========== DEMANDES ENDPOINTS ==========
