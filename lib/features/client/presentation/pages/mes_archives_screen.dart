@@ -1,14 +1,12 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:dio/dio.dart';
 import 'package:open_filex/open_filex.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_routes.dart';
+import 'package:secure_link/core/services/demande_zip_service.dart';
 import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/client/data/models/archive_model.dart';
 import 'package:secure_link/features/client/data/repositories/demandes_repository.dart';
@@ -116,14 +114,12 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
                   onTap: () => _bloc.add(
                       LoadArchivesEvent(status: _filterStatuses[_selectedFilter])),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     decoration: BoxDecoration(
                         color: AppColors.primaryDark,
                         borderRadius: BorderRadius.circular(20)),
                     child: Text('archives.retry'.tr(),
-                        style: const TextStyle(
-                            color: AppColors.white, fontSize: 14)),
+                        style: const TextStyle(color: AppColors.white, fontSize: 14)),
                   ),
                 ),
               ],
@@ -146,7 +142,8 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
                     padding: const EdgeInsets.only(top: 80),
                     child: Center(
                       child: Text('archives.no_archives'.tr(),
-                          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                          style: const TextStyle(
+                              fontSize: 14, color: AppColors.textSecondary)),
                     ),
                   ),
                 ],
@@ -188,8 +185,7 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
               decoration: BoxDecoration(
                   color: AppColors.primaryDark,
                   borderRadius: BorderRadius.circular(10)),
-              child: const Icon(Icons.arrow_back,
-                  color: AppColors.white, size: 20),
+              child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
             ),
           ),
           const SizedBox(width: 12),
@@ -232,8 +228,7 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
               child: TextField(
                 controller: _searchController,
                 onChanged: (_) => setState(() {}),
-                style:
-                    const TextStyle(fontSize: 14, color: AppColors.textDark),
+                style: const TextStyle(fontSize: 14, color: AppColors.textDark),
                 decoration: InputDecoration(
                   hintText: 'archives.search_placeholder'.tr(),
                   hintStyle: const TextStyle(
@@ -266,22 +261,17 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
               onTap: () => setState(() => _selectedFilter = index),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.primaryDark
-                      : Colors.transparent,
+                  color: isSelected ? AppColors.primaryDark : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   _filterLabels[index].tr(),
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w400,
-                    color:
-                        isSelected ? AppColors.white : AppColors.textSecondary,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    color: isSelected ? AppColors.white : AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -306,98 +296,49 @@ class _ArchiveCard extends StatefulWidget {
 }
 
 class _ArchiveCardState extends State<_ArchiveCard> {
-  bool _isDownloading = false;
+  bool _isBusy = false;
+  double _progress = 0;
+  String _progressLabel = '';
 
-  // Télécharge le fichier et retourne le chemin local
-  Future<String?> _fetchFile(BuildContext context) async {
-    setState(() => _isDownloading = true);
-    try {
-      String? url = widget.item.isRequest
-          ? widget.item.pdfUrl
-          : widget.item.filePath;
-
-      final token = UserSession.instance.accessToken;
-
-      if (widget.item.isRequest && (url == null || url.isEmpty)) {
-        final demande = await DemandesRepository()
-            .getRequestById(accessToken: token, id: widget.item.id);
-        url = demande.pdfUrl;
-      }
-
-      if (url == null || url.isEmpty) {
-        throw Exception('Aucun PDF disponible');
-      }
-
-      // Fichier temporaire pour le viewer
-      final tmp = await getTemporaryDirectory();
-      final tmpPath = '${tmp.path}/view_${widget.item.id}.pdf';
-
-      final options = widget.item.isRequest
-          ? Options(responseType: ResponseType.bytes)
-          : Options(
-              responseType: ResponseType.bytes,
-              headers: {'Authorization': 'Bearer $token'},
-            );
-
-      await Dio().download(url, tmpPath, options: options);
-      return tmpPath;
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('archives.download_error'.tr()),
-          backgroundColor: AppColors.statusRejected,
-        ));
-      }
-      return null;
-    } finally {
-      if (mounted) setState(() => _isDownloading = false);
-    }
-  }
-
-  // Ouvre le détail demande ou le viewer PDF
+  // ── Ouvre le détail de la demande ──
   void _onView(BuildContext context) {
-    if (widget.item.isRequest) {
-      // Demande → page détail
-      Navigator.of(context).pushNamed(
-        '/client-demande-detail',
-        arguments: {'id': widget.item.id},
-      );
-    } else {
-      // Document → viewer PDF
-      _fetchFile(context).then((path) {
-        if (path != null && context.mounted) {
-          _openPdfViewer(context, path);
-        }
-      });
-    }
-  }
-
-  void _openPdfViewer(BuildContext context, String path) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: AppColors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => _PdfViewerSheet(
-        label: widget.item.title,
-        filePath: path,
-      ),
+    Navigator.of(context).pushNamed(
+      AppRoutes.clientDemandeDetail,
+      arguments: {'id': widget.item.id},
     );
   }
 
-  // Télécharge dans le dossier Téléchargements public Android
+  // ── Génère le ZIP et le sauvegarde dans Téléchargements ──
   Future<void> _onDownload(BuildContext context) async {
-    final tmpPath = await _fetchFile(context);
-    if (tmpPath == null || !context.mounted) return;
-
+    if (_isBusy) return;
+    setState(() { _isBusy = true; _progress = 0; _progressLabel = 'Préparation...'; });
     try {
-      // Dossier public Downloads visible dans le gestionnaire de fichiers
-      final fileName = '${widget.item.title.replaceAll(RegExp(r'[^\w\s]'), '_')}_${widget.item.id}.pdf';
-      final savePath = '/storage/emulated/0/Download/$fileName';
-      await File(tmpPath).copy(savePath);
+      final demande = await DemandesRepository().getRequestById(
+        accessToken: _token(),
+        id: widget.item.id,
+      );
+
+      final zip = await DemandeZipService.genererEtZipper(
+        demande: demande,
+        onProgress: (p, label) {
+          if (mounted) setState(() { _progress = p; _progressLabel = label; });
+        },
+      );
+
+      final shortId = widget.item.id.length >= 8
+          ? widget.item.id.substring(0, 8)
+          : widget.item.id;
+      final fileName = 'demande_$shortId.zip';
+
+      // Android 10+ : pas besoin de permission, on copie dans Downloads
+      String savePath;
+      try {
+        savePath = '/storage/emulated/0/Download/$fileName';
+        await zip.copy(savePath);
+      } catch (_) {
+        // Fallback : dossier temporaire accessible
+        savePath = zip.path;
+      }
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -410,247 +351,236 @@ class _ArchiveCardState extends State<_ArchiveCard> {
           ),
         ));
       }
-    } catch (_) {
-      // Fallback : ouvrir depuis le fichier temporaire
+    } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('archives.download_success'.tr()),
-          backgroundColor: AppColors.statusValideGreen,
-          action: SnackBarAction(
-            label: 'archives.open'.tr(),
-            textColor: AppColors.white,
-            onPressed: () => OpenFilex.open(tmpPath),
-          ),
+          content: Text('archives.download_error'.tr()),
+          backgroundColor: AppColors.statusRejected,
         ));
       }
+    } finally {
+      if (mounted) setState(() { _isBusy = false; _progress = 0; });
     }
   }
 
+  // ── Génère le ZIP et partage ──
   Future<void> _onShare(BuildContext context) async {
-    final path = await _fetchFile(context);
-    if (path != null && context.mounted) {
-      await Share.shareXFiles(
-        [XFile(path)],
-        text: '${widget.item.title} — ${widget.item.institution}',
+    if (_isBusy) return;
+    setState(() { _isBusy = true; _progress = 0; _progressLabel = 'Préparation...'; });
+    try {
+      final demande = await DemandesRepository().getRequestById(
+        accessToken: _token(),
+        id: widget.item.id,
       );
+
+      final zip = await DemandeZipService.genererEtZipper(
+        demande: demande,
+        onProgress: (p, label) {
+          if (mounted) setState(() { _progress = p; _progressLabel = label; });
+        },
+      );
+
+      if (context.mounted) {
+        await Share.shareXFiles(
+          [XFile(zip.path)],
+          subject: widget.item.title,
+          text: '${widget.item.title} — ${widget.item.institution}',
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('archives.download_error'.tr()),
+          backgroundColor: AppColors.statusRejected,
+        ));
+      }
+    } finally {
+      if (mounted) setState(() { _isBusy = false; _progress = 0; });
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderDivider),
-        boxShadow: const [
-          BoxShadow(
-              color: AppColors.shadowDark,
-              blurRadius: 6,
-              offset: Offset(0, 2)),
-        ],
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                      color: AppColors.gray,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Center(
-                    child: SvgPicture.asset(
-                      widget.item.isRequest
-                          ? 'assets/icons/logo.svg'
-                          : 'assets/icons/earmark-text.svg',
-                      width: 28,
-                      height: 28,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.item.title.isNotEmpty
-                            ? widget.item.title
-                            : '—',
-                        style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textDark),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        widget.item.institution.isNotEmpty
-                            ? '${widget.item.institution} • ${widget.item.date}'
-                            : widget.item.date,
-                        style: const TextStyle(
-                            fontSize: 12, color: AppColors.textSecondary),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                _StatusBadge(status: widget.item.status),
-              ],
-            ),
-          ),
-          const Divider(height: 1, color: Color(0xFFEEEEEE)),
-          SizedBox(
-            height: 44,
-            child: _isDownloading
-                ? const Center(
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: AppColors.primary),
-                    ),
-                  )
-                : Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => _onView(context),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.remove_red_eye_outlined,
-                                  size: 16, color: AppColors.textSecondary),
-                              const SizedBox(width: 5),
-                              Text('archives.view'.tr(),
-                                  style: const TextStyle(
-                                      fontSize: 13,
-                                      color: AppColors.textSecondary,
-                                      fontWeight: FontWeight.w500)),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Container(
-                          width: 1,
-                          height: 20,
-                          color: const Color(0xFFEEEEEE)),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => _onDownload(context),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset('assets/images/download.png',
-                                  width: 16, height: 16),
-                              const SizedBox(width: 5),
-                              Text('archives.download'.tr(),
-                                  style: const TextStyle(
-                                      fontSize: 13,
-                                      color: AppColors.textSecondary,
-                                      fontWeight: FontWeight.w500)),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Container(
-                          width: 1,
-                          height: 20,
-                          color: const Color(0xFFEEEEEE)),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => _onShare(context),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset('assets/images/share.png',
-                                  width: 16, height: 16),
-                              const SizedBox(width: 5),
-                              Text('archives.share'.tr(),
-                                  style: const TextStyle(
-                                      fontSize: 13,
-                                      color: AppColors.textSecondary,
-                                      fontWeight: FontWeight.w500)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// PDF Viewer Sheet
-// ---------------------------------------------------------------------------
-
-class _PdfViewerSheet extends StatelessWidget {
-  final String label;
-  final String filePath;
-  const _PdfViewerSheet({required this.label, required this.filePath});
+  String _token() => UserSession.instance.accessToken;
 
   @override
   Widget build(BuildContext context) {
-    final screenH = MediaQuery.of(context).size.height;
-    return Container(
-      height: screenH * 0.92,
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: Column(
-        children: [
-          Center(
-            child: Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.borderGray,
-                borderRadius: BorderRadius.circular(999),
+    return GestureDetector(
+      onTap: () => _onView(context),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.borderDivider),
+          boxShadow: const [
+            BoxShadow(
+                color: AppColors.shadowDark,
+                blurRadius: 6,
+                offset: Offset(0, 2)),
+          ],
+        ),
+        child: Column(
+          children: [
+            // ── Infos ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                        color: AppColors.gray,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Center(
+                      child: SvgPicture.asset(
+                        'assets/icons/logo.svg',
+                        width: 28,
+                        height: 28,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.item.title.isNotEmpty ? widget.item.title : '—',
+                          style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textDark),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.item.institution.isNotEmpty
+                              ? '${widget.item.institution} • ${widget.item.date}'
+                              : widget.item.date,
+                          style: const TextStyle(
+                              fontSize: 12, color: AppColors.textSecondary),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  _StatusBadge(status: widget.item.status),
+                ],
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark),
-                  overflow: TextOverflow.ellipsis,
+
+            const Divider(height: 1, color: Color(0xFFEEEEEE)),
+
+            // ── Barre de progression ou boutons ──
+            if (_isBusy)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _progressLabel,
+                          style: const TextStyle(
+                              fontSize: 11, color: AppColors.textSecondary),
+                        ),
+                        Text(
+                          '${(_progress * 100).toInt()}%',
+                          style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryDark),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: _progress,
+                        minHeight: 4,
+                        backgroundColor: AppColors.borderDivider,
+                        valueColor: const AlwaysStoppedAnimation(AppColors.primaryDark),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              SizedBox(
+                height: 48,
+                child: Row(
+                  children: [
+                    // Voir
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _onView(context),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.remove_red_eye_outlined,
+                                size: 18, color: AppColors.primary),
+                            const SizedBox(width: 6),
+                            Text('archives.view'.tr(),
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(width: 1, height: 24, color: const Color(0xFFEEEEEE)),
+                    // Télécharger
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          _onDownload(context);
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.download_outlined,
+                                size: 18, color: AppColors.primaryDark),
+                            const SizedBox(width: 6),
+                            Text('archives.download'.tr(),
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.primaryDark,
+                                    fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(width: 1, height: 24, color: const Color(0xFFEEEEEE)),
+                    // Partager
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          _onShare(context);
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.share_outlined,
+                                size: 18, color: AppColors.textSecondary),
+                            const SizedBox(width: 6),
+                            Text('archives.share'.tr(),
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary,
+                                    fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: const Icon(Icons.close,
-                    color: AppColors.textSecondary, size: 24),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: PDFView(
-              filePath: filePath,
-              enableSwipe: true,
-              swipeHorizontal: false,
-              autoSpacing: true,
-              pageFling: false,
-              pageSnap: false,
-              fitPolicy: FitPolicy.WIDTH,
-              enableRenderDuringScale: true,
-              useBestQuality: true,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -673,9 +603,7 @@ class _StatusBadge extends StatelessWidget {
           color: cfg.bg, borderRadius: BorderRadius.circular(999)),
       child: Text(cfg.label,
           style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: cfg.text)),
+              fontSize: 13, fontWeight: FontWeight.w600, color: cfg.text)),
     );
   }
 
