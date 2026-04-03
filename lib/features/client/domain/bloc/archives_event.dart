@@ -3,7 +3,12 @@ abstract class ArchivesEvent {
 }
 
 class LoadArchivesEvent extends ArchivesEvent {
-  final String type;   // 'all' | 'requests' | 'documents'
+  final String type;
   final String? status;
   const LoadArchivesEvent({this.type = 'all', this.status});
+}
+
+class GoToArchivesPageEvent extends ArchivesEvent {
+  final int page;
+  const GoToArchivesPageEvent(this.page);
 }

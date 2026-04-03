@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart'; // 👈 NOUVEAU
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/session_storage.dart';
+import 'package:secure_link/core/utils/authenticated_http_client.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
 import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
 import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
@@ -52,28 +53,44 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _checkSession() async {
     final hasSession = await SessionStorage.instance.restore();
+    if (!mounted) return;
+
+    if (!hasSession) {
+      Navigator.of(context).pushReplacementNamed(AppRoutes.welcome);
+      return;
+    }
+
+    // Tenter un refresh proactif du token avant de naviguer
+    final refreshToken = UserSession.instance.refreshToken;
+    if (refreshToken.isNotEmpty) {
+      try {
+        final freshToken = await AuthenticatedHttpClient.instance.ensureFreshToken();
+        if (freshToken.isEmpty) {
+          // Refresh token expiré → forcer reconnexion
+          await SessionStorage.instance.clear();
+          if (mounted) Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+          return;
+        }
+      } catch (_) {
+        // En cas d'erreur réseau, on tente quand même avec le token existant
+      }
+    }
 
     if (!mounted) return;
 
-    if (hasSession) {
-      final token = UserSession.instance.accessToken;
-      final userBloc = context.read<UserBloc>();
-      final notifBloc = context.read<NotificationsBloc>();
-      final navigator = Navigator.of(context);
+    final token = UserSession.instance.accessToken;
+    final userBloc = context.read<UserBloc>();
+    final notifBloc = context.read<NotificationsBloc>();
+    final navigator = Navigator.of(context);
 
-      // Naviguer IMMEDIATEMENT vers home
-      navigator.pushReplacementNamed(AppRoutes.clientHome);
+    navigator.pushReplacementNamed(AppRoutes.clientHome);
 
-      // Charger tout en arrière-plan après navigation
-      Future.microtask(() {
-        notifBloc.add(const LoadNotificationsEvent());
-        userBloc.add(LoadProfilePictureEvent(token));
-        userBloc.add(LoadUserProfile(token));
-        _sendFcmTokenOnRestore();
-      });
-    } else {
-      Navigator.of(context).pushReplacementNamed(AppRoutes.welcome);
-    }
+    Future.microtask(() {
+      notifBloc.add(const LoadNotificationsEvent());
+      userBloc.add(LoadProfilePictureEvent(token));
+      userBloc.add(LoadUserProfile(token));
+      _sendFcmTokenOnRestore();
+    });
   }
 
   // 👇 NOUVEAU — Récupère et envoie le token FCM au backend

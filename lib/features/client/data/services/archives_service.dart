@@ -8,12 +8,18 @@ class ArchivesService {
   final http.Client _client;
   ArchivesService({http.Client? client}) : _client = client ?? HttpClientSingleton.instance;
 
-  Future<List<ArchiveModel>> getArchives({
+  Future<ArchivesPage> getArchives({
     required String accessToken,
     String type = 'all',
     String? status,
+    int page = 1,
+    int limit = 10,
   }) async {
-    final params = <String, String>{'type': type};
+    final params = <String, String>{
+      'type': type,
+      'page': '$page',
+      'limit': '$limit',
+    };
     if (status != null && status.isNotEmpty) params['status'] = status;
     final uri = Uri.parse(BaseUrl.getArchives).replace(queryParameters: params);
 
@@ -27,13 +33,29 @@ class ArchivesService {
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(response.body);
-      // ignore: avoid_print
-      print('[ArchivesService] items: ${response.body}');
-      final List<dynamic> list = decoded is List
-          ? decoded
-          : (decoded['items'] ?? decoded['data'] ?? decoded['archives'] ?? []);
-      return list.map((e) => ArchiveModel.fromJson(e as Map<String, dynamic>)).toList();
+      if (decoded is List) {
+        final items = decoded.map((e) => ArchiveModel.fromJson(e as Map<String, dynamic>)).toList();
+        return ArchivesPage(items: items, total: items.length, page: page, limit: limit);
+      }
+      final items = ((decoded['items'] ?? decoded['data'] ?? decoded['archives'] ?? []) as List)
+          .map((e) => ArchiveModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+      return ArchivesPage(
+        items: items,
+        total: decoded['total'] as int? ?? items.length,
+        page: decoded['page'] as int? ?? page,
+        limit: decoded['limit'] as int? ?? limit,
+      );
     }
     throw Exception('Erreur chargement archives: ${response.statusCode}');
   }
+}
+
+class ArchivesPage {
+  final List<ArchiveModel> items;
+  final int total;
+  final int page;
+  final int limit;
+  const ArchivesPage({required this.items, required this.total, required this.page, required this.limit});
+  bool get hasMore => (page * limit) < total;
 }

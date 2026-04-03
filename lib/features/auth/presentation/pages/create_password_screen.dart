@@ -147,7 +147,47 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                                 color: AppColors.textSecondary,
                               ),
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 16),
+
+                            // ── Règles du mot de passe ──
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryLight,
+                                borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.info_outline,
+                                          size: AppConstants.iconSizeMedium,
+                                          color: AppColors.primary),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'register.password_rules_title'.tr(),
+                                        style: const TextStyle(
+                                          fontFamily: AppConstants.fontFamilySofiaSans,
+                                          fontSize: AppConstants.fontSizeMedium,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _PasswordRule(text: 'register.password_rule_length'.tr()),
+                                  _PasswordRule(text: 'register.password_rule_upper'.tr()),
+                                  _PasswordRule(text: 'register.password_rule_lower'.tr()),
+                                  _PasswordRule(text: 'register.password_rule_number'.tr()),
+                                  _PasswordRule(text: 'register.password_rule_special'.tr()),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 24),
 
                             // ── Nouveau mot de passe ──
                             _FieldLabel(label: 'password.new_password'.tr()),
@@ -314,6 +354,34 @@ class _FieldLabel extends StatelessWidget {
         fontSize: AppConstants.fontSizeMedium,
         fontWeight: FontWeight.w500,
         color: AppColors.textDark,
+      ),
+    );
+  }
+}
+
+class _PasswordRule extends StatelessWidget {
+  final String text;
+  const _PasswordRule({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          const Icon(Icons.check_circle_outline,
+              size: AppConstants.iconSizeSmall,
+              color: AppColors.primary),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              fontFamily: AppConstants.fontFamilyInter,
+              fontSize: AppConstants.fontSizeRegular,
+              color: AppColors.primary,
+            ),
+          ),
+        ],
       ),
     );
   }

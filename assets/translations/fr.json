@@ -25,7 +25,11 @@
     "login_button": "se connecter",
     "no_account": "Vous n'avez pas de compte ? ",
     "register": "S'inscrire",
-    "continue_registration": "Continuer mon inscription"
+    "continue_registration": "Continuer mon inscription",
+    "incomplete_title": "Inscription incomplète",
+    "incomplete_message": "Votre compte existe mais votre mot de passe n'a pas encore été créé. Cliquez sur \"Continuer mon inscription\" pour finaliser votre compte.",
+    "incomplete_later": "Plus tard",
+    "incomplete_action": "Continuer mon inscription"
   },
   "password": {
     "create_title": "Creez votre mot de passe",
@@ -62,7 +66,13 @@
     "min_6_chars": "Minimum 6 caracteres",
     "passwords_not_match": "Les mots de passe ne correspondent pas",
     "account_created": "Compte crée",
-    "code_sent_to": "Verifiez le code envoyé au"
+    "code_sent_to": "Verifiez le code envoyé au",
+    "password_rules_title": "Votre mot de passe devra contenir :",
+    "password_rule_length": "Au moins 8 caractères",
+    "password_rule_upper": "Une lettre majuscule (A-Z)",
+    "password_rule_lower": "Une lettre minuscule (a-z)",
+    "password_rule_number": "Un chiffre (0-9)",
+    "password_rule_special": "Un caractère spécial (@ $ ! % * ? &)"
   },
   "otp": {
     "title": "Vérification",

@@ -38,7 +38,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         lastName: response.lastName,
       ));
     } catch (e) {
-      emit(AuthFailure(message: e.toString().replaceAll('Exception: ', '')));
+      final msg = e.toString().replaceAll('Exception: ', '');
+      // Détecter inscription partielle : l'utilisateur n'a pas encore de mot de passe
+      final isIncomplete = msg.toLowerCase().contains('password') ||
+          msg.toLowerCase().contains('mot de passe') ||
+          msg.toLowerCase().contains('setup') ||
+          msg.toLowerCase().contains('complet') ||
+          msg.toLowerCase().contains('inscript');
+      if (isIncomplete) {
+        emit(LoginIncomplete(email: event.email));
+      } else {
+        emit(AuthFailure(message: msg));
+      }
     }
   }
 

@@ -100,6 +100,8 @@ class _LoginScreenState extends State<LoginScreen> {
               notifBloc.add(const LoadNotificationsEvent());
               _sendFcmTokenAfterLogin();
             });
+          } else if (state is LoginIncomplete) {
+            _showIncompleteDialog(context, state.email);
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -382,6 +384,63 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // 👇 NOUVEAU — Récupère le token FCM et l'envoie au backend
+  void _showIncompleteDialog(BuildContext context, String email) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.radiusMedium)),
+        title: Row(children: [
+          const Icon(Icons.info_outline,
+              color: AppColors.primary, size: AppConstants.iconSizeLarge),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'login.incomplete_title'.tr(),
+              style: const TextStyle(
+                fontFamily: AppConstants.fontFamilySofiaSans,
+                fontWeight: FontWeight.w700,
+                fontSize: AppConstants.fontSizeLarge,
+                color: AppColors.textDark),
+            ),
+          ),
+        ]),
+        content: Text(
+          'login.incomplete_message'.tr(),
+          style: const TextStyle(
+            fontFamily: AppConstants.fontFamilyInter,
+            fontSize: AppConstants.fontSizeMedium,
+            color: AppColors.textSecondary,
+            height: 1.5)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('login.incomplete_later'.tr(),
+              style: const TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Navigator.of(context).pushNamed(AppRoutes.resumeRegistration);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryDark,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+            child: Text('login.incomplete_action'.tr(),
+              style: const TextStyle(
+                fontFamily: AppConstants.fontFamilySofiaSans,
+                color: AppColors.white,
+                fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
   Future<void> _sendFcmTokenAfterLogin() async {
     try {
       final fcmToken = await FirebaseMessaging.instance.getToken();

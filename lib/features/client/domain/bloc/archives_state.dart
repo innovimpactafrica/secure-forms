@@ -14,7 +14,28 @@ class ArchivesLoading extends ArchivesState {
 
 class ArchivesLoaded extends ArchivesState {
   final List<ArchiveModel> archives;
-  const ArchivesLoaded(this.archives);
+  final int total;
+  final int currentPage;
+  final bool isLoadingMore;
+  const ArchivesLoaded(
+    this.archives, {
+    this.total = 0,
+    this.currentPage = 1,
+    this.isLoadingMore = false,
+  });
+
+  ArchivesLoaded copyWith({
+    List<ArchiveModel>? archives,
+    int? total,
+    int? currentPage,
+    bool? isLoadingMore,
+  }) =>
+      ArchivesLoaded(
+        archives ?? this.archives,
+        total: total ?? this.total,
+        currentPage: currentPage ?? this.currentPage,
+        isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      );
 }
 
 class ArchivesError extends ArchivesState {

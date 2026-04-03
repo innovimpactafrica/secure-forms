@@ -25,6 +25,7 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
   late final ArchivesBloc _bloc;
   int _selectedFilter = 0;
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   static const List<String> _filterLabels = [
     'archives.all',
@@ -52,6 +53,7 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
   void dispose() {
     _bloc.close();
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -67,6 +69,15 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
             a.title.toLowerCase().contains(query) ||
             a.institution.toLowerCase().contains(query))
         .toList();
+  }
+
+  void _goToPage(int page) {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+    _bloc.add(GoToArchivesPageEvent(page));
   }
 
   @override
@@ -128,6 +139,8 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
         }
         if (state is ArchivesLoaded) {
           final items = _applySearch(state.archives);
+          final totalPages = (state.total / 10).ceil().clamp(1, 999);
+
           if (items.isEmpty) {
             return RefreshIndicator(
               color: AppColors.primaryDark,
@@ -150,21 +163,68 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
               ),
             );
           }
-          return RefreshIndicator(
-            color: AppColors.primaryDark,
-            onRefresh: () async {
-              _bloc.add(LoadArchivesEvent(status: _filterStatuses[_selectedFilter]));
-              await Future.delayed(const Duration(milliseconds: 800));
-            },
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-              itemCount: items.length,
-              itemBuilder: (context, index) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _ArchiveCard(item: items[index]),
+          return Column(
+            children: [
+              // Compteur
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                child: Row(
+                  children: [
+                    Text(
+                      '${state.total} ',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryDark,
+                      ),
+                    ),
+                    Text(
+                      'archives.title'.tr().toLowerCase(),
+                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    ),
+                    const Spacer(),
+                    Text(
+                      'Page ${state.currentPage}/$totalPages',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+              // Liste
+              Expanded(
+                child: state.isLoadingMore
+                    ? const Center(child: CircularProgressIndicator(
+                        strokeWidth: 2, color: AppColors.primaryDark))
+                    : RefreshIndicator(
+                        color: AppColors.primaryDark,
+                        onRefresh: () async {
+                          _bloc.add(LoadArchivesEvent(status: _filterStatuses[_selectedFilter]));
+                          await Future.delayed(const Duration(milliseconds: 800));
+                        },
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          itemCount: items.length,
+                          itemBuilder: (context, index) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _ArchiveCard(item: items[index]),
+                          ),
+                        ),
+                      ),
+              ),
+              // Barre de pagination
+              if (totalPages > 1)
+                _PaginationBar(
+                  currentPage: state.currentPage,
+                  totalPages: totalPages,
+                  onPageTap: _goToPage,
+                ),
+            ],
           );
         }
         return const SizedBox.shrink();
@@ -277,6 +337,134 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pagination Bar
+// ---------------------------------------------------------------------------
+
+class _PaginationBar extends StatelessWidget {
+  final int currentPage;
+  final int totalPages;
+  final void Function(int page) onPageTap;
+
+  const _PaginationBar({
+    required this.currentPage,
+    required this.totalPages,
+    required this.onPageTap,
+  });
+
+  List<int?> _buildPageNumbers() {
+    if (totalPages <= 7) return List.generate(totalPages, (i) => i + 1);
+    final pages = <int?>[];
+    pages.add(1);
+    if (currentPage > 3) pages.add(null);
+    for (int i = (currentPage - 1).clamp(2, totalPages - 1);
+        i <= (currentPage + 1).clamp(2, totalPages - 1);
+        i++) {
+      pages.add(i);
+    }
+    if (currentPage < totalPages - 2) pages.add(null);
+    pages.add(totalPages);
+    return pages;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pages = _buildPageNumbers();
+    return Container(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 12,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        border: Border(top: BorderSide(color: AppColors.borderDivider)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _NavButton(
+            icon: Icons.chevron_left,
+            enabled: currentPage > 1,
+            onTap: () => onPageTap(currentPage - 1),
+          ),
+          const SizedBox(width: 8),
+          ...pages.map((p) {
+            if (p == null) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4),
+                child: Text('...', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+              );
+            }
+            final isActive = p == currentPage;
+            return GestureDetector(
+              onTap: isActive ? null : () => onPageTap(p),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 36,
+                height: 36,
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                decoration: BoxDecoration(
+                  color: isActive ? AppColors.primaryDark : AppColors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isActive ? AppColors.primaryDark : AppColors.borderDivider,
+                    width: 1.2,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    '$p',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                      color: isActive ? AppColors.white : AppColors.textDark,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+          const SizedBox(width: 8),
+          _NavButton(
+            icon: Icons.chevron_right,
+            enabled: currentPage < totalPages,
+            onTap: () => onPageTap(currentPage + 1),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NavButton extends StatelessWidget {
+  final IconData icon;
+  final bool enabled;
+  final VoidCallback onTap;
+  const _NavButton({required this.icon, required this.enabled, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: enabled ? AppColors.primaryDark : AppColors.greyShade100,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          size: 20,
+          color: enabled ? AppColors.white : AppColors.textSecondary,
         ),
       ),
     );

@@ -54,6 +54,7 @@ class BaseUrl {
   static String requestById(String id) => '$currentBaseUrl/requests/$id';
   static String draftById(String id)   => '$currentBaseUrl/requests/draft/$id';
   static String requestPdf(String id)  => '$currentBaseUrl/requests/$id/pdf';
+  static String formPdf(String id)      => '$currentBaseUrl/forms/$id/pdf';
   // ========== HOME ENDPOINTS ==========
   static const String getHomeData       = '$currentBaseUrl/home';
   static const String clientStatistics  = '$currentBaseUrl/clients/statistics';

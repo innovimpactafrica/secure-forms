@@ -51,3 +51,11 @@ class AuthFailure extends AuthState {
   @override
   List<Object?> get props => [message];
 }
+
+// Inscription partielle — l'utilisateur n'a pas encore créé son mot de passe
+class LoginIncomplete extends AuthState {
+  final String email;
+  LoginIncomplete({required this.email});
+  @override
+  List<Object?> get props => [email];
+}
