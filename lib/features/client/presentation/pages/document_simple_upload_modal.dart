@@ -8,6 +8,8 @@ import 'package:secure_link/features/client/data/models/profile_model.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'document_upload_modal.dart' show showPickerSource;
 
 /// Modal d'ajout de document SANS vérification d'identité
@@ -43,7 +45,24 @@ class _DocumentSimpleUploadModalState
   }
 
   Future<void> _pickFile({bool isBack = false}) async {
-    final path = await showPickerSource(context);
+    final choice = await showPickerSource(context);
+    if (choice == null || !mounted) return;
+
+    String? path;
+    if (choice == 'gallery') {
+      final x = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
+      path = x?.path;
+    } else if (choice == 'camera') {
+      final x = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 85);
+      path = x?.path;
+    } else {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+      );
+      path = result?.files.single.path;
+    }
+
     if (path == null || !mounted) return;
     final file = File(path);
     final ext = path.split('.').last.toLowerCase();

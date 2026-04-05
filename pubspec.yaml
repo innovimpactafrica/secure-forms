@@ -1,7 +1,7 @@
 name: secure_link
 description: "Application mobile Secure Link"
 publish_to: 'none'
-version: 1.1.0+8
+version: 1.1.0+10
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -36,6 +36,8 @@ dependencies:
   pdf: ^3.10.8
   archive: ^3.4.10
   permission_handler: ^11.3.0
+  google_mlkit_text_recognition: ^0.15.0
+  image: ^4.3.0
 
 dev_dependencies:
   flutter_test:

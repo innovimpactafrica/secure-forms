@@ -16,7 +16,11 @@ import 'package:secure_link/features/client/data/repositories/profile_document_r
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'document_upload_modal.dart' show showPickerSource;
+import 'package:secure_link/core/services/mlkit_ocr_service.dart';
+import 'document_scanner_page.dart';
 import 'face_verification_screen.dart';
 
 /// Page "Mes documents" accessible depuis le profil.
@@ -72,9 +76,9 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<ProfileBloc, ProfileState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is ProfileDocumentAdded && state.requiresFaceId) {
-          Navigator.of(context).push(
+          final result = await Navigator.of(context).push<bool>(
             MaterialPageRoute(
               builder: (_) => BlocProvider.value(
                 value: context.read<ProfileBloc>(),
@@ -84,6 +88,12 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
               ),
             ),
           );
+          // Ne recharger que si la vérification a été complétée (result == true)
+          if (result == true && mounted) {
+            ProfileDocumentRepository.clearCache();
+            await _loadData();
+            if (mounted) setState(() => _refreshKey++);
+          }
         } else if (state is ProfileDocumentUploadedSuccess ||
             state is ProfileDocumentUploadedNeedsVerification ||
             state is ProfileDocumentDeleted ||
@@ -362,11 +372,12 @@ class _DocumentsGrid extends StatelessWidget {
         final uploaded = uploadedDocuments
             .where((d) => d.documentTypeId == docType.id)
             .firstOrNull;
+        final visibleDoc = uploaded;
         return _DocumentCard(
           documentType: docType,
-          uploadedDocument: uploaded,
+          uploadedDocument: visibleDoc,
           localFilePath: localFileCache[docType.id],
-          onTap: () => _showUpdateModal(context, docType, uploaded),
+          onTap: () => _showUpdateModal(context, docType, visibleDoc),
           refreshKey: refreshKey,
         );
       },
@@ -641,6 +652,7 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
   String? _backFilePath;
   bool _showBack = false;
   bool _isImage = false;
+  bool _isScanning = false; // OCR en cours
   late final ProfileBloc _bloc;
 
   bool get _isExisting => widget.existingDocument != null;
@@ -760,7 +772,28 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
   }
 
   Future<void> _pickFile({bool isBack = false}) async {
-    final path = await showPickerSource(context);
+    final choice = await showPickerSource(context);
+    if (choice == null || !mounted) return;
+
+    String? path;
+    if (choice == 'camera' && !isBack && widget.documentType.hasExpirationDate) {
+      path = await Navigator.of(context).push<String>(
+        MaterialPageRoute(builder: (_) => const DocumentScannerPage()),
+      );
+    } else if (choice == 'camera') {
+      final x = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 85);
+      path = x?.path;
+    } else if (choice == 'gallery') {
+      final x = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
+      path = x?.path;
+    } else {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+      );
+      path = result?.files.single.path;
+    }
+
     if (path == null || !mounted) return;
     final ext = path.split('.').last.toLowerCase();
     if (isBack) {
@@ -768,6 +801,39 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
     } else {
       setState(() { _uploadedFilePath = path; _isImage = ext != 'pdf'; });
       widget.onFileSelected?.call(path);
+      if (widget.documentType.hasExpirationDate) {
+        await _runOcr(path);
+      }
+    }
+  }
+
+  Future<void> _runOcr(String filePath) async {
+    setState(() => _isScanning = true);
+    try {
+      final result = await MlKitOcrService.extractDatesFromDocument(File(filePath));
+      if (!mounted) return;
+      if (result.issueDate != null && _deliveryDateController.text.isEmpty) {
+        _deliveryDateController.text = result.issueDate!;
+      }
+      if (result.expirationDate != null && _expiryDateController.text.isEmpty) {
+        _expiryDateController.text = result.expirationDate!;
+      }
+      if (result.hasDates) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Dates détectées automatiquement ✓',
+              style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.white),
+            ),
+            backgroundColor: AppColors.statusValideGreen,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isScanning = false);
     }
   }
 
@@ -932,31 +998,10 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
             ),
             const SizedBox(height: 16),
 
-            _ModalLabel(text: 'profile.delivery_date'.tr()),
-            const SizedBox(height: 6),
-            _ModalDateField(
-              controller: _deliveryDateController,
-              hint: 'profile.delivery_date_hint'.tr(),
-              onTap: () => _pickDate(context, _deliveryDateController),
-            ),
-            const SizedBox(height: 16),
-
-            if (showExpiryField) ...[
-              _ModalLabel(text: 'profile.expiry_date'.tr()),
-              const SizedBox(height: 6),
-              _ModalDateField(
-                controller: _expiryDateController,
-                hint: 'profile.expiry_date_hint'.tr(),
-                onTap: () =>
-                    _pickDate(context, _expiryDateController, isExpiry: true),
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // Zone upload (masquée si document validé)
+            // Zone upload en premier pour déclencher l'OCR
             if (_canEditPhoto) ...[
               GestureDetector(
-                onTap: () => _pickFile(),
+                onTap: _isScanning ? null : () => _pickFile(),
                 child: Container(
                   width: double.infinity,
                   height: 120,
@@ -965,12 +1010,34 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                     borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
                     border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                   ),
-                  child: _uploadedFilePath != null && _isImage
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                          child: Image.file(File(_uploadedFilePath!), fit: BoxFit.cover, width: double.infinity,
-                              errorBuilder: (_, __, ___) => const _UploadPlaceholder(hasFile: true)))
-                      : _UploadPlaceholder(hasFile: _uploadedFilePath != null),
+                  child: _isScanning
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 24, height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Lecture des dates en cours...',
+                              style: TextStyle(
+                                fontFamily: AppConstants.fontFamilyInter,
+                                fontSize: AppConstants.fontSizeRegular,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        )
+                      : _uploadedFilePath != null && _isImage
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                              child: Image.file(File(_uploadedFilePath!), fit: BoxFit.cover, width: double.infinity,
+                                  errorBuilder: (_, __, ___) => const _UploadPlaceholder(hasFile: true)))
+                          : _UploadPlaceholder(hasFile: _uploadedFilePath != null),
                 ),
               ),
               const SizedBox(height: 10),
@@ -1065,6 +1132,26 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                 ),
               ),
               const SizedBox(height: 20),
+            ],
+
+            // Dates après l'upload pour que l'OCR les pré-remplisse
+            if (showExpiryField) ...[
+              _ModalLabel(text: 'profile.delivery_date'.tr()),
+              const SizedBox(height: 6),
+              _ModalDateField(
+                controller: _deliveryDateController,
+                hint: 'profile.delivery_date_hint'.tr(),
+                onTap: () => _pickDate(context, _deliveryDateController),
+              ),
+              const SizedBox(height: 16),
+              _ModalLabel(text: 'profile.expiry_date'.tr()),
+              const SizedBox(height: 6),
+              _ModalDateField(
+                controller: _expiryDateController,
+                hint: 'profile.expiry_date_hint'.tr(),
+                onTap: () => _pickDate(context, _expiryDateController, isExpiry: true),
+              ),
+              const SizedBox(height: 16),
             ],
 
             SizedBox(
@@ -1723,7 +1810,24 @@ class _SingleFileUpdateModalState extends State<_SingleFileUpdateModal> {
   void initState() { super.initState(); _bloc = context.read<ProfileBloc>(); }
 
   Future<void> _pickFile({bool isSecond = false}) async {
-    final path = await showPickerSource(context);
+    final choice = await showPickerSource(context);
+    if (choice == null || !mounted) return;
+
+    String? path;
+    if (choice == 'camera') {
+      final x = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 85);
+      path = x?.path;
+    } else if (choice == 'gallery') {
+      final x = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
+      path = x?.path;
+    } else {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+      );
+      path = result?.files.single.path;
+    }
+
     if (path == null || !mounted) return;
     setState(() => isSecond ? _secondFilePath = path : _filePath = path);
   }

@@ -378,44 +378,52 @@ class _PaginationBar extends StatelessWidget {
           const SizedBox(width: 8),
 
           // Numéros de pages
-          ...pages.map((p) {
-            if (p == null) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Text('...', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
-              );
-            }
-            final isActive = p == currentPage;
-            return GestureDetector(
-              onTap: isActive ? null : () => onPageTap(p),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 36,
-                height: 36,
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                decoration: BoxDecoration(
-                  color: isActive ? AppColors.primaryDark : AppColors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isActive ? AppColors.primaryDark : AppColors.borderDivider,
-                    width: 1.2,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    '$p',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-                      color: isActive ? AppColors.white : AppColors.textDark,
+          Flexible(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: pages.map((p) {
+                  if (p == null) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      child: Text('...', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+                    );
+                  }
+                  final isActive = p == currentPage;
+                  return GestureDetector(
+                    onTap: isActive ? null : () => onPageTap(p),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 36,
+                      height: 36,
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      decoration: BoxDecoration(
+                        color: isActive ? AppColors.primaryDark : AppColors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isActive ? AppColors.primaryDark : AppColors.borderDivider,
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$p',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                            color: isActive ? AppColors.white : AppColors.textDark,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                }).toList(),
               ),
-            );
-          }),
+            ),
+          ),
 
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           // Bouton suivant
           _NavButton(
             icon: Icons.chevron_right,
@@ -533,18 +541,23 @@ class _DemandeCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: statusCfg.bgColor,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                statusCfg.label,
-                style: TextStyle(
-                  fontSize: AppConstants.fontSizeRegular,
-                  fontWeight: FontWeight.w500,
-                  color: statusCfg.textColor,
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 100),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusCfg.bgColor,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  statusCfg.label,
+                  style: TextStyle(
+                    fontSize: AppConstants.fontSizeRegular,
+                    fontWeight: FontWeight.w500,
+                    color: statusCfg.textColor,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ),
             ),

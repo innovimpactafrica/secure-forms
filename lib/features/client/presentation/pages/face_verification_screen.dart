@@ -93,14 +93,13 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
     context.read<ProfileBloc>().add(
           FaceVerificationSuccessEvent(documentType: widget.documentType),
         );
-    // Afficher un feedback visuel puis naviguer
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => _SuccessDialog(
         onContinue: () {
           Navigator.of(context).pop(); // ferme dialog
-          Navigator.of(context).pop(); // retour à step2
+          Navigator.of(context).pop(true); // retourne true → vérification complétée
         },
       ),
     );
@@ -140,7 +139,7 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
+                      onTap: () => Navigator.of(context).pop(false), // retourne false → vérification annulée
                       child: Container(
                         width: 38,
                         height: 38,

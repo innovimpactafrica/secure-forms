@@ -20,6 +20,8 @@ import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'package:secure_link/features/kyc/presentation/pages/kyc_step2_face_page.dart';
 import 'complete_profile_header.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'document_upload_modal.dart' show DocumentUploadModal, showPickerSource;
 import 'document_simple_upload_modal.dart';
 
@@ -238,23 +240,26 @@ class _Step2DocumentsScreenState extends State<Step2DocumentsScreen> {
     );
   }
 
-  void _navigateToKyc(BuildContext context, DocumentTypeModel docType) {
-    Navigator.of(context).push(
+  void _navigateToKyc(BuildContext context, DocumentTypeModel docType) async {
+    final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => BlocProvider(
+        builder: (kycContext) => BlocProvider(
           create: (_) => KycBloc(userId: UserSession.instance.email),
           child: KycStep2FacePage(
             onSuccess: () {
-              // Dépiler : kyc_step2_face_preview + kyc_step2_face_page
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-              // Recharger les documents
-              context.read<ProfileBloc>().add(const LoadDocumentTypesEvent());
+              // Fermer kyc_step2_face_preview + kyc_step2_face_page
+              Navigator.of(kycContext)
+                ..pop() // ferme preview
+                ..pop(true); // ferme face_page avec result=true
             },
           ),
         ),
       ),
     );
+    // Ne recharger que si la vérification a été complétée
+    if (result == true && mounted) {
+      context.read<ProfileBloc>().add(const LoadDocumentTypesEvent());
+    }
   }
 
   double _getProgressValue(ProfileState state) {
@@ -383,12 +388,13 @@ class _DocumentsGrid extends StatelessWidget {
         final uploaded = uploadedDocuments
             .where((d) => d.documentTypeId == docType.id)
             .firstOrNull;
+        final visibleDoc = uploaded;
         return _DocumentCard(
           documentType: docType,
-          uploadedDocument: uploaded,
-          onTap: () => _showModal(context, docType, uploaded),
-          onDelete: uploaded != null
-              ? () => _showDeleteConfirm(context, uploaded)
+          uploadedDocument: visibleDoc,
+          onTap: () => _showModal(context, docType, visibleDoc),
+          onDelete: visibleDoc != null
+              ? () => _showDeleteConfirm(context, visibleDoc)
               : null,
         );
       },
@@ -503,7 +509,7 @@ class _DocumentsGrid extends StatelessWidget {
       ),
       builder: (_) => BlocProvider.value(
         value: context.read<ProfileBloc>(),
-        child: docType.isForIdentityVerification
+        child: docType.hasExpirationDate
             ? DocumentUploadModal(
                 documentType: docType,
                 existingDocument: existing,
@@ -1216,7 +1222,24 @@ class _SingleFileUpdateModalState extends State<_SingleFileUpdateModal> {
   }
 
   Future<void> _pickFile({bool isSecond = false}) async {
-    final path = await showPickerSource(context);
+    final choice = await showPickerSource(context);
+    if (choice == null || !mounted) return;
+
+    String? path;
+    if (choice == 'camera') {
+      final x = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 85);
+      path = x?.path;
+    } else if (choice == 'gallery') {
+      final x = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
+      path = x?.path;
+    } else {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+      );
+      path = result?.files.single.path;
+    }
+
     if (path == null || !mounted) return;
     setState(() => isSecond ? _secondFilePath = path : _filePath = path);
   }

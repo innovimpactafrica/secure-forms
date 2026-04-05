@@ -6,10 +6,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:secure_link/core/services/mlkit_ocr_service.dart';
 import 'package:secure_link/features/client/data/models/profile_model.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
+import 'document_scanner_page.dart';
 
 // ─────────────────────────────────────────────────────────────────
 // MODAL UPLOAD DOCUMENT AVEC VÉRIFICATION D'IDENTITÉ
@@ -35,6 +37,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
   String? _uploadedFilePath;
   String? _backFilePath;
   bool _showBack = false; // verso masqué par défaut
+  bool _isScanning = false; // OCR en cours
   late final ProfileBloc _bloc;
 
   @override
@@ -82,21 +85,76 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
   }
 
   Future<void> _pickFile({bool isBack = false}) async {
-    final picked = await showPickerSource(context);
+    final choice = await showPickerSource(context);
+    if (choice == null) return;
+
+    String? picked;
+    if (choice == 'camera' && !isBack && widget.documentType.hasExpirationDate) {
+      // Prendre une photo sur doc avec expiration → scanner OCR
+      picked = await Navigator.of(context).push<String>(
+        MaterialPageRoute(builder: (_) => const DocumentScannerPage()),
+      );
+    } else if (choice == 'camera') {
+      final x = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 85);
+      picked = x?.path;
+    } else if (choice == 'gallery') {
+      final x = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
+      picked = x?.path;
+    } else {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+      );
+      picked = result?.files.single.path;
+    }
+
     if (picked == null) return;
     if (isBack) {
       setState(() => _backFilePath = picked);
     } else {
       setState(() => _uploadedFilePath = picked);
+      if (widget.documentType.hasExpirationDate) {
+        await _runOcr(picked!);
+      }
+    }
+  }
+
+  Future<void> _runOcr(String filePath) async {
+    setState(() => _isScanning = true);
+    try {
+      final result = await MlKitOcrService.extractDatesFromDocument(File(filePath));
+      if (!mounted) return;
+      if (result.issueDate != null && _deliveryDateController.text.isEmpty) {
+        _deliveryDateController.text = result.issueDate!;
+      }
+      if (result.expirationDate != null && _expiryDateController.text.isEmpty) {
+        _expiryDateController.text = result.expirationDate!;
+      }
+      if (result.hasDates) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Dates détectées automatiquement ✓',
+              style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.white),
+            ),
+            backgroundColor: AppColors.statusValideGreen,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isScanning = false);
     }
   }
 
   void _onEnvoyer() {
-    final hasExpiry = widget.documentType.hasExpirationDate;
+    final hasDates = widget.documentType.hasExpirationDate;
 
     if (_uploadedFilePath == null ||
-        _deliveryDateController.text.isEmpty ||
-        (hasExpiry && _expiryDateController.text.isEmpty)) {
+        (hasDates && _deliveryDateController.text.isEmpty) ||
+        (hasDates && _expiryDateController.text.isEmpty)) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -226,33 +284,13 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
               ),
               const SizedBox(height: 16),
 
-              // Date de délivrance
-              _ModalLabel(text: 'profile.delivery_date'.tr()),
-              const SizedBox(height: 6),
-              _ModalDateField(
-                controller: _deliveryDateController,
-                hint: 'profile.delivery_date_hint'.tr(),
-                onTap: () => _pickDate(context, _deliveryDateController),
-              ),
-
-              // Date d'expiration (si applicable)
-              if (hasExpiry) ...[
-                const SizedBox(height: 16),
-                _ModalLabel(text: 'profile.expiry_date'.tr()),
-                const SizedBox(height: 6),
-                _ModalDateField(
-                  controller: _expiryDateController,
-                  hint: 'profile.expiry_date_hint'.tr(),
-                  onTap: () =>
-                      _pickDate(context, _expiryDateController, isExpiry: true),
-                ),
-              ],
-              const SizedBox(height: 16),
-
-              // Zone upload principale
+              // Zone upload principale (en premier pour déclencher l'OCR)
               GestureDetector(
-                onTap: () => _pickFile(),
-                child: _UploadZone(filePath: _uploadedFilePath),
+                onTap: _isScanning ? null : () => _pickFile(),
+                child: _UploadZone(
+                  filePath: _uploadedFilePath,
+                  isScanning: _isScanning,
+                ),
               ),
               const SizedBox(height: 10),
 
@@ -302,7 +340,27 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
                   child: _UploadZone(filePath: _backFilePath),
                 ),
               ],
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
+
+              // Dates (uniquement si hasExpirationDate: true) — après l'upload pour l'OCR
+              if (hasExpiry) ...[
+                _ModalLabel(text: 'profile.delivery_date'.tr()),
+                const SizedBox(height: 6),
+                _ModalDateField(
+                  controller: _deliveryDateController,
+                  hint: 'profile.delivery_date_hint'.tr(),
+                  onTap: () => _pickDate(context, _deliveryDateController),
+                ),
+                const SizedBox(height: 16),
+                _ModalLabel(text: 'profile.expiry_date'.tr()),
+                const SizedBox(height: 6),
+                _ModalDateField(
+                  controller: _expiryDateController,
+                  hint: 'profile.expiry_date_hint'.tr(),
+                  onTap: () => _pickDate(context, _expiryDateController, isExpiry: true),
+                ),
+                const SizedBox(height: 16),
+              ],
 
               // Bouton Envoyer pour validation
               SizedBox(
@@ -371,7 +429,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
 /// Affiche le bottom sheet de choix de source (galerie / caméra / fichier)
 /// Retourne le chemin du fichier sélectionné ou null
 Future<String?> showPickerSource(BuildContext context) async {
-  final choice = await showModalBottomSheet<String>(
+  return showModalBottomSheet<String>(
     context: context,
     backgroundColor: AppColors.white,
     shape: const RoundedRectangleBorder(
@@ -405,27 +463,13 @@ Future<String?> showPickerSource(BuildContext context) async {
       ),
     ),
   );
-  if (choice == null) return null;
-  if (choice == 'gallery') {
-    final x = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
-    return x?.path;
-  }
-  if (choice == 'camera') {
-    final x = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 85);
-    return x?.path;
-  }
-  // file
-  final result = await FilePicker.platform.pickFiles(
-    type: FileType.custom,
-    allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
-  );
-  return result?.files.single.path;
 }
 
 /// Zone d'upload générique (recto ou verso)
 class _UploadZone extends StatelessWidget {
   final String? filePath;
-  const _UploadZone({this.filePath});
+  final bool isScanning;
+  const _UploadZone({this.filePath, this.isScanning = false});
 
   bool get _isImage {
     if (filePath == null) return false;
@@ -443,15 +487,37 @@ class _UploadZone extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
-      child: filePath != null
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-              child: _isImage
-                  ? Image.file(File(filePath!), fit: BoxFit.cover, width: double.infinity,
-                      errorBuilder: (_, __, ___) => const _UploadPlaceholder(hasFile: true))
-                  : const _UploadPlaceholder(hasFile: true),
+      child: isScanning
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 24, height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Lecture des dates en cours...',
+                  style: TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    fontSize: AppConstants.fontSizeRegular,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
             )
-          : const _UploadPlaceholder(hasFile: false),
+          : filePath != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                  child: _isImage
+                      ? Image.file(File(filePath!), fit: BoxFit.cover, width: double.infinity,
+                          errorBuilder: (_, __, ___) => const _UploadPlaceholder(hasFile: true))
+                      : const _UploadPlaceholder(hasFile: true),
+                )
+              : const _UploadPlaceholder(hasFile: false),
     );
   }
 }

@@ -60,8 +60,10 @@ class KycBloc extends Bloc<KycEvent, KycState> {
       _log('hasRecto=$hasRecto hasSelfie=$hasSelfie → ${apiCompleted ? "KycCompleted" : "KycRequired"}');
 
       if (apiCompleted) {
-        // Sauvegarder localement pour éviter l'appel API au prochain démarrage
+        // L'API confirme que les documents sont soumis → source de vérité
+        // On met à jour le cache local (couvre réinstallation / changement d'appareil)
         await prefs.setBool(_kycKey, true);
+        await prefs.setBool('${_kycKey}_submitted', true);
         emit(const KycCompleted());
       } else {
         emit(const KycRequired());
@@ -78,6 +80,7 @@ class KycBloc extends Bloc<KycEvent, KycState> {
     if (userId.isNotEmpty) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_kycKey, true);
+      await prefs.setBool('${_kycKey}_submitted', true);
     }
     emit(const KycCompleted());
   }
@@ -125,10 +128,12 @@ class KycBloc extends Bloc<KycEvent, KycState> {
       );
       _log('SELFIE uploadé ✓ id=${selfieResult.id} status=${selfieResult.status}');
 
+      // Marquer que l'utilisateur a bien cliqué "Envoyer pour validation"
       if (userId.isNotEmpty) {
         final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('${_kycKey}_submitted', true);
         await prefs.setBool(_kycKey, true);
-        _log('KYC marqué complété localement pour userId=$userId');
+        _log('KYC marqué soumis et complété localement pour userId=$userId');
       }
       emit(KycSelfieUploaded(selfie: selfieResult));
     } catch (e) {

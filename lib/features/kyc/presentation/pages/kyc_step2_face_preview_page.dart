@@ -58,6 +58,8 @@ class KycStep2FacePreviewPage extends StatelessWidget {
               msg.contains('formatexception') || msg.contains('unexpected character')) {
             // ignore: avoid_print
             print('[KycPreview] Erreur 499/FormatException → traité comme succès');
+            // S'assurer que le KYC est bien marqué complet même en cas d'erreur 499
+            context.read<KycBloc>().add(const KycMarkCompleted());
             _showSuccessModal(context);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
