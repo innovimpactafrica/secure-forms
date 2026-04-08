@@ -11,7 +11,9 @@ import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_e
 import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_state.dart';
 
 class ClientDemandesScreen extends StatefulWidget {
-  const ClientDemandesScreen({super.key});
+  final bool fromHome;
+  final VoidCallback? onGoHome;
+  const ClientDemandesScreen({super.key, this.fromHome = false, this.onGoHome});
 
   @override
   State<ClientDemandesScreen> createState() => _ClientDemandesScreenState();
@@ -93,19 +95,27 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.primaryDark,
-                borderRadius: BorderRadius.circular(10),
+          if (widget.fromHome || !widget.fromHome) ...[
+            GestureDetector(
+              onTap: () {
+                if (widget.fromHome && widget.onGoHome != null) {
+                  widget.onGoHome!();
+                } else {
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryDark,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
               ),
-              child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
             ),
-          ),
-          const SizedBox(width: 12),
+            const SizedBox(width: 12),
+          ],
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -132,6 +142,7 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
       ),
     );
   }
+
 
   Widget _buildSearchBar() {
     return Padding(

@@ -31,7 +31,7 @@ class _KycGatePageState extends State<KycGatePage> {
       if (widget.fromDeepLink) {
         _handleDeepLinkRoute();
       } else {
-        // Comportement existant : 3s puis pop
+        // Fermer automatiquement après 3s
         Future.delayed(const Duration(seconds: 3), () {
           if (mounted) Navigator.of(context).pop();
         });
@@ -175,7 +175,13 @@ void _logoutAndGoToLogin(String deepLinkJwt) {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: true,
+      onPopInvokedWithResult: (didPop, _) {
+        // Quand l'utilisateur revient sur KycGatePage depuis KycIntroPage,
+        // on la ferme immédiatement pour retourner sur home
+        if (didPop) return;
+        if (mounted) Navigator.of(context).pop();
+      },
       child: Scaffold(
         backgroundColor: AppColors.white,
         body: SafeArea(

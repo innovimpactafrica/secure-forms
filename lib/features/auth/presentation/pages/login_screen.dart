@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text('login.invalid_credentials'.tr()),
                 backgroundColor: AppColors.statusRejected,
               ),
             );

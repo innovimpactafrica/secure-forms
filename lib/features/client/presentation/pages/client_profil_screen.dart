@@ -20,7 +20,9 @@ import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_constants.dart';
 
 class ClientProfilScreen extends StatefulWidget {
-  const ClientProfilScreen({super.key});
+  final bool fromHome;
+  final VoidCallback? onGoHome;
+  const ClientProfilScreen({super.key, this.fromHome = false, this.onGoHome});
 
   @override
   State<ClientProfilScreen> createState() => _ClientProfilScreenState();
@@ -43,11 +45,9 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
               ? UserSession.instance.accessToken
               : ''
           : UserSession.instance.accessToken;
-      // Recharger le profil si cachedUser est null
       if (bloc.cachedUser == null) {
         bloc.add(LoadUserProfile(token));
       }
-      // Charger la photo si pas en cache
       if (bloc.profilePictureBytes == null) {
         bloc.add(LoadProfilePictureEvent(token));
       }
@@ -61,9 +61,7 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // â”€â”€ Header â”€â”€
-            const _ProfileHeader(),
-            // â”€â”€ Scrollable content â”€â”€
+            _ProfileHeader(fromHome: widget.fromHome, onGoHome: widget.onGoHome),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -108,11 +106,11 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                         ),
                       ),
                       onArchivesTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const MesArchivesScreen(),
-              ),
-            ),
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MesArchivesScreen(),
+                        ),
+                      ),
                       onNotifsTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -125,7 +123,6 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                 ),
               ),
             ),
-            // â”€â”€ Logout button pinned at bottom â”€â”€
             _LogoutButton(
               onTap: () => _showDeconnexionModal(context),
             ),
@@ -134,10 +131,6 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
       ),
     );
   }
-
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  // MODALS
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   void _showLangueModal(BuildContext context) {
     showModalBottomSheet(
@@ -165,7 +158,6 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Handle
               Center(
                 child: Container(
                   width: AppConstants.modalHandleWidth,
@@ -211,23 +203,19 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
     );
   }
 
-  Widget _buildLanguageOption(
-      BuildContext context, String language, String flagPath) {
-    // DÃ©termine si cette option est sÃ©lectionnÃ©e en comparant avec la locale actuelle
-    final bool isSelected = (language == 'profil.french'.tr() && context.locale.languageCode == 'fr') ||
-                            (language == 'profil.english'.tr() && context.locale.languageCode == 'en');
-    
+  Widget _buildLanguageOption(BuildContext context, String language, String flagPath) {
+    final bool isSelected =
+        (language == 'profil.french'.tr() && context.locale.languageCode == 'fr') ||
+        (language == 'profil.english'.tr() && context.locale.languageCode == 'en');
+
     return GestureDetector(
       onTap: () {
-        // Changer la locale de l'application
         if (language == 'profil.french'.tr()) {
           context.setLocale(const Locale('fr'));
         } else {
           context.setLocale(const Locale('en'));
         }
-        // Fermer le modal et forcer le rebuild de toute la page
         Navigator.of(context).pop();
-        // Forcer le rebuild de la page profil
         if (mounted) setState(() {});
       },
       child: Container(
@@ -382,24 +370,31 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
       },
     );
   }
-} // â† FIN de _ClientProfilScreenState
+}
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────
 // HEADER
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader();
+  final bool fromHome;
+  final VoidCallback? onGoHome;
+  const _ProfileHeader({this.fromHome = false, this.onGoHome});
 
   @override
   Widget build(BuildContext context) {
-    // context.locale force le rebuild quand la langue change
     context.locale;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
+            onTap: () {
+              if (fromHome && onGoHome != null) {
+                onGoHome!();
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
             child: Container(
               width: 38,
               height: 38,
@@ -407,7 +402,7 @@ class _ProfileHeader extends StatelessWidget {
                 color: AppColors.primaryDark,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.arrow_back,
                 color: AppColors.white,
                 size: 18,
@@ -430,9 +425,9 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────
 // USER INFO
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────
 class _UserInfoSection extends StatelessWidget {
   final String name;
   final String phone;
@@ -466,9 +461,9 @@ class _UserInfoSection extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────
 // MENU SECTION
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────
 class _MenuSection extends StatelessWidget {
   final String selectedLanguage;
   final VoidCallback onLanguageTap;
@@ -662,9 +657,9 @@ class _Divider extends StatelessWidget {
   }
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────
 // LOGOUT BUTTON
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────
 class _LogoutButton extends StatelessWidget {
   final VoidCallback onTap;
 

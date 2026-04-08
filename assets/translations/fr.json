@@ -1,4 +1,10 @@
 ﻿{
+  "navbar": {
+    "home": "Accueil",
+    "requests": "Mes demandes",
+    "archives": "Mes archives",
+    "account": "Mon compte"
+  },
   "welcome": {
     "title": "Bienvenue sur",
     "tagline": "La transmission sécurisée de confiance",
@@ -22,12 +28,13 @@
     "password_hint": "••••••••",
     "required_field": "Champ obligatoire",
     "invalid_email": "Email invalide",
-    "login_button": "se connecter",
+    "invalid_credentials": "Email ou mot de passe incorrect",
+    "login_button": "Se connecter",
     "no_account": "Vous n'avez pas de compte ? ",
     "register": "S'inscrire",
     "continue_registration": "Continuer mon inscription",
     "incomplete_title": "Inscription incomplète",
-    "incomplete_message": "Votre compte existe mais votre mot de passe n'a pas encore été créé. Cliquez sur \"Continuer mon inscription\" pour finaliser votre compte.",
+    "incomplete_message": "Ce numéro ou email est déjà associé à un compte. Si vous avez déjà un compte, connectez-vous. Sinon, votre inscription est peut-être incomplète, continuez votre inscription.",
     "incomplete_later": "Plus tard",
     "incomplete_action": "Continuer mon inscription"
   },

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -41,17 +40,13 @@ class ClientHomeScreen extends StatefulWidget {
 
 class _ClientHomeScreenState extends State<ClientHomeScreen> {
   late KycBloc _kycBloc;
-  StreamSubscription<KycState>? _kycSub;
   String _lastUserId = '';
-  bool _kycTriggered = false;
   bool _kycGateOpen = false;
 
   @override
   void initState() {
     super.initState();
     _kycBloc = KycBloc(userId: '');
-    _kycSub = _kycBloc.stream.listen(_onKycState);
-    // Charger la complétion réelle depuis l'API au démarrage
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userState = context.read<UserBloc>().state;
       if (userState is UserLoaded && userState.user.id != _lastUserId) {
@@ -64,88 +59,45 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   }
 
   void _initKycBloc(String userId) {
-    // ignore: avoid_print
-    print('[ClientHome] _initKycBloc userId="$_lastUserId" -> "$userId"');
-    _kycSub?.cancel();
-    _kycBloc.close();
+    if (userId == _lastUserId) return;
+    print('[KYC] _initKycBloc "$_lastUserId" -> "$userId"');
+    final old = _kycBloc;
     _lastUserId = userId;
-    _kycTriggered = false;
+    _kycGateOpen = false;
     _kycBloc = KycBloc(userId: userId);
-    _kycSub = _kycBloc.stream.listen(_onKycState);
+    old.close();
+    print('[KYC] KycBloc cree, dispatching KycCheckStatus');
     _kycBloc.add(const KycCheckStatus());
-    // ignore: avoid_print
-    print('[ClientHome] KycBloc initialise pour userId="$userId"');
+    if (mounted) setState(() {});
   }
 
-  void _pushKycIntro({bool withDelay = true}) {
+  void _pushKycIntro() {
+    print('[KYC] _pushKycIntro | _kycGateOpen=$_kycGateOpen mounted=$mounted');
     if (_kycGateOpen || !mounted) return;
     _kycGateOpen = true;
-    _kycTriggered = true;
-    Future.delayed(withDelay ? const Duration(seconds: 3) : Duration.zero, () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) { _kycGateOpen = false; return; }
-      // ignore: avoid_print
-      print('[ClientHome] ${withDelay ? "3s ecoulees" : "retour"} -> push KycGatePage');
-      // Etape 1 : afficher KycGatePage (ecran d'attente 3s)
+      print('[KYC] pushing KycIntroPage');
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => BlocProvider.value(
             value: _kycBloc,
-            child: const KycGatePage(),
+            child: const KycIntroPage(),
           ),
         ),
       ).then((_) {
-        // KycGatePage s'est fermee automatiquement -> push KycIntroPage
-        if (!mounted) { _kycGateOpen = false; return; }
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => BlocProvider.value(
-              value: _kycBloc,
-              child: const KycIntroPage(),
-            ),
-          ),
-        ).then((result) {
-          // ignore: avoid_print
-          print('[ClientHome] Retour depuis KycIntroPage result=$result -> re-check KYC');
-          _kycGateOpen = false;
-          // Re-déclencher que l'utilisateur ait cliqué la flèche (true)
-          // ou utilisé le geste/bouton retour Android (null)
-          if (mounted && _kycBloc.state is KycRequired) {
-            _kycTriggered = false;
-            _pushKycIntro(withDelay: true);
-          }
-        });
+        print('[KYC] KycIntroPage .then | mounted=$mounted');
+        _kycGateOpen = false;
+        if (mounted) {
+          print('[KYC] re-check KYC');
+          _kycBloc.add(const KycCheckStatus());
+        }
       });
     });
   }
 
-  void _triggerKycCheck() {
-    // ignore: avoid_print
-    print('[ClientHome] triggerKycCheck -> _kycTriggered=$_kycTriggered');
-    if (_kycGateOpen) return;
-    if (_kycBloc.state is KycRequired) {
-      _pushKycIntro(withDelay: true);
-    }
-  }
-
-  void _onKycState(KycState state) {
-    // ignore: avoid_print
-    print('[ClientHome] KycState: ${state.runtimeType} | userId=$_lastUserId | triggered=$_kycTriggered');
-    if (state is KycCompleted) {
-      // ignore: avoid_print
-      print('[ClientHome] KYC deja complete -> acces libre');
-      _kycTriggered = true;
-      return;
-    }
-    if (state is KycRequired && !_kycTriggered) {
-      // ignore: avoid_print
-      print('[ClientHome] KYC requis -> home 3s puis KycGatePage');
-      _pushKycIntro(withDelay: true);
-    }
-  }
-
   @override
   void dispose() {
-    _kycSub?.cancel();
     _kycBloc.close();
     super.dispose();
   }
@@ -166,52 +118,60 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       },
       child: BlocProvider.value(
         value: _kycBloc,
-        child: PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, _) {
-            if (!didPop) {
-              // ignore: avoid_print
-              print('[ClientHome] Retour arriere intercepte -> re-check KYC');
-              _kycTriggered = false;
-              _triggerKycCheck();
+        child: BlocListener<KycBloc, KycState>(
+          bloc: _kycBloc,
+          listener: (context, state) {
+            print('[KYC] BlocListener state: ${state.runtimeType} | _kycGateOpen=$_kycGateOpen');
+            if (state is KycRequired) {
+              _kycGateOpen = false;
+              _pushKycIntro();
             }
           },
-          child: BlocBuilder<UserBloc, UserState>(
-            builder: (context, userState) {
-              final bloc = context.read<UserBloc>();
-              final user = userState is UserLoaded
-                  ? userState.user
-                  : bloc.cachedUser;
-              return Scaffold(
-                backgroundColor: AppColors.white,
-                body: SafeArea(
-                  child: RefreshIndicator(
-                    color: AppColors.primaryDark,
-                    onRefresh: () async {
-                      context.read<ProfileBloc>().add(const LoadDocumentTypesEvent(forceRefresh: true));
-                      context.read<DemandesBloc>().add(const LoadRecentDemandesEvent(limit: 5, forceRefresh: true));
-                      context.read<HomeBloc>().add(const LoadClientStatisticsEvent(forceRefresh: true));
-                      context.read<NotificationsBloc>().add(const LoadNotificationsEvent(forceRefresh: true));
-                      await Future.delayed(const Duration(milliseconds: 800));
-                    },
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _HomeHeader(initials: user?.initials ?? ''),
-                          _WelcomeSection(firstName: user?.firstName ?? ''),
-                          _ProfileProgressSection(),
-                          _StatsGrid(),
-                          _SearchBarSection(),
-                          _RecentDemandesSection(),
-                        ],
+          child: PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, _) {
+              if (!didPop) {
+                _kycGateOpen = false;
+                _kycBloc.add(const KycCheckStatus());
+              }
+            },
+            child: BlocBuilder<UserBloc, UserState>(
+              builder: (context, userState) {
+                final bloc = context.read<UserBloc>();
+                final user = userState is UserLoaded
+                    ? userState.user
+                    : bloc.cachedUser;
+                return Scaffold(
+                  backgroundColor: AppColors.white,
+                  body: SafeArea(
+                    child: RefreshIndicator(
+                      color: AppColors.primaryDark,
+                      onRefresh: () async {
+                        context.read<ProfileBloc>().add(const LoadDocumentTypesEvent(forceRefresh: true));
+                        context.read<DemandesBloc>().add(const LoadRecentDemandesEvent(limit: 5, forceRefresh: true));
+                        context.read<HomeBloc>().add(const LoadClientStatisticsEvent(forceRefresh: true));
+                        context.read<NotificationsBloc>().add(const LoadNotificationsEvent(forceRefresh: true));
+                        await Future.delayed(const Duration(milliseconds: 800));
+                      },
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _HomeHeader(initials: user?.initials ?? ''),
+                            _WelcomeSection(firstName: user?.firstName ?? ''),
+                            _ProfileProgressSection(),
+                            _StatsGrid(),
+                            _SearchBarSection(),
+                            _RecentDemandesSection(),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),

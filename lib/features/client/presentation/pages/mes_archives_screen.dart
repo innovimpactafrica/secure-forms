@@ -15,7 +15,9 @@ import 'package:secure_link/features/client/domain/bloc/archives_event.dart';
 import 'package:secure_link/features/client/domain/bloc/archives_state.dart';
 
 class MesArchivesScreen extends StatefulWidget {
-  const MesArchivesScreen({super.key});
+  final bool fromHome;
+  final VoidCallback? onGoHome;
+  const MesArchivesScreen({super.key, this.fromHome = false, this.onGoHome});
 
   @override
   State<MesArchivesScreen> createState() => _MesArchivesScreenState();
@@ -238,7 +240,13 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
+            onTap: () {
+              if (widget.fromHome && widget.onGoHome != null) {
+                widget.onGoHome!();
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
             child: Container(
               width: 40,
               height: 40,

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
-import 'kyc_step1_id_page.dart';
+import 'kyc_doc_type_page.dart';
 
 class KycIntroPage extends StatelessWidget {
   const KycIntroPage({super.key});
@@ -21,7 +21,10 @@ class KycIntroPage extends StatelessWidget {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () => Navigator.of(context).pop(true),
+                    onTap: () {
+                      print('[KycIntroPage] fleche retour -> pop');
+                      Navigator.of(context).pop();
+                    },
                     child: Container(
                       width: 40,
                       height: 40,
@@ -153,7 +156,7 @@ class KycIntroPage extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (_) => BlocProvider.value(
                       value: context.read<KycBloc>(),
-                      child: const KycStep1IdPage(),
+                      child: const KycDocTypePage(),
                     ),
                   ),
                 ),

@@ -60,11 +60,17 @@ class KycBloc extends Bloc<KycEvent, KycState> {
       _log('hasRecto=$hasRecto hasSelfie=$hasSelfie → ${apiCompleted ? "KycCompleted" : "KycRequired"}');
 
       if (apiCompleted) {
-        // L'API confirme que les documents sont soumis → source de vérité
-        // On met à jour le cache local (couvre réinstallation / changement d'appareil)
-        await prefs.setBool(_kycKey, true);
-        await prefs.setBool('${_kycKey}_submitted', true);
-        emit(const KycCompleted());
+        // L'API confirme recto + selfie soumis ET l'utilisateur a validé
+        // (KycMarkCompleted a été appelé après clic "Envoyer pour validation")
+        final submitted = prefs.getBool('${_kycKey}_submitted') ?? false;
+        if (submitted) {
+          await prefs.setBool(_kycKey, true);
+          emit(const KycCompleted());
+        } else {
+          // Selfie uploadé mais bouton "Envoyer" jamais cliqué → KYC incomplet
+          _log('API: recto+selfie présents MAIS submitted=false → KycRequired');
+          emit(const KycRequired());
+        }
       } else {
         emit(const KycRequired());
       }
@@ -128,13 +134,9 @@ class KycBloc extends Bloc<KycEvent, KycState> {
       );
       _log('SELFIE uploadé ✓ id=${selfieResult.id} status=${selfieResult.status}');
 
-      // Marquer que l'utilisateur a bien cliqué "Envoyer pour validation"
-      if (userId.isNotEmpty) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('${_kycKey}_submitted', true);
-        await prefs.setBool(_kycKey, true);
-        _log('KYC marqué soumis et complété localement pour userId=$userId');
-      }
+      // NE PAS marquer complet ici — c'est KycMarkCompleted (appelé après clic
+      // "Envoyer pour validation") qui met le cache à true.
+      // Si l'utilisateur quitte sans cliquer le bouton, le KYC reste requis.
       emit(KycSelfieUploaded(selfie: selfieResult));
     } catch (e) {
       _log('ERREUR upload selfie: $e');
