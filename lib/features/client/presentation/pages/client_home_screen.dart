@@ -42,6 +42,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   late KycBloc _kycBloc;
   String _lastUserId = '';
   bool _kycGateOpen = false;
+  bool _lastPushWasFirst = true;
 
   @override
   void initState() {
@@ -59,25 +60,41 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   }
 
   void _initKycBloc(String userId) {
-    if (userId == _lastUserId) return;
-    print('[KYC] _initKycBloc "$_lastUserId" -> "$userId"');
+    if (userId == _lastUserId) {
+      print('[KYC][initKycBloc] userId inchangé ("$userId") → skip');
+      return;
+    }
+    print('[KYC][initKycBloc] "$_lastUserId" → "$userId"');
     final old = _kycBloc;
     _lastUserId = userId;
     _kycGateOpen = false;
+    _lastPushWasFirst = true;
     _kycBloc = KycBloc(userId: userId);
     old.close();
-    print('[KYC] KycBloc cree, dispatching KycCheckStatus');
+    print('[KYC][initKycBloc] nouveau KycBloc créé, dispatch KycCheckStatus');
     _kycBloc.add(const KycCheckStatus());
     if (mounted) setState(() {});
   }
 
-  void _pushKycIntro() {
-    print('[KYC] _pushKycIntro | _kycGateOpen=$_kycGateOpen mounted=$mounted');
-    if (_kycGateOpen || !mounted) return;
+  void _pushKycIntro({int delaySeconds = 3}) {
+    print('[KYC][pushKycIntro] appelé | _kycGateOpen=$_kycGateOpen mounted=$mounted delay=${delaySeconds}s');
+    if (_kycGateOpen) {
+      print('[KYC][pushKycIntro] BLOQUÉ — _kycGateOpen=true, page déjà en cours d\'ouverture');
+      return;
+    }
+    if (!mounted) {
+      print('[KYC][pushKycIntro] BLOQUÉ — widget non monté');
+      return;
+    }
     _kycGateOpen = true;
-    Future.delayed(const Duration(seconds: 3), () {
-      if (!mounted) { _kycGateOpen = false; return; }
-      print('[KYC] pushing KycIntroPage');
+    print('[KYC][pushKycIntro] gate ouverte, attente ${delaySeconds}s...');
+    Future.delayed(Duration(seconds: delaySeconds), () {
+      if (!mounted) {
+        print('[KYC][pushKycIntro] délai écoulé mais widget non monté → annulé');
+        _kycGateOpen = false;
+        return;
+      }
+      print('[KYC][pushKycIntro] délai écoulé → push KycIntroPage');
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => BlocProvider.value(
@@ -86,11 +103,13 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           ),
         ),
       ).then((_) {
-        print('[KYC] KycIntroPage .then | mounted=$mounted');
+        print('[KYC][pushKycIntro] KycIntroPage fermée (pop) | mounted=$mounted');
         _kycGateOpen = false;
         if (mounted) {
-          print('[KYC] re-check KYC');
+          print('[KYC][pushKycIntro] re-dispatch KycCheckStatus après retour');
           _kycBloc.add(const KycCheckStatus());
+        } else {
+          print('[KYC][pushKycIntro] widget non monté après retour → pas de re-check');
         }
       });
     });
@@ -121,10 +140,16 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         child: BlocListener<KycBloc, KycState>(
           bloc: _kycBloc,
           listener: (context, state) {
-            print('[KYC] BlocListener state: ${state.runtimeType} | _kycGateOpen=$_kycGateOpen');
-            if (state is KycRequired) {
-              _kycGateOpen = false;
-              _pushKycIntro();
+            print('[KYC][BlocListener] state reçu: ${state.runtimeType} | _kycGateOpen=$_kycGateOpen | _lastPushWasFirst=$_lastPushWasFirst');
+            if (state is KycChecking) {
+              print('[KYC][BlocListener] KycChecking → vérification en cours, attente...');
+            } else if (state is KycRequired) {
+              final delay = _lastPushWasFirst ? 3 : 2;
+              print('[KYC][BlocListener] KycRequired → délai=$delay s | premier=${_lastPushWasFirst}');
+              _lastPushWasFirst = false;
+              _pushKycIntro(delaySeconds: delay);
+            } else if (state is KycCompleted) {
+              print('[KYC][BlocListener] KycCompleted → accès autorisé, aucune action');
             }
           },
           child: PopScope(

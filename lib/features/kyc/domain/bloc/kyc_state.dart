@@ -8,6 +8,10 @@ class KycInitial extends KycState {
   const KycInitial();
 }
 
+class KycChecking extends KycState {
+  const KycChecking();
+}
+
 class KycRequired extends KycState {
   const KycRequired();
 }

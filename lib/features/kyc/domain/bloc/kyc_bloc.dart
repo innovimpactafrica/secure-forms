@@ -26,78 +26,88 @@ class KycBloc extends Bloc<KycEvent, KycState> {
 
   Future<void> _onCheckStatus(
       KycCheckStatus event, Emitter<KycState> emit) async {
-    _log('KycCheckStatus — userId: "$userId"');
+    _log('━━━ KycCheckStatus ━━━ userId: "$userId"');
+
+    // Émettre KycChecking pour forcer un changement d'état
+    // (évite que BLoC ignore KycRequired si déjà en KycRequired)
+    emit(const KycChecking());
+
     if (userId.isEmpty) {
-      _log('userId vide → KycRequired');
+      _log('userId vide → KycRequired émis');
       emit(const KycRequired());
       return;
     }
 
-    // 1. Vérifier d'abord le cache local
+    // 1. Cache local
     final prefs = await SharedPreferences.getInstance();
     final cachedCompleted = prefs.getBool(_kycKey) ?? false;
+    _log('Cache local "$_kycKey" = $cachedCompleted');
+
     if (cachedCompleted) {
-      _log('Cache local: KYC déjà completé → KycCompleted');
+      _log('Cache local: KYC déjà complété → KycCompleted émis');
       emit(const KycCompleted());
       return;
     }
 
-    // 2. Vérifier via l'API si les documents ont été soumis
+    // 2. Vérification API
     try {
       final token = UserSession.instance.accessToken;
+      _log('Token présent: ${token.isNotEmpty} (longueur: ${token.length})');
+
       if (token.isEmpty) {
+        _log('Token vide → KycRequired émis');
         emit(const KycRequired());
         return;
       }
-      final docs = await _repository.getDocuments(token);
-      _log('API: ${docs.length} document(s) trouvé(s)');
 
-      // KYC considéré complet si au moins RECTO et SELFIE ont été soumis
+      _log('Appel API identity-documents...');
+      final docs = await _repository.getDocuments(token);
+      _log('API: ${docs.length} document(s) reçu(s)');
+      for (final d in docs) {
+        _log('  doc → id=${d.id} kind=${d.kind} status=${d.status}');
+      }
+
       final hasRecto = docs.any((d) => d.kind.toUpperCase() == 'RECTO');
       final hasSelfie = docs.any((d) => d.kind.toUpperCase() == 'SELFIE');
-      final apiCompleted = hasRecto && hasSelfie;
+      _log('hasRecto=$hasRecto | hasSelfie=$hasSelfie');
 
-      _log('hasRecto=$hasRecto hasSelfie=$hasSelfie → ${apiCompleted ? "KycCompleted" : "KycRequired"}');
-
-      if (apiCompleted) {
-        // L'API confirme recto + selfie soumis ET l'utilisateur a validé
-        // (KycMarkCompleted a été appelé après clic "Envoyer pour validation")
-        final submitted = prefs.getBool('${_kycKey}_submitted') ?? false;
-        if (submitted) {
-          await prefs.setBool(_kycKey, true);
-          emit(const KycCompleted());
-        } else {
-          // Selfie uploadé mais bouton "Envoyer" jamais cliqué → KYC incomplet
-          _log('API: recto+selfie présents MAIS submitted=false → KycRequired');
-          emit(const KycRequired());
-        }
+      if (hasRecto && hasSelfie) {
+        _log('API: recto+selfie présents → KYC validé, sauvegarde cache + KycCompleted émis');
+        await prefs.setBool(_kycKey, true);
+        emit(const KycCompleted());
       } else {
+        _log('API: documents incomplets → KycRequired émis');
         emit(const KycRequired());
       }
     } catch (e) {
-      _log('Erreur vérification API KYC: $e → fallback KycRequired');
+      _log('ERREUR appel API: $e → KycRequired émis par défaut');
       emit(const KycRequired());
     }
   }
 
   Future<void> _onMarkCompleted(
       KycMarkCompleted event, Emitter<KycState> emit) async {
-    _log('KycMarkCompleted — sauvegarde $_kycKey = true');
+    _log('━━━ KycMarkCompleted ━━━ userId: "$userId"');
     if (userId.isNotEmpty) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_kycKey, true);
-      await prefs.setBool('${_kycKey}_submitted', true);
+      _log('SharedPreferences "$_kycKey" = true → sauvegardé');
+    } else {
+      _log('userId vide → pas de sauvegarde SharedPreferences');
     }
+    _log('KycCompleted émis');
     emit(const KycCompleted());
   }
 
   Future<void> _onUploadIdDocuments(
       KycUploadIdDocuments event, Emitter<KycState> emit) async {
-    _log('KycUploadIdDocuments — recto: ${event.recto.path} | verso: ${event.verso.path}');
-    _log('Token présent: ${event.token.isNotEmpty} (longueur: ${event.token.length})');
+    _log('━━━ KycUploadIdDocuments ━━━');
+    _log('recto: ${event.recto.path}');
+    _log('verso: ${event.verso.path}');
+    _log('token présent: ${event.token.isNotEmpty} (longueur: ${event.token.length})');
     emit(const KycUploading(message: 'Envoi de la pièce d\'identité...'));
     try {
-      _log('Upload RECTO → POST ${_kycKey.contains("_") ? "identityDocuments" : ""} kind=RECTO');
+      _log('Upload RECTO → kind=RECTO');
       final rectoResult = await _repository.uploadDocument(
         token: event.token,
         file: event.recto,
@@ -105,7 +115,7 @@ class KycBloc extends Bloc<KycEvent, KycState> {
       );
       _log('RECTO uploadé ✓ id=${rectoResult.id} status=${rectoResult.status}');
 
-      _log('Upload VERSO → POST kind=VERSO');
+      _log('Upload VERSO → kind=VERSO');
       final versoResult = await _repository.uploadDocument(
         token: event.token,
         file: event.verso,
@@ -113,6 +123,7 @@ class KycBloc extends Bloc<KycEvent, KycState> {
       );
       _log('VERSO uploadé ✓ id=${versoResult.id} status=${versoResult.status}');
 
+      _log('KycIdDocumentsUploaded émis');
       emit(KycIdDocumentsUploaded(recto: rectoResult, verso: versoResult));
     } catch (e) {
       _log('ERREUR upload ID documents: $e');
@@ -122,21 +133,19 @@ class KycBloc extends Bloc<KycEvent, KycState> {
 
   Future<void> _onUploadSelfie(
       KycUploadSelfie event, Emitter<KycState> emit) async {
-    _log('KycUploadSelfie — selfie: ${event.selfie.path}');
-    _log('Token présent: ${event.token.isNotEmpty} (longueur: ${event.token.length})');
+    _log('━━━ KycUploadSelfie ━━━');
+    _log('selfie: ${event.selfie.path}');
+    _log('token présent: ${event.token.isNotEmpty} (longueur: ${event.token.length})');
     emit(const KycUploading(message: 'Envoi du selfie...'));
     try {
-      _log('Upload SELFIE → POST kind=SELFIE');
+      _log('Upload SELFIE → kind=SELFIE');
       final selfieResult = await _repository.uploadDocument(
         token: event.token,
         file: event.selfie,
         kind: DocumentKind.selfie,
       );
       _log('SELFIE uploadé ✓ id=${selfieResult.id} status=${selfieResult.status}');
-
-      // NE PAS marquer complet ici — c'est KycMarkCompleted (appelé après clic
-      // "Envoyer pour validation") qui met le cache à true.
-      // Si l'utilisateur quitte sans cliquer le bouton, le KYC reste requis.
+      _log('KycSelfieUploaded émis (KycMarkCompleted sera appelé par la page preview)');
       emit(KycSelfieUploaded(selfie: selfieResult));
     } catch (e) {
       _log('ERREUR upload selfie: $e');
@@ -146,10 +155,10 @@ class KycBloc extends Bloc<KycEvent, KycState> {
 
   Future<void> _onLoadDocuments(
       KycLoadDocuments event, Emitter<KycState> emit) async {
-    _log('KycLoadDocuments — chargement liste documents');
+    _log('━━━ KycLoadDocuments ━━━');
     try {
       final docs = await _repository.getDocuments(event.token);
-      _log('Documents chargés: ${docs.length} document(s)');
+      _log('${docs.length} document(s) chargé(s)');
       for (final d in docs) {
         _log('  → id=${d.id} kind=${d.kind} status=${d.status}');
       }

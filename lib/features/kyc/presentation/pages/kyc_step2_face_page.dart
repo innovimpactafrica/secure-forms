@@ -135,20 +135,18 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            // Ovale guide visage
+                            // Ovale supprimé — coins de scan conservés
                             CustomPaint(
                               size: const Size(double.infinity, 300),
                               painter: _FaceOvalPainter(),
                             ),
                             // Icône personne centrée dans l'ovale
-                            Positioned(
-                              top: 30,
-                              left: 0,
-                              right: 0,
-                              child: Center(
+                            Positioned.fill(
+                              child: Align(
+                                alignment: const Alignment(0, -0.12),
                                 child: Container(
-                                  width: 110,
-                                  height: 110,
+                                  width: 140,
+                                  height: 140,
                                   decoration: const BoxDecoration(
                                     color: AppColors.primaryDark,
                                     shape: BoxShape.circle,
@@ -156,7 +154,7 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                                   child: const Icon(
                                     Icons.person,
                                     color: AppColors.white,
-                                    size: 72,
+                                    size: 140,
                                   ),
                                 ),
                               ),
@@ -261,20 +259,7 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
 class _FaceOvalPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    // Ovale principal
-    final ovalPaint = Paint()
-      ..color = AppColors.primaryDark
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5;
-
-    final ovalRect = Rect.fromCenter(
-      center: Offset(size.width / 2, size.height / 2 - 16),
-      width: size.width * 0.52,
-      height: size.height * 0.62,
-    );
-    canvas.drawOval(ovalRect, ovalPaint);
-
-    // Coins de cadrage autour de l'ovale
+    // Coins de cadrage seulement
     final cornerPaint = Paint()
       ..color = AppColors.primary
       ..style = PaintingStyle.stroke
@@ -284,8 +269,8 @@ class _FaceOvalPainter extends CustomPainter {
     const cornerLen = 18.0;
     final cx = size.width / 2;
     final cy = size.height / 2 - 16;
-    final rx = size.width * 0.26;
-    final ry = size.height * 0.31;
+    final rx = size.width * 0.22;
+    final ry = size.height * 0.26;
 
     // Haut-gauche
     canvas.drawLine(Offset(cx - rx, cy - ry + cornerLen), Offset(cx - rx, cy - ry), cornerPaint);

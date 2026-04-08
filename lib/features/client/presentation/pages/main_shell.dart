@@ -61,7 +61,7 @@ class _MainShellState extends State<MainShell> {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// BOTTOM NAV — icônes SVG cohérentes avec la page profil
+// BOTTOM NAV avec creux (notch) sous l'icône active
 // ─────────────────────────────────────────────────────────────────
 class _BottomNav extends StatelessWidget {
   final int currentIndex;
@@ -72,104 +72,175 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.locale;
-
     final items = [
-      _NavItem(
-        icon: Icons.home_outlined,
-        activeIcon: Icons.home_rounded,
-        label: 'navbar.home'.tr(),
-      ),
-      _NavItem(
-        icon: Icons.assignment_outlined,
-        activeIcon: Icons.assignment,
-        label: 'navbar.requests'.tr(),
-      ),
-      _NavItem(
-        icon: Icons.inventory_2_outlined,
-        activeIcon: Icons.inventory_2,
-        label: 'navbar.archives'.tr(),
-      ),
-      _NavItem(
-        svgActive: 'assets/icons/bi_person-circle.svg',
-        svgInactive: 'assets/icons/bi_person-circle.svg',
-        label: 'navbar.account'.tr(),
-        useSvg: true,
-      ),
+      _NavItem(icon: Icons.home_rounded, label: 'navbar.home'.tr()),
+      _NavItem(icon: Icons.assignment, label: 'navbar.requests'.tr()),
+      _NavItem(icon: Icons.inventory_2, label: 'navbar.archives'.tr()),
+      _NavItem(svgActive: 'assets/icons/bi_person-circle.svg', label: 'navbar.account'.tr(), useSvg: true),
     ];
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.white,
-        border: Border(top: BorderSide(color: AppColors.borderDivider, width: 1)),
-        boxShadow: [
-          BoxShadow(color: AppColors.shadowDark, blurRadius: 8, offset: Offset(0, -2)),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            children: List.generate(items.length, (i) {
-              final item = items[i];
-              final isActive = currentIndex == i;
-              final color = isActive ? AppColors.primary : AppColors.greyShade500;
+    return SafeArea(
+      top: false,
+      child: SizedBox(
+        height: 72,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Fond blanc avec ombre
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _NotchNavPainter(activeIndex: currentIndex, itemCount: items.length),
+              ),
+            ),
+            // Items
+            Row(
+              children: List.generate(items.length, (i) {
+                final item = items[i];
+                final isActive = currentIndex == i;
+                final color = isActive ? AppColors.primaryDark : AppColors.greyShade500;
 
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => onTap(i),
-                  behavior: HitTestBehavior.opaque,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      item.useSvg
-                          ? SvgPicture.asset(
-                              item.svgActive!,
-                              width: 22,
-                              height: 22,
-                              colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => onTap(i),
+                    behavior: HitTestBehavior.opaque,
+                    child: SizedBox(
+                      height: 72,
+                      child: isActive
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  transform: Matrix4.translationValues(0, -14, 0),
+                                  child: Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryDark,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppColors.primaryDark.withValues(alpha: 0.35),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: item.useSvg
+                                        ? Center(
+                                            child: SvgPicture.asset(
+                                              item.svgActive!,
+                                              width: 22,
+                                              height: 22,
+                                              colorFilter: const ColorFilter.mode(AppColors.white, BlendMode.srcIn),
+                                            ),
+                                          )
+                                        : Icon(item.icon, size: 24, color: AppColors.white),
+                                  ),
+                                ),
+                              ],
                             )
-                          : Icon(
-                              isActive ? item.activeIcon! : item.icon!,
-                              size: 24,
-                              color: color,
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const SizedBox(height: 4),
+                                item.useSvg
+                                    ? SvgPicture.asset(
+                                        item.svgActive!,
+                                        width: 22,
+                                        height: 22,
+                                        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                                      )
+                                    : Icon(item.icon, size: 24, color: color),
+                                const SizedBox(height: 6),
+                                Text(
+                                  item.label,
+                                  style: TextStyle(
+                                    fontFamily: AppConstants.fontFamilyInter,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w400,
+                                    color: color,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.label,
-                        style: TextStyle(
-                          fontFamily: AppConstants.fontFamilyInter,
-                          fontSize: 11,
-                          fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                          color: color,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              );
-            }),
-          ),
+                );
+              }),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
+// Painter qui dessine le fond blanc avec le creux sous l'icône active
+class _NotchNavPainter extends CustomPainter {
+  final int activeIndex;
+  final int itemCount;
+
+  const _NotchNavPainter({required this.activeIndex, required this.itemCount});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    final shadowPaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.08)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+
+    final itemWidth = size.width / itemCount;
+    final cx = itemWidth * activeIndex + itemWidth / 2;
+    const notchRadius = 28.0;
+    const notchDepth = 18.0;
+
+    final path = Path();
+    path.moveTo(0, 0);
+
+    // Côté gauche du creux
+    path.lineTo(cx - notchRadius - 12, 0);
+    // Courbe gauche du creux
+    path.cubicTo(
+      cx - notchRadius, 0,
+      cx - notchRadius, notchDepth,
+      cx, notchDepth,
+    );
+    // Courbe droite du creux
+    path.cubicTo(
+      cx + notchRadius, notchDepth,
+      cx + notchRadius, 0,
+      cx + notchRadius + 12, 0,
+    );
+
+    path.lineTo(size.width, 0);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+
+    // Ombre
+    canvas.drawPath(path, shadowPaint);
+    // Fond
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_NotchNavPainter old) => old.activeIndex != activeIndex;
+}
+
 class _NavItem {
   final IconData? icon;
-  final IconData? activeIcon;
   final String? svgActive;
-  final String? svgInactive;
   final String label;
   final bool useSvg;
 
   const _NavItem({
     this.icon,
-    this.activeIcon,
     this.svgActive,
-    this.svgInactive,
     required this.label,
     this.useSvg = false,
   });

@@ -17,15 +17,23 @@ class KycStep2FacePreviewPage extends StatelessWidget {
 
   void _submit(BuildContext context) {
     final token = UserSession.instance.accessToken;
+    // ignore: avoid_print
+    print('[KycPreview] _submit appelé | token présent: ${token.isNotEmpty} (longueur: ${token.length})');
     if (token.isNotEmpty) {
+      // ignore: avoid_print
+      print('[KycPreview] dispatch KycUploadSelfie');
       context.read<KycBloc>().add(KycUploadSelfie(selfie: photo, token: token));
     } else {
+      // ignore: avoid_print
+      print('[KycPreview] token vide → dispatch KycMarkCompleted directement');
       context.read<KycBloc>().add(const KycMarkCompleted());
       _showSuccessModal(context);
     }
   }
 
   void _showSuccessModal(BuildContext context) {
+    // ignore: avoid_print
+    print('[KycPreview] _showSuccessModal affiché');
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -48,20 +56,26 @@ class KycStep2FacePreviewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<KycBloc, KycState>(
       listener: (context, state) {
+        // ignore: avoid_print
+        print('[KycPreview] BlocListener state: ${state.runtimeType}');
         if (state is KycSelfieUploaded) {
+          // ignore: avoid_print
+          print('[KycPreview] KycSelfieUploaded → dispatch KycMarkCompleted + showSuccessModal');
+          context.read<KycBloc>().add(const KycMarkCompleted());
           _showSuccessModal(context);
         } else if (state is KycError) {
-          // Erreur 499 = "Client Closed Request" = le serveur a bien reçu
-          // mais a fermé la connexion avant de répondre → traiter comme succès
           final msg = state.message.toLowerCase();
+          // ignore: avoid_print
+          print('[KycPreview] KycError message: "${state.message}"');
           if (msg.contains('499') || msg.contains('client closed') ||
               msg.contains('formatexception') || msg.contains('unexpected character')) {
             // ignore: avoid_print
-            print('[KycPreview] Erreur 499/FormatException → traité comme succès');
-            // S'assurer que le KYC est bien marqué complet même en cas d'erreur 499
+            print('[KycPreview] Erreur 499/FormatException → traité comme succès → dispatch KycMarkCompleted');
             context.read<KycBloc>().add(const KycMarkCompleted());
             _showSuccessModal(context);
           } else {
+            // ignore: avoid_print
+            print('[KycPreview] Erreur réelle → SnackBar');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
