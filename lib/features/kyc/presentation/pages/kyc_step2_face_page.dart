@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
@@ -44,12 +45,12 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
 
   @override
   Widget build(BuildContext context) {
+    context.locale;
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Row(
@@ -71,7 +72,7 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Vérification d\'identité',
+                        'kyc.title'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilySofiaSans,
                           fontWeight: FontWeight.w600,
@@ -80,7 +81,7 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                         ),
                       ),
                       Text(
-                        'Prenez un selfie',
+                        'kyc.selfie_title'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilyInter,
                           fontSize: AppConstants.fontSizeRegular,
@@ -100,7 +101,7 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                   children: [
                     const SizedBox(height: 8),
                     Text(
-                      'Prenez un selfie',
+                      'kyc.selfie_title'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilySofiaSans,
                         fontWeight: FontWeight.w700,
@@ -111,7 +112,7 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Positionnez votre visage dans le cadre ovale',
+                      'kyc.selfie_subtitle'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilyInter,
                         fontSize: AppConstants.fontSizeMedium,
@@ -121,7 +122,6 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                     ),
                     const SizedBox(height: 28),
 
-                    // Cadre selfie avec ovale dessiné
                     GestureDetector(
                       onTap: _isCapturing ? null : _takePhoto,
                       child: Container(
@@ -135,12 +135,10 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            // Ovale supprimé — coins de scan conservés
                             CustomPaint(
                               size: const Size(double.infinity, 300),
                               painter: _FaceOvalPainter(),
                             ),
-                            // Icône personne centrée dans l'ovale
                             Positioned.fill(
                               child: Align(
                                 alignment: const Alignment(0, -0.12),
@@ -159,7 +157,6 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                                 ),
                               ),
                             ),
-                            // Badge caméra en bas du cadre
                             Positioned(
                               bottom: 16,
                               left: 0,
@@ -177,7 +174,7 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                                       const Icon(Icons.camera_front, color: AppColors.white, size: 18),
                                       const SizedBox(width: 6),
                                       Text(
-                                        _isCapturing ? 'Capture...' : 'Appuyez pour prendre le selfie',
+                                        _isCapturing ? 'kyc.capturing'.tr() : 'kyc.tap_selfie'.tr(),
                                         style: const TextStyle(
                                           color: AppColors.white,
                                           fontSize: 12,
@@ -195,7 +192,6 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                     ),
 
                     const SizedBox(height: 20),
-                    // Conseils
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
@@ -205,9 +201,9 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _TipItem('Regardez directement la caméra frontale'),
-                          _TipItem('Assurez-vous que l\'éclairage est suffisant'),
-                          _TipItem('Votre visage doit être entièrement visible'),
+                          _TipItem('kyc.tip1'.tr()),
+                          _TipItem('kyc.tip2'.tr()),
+                          _TipItem('kyc.tip3'.tr()),
                         ],
                       ),
                     ),
@@ -216,7 +212,6 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
               ),
             ),
 
-            // Bouton Prendre la photo
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
               child: GestureDetector(
@@ -235,7 +230,7 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                       const Icon(Icons.camera_front_outlined, color: AppColors.white, size: 20),
                       const SizedBox(width: 10),
                       Text(
-                        _isCapturing ? 'Capture en cours...' : 'Prendre le selfie',
+                        _isCapturing ? 'kyc.capturing_selfie'.tr() : 'kyc.taking_selfie'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilySofiaSans,
                           fontWeight: FontWeight.w600,
@@ -255,11 +250,9 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
   }
 }
 
-/// Dessine un ovale guide pour le visage avec coins de cadrage
 class _FaceOvalPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    // Coins de cadrage seulement
     final cornerPaint = Paint()
       ..color = AppColors.primary
       ..style = PaintingStyle.stroke
@@ -272,16 +265,12 @@ class _FaceOvalPainter extends CustomPainter {
     final rx = size.width * 0.22;
     final ry = size.height * 0.26;
 
-    // Haut-gauche
     canvas.drawLine(Offset(cx - rx, cy - ry + cornerLen), Offset(cx - rx, cy - ry), cornerPaint);
     canvas.drawLine(Offset(cx - rx, cy - ry), Offset(cx - rx + cornerLen, cy - ry), cornerPaint);
-    // Haut-droit
     canvas.drawLine(Offset(cx + rx - cornerLen, cy - ry), Offset(cx + rx, cy - ry), cornerPaint);
     canvas.drawLine(Offset(cx + rx, cy - ry), Offset(cx + rx, cy - ry + cornerLen), cornerPaint);
-    // Bas-gauche
     canvas.drawLine(Offset(cx - rx, cy + ry - cornerLen), Offset(cx - rx, cy + ry), cornerPaint);
     canvas.drawLine(Offset(cx - rx, cy + ry), Offset(cx - rx + cornerLen, cy + ry), cornerPaint);
-    // Bas-droit
     canvas.drawLine(Offset(cx + rx - cornerLen, cy + ry), Offset(cx + rx, cy + ry), cornerPaint);
     canvas.drawLine(Offset(cx + rx, cy + ry), Offset(cx + rx, cy + ry - cornerLen), cornerPaint);
   }

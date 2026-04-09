@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_messaging/firebase_messaging.dart'; // 👈 NOUVEAU
@@ -60,20 +61,25 @@ class _SplashScreenState extends State<SplashScreen>
       return;
     }
 
-    // Tenter un refresh proactif du token avant de naviguer
+    // Refresh proactif uniquement si le token access est expiré ou proche de l'expiration
     final refreshToken = UserSession.instance.refreshToken;
-    if (refreshToken.isNotEmpty) {
+    if (refreshToken.isNotEmpty && _isTokenExpiredOrSoon(UserSession.instance.accessToken)) {
       try {
+        print('[Splash] Token expiré ou bientôt → refresh proactif...');
         final freshToken = await AuthenticatedHttpClient.instance.ensureFreshToken();
         if (freshToken.isEmpty) {
-          // Refresh token expiré → forcer reconnexion
+          print('[Splash] Refresh échoué → reconnexion requise');
           await SessionStorage.instance.clear();
           if (mounted) Navigator.of(context).pushReplacementNamed(AppRoutes.login);
           return;
         }
+        print('[Splash] Token rafraîché avec succès');
       } catch (_) {
-        // En cas d'erreur réseau, on tente quand même avec le token existant
+        // Erreur réseau → on tente avec le token existant
+        print('[Splash] Erreur réseau lors du refresh → on continue avec le token existant');
       }
+    } else {
+      print('[Splash] Token encore valide → pas de refresh nécessaire');
     }
 
     if (!mounted) return;
@@ -91,6 +97,25 @@ class _SplashScreenState extends State<SplashScreen>
       userBloc.add(LoadUserProfile(token));
       _sendFcmTokenOnRestore();
     });
+  }
+
+  // Retourne true si le JWT est expiré ou expire dans moins de 5 minutes
+  bool _isTokenExpiredOrSoon(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return true;
+      final payload = parts[1];
+      final normalized = base64Url.normalize(payload);
+      final decoded = utf8.decode(base64Url.decode(normalized));
+      final map = jsonDecode(decoded) as Map<String, dynamic>;
+      final exp = map['exp'] as int?;
+      if (exp == null) return true;
+      final expiry = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
+      // Refresh si expire dans moins de 5 minutes
+      return DateTime.now().isAfter(expiry.subtract(const Duration(minutes: 5)));
+    } catch (_) {
+      return true; // En cas d'erreur de décodage, on refresh par sécurité
+    }
   }
 
   // 👇 NOUVEAU — Récupère et envoie le token FCM au backend

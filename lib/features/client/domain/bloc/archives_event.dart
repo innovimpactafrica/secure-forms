@@ -12,3 +12,7 @@ class GoToArchivesPageEvent extends ArchivesEvent {
   final int page;
   const GoToArchivesPageEvent(this.page);
 }
+
+class LoadMoreArchivesEvent extends ArchivesEvent {
+  const LoadMoreArchivesEvent();
+}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/user_session.dart';
@@ -25,13 +26,13 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
   File? _backImage;
 
   String get _docLabel => widget.docType == KycDocType.cni
-      ? 'Carte Nationale d\'identité'
-      : 'Passeport';
+      ? 'kyc.cni'.tr()
+      : 'kyc.passport'.tr();
 
   Future<void> _captureImage(bool isFront) async {
     final label = isFront
-        ? 'RECTO de votre $_docLabel'
-        : 'VERSO de votre $_docLabel';
+        ? '${'kyc.take_photo_recto'.tr()} $_docLabel'
+        : '${'kyc.take_photo_verso'.tr()} $_docLabel';
     final File? result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => KycCameraDocumentPage(title: label),
@@ -53,6 +54,7 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
 
   @override
   Widget build(BuildContext context) {
+    context.locale;
     return BlocListener<KycBloc, KycState>(
       listener: (context, state) {
         if (state is KycIdDocumentsUploaded) {
@@ -81,7 +83,6 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
             body: SafeArea(
               child: Column(
                 children: [
-                  // Header
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     child: Column(
@@ -106,7 +107,7 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Vérification d\'identité',
+                                  'kyc.title'.tr(),
                                   style: TextStyle(
                                     fontFamily: AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w600,
@@ -161,7 +162,6 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Instructions
                           Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
@@ -172,7 +172,7 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Instructions',
+                                  'kyc.instructions'.tr(),
                                   style: TextStyle(
                                     fontFamily: AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w600,
@@ -181,18 +181,17 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                _InstructionItem('Placez votre document dans le cadre'),
-                                _InstructionItem('Assurez-vous que le document est bien éclairé'),
-                                _InstructionItem('Toutes les informations doivent être lisibles'),
-                                _InstructionItem('Évitez les reflets et les ombres'),
+                                _InstructionItem('kyc.instruction1'.tr()),
+                                _InstructionItem('kyc.instruction2'.tr()),
+                                _InstructionItem('kyc.instruction3'.tr()),
+                                _InstructionItem('kyc.instruction4'.tr()),
                               ],
                             ),
                           ),
                           const SizedBox(height: 24),
 
-                          // Face avant
                           Text(
-                            'Face avant (Recto)',
+                            'kyc.front_side'.tr(),
                             style: TextStyle(
                               fontFamily: AppConstants.fontFamilySofiaSans,
                               fontWeight: FontWeight.w600,
@@ -203,15 +202,14 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                           const SizedBox(height: 10),
                           _CaptureBox(
                             image: _frontImage,
-                            label: 'Prenez une photo RECTO de votre $_docLabel',
+                            label: '${'kyc.take_photo_recto'.tr()} $_docLabel',
                             onCapture: () => _captureImage(true),
                             onRetake: () => setState(() => _frontImage = null),
                           ),
                           const SizedBox(height: 24),
 
-                          // Face arrière
                           Text(
-                            'Face arrière (Verso)',
+                            'kyc.back_side'.tr(),
                             style: TextStyle(
                               fontFamily: AppConstants.fontFamilySofiaSans,
                               fontWeight: FontWeight.w600,
@@ -222,7 +220,7 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                           const SizedBox(height: 10),
                           _CaptureBox(
                             image: _backImage,
-                            label: 'Prenez une photo VERSO de votre $_docLabel',
+                            label: '${'kyc.take_photo_verso'.tr()} $_docLabel',
                             onCapture: () => _captureImage(false),
                             onRetake: () => setState(() => _backImage = null),
                           ),
@@ -232,7 +230,6 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                     ),
                   ),
 
-                  // Bouton Continuer
                   Padding(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
                     child: GestureDetector(
@@ -281,7 +278,7 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                                   ),
                                 )
                               : Text(
-                                  'Continuer',
+                                  'kyc.continue'.tr(),
                                   style: TextStyle(
                                     fontFamily: AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w600,
@@ -305,9 +302,6 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────
-// Cadre de capture avec guide visuel
-// ─────────────────────────────────────────────────────────────────
 class _CaptureBox extends StatelessWidget {
   final File? image;
   final String label;
@@ -324,7 +318,6 @@ class _CaptureBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (image != null) {
-      // Photo prise — afficher avec bouton reprendre
       return Column(
         children: [
           Container(
@@ -348,7 +341,7 @@ class _CaptureBox extends StatelessWidget {
                 Icon(Icons.refresh, color: AppColors.primary, size: 18),
                 const SizedBox(width: 6),
                 Text(
-                  'Reprendre la photo',
+                  'kyc.retake'.tr(),
                   style: TextStyle(
                     fontFamily: AppConstants.fontFamilyInter,
                     fontSize: AppConstants.fontSizeMedium,
@@ -363,7 +356,6 @@ class _CaptureBox extends StatelessWidget {
       );
     }
 
-    // Cadre guide + bouton capture
     return GestureDetector(
       onTap: onCapture,
       child: Container(
@@ -399,7 +391,7 @@ class _CaptureBox extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              'Appuyez pour prendre la photo',
+              'kyc.tap_to_photo'.tr(),
               style: TextStyle(
                 fontFamily: AppConstants.fontFamilyInter,
                 fontSize: AppConstants.fontSizeSmall,
@@ -412,7 +404,6 @@ class _CaptureBox extends StatelessWidget {
     );
   }
 }
-
 
 class _InstructionItem extends StatelessWidget {
   final String text;

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
@@ -11,7 +10,6 @@ import 'package:secure_link/features/client/presentation/pages/mes_archives_scre
 import 'package:secure_link/features/client/presentation/pages/client_profil_screen.dart';
 
 class MainShell extends StatefulWidget {
-  /// Onglet initial (0=home, 1=demandes, 2=archives, 3=profil)
   final int initialIndex;
   const MainShell({super.key, this.initialIndex = 0});
 
@@ -60,188 +58,235 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────
-// BOTTOM NAV avec creux (notch) sous l'icône active
-// ─────────────────────────────────────────────────────────────────
-class _BottomNav extends StatelessWidget {
+class _BottomNav extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
-
   const _BottomNav({required this.currentIndex, required this.onTap});
+
+  @override
+  State<_BottomNav> createState() => _BottomNavState();
+}
+
+class _BottomNavState extends State<_BottomNav>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+
+  static const _navHeight = 70.0;
+  static const _circleSize = 42.0;
+  static const _notchDepth = 30.0; // profondeur du creux
+  static const _notchWidth = 70.0; // largeur du creux
+
+  static const List<String> _images = [
+    'assets/images/accueil.png',
+    'assets/images/demande.png',
+    'assets/images/archiver.png',
+    'assets/images/profil.png',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
+    _anim = Tween<double>(
+      begin: widget.currentIndex.toDouble(),
+      end: widget.currentIndex.toDouble(),
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+  }
+
+  @override
+  void didUpdateWidget(_BottomNav old) {
+    super.didUpdateWidget(old);
+    if (old.currentIndex != widget.currentIndex) {
+      _anim = Tween<double>(
+        begin: _anim.value,
+        end: widget.currentIndex.toDouble(),
+      ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+      _ctrl.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     context.locale;
-    final items = [
-      _NavItem(icon: Icons.home_rounded, label: 'navbar.home'.tr()),
-      _NavItem(icon: Icons.assignment, label: 'navbar.requests'.tr()),
-      _NavItem(icon: Icons.inventory_2, label: 'navbar.archives'.tr()),
-      _NavItem(svgActive: 'assets/icons/bi_person-circle.svg', label: 'navbar.account'.tr(), useSvg: true),
+    final labels = [
+      'navbar.home'.tr(),
+      'navbar.requests'.tr(),
+      'navbar.archives'.tr(),
+      'navbar.account'.tr(),
     ];
+    final itemCount = _images.length;
 
     return SafeArea(
       top: false,
       child: SizedBox(
-        height: 72,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // Fond blanc avec ombre
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _NotchNavPainter(activeIndex: currentIndex, itemCount: items.length),
-              ),
-            ),
-            // Items
-            Row(
-              children: List.generate(items.length, (i) {
-                final item = items[i];
-                final isActive = currentIndex == i;
-                final color = isActive ? AppColors.primaryDark : AppColors.greyShade500;
-
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () => onTap(i),
-                    behavior: HitTestBehavior.opaque,
-                    child: SizedBox(
-                      height: 72,
-                      child: isActive
-                          ? Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  transform: Matrix4.translationValues(0, -14, 0),
-                                  child: Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primaryDark,
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: AppColors.primaryDark.withValues(alpha: 0.35),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: item.useSvg
-                                        ? Center(
-                                            child: SvgPicture.asset(
-                                              item.svgActive!,
-                                              width: 22,
-                                              height: 22,
-                                              colorFilter: const ColorFilter.mode(AppColors.white, BlendMode.srcIn),
-                                            ),
-                                          )
-                                        : Icon(item.icon, size: 24, color: AppColors.white),
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const SizedBox(height: 4),
-                                item.useSvg
-                                    ? SvgPicture.asset(
-                                        item.svgActive!,
-                                        width: 22,
-                                        height: 22,
-                                        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-                                      )
-                                    : Icon(item.icon, size: 24, color: color),
-                                const SizedBox(height: 6),
-                                Text(
-                                  item.label,
-                                  style: TextStyle(
-                                    fontFamily: AppConstants.fontFamilyInter,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w400,
-                                    color: color,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
+        // hauteur totale = navbar + espace pour le cercle qui dépasse en haut
+        height: _navHeight + _circleSize / 2,
+        child: AnimatedBuilder(
+          animation: _anim,
+          builder: (context, _) {
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // ── Fond blanc avec creux en haut ──
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: _navHeight,
+                  child: CustomPaint(
+                    painter: _NotchPainter(
+                      notchPos: _anim.value,
+                      itemCount: itemCount,
+                      notchDepth: _notchDepth,
+                      notchWidth: _notchWidth,
                     ),
                   ),
-                );
-              }),
-            ),
-          ],
+                ),
+
+                // ── Items ──
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: _navHeight + _circleSize / 2,
+                  child: Row(
+                    children: List.generate(itemCount, (i) {
+                      final isActive = widget.currentIndex == i;
+                      final color = isActive
+                          ? AppColors.primaryDark
+                          : AppColors.greyShade500;
+
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () => widget.onTap(i),
+                          behavior: HitTestBehavior.opaque,
+                          child: SizedBox(
+                            height: _navHeight + _circleSize / 2,
+                            child: isActive
+                                ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      // Cercle surélevé qui sort du creux
+                                      Container(
+                                        width: _circleSize,
+                                        height: _circleSize,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primaryDark,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: AppColors.primaryDark
+                                                  .withValues(alpha: 0.4),
+                                              blurRadius: 12,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Center(
+                                          child: Image.asset(
+                                            _images[i],
+                                            width: 20,
+                                            height: 20,
+                                            color: AppColors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const SizedBox(height: _circleSize / 2),
+                                      Image.asset(
+                                        _images[i],
+                                        width: 20,
+                                        height: 20,
+                                        color: color,
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 }
 
-// Painter qui dessine le fond blanc avec le creux sous l'icône active
-class _NotchNavPainter extends CustomPainter {
-  final int activeIndex;
+// ── Painter : fond blanc avec creux arrondi en haut ──
+class _NotchPainter extends CustomPainter {
+  final double notchPos; // 0.0 → itemCount-1
   final int itemCount;
+  final double notchDepth;
+  final double notchWidth;
 
-  const _NotchNavPainter({required this.activeIndex, required this.itemCount});
+  const _NotchPainter({
+    required this.notchPos,
+    required this.itemCount,
+    required this.notchDepth,
+    required this.notchWidth,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
+    // Ombre portée
+    final shadow = Paint()
+      ..color = Colors.black.withValues(alpha: 0.10)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+
+    final fill = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
 
-    final shadowPaint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.08)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
-
     final itemWidth = size.width / itemCount;
-    final cx = itemWidth * activeIndex + itemWidth / 2;
-    const notchRadius = 28.0;
-    const notchDepth = 18.0;
+    final cx = itemWidth * notchPos + itemWidth / 2;
+    final half = notchWidth / 2;
+    const smooth = 20.0;
 
     final path = Path();
+    // Départ coin haut-gauche
     path.moveTo(0, 0);
-
-    // Côté gauche du creux
-    path.lineTo(cx - notchRadius - 12, 0);
-    // Courbe gauche du creux
+    // Ligne jusqu'au début du creux
+    path.lineTo(cx - half - smooth, 0);
+    // Courbe d'entrée gauche
     path.cubicTo(
-      cx - notchRadius, 0,
-      cx - notchRadius, notchDepth,
+      cx - half, 0,
+      cx - half, notchDepth,
       cx, notchDepth,
     );
-    // Courbe droite du creux
+    // Courbe de sortie droite
     path.cubicTo(
-      cx + notchRadius, notchDepth,
-      cx + notchRadius, 0,
-      cx + notchRadius + 12, 0,
+      cx + half, notchDepth,
+      cx + half, 0,
+      cx + half + smooth, 0,
     );
-
+    // Ligne jusqu'au coin haut-droit
     path.lineTo(size.width, 0);
     path.lineTo(size.width, size.height);
     path.lineTo(0, size.height);
     path.close();
 
-    // Ombre
-    canvas.drawPath(path, shadowPaint);
-    // Fond
-    canvas.drawPath(path, paint);
+    canvas.drawPath(path, shadow);
+    canvas.drawPath(path, fill);
   }
 
   @override
-  bool shouldRepaint(_NotchNavPainter old) => old.activeIndex != activeIndex;
-}
-
-class _NavItem {
-  final IconData? icon;
-  final String? svgActive;
-  final String label;
-  final bool useSvg;
-
-  const _NavItem({
-    this.icon,
-    this.svgActive,
-    required this.label,
-    this.useSvg = false,
-  });
+  bool shouldRepaint(_NotchPainter old) => old.notchPos != notchPos;
 }

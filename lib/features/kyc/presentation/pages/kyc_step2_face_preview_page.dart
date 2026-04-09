@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/user_session.dart';
@@ -11,39 +12,30 @@ import 'kyc_step2_face_page.dart';
 
 class KycStep2FacePreviewPage extends StatelessWidget {
   final File photo;
-  /// Callback appelé après succès — si null, retour simple à step2
   final VoidCallback? onSuccess;
   const KycStep2FacePreviewPage({super.key, required this.photo, this.onSuccess});
 
   void _submit(BuildContext context) {
     final token = UserSession.instance.accessToken;
-    // ignore: avoid_print
-    print('[KycPreview] _submit appelé | token présent: ${token.isNotEmpty} (longueur: ${token.length})');
+    print('[KycPreview] _submit appelé | token présent: ${token.isNotEmpty}');
     if (token.isNotEmpty) {
-      // ignore: avoid_print
-      print('[KycPreview] dispatch KycUploadSelfie');
       context.read<KycBloc>().add(KycUploadSelfie(selfie: photo, token: token));
     } else {
-      // ignore: avoid_print
-      print('[KycPreview] token vide → dispatch KycMarkCompleted directement');
       context.read<KycBloc>().add(const KycMarkCompleted());
       _showSuccessModal(context);
     }
   }
 
   void _showSuccessModal(BuildContext context) {
-    // ignore: avoid_print
-    print('[KycPreview] _showSuccessModal affiché');
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => _KycSuccessModal(
         onContinue: () {
-          Navigator.of(context).pop(); // ferme dialog
+          Navigator.of(context).pop();
           if (onSuccess != null) {
             onSuccess!();
           } else {
-            // Retour à step2 : dépiler face_preview + kyc_step2
             Navigator.of(context).pop();
             Navigator.of(context).pop();
           }
@@ -56,26 +48,17 @@ class KycStep2FacePreviewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<KycBloc, KycState>(
       listener: (context, state) {
-        // ignore: avoid_print
         print('[KycPreview] BlocListener state: ${state.runtimeType}');
         if (state is KycSelfieUploaded) {
-          // ignore: avoid_print
-          print('[KycPreview] KycSelfieUploaded → dispatch KycMarkCompleted + showSuccessModal');
           context.read<KycBloc>().add(const KycMarkCompleted());
           _showSuccessModal(context);
         } else if (state is KycError) {
           final msg = state.message.toLowerCase();
-          // ignore: avoid_print
-          print('[KycPreview] KycError message: "${state.message}"');
           if (msg.contains('499') || msg.contains('client closed') ||
               msg.contains('formatexception') || msg.contains('unexpected character')) {
-            // ignore: avoid_print
-            print('[KycPreview] Erreur 499/FormatException → traité comme succès → dispatch KycMarkCompleted');
             context.read<KycBloc>().add(const KycMarkCompleted());
             _showSuccessModal(context);
           } else {
-            // ignore: avoid_print
-            print('[KycPreview] Erreur réelle → SnackBar');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -87,13 +70,13 @@ class KycStep2FacePreviewPage extends StatelessWidget {
       },
       child: BlocBuilder<KycBloc, KycState>(
         builder: (context, kycState) {
+          context.locale;
           final isLoading = kycState is KycUploading;
           return Scaffold(
             backgroundColor: AppColors.white,
             body: SafeArea(
               child: Column(
                 children: [
-                  // Header
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     child: Row(
@@ -107,8 +90,7 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                               color: AppColors.primaryDark,
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.arrow_back,
-                                color: AppColors.white, size: 20),
+                            child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
                           ),
                         ),
                         const SizedBox(width: 14),
@@ -116,7 +98,7 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Vérification d\'identité',
+                              'kyc.title'.tr(),
                               style: TextStyle(
                                 fontFamily: AppConstants.fontFamilySofiaSans,
                                 fontWeight: FontWeight.w600,
@@ -125,7 +107,7 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'Prenez une photo de votre visage',
+                              'kyc.selfie_title'.tr(),
                               style: TextStyle(
                                 fontFamily: AppConstants.fontFamilyInter,
                                 fontSize: AppConstants.fontSizeRegular,
@@ -145,7 +127,7 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                         children: [
                           const SizedBox(height: 16),
                           Text(
-                            'Vérifiez votre photo',
+                            'kyc.verify_photo'.tr(),
                             style: TextStyle(
                               fontFamily: AppConstants.fontFamilySofiaSans,
                               fontWeight: FontWeight.w700,
@@ -156,7 +138,7 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Assurez-vous que votre visage est bien visible avant de\ncontinuer.',
+                            'kyc.verify_subtitle'.tr(),
                             style: TextStyle(
                               fontFamily: AppConstants.fontFamilyInter,
                               fontSize: AppConstants.fontSizeMedium,
@@ -171,8 +153,7 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                             height: 260,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                  color: AppColors.borderLight, width: 2),
+                              border: Border.all(color: AppColors.borderLight, width: 2),
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(14),
@@ -181,7 +162,7 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Assurez-vous que l\'éclairage est suffisant et que\nvotre visage est visible clairement.',
+                            'kyc.verify_tip'.tr(),
                             style: TextStyle(
                               fontFamily: AppConstants.fontFamilyInter,
                               fontSize: AppConstants.fontSizeRegular,
@@ -195,7 +176,6 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                     ),
                   ),
 
-                  // Boutons
                   Padding(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
                     child: Column(
@@ -219,16 +199,14 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                                     height: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          AppColors.white),
+                                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                                     ),
                                   )
                                 else ...[
-                                  const Icon(Icons.send_outlined,
-                                      color: AppColors.white, size: 20),
+                                  const Icon(Icons.send_outlined, color: AppColors.white, size: 20),
                                   const SizedBox(width: 10),
                                   Text(
-                                    'Envoyer pour validation',
+                                    'kyc.send_validation'.tr(),
                                     style: TextStyle(
                                       fontFamily: AppConstants.fontFamilySofiaSans,
                                       fontWeight: FontWeight.w600,
@@ -249,9 +227,7 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                                     MaterialPageRoute(
                                       builder: (_) => BlocProvider.value(
                                         value: context.read<KycBloc>(),
-                                        child: KycStep2FacePage(
-                                          onSuccess: onSuccess,
-                                        ),
+                                        child: KycStep2FacePage(onSuccess: onSuccess),
                                       ),
                                     ),
                                   ),
@@ -265,11 +241,10 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.refresh,
-                                    color: AppColors.textBlack87, size: 20),
+                                const Icon(Icons.refresh, color: AppColors.textBlack87, size: 20),
                                 const SizedBox(width: 10),
                                 Text(
-                                  'Reprendre la photo',
+                                  'kyc.retake_photo'.tr(),
                                   style: TextStyle(
                                     fontFamily: AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w600,
@@ -315,13 +290,12 @@ class _KycSuccessModal extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Center(
-                child: Icon(Icons.check_circle_outline,
-                    color: AppColors.primary, size: 52),
+                child: Icon(Icons.check_circle_outline, color: AppColors.primary, size: 52),
               ),
             ),
             const SizedBox(height: 20),
             Text(
-              'Photo envoyée avec succès !',
+              'kyc.success_title'.tr(),
               style: TextStyle(
                 fontFamily: AppConstants.fontFamilySofiaSans,
                 fontWeight: FontWeight.w700,
@@ -332,7 +306,7 @@ class _KycSuccessModal extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Votre vérification d\'identité a été soumise.',
+              'kyc.success_subtitle'.tr(),
               style: TextStyle(
                 fontFamily: AppConstants.fontFamilyInter,
                 fontSize: AppConstants.fontSizeMedium,
@@ -352,7 +326,7 @@ class _KycSuccessModal extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'Continuer',
+                    'kyc.success_continue'.tr(),
                     style: TextStyle(
                       fontFamily: AppConstants.fontFamilySofiaSans,
                       fontWeight: FontWeight.w600,

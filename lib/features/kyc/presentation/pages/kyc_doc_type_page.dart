@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
@@ -12,6 +13,7 @@ class KycDocTypePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.locale;
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -39,7 +41,7 @@ class KycDocTypePage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Vérification d\'identité',
+                        'kyc.title'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilySofiaSans,
                           fontWeight: FontWeight.w600,
@@ -48,7 +50,7 @@ class KycDocTypePage extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Choisissez votre type de pièce',
+                        'kyc.choose_doc_label'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilyInter,
                           fontSize: AppConstants.fontSizeRegular,
@@ -69,7 +71,7 @@ class KycDocTypePage extends StatelessWidget {
                   children: [
                     const SizedBox(height: 24),
                     Text(
-                      'Choisir le type de pièce',
+                      'kyc.choose_doc_title'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilySofiaSans,
                         fontWeight: FontWeight.w700,
@@ -79,7 +81,7 @@ class KycDocTypePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Sélectionnez le document que vous souhaitez utiliser pour la vérification.',
+                      'kyc.choose_doc_subtitle'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilyInter,
                         fontSize: AppConstants.fontSizeMedium,
@@ -90,15 +92,15 @@ class KycDocTypePage extends StatelessWidget {
                     const SizedBox(height: 32),
                     _DocTypeItem(
                       icon: Icons.credit_card_outlined,
-                      label: 'Carte Nationale d\'identité',
-                      subtitle: 'CNI recto + verso requis',
+                      label: 'kyc.cni'.tr(),
+                      subtitle: 'kyc.cni_subtitle'.tr(),
                       onTap: () => _navigate(context, KycDocType.cni),
                     ),
                     const SizedBox(height: 14),
                     _DocTypeItem(
                       icon: Icons.book_outlined,
-                      label: 'Passeport',
-                      subtitle: 'Page principale requise',
+                      label: 'kyc.passport'.tr(),
+                      subtitle: 'kyc.passport_subtitle'.tr(),
                       onTap: () => _navigate(context, KycDocType.passeport),
                     ),
                   ],

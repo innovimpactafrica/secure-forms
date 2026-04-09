@@ -31,16 +31,19 @@ class AuthService {
     throw Exception(data['message'] ?? 'Erreur inscription');
   }
 
-  // POST /api/auth/login — retry automatique jusqu'à 3 tentatives
-  Future<LoginResponse> login({required String email, required String password}) async {
+  // POST /api/auth/login/client — email OU phone
+  Future<LoginResponse> login({String? email, String? phone, required String password}) async {
     const maxAttempts = 3;
     Exception? lastError;
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
+        final body = <String, dynamic>{'password': password};
+        if (email != null && email.isNotEmpty) body['email'] = email;
+        if (phone != null && phone.isNotEmpty) body['phone'] = phone;
         final response = await _loginClient.post(
           Uri.parse(BaseUrl.login),
           headers: _headers,
-          body: jsonEncode({'email': email, 'password': password}),
+          body: jsonEncode(body),
         ).timeout(const Duration(seconds: 15));
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         if (response.statusCode == 200 || response.statusCode == 201) {
@@ -49,7 +52,6 @@ class AuthService {
         throw Exception(data['message'] ?? 'Erreur connexion');
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
-        // Ne pas retenter si c'est une erreur métier (mauvais mot de passe, etc.)
         final msg = e.toString();
         if (!msg.contains('timeout') && !msg.contains('SocketException') &&
             !msg.contains('connection') && !msg.contains('Connection')) {

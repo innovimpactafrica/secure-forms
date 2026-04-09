@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
@@ -10,43 +11,26 @@ class KycIntroPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.locale;
     // ignore: avoid_print
-    print('[KycIntroPage] build — page affichée, PopScope(canPop=false) actif');
+    print('[KycIntroPage] build — locale=${context.locale.languageCode}');
     return PopScope(
-      canPop: true,
+      canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        // ignore: avoid_print
-        print('[KycIntroPage] onPopInvokedWithResult | didPop=$didPop → retour vers home autorisé');
+        print('[KycIntroPage] retour bloqué | didPop=$didPop');
       },
       child: Scaffold(
         backgroundColor: AppColors.white,
         body: SafeArea(
           child: Column(
             children: [
-              // Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        // ignore: avoid_print
-                        print('[KycIntroPage] flèche retour tapée → pop vers home');
-                        Navigator.of(context).pop();
-                      },
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryDark,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
-                      ),
-                    ),
                     const SizedBox(width: 14),
                     Text(
-                      'Vérification d\'identité',
+                      'kyc.title'.tr(),
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilySofiaSans,
                         fontWeight: FontWeight.w600,
@@ -57,7 +41,6 @@ class KycIntroPage extends StatelessWidget {
                   ],
                 ),
               ),
-
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -66,7 +49,7 @@ class KycIntroPage extends StatelessWidget {
                     children: [
                       const SizedBox(height: 32),
                       Text(
-                        'Vérification d\'identité',
+                        'kyc.title'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilySofiaSans,
                           fontWeight: FontWeight.w700,
@@ -77,7 +60,7 @@ class KycIntroPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Pour sécuriser votre compte, nous devons vérifier\nvotre identité.',
+                        'kyc.subtitle'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilyInter,
                           fontSize: AppConstants.fontSizeMedium,
@@ -88,7 +71,7 @@ class KycIntroPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 36),
                       Text(
-                        'Le processus en 3 étapes',
+                        'kyc.steps_title'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilySofiaSans,
                           fontWeight: FontWeight.w500,
@@ -97,23 +80,11 @@ class KycIntroPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      _StepItem(
-                        number: '1',
-                        icon: Icons.description_outlined,
-                        label: 'Ajouter votre pièce d\'identité',
-                      ),
+                      _StepItem(number: '1', icon: Icons.description_outlined, label: 'kyc.step1'.tr()),
                       const SizedBox(height: 12),
-                      _StepItem(
-                        number: '2',
-                        icon: Icons.camera_alt_outlined,
-                        label: 'Prendre une photo de votre visage',
-                      ),
+                      _StepItem(number: '2', icon: Icons.camera_alt_outlined, label: 'kyc.step2'.tr()),
                       const SizedBox(height: 12),
-                      _StepItem(
-                        number: '3',
-                        icon: Icons.check_circle_outline,
-                        label: 'Validation par le système',
-                      ),
+                      _StepItem(number: '3', icon: Icons.check_circle_outline, label: 'kyc.step3'.tr()),
                       const SizedBox(height: 28),
                       Container(
                         padding: const EdgeInsets.all(16),
@@ -130,7 +101,7 @@ class KycIntroPage extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Vos données sont protégées',
+                                    'kyc.data_protected'.tr(),
                                     style: TextStyle(
                                       fontFamily: AppConstants.fontFamilySofiaSans,
                                       fontWeight: FontWeight.w600,
@@ -139,7 +110,7 @@ class KycIntroPage extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    'Informations cryptées et conformes au RGPD',
+                                    'kyc.data_encrypted'.tr(),
                                     style: TextStyle(
                                       fontFamily: AppConstants.fontFamilyInter,
                                       fontSize: AppConstants.fontSizeSmall,
@@ -156,13 +127,10 @@ class KycIntroPage extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Bouton Commencer
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
                 child: GestureDetector(
                   onTap: () {
-                    // ignore: avoid_print
                     print('[KycIntroPage] bouton Commencer tappé → push KycDocTypePage');
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -183,7 +151,7 @@ class KycIntroPage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Commencer',
+                          'kyc.start_button'.tr(),
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilySofiaSans,
                             fontWeight: FontWeight.w600,

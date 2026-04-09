@@ -14,11 +14,12 @@ class RegisterRequested extends AuthEvent {
 }
 
 class LoginRequested extends AuthEvent {
-  final String email;
+  final String? email;
+  final String? phone;
   final String password;
-  LoginRequested({required this.email, required this.password});
+  LoginRequested({this.email, this.phone, required this.password});
   @override
-  List<Object?> get props => [email, password];
+  List<Object?> get props => [email, phone, password];
 }
 
 class OtpVerifyRequested extends AuthEvent {

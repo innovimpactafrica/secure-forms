@@ -18,6 +18,7 @@ class ArchivesBloc extends Bloc<ArchivesEvent, ArchivesState> {
         super(const ArchivesInitial()) {
     on<LoadArchivesEvent>(_onLoad);
     on<GoToArchivesPageEvent>(_onGoToPage);
+    on<LoadMoreArchivesEvent>(_onLoadMore);
   }
 
   Future<void> _onLoad(
@@ -71,6 +72,37 @@ class ArchivesBloc extends Bloc<ArchivesEvent, ArchivesState> {
       ));
     } catch (e) {
       emit(ArchivesError(e.toString().replaceAll('Exception: ', '')));
+    }
+  }
+
+  Future<void> _onLoadMore(
+    LoadMoreArchivesEvent event,
+    Emitter<ArchivesState> emit,
+  ) async {
+    final current = state;
+    if (current is! ArchivesLoaded) return;
+    final nextPage = current.currentPage + 1;
+    final totalPages = (current.total / _pageSize).ceil();
+    if (nextPage > totalPages) return;
+    emit(current.copyWith(isLoadingMore: true));
+    try {
+      final token = UserSession.instance.accessToken;
+      final page = await _service.getArchives(
+        accessToken: token,
+        type: _currentType,
+        status: _currentStatus,
+        page: nextPage,
+        limit: _pageSize,
+      );
+      _currentPage = nextPage;
+      emit(ArchivesLoaded(
+        [...current.archives, ...page.items],
+        total: page.total,
+        currentPage: nextPage,
+        isLoadingMore: false,
+      ));
+    } catch (e) {
+      emit(current.copyWith(isLoadingMore: false));
     }
   }
 }

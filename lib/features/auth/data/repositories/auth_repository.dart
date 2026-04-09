@@ -11,8 +11,8 @@ class AuthRepository {
     return _authService.registerStep1(request);
   }
 
-  Future<LoginResponse> login({required String email, required String password}) async {
-    return _authService.login(email: email, password: password);
+  Future<LoginResponse> login({String? email, String? phone, required String password}) async {
+    return _authService.login(email: email, phone: phone, password: password);
   }
 
   Future<OtpVerifyResponse> verifyOtp(OtpVerifyRequest request) async {

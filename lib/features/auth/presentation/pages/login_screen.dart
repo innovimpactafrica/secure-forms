@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
@@ -20,8 +21,8 @@ import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
 import 'package:secure_link/features/home/domain/bloc/home_bloc.dart';
 import 'package:secure_link/features/home/domain/bloc/home_event.dart';
-import 'package:secure_link/core/services/fcm_service.dart'; // 👈 NOUVEAU
-import 'package:firebase_messaging/firebase_messaging.dart'; // 👈 NOUVEAU
+import 'package:secure_link/core/services/fcm_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
@@ -31,32 +32,41 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _phoneController = TextEditingController();
   bool _obscurePassword = true;
   late final AuthBloc _authBloc;
+  late final TabController _tabController;
+  String _fullPhone = '';
 
   @override
   void initState() {
     super.initState();
     _authBloc = AuthBloc();
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _phoneController.dispose();
+    _tabController.dispose();
     _authBloc.close();
     super.dispose();
   }
 
   void _onLogin(BuildContext context) {
     if (!_formKey.currentState!.validate()) return;
+    final isPhone = _tabController.index == 1;
     _authBloc.add(
       LoginRequested(
-        email: _emailController.text.trim(),
+        email: isPhone ? null : _emailController.text.trim(),
+        phone: isPhone ? _fullPhone : null,
         password: _passwordController.text.trim(),
       ),
     );
@@ -174,35 +184,139 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              'login.login_subtitle'.tr(),
+                              'login.login_subtitle_new'.tr(),
                               style: const TextStyle(
                                 fontFamily: AppConstants.fontFamilyInter,
                                 fontSize: AppConstants.fontSizeMedium,
                                 color: AppColors.textSecondary,
                               ),
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 24),
 
-                            // ── Email ──
-                            _FieldLabel(label: 'login.email_label'.tr()),
-                            const SizedBox(height: 6),
-                            TextFormField(
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              validator: (v) {
-                                if (v!.isEmpty) return 'login.required_field'.tr();
-                                if (!v.contains('@')) return 'login.invalid_email'.tr();
-                                return null;
+                            // ── Tabs Email / Téléphone ──
+                            Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF3F4F6),
+                                borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                              ),
+                              child: TabBar(
+                                controller: _tabController,
+                                indicator: BoxDecoration(
+                                  color: AppColors.primaryDark,
+                                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall - 2),
+                                ),
+                                indicatorSize: TabBarIndicatorSize.tab,
+                                labelColor: AppColors.white,
+                                unselectedLabelColor: AppColors.textSecondary,
+                                labelStyle: const TextStyle(
+                                  fontFamily: AppConstants.fontFamilyInter,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: AppConstants.fontSizeMedium,
+                                ),
+                                unselectedLabelStyle: const TextStyle(
+                                  fontFamily: AppConstants.fontFamilyInter,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: AppConstants.fontSizeMedium,
+                                ),
+                                dividerColor: Colors.transparent,
+                                tabs: [
+                                  Tab(text: 'login.tab_email'.tr()),
+                                  Tab(text: 'login.tab_phone'.tr()),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+
+                            // ── Champ Email ou Téléphone selon tab ──
+                            AnimatedBuilder(
+                              animation: _tabController,
+                              builder: (_, __) {
+                                if (_tabController.index == 0) {
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _FieldLabel(label: 'login.email_label'.tr()),
+                                      const SizedBox(height: 6),
+                                      TextFormField(
+                                        controller: _emailController,
+                                        keyboardType: TextInputType.emailAddress,
+                                        validator: (v) {
+                                          if (_tabController.index != 0) return null;
+                                          if (v == null || v.isEmpty) return 'login.required_field'.tr();
+                                          if (!v.contains('@')) return 'login.invalid_email'.tr();
+                                          return null;
+                                        },
+                                        style: const TextStyle(
+                                          fontFamily: AppConstants.fontFamilyInter,
+                                          fontSize: AppConstants.fontSizeMedium,
+                                          color: AppColors.textDark,
+                                        ),
+                                        decoration: _inputDecoration(
+                                          hint: 'login.email_hint'.tr(),
+                                          prefixIcon: Icons.email_outlined,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _FieldLabel(label: 'login.phone_label'.tr()),
+                                      const SizedBox(height: 6),
+                                      IntlPhoneField(
+                                        controller: _phoneController,
+                                        initialCountryCode: 'SN',
+                                        keyboardType: TextInputType.phone,
+                                        style: const TextStyle(
+                                          fontFamily: AppConstants.fontFamilyInter,
+                                          fontSize: AppConstants.fontSizeMedium,
+                                          color: AppColors.textDark,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: 'login.phone_hint_field'.tr(),
+                                          hintStyle: const TextStyle(
+                                            fontFamily: AppConstants.fontFamilyInter,
+                                            color: AppColors.hintText,
+                                            fontSize: AppConstants.fontSizeMedium,
+                                          ),
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                          filled: true,
+                                          fillColor: AppColors.white,
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                                            borderSide: const BorderSide(color: AppColors.borderLight),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                                            borderSide: const BorderSide(color: AppColors.borderLight),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                                            borderSide: const BorderSide(color: AppColors.primary, width: AppConstants.borderWidthMedium),
+                                          ),
+                                          errorBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                                            borderSide: const BorderSide(color: AppColors.statusRejected),
+                                          ),
+                                          focusedErrorBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                                            borderSide: const BorderSide(color: AppColors.statusRejected),
+                                          ),
+                                        ),
+                                        validator: (phone) {
+                                          if (_tabController.index != 1) return null;
+                                          if (phone == null || phone.number.isEmpty) return 'login.required_field'.tr();
+                                          return null;
+                                        },
+                                        onChanged: (phone) {
+                                          _fullPhone = phone.completeNumber;
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                }
                               },
-                              style: const TextStyle(
-                                fontFamily: AppConstants.fontFamilyInter,
-                                fontSize: AppConstants.fontSizeMedium,
-                                color: AppColors.textDark,
-                              ),
-                              decoration: _inputDecoration(
-                                hint: 'login.email_hint'.tr(),
-                                prefixIcon: Icons.email_outlined,
-                              ),
                             ),
                             const SizedBox(height: 16),
 

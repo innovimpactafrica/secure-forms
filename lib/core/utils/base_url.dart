@@ -6,7 +6,7 @@ class BaseUrl {
   // ========== AUTH ENDPOINTS ==========
   static const String registerStep1         = '$currentBaseUrl/auth/register/client/step1';
   static const String verifyRegistrationOtp = '$currentBaseUrl/auth/register/client/verify-otp';
-  static const String login                 = '$currentBaseUrl/auth/login';
+  static const String login                 = '$currentBaseUrl/auth/login/client';
   static const String resendOtp             = '$currentBaseUrl/auth/resend-otp';
   static const String logout                = '$currentBaseUrl/auth/logout';
   static const String refreshToken          = '$currentBaseUrl/auth/refresh';

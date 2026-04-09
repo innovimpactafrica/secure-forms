@@ -144,7 +144,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
             if (state is KycChecking) {
               print('[KYC][BlocListener] KycChecking → vérification en cours, attente...');
             } else if (state is KycRequired) {
-              final delay = _lastPushWasFirst ? 3 : 2;
+              final delay = _lastPushWasFirst ? 1 : 2;
               print('[KYC][BlocListener] KycRequired → délai=$delay s | premier=${_lastPushWasFirst}');
               _lastPushWasFirst = false;
               _pushKycIntro(delaySeconds: delay);

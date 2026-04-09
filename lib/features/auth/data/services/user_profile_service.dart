@@ -22,10 +22,13 @@ class UserProfileService {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Authorization': 'Bearer $accessToken',
+        // Token injecté automatiquement par AuthenticatedHttpClient
       },
     );
     print('=== GET /auth/profile STATUS: ${response.statusCode} ===');
+    if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
+    }
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 200) {
       return UserProfileModel.fromJson(data);
@@ -85,7 +88,7 @@ class UserProfileService {
     print('=== PROFILE PICTURE: téléchargement API ===');
     final response = await _client.get(
       Uri.parse(BaseUrl.getProfilePicture),
-      headers: {'Authorization': 'Bearer $accessToken'},
+      // Token injecté automatiquement par AuthenticatedHttpClient
     );
     print('=== GET /users/me/profile-picture STATUS: ${response.statusCode} ===');
     if (response.statusCode == 200) {

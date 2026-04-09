@@ -30,7 +30,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onLoginRequested(LoginRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      final response = await _repository.login(email: event.email, password: event.password);
+      final response = await _repository.login(
+        email: event.email,
+        phone: event.phone,
+        password: event.password,
+      );
       emit(LoginSuccess(
         accessToken: response.accessToken,
         refreshToken: response.refreshToken,
