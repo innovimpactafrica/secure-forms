@@ -27,6 +27,7 @@ class BaseUrl {
   static const String profileDocumentTypes = '$currentBaseUrl/users/profile/document-types';
   static const String profileCompletion    = '$currentBaseUrl/users/profile/completion';
   static const String profileDocuments     = '$currentBaseUrl/users/profile/documents';
+  static const String kycDocumentTypes     = '$currentBaseUrl/users/profile/identity-verification-document-types';
   static String profileDocumentFile(String documentId) =>
       '$currentBaseUrl/users/profile/documents/$documentId/file';
   static String storageFile(String objectKey) =>

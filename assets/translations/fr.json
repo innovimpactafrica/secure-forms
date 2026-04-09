@@ -397,6 +397,23 @@
     "success_subtitle": "Votre vérification d'identité a été soumise.",
     "success_continue": "Continuer"
   },
+  "signature": {
+    "title": "Signature électronique",
+    "request_id": "Réf :",
+    "info_banner": "Signez dans le cadre ci-dessous. Votre signature sera transmise en temps réel.",
+    "draw_hint": "Dessinez votre signature ici",
+    "sign_here": "Signez ici",
+    "clear": "Effacer",
+    "confirm_button": "Confirmer la signature",
+    "empty_signature": "Veuillez signer avant de confirmer.",
+    "exit_title": "Quitter la signature ?",
+    "exit_message": "Votre signature en cours sera perdue. Voulez-vous vraiment quitter ?",
+    "cancel": "Annuler",
+    "exit_confirm": "Quitter",
+    "success_title": "Signature envoyée !",
+    "success_message": "Votre signature a été transmise avec succès et sera traitée par notre système.",
+    "done_button": "Terminer"
+  },
   "forgot_password": {
     "title": "Mot de passe oublié",
     "subtitle": "Indiquez votre adresse e-mail : nous vous enverrons un code pour choisir un nouveau mot de passe.",

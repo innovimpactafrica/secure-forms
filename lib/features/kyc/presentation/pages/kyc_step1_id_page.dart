@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
 import 'package:secure_link/core/utils/user_session.dart';
+import 'package:secure_link/features/kyc/data/models/identity_document_model.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_event.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_state.dart';
 import 'kyc_camera_document_page.dart';
-import 'kyc_doc_type_page.dart';
 import 'kyc_step2_face_page.dart';
 
 class KycStep1IdPage extends StatefulWidget {
-  final KycDocType docType;
+  final KycDocTypeModel docType;
   const KycStep1IdPage({super.key, required this.docType});
 
   @override
@@ -25,9 +24,7 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
   File? _frontImage;
   File? _backImage;
 
-  String get _docLabel => widget.docType == KycDocType.cni
-      ? 'kyc.cni'.tr()
-      : 'kyc.passport'.tr();
+  String get _docLabel => widget.docType.title;
 
   Future<void> _captureImage(bool isFront) async {
     final label = isFront
@@ -241,6 +238,7 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                                       recto: _frontImage!,
                                       verso: _backImage!,
                                       token: token,
+                                      documentTypeId: widget.docType.id,
                                     ));
                               } else {
                                 Navigator.of(context).push(

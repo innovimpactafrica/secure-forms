@@ -45,7 +45,8 @@ class AppRoutes {
   static const String nouvelleDemandeStep11 = '/nouvelle-demande-step-11';
   static const String nouvelleDemandeStep12 = '/nouvelle-demande-step-12';
 
-  // Détails demande (différents statuts)
+  // Signature électronique
+  static const String signaturePad = '/signature-pad';
   static const String detailDemande = '/detail-demande';
   static const String detailVirement = '/detail-virement';
   static const String detailActeVente = '/detail-acte-vente';

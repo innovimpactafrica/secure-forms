@@ -107,19 +107,21 @@ class KycBloc extends Bloc<KycEvent, KycState> {
     _log('token présent: ${event.token.isNotEmpty} (longueur: ${event.token.length})');
     emit(const KycUploading(message: 'Envoi de la pièce d\'identité...'));
     try {
-      _log('Upload RECTO → kind=RECTO');
+      _log('Upload RECTO → kind=RECTO documentTypeId=${event.documentTypeId}');
       final rectoResult = await _repository.uploadDocument(
         token: event.token,
         file: event.recto,
         kind: DocumentKind.recto,
+        documentTypeId: event.documentTypeId,
       );
       _log('RECTO uploadé ✓ id=${rectoResult.id} status=${rectoResult.status}');
 
-      _log('Upload VERSO → kind=VERSO');
+      _log('Upload VERSO → kind=VERSO documentTypeId=${event.documentTypeId}');
       final versoResult = await _repository.uploadDocument(
         token: event.token,
         file: event.verso,
         kind: DocumentKind.verso,
+        documentTypeId: event.documentTypeId,
       );
       _log('VERSO uploadé ✓ id=${versoResult.id} status=${versoResult.status}');
 

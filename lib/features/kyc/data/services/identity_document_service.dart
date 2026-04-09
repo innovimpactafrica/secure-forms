@@ -21,6 +21,19 @@ class IdentityDocumentService {
     print('[IdentityDocumentService] $msg');
   }
 
+  /// GET /api/users/profile/identity-verification-document-types
+  Future<List<KycDocTypeModel>> getKycDocumentTypes(String token) async {
+    final url = BaseUrl.kycDocumentTypes;
+    _log('GET $url');
+    final response = await _client.get(Uri.parse(url), headers: _authHeaders(token));
+    _log('GET $url → ${response.statusCode}');
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((e) => KycDocTypeModel.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Erreur types KYC: ${response.statusCode}');
+  }
+
   /// GET /api/users/profile/identity-documents
   Future<List<IdentityDocumentModel>> getDocuments(String token) async {
     final url = BaseUrl.identityDocuments;
@@ -48,15 +61,19 @@ class IdentityDocumentService {
     required String token,
     required File file,
     required String kind,
+    String documentTypeId = '',
   }) async {
     final url = BaseUrl.identityDocuments;
     final fileSize = await file.length();
     final fileName = file.path.split(Platform.pathSeparator).last;
-    _log('POST $url | kind=$kind | file=$fileName | size=${(fileSize / 1024).toStringAsFixed(1)}KB');
+    _log('POST $url | kind=$kind | documentTypeId=$documentTypeId | file=$fileName | size=${(fileSize / 1024).toStringAsFixed(1)}KB');
 
     final request = http.MultipartRequest('POST', Uri.parse(url));
     request.headers.addAll(_authHeaders(token));
     request.fields['kind'] = kind;
+    if (documentTypeId.isNotEmpty) {
+      request.fields['documentTypeId'] = documentTypeId;
+    }
     final ext = fileName.split('.').last.toLowerCase();
     final mime = ext == 'png' ? 'image/png' : ext == 'pdf' ? 'application/pdf' : 'image/jpeg';
     request.files.add(await http.MultipartFile.fromPath(

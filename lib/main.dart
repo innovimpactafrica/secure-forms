@@ -41,6 +41,7 @@ import 'features/auth/presentation/pages/forgot_password_otp_screen.dart';
 import 'features/auth/presentation/pages/reset_password_screen.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/features/kyc/presentation/pages/kyc_gate_page.dart';
+import 'features/client/presentation/pages/signature_screen.dart';
 import 'firebase_options.dart';
 
 // Handler background OBLIGATOIREMENT top-level
@@ -154,6 +155,25 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
             (route) => false,
           );
         });
+      }
+
+      else if (uri.path.contains('/sign')) {
+        final requestId = uri.queryParameters['requestId'] ?? '';
+        final wsUrl = uri.queryParameters['wsUrl'];
+        final sessionId = uri.queryParameters['sessionId'];
+        if (requestId.isNotEmpty) {
+          _navigateWhenReady(() {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (_) => SignatureScreen(
+                  requestId: requestId,
+                  wsUrl: wsUrl,
+                  sessionId: sessionId,
+                ),
+              ),
+            );
+          });
+        }
       }
     }
 

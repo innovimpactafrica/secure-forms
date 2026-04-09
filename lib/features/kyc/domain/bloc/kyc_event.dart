@@ -17,11 +17,13 @@ class KycUploadIdDocuments extends KycEvent {
   final File recto;
   final File verso;
   final String token;
+  final String documentTypeId;
 
   const KycUploadIdDocuments({
     required this.recto,
     required this.verso,
     required this.token,
+    required this.documentTypeId,
   });
 }
 

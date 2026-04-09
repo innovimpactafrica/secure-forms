@@ -1,3 +1,27 @@
+/// Type de document pour la vérification d'identité (KYC)
+class KycDocTypeModel {
+  final String id;
+  final String title;
+  final bool hasExpirationDate;
+  final List<String> aliases;
+
+  const KycDocTypeModel({
+    required this.id,
+    required this.title,
+    required this.hasExpirationDate,
+    this.aliases = const [],
+  });
+
+  factory KycDocTypeModel.fromJson(Map<String, dynamic> json) {
+    return KycDocTypeModel(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      hasExpirationDate: json['hasExpirationDate'] == true,
+      aliases: (json['aliases'] as List<dynamic>? ?? []).map((e) => e.toString()).toList(),
+    );
+  }
+}
+
 /// Modèle d'un document d'identité retourné par l'API
 class IdentityDocumentModel {
   final String id;

@@ -392,6 +392,23 @@
     "success_subtitle": "Your identity verification has been submitted.",
     "success_continue": "Continue"
   },
+  "signature": {
+    "title": "Electronic Signature",
+    "request_id": "Ref:",
+    "info_banner": "Sign in the box below. Your signature will be transmitted in real time.",
+    "draw_hint": "Draw your signature here",
+    "sign_here": "Sign here",
+    "clear": "Clear",
+    "confirm_button": "Confirm signature",
+    "empty_signature": "Please sign before confirming.",
+    "exit_title": "Exit signature?",
+    "exit_message": "Your current signature will be lost. Are you sure you want to exit?",
+    "cancel": "Cancel",
+    "exit_confirm": "Exit",
+    "success_title": "Signature sent!",
+    "success_message": "Your signature has been successfully transmitted and will be processed by our system.",
+    "done_button": "Done"
+  },
   "forgot_password": {
     "title": "Forgot password",
     "subtitle": "Enter your email address: we will send you a code to choose a new password.",

@@ -195,34 +195,28 @@ class _LoginScreenState extends State<LoginScreen>
 
                             // ── Tabs Email / Téléphone ──
                             Container(
+                              height: 48,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF3F4F6),
-                                borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                                color: AppColors.backgroundLight,
+                                borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                               ),
-                              child: TabBar(
-                                controller: _tabController,
-                                indicator: BoxDecoration(
-                                  color: AppColors.primaryDark,
-                                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall - 2),
+                              padding: const EdgeInsets.all(4),
+                              child: AnimatedBuilder(
+                                animation: _tabController,
+                                builder: (_, __) => Row(
+                                  children: [
+                                    _LoginTabOption(
+                                      label: 'login.tab_email'.tr(),
+                                      isSelected: _tabController.index == 0,
+                                      onTap: () => setState(() => _tabController.animateTo(0)),
+                                    ),
+                                    _LoginTabOption(
+                                      label: 'login.tab_phone'.tr(),
+                                      isSelected: _tabController.index == 1,
+                                      onTap: () => setState(() => _tabController.animateTo(1)),
+                                    ),
+                                  ],
                                 ),
-                                indicatorSize: TabBarIndicatorSize.tab,
-                                labelColor: AppColors.white,
-                                unselectedLabelColor: AppColors.textSecondary,
-                                labelStyle: const TextStyle(
-                                  fontFamily: AppConstants.fontFamilyInter,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: AppConstants.fontSizeMedium,
-                                ),
-                                unselectedLabelStyle: const TextStyle(
-                                  fontFamily: AppConstants.fontFamilyInter,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: AppConstants.fontSizeMedium,
-                                ),
-                                dividerColor: Colors.transparent,
-                                tabs: [
-                                  Tab(text: 'login.tab_email'.tr()),
-                                  Tab(text: 'login.tab_phone'.tr()),
-                                ],
                               ),
                             ),
                             const SizedBox(height: 20),
@@ -622,6 +616,47 @@ class _FieldLabel extends StatelessWidget {
         fontSize: AppConstants.fontSizeMedium,
         fontWeight: FontWeight.w500,
         color: AppColors.textDark,
+      ),
+    );
+  }
+}
+
+class _LoginTabOption extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _LoginTabOption({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.white : AppColors.backgroundLight,
+            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+            boxShadow: isSelected
+                ? [BoxShadow(color: AppColors.shadowLight, blurRadius: 4, offset: const Offset(0, 2))]
+                : [],
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: AppConstants.fontFamilySofiaSans,
+              fontSize: AppConstants.fontSizeMedium,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              color: isSelected ? AppColors.textDark : AppColors.textSecondary,
+            ),
+          ),
+        ),
       ),
     );
   }

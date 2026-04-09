@@ -8,6 +8,9 @@ class IdentityDocumentRepository {
   IdentityDocumentRepository({IdentityDocumentService? service})
       : _service = service ?? IdentityDocumentService();
 
+  Future<List<KycDocTypeModel>> getKycDocumentTypes(String token) =>
+      _service.getKycDocumentTypes(token);
+
   Future<List<IdentityDocumentModel>> getDocuments(String token) =>
       _service.getDocuments(token);
 
@@ -15,8 +18,9 @@ class IdentityDocumentRepository {
     required String token,
     required File file,
     required String kind,
+    String documentTypeId = '',
   }) =>
-      _service.uploadDocument(token: token, file: file, kind: kind);
+      _service.uploadDocument(token: token, file: file, kind: kind, documentTypeId: documentTypeId);
 
   Future<List<int>> getDocumentFile({
     required String token,

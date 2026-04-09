@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/user_session.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'package:secure_link/features/kyc/domain/bloc/kyc_event.dart';
@@ -32,12 +33,15 @@ class KycStep2FacePreviewPage extends StatelessWidget {
       barrierDismissible: false,
       builder: (_) => _KycSuccessModal(
         onContinue: () {
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(); // ferme le dialog
           if (onSuccess != null) {
             onSuccess!();
           } else {
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
+            // Vider toute la stack KYC et aller directement au home
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              AppRoutes.clientHome,
+              (route) => false,
+            );
           }
         },
       ),
