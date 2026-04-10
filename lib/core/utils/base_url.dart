@@ -59,6 +59,12 @@ class BaseUrl {
   // ========== HOME ENDPOINTS ==========
   static const String getHomeData       = '$currentBaseUrl/home';
   static const String clientStatistics  = '$currentBaseUrl/clients/statistics';
+  // ========== PKI / SIGNATURE ENDPOINTS ==========
+  static String uploadToken(String requestId)     => '$currentBaseUrl/requests/$requestId/upload-token';
+  static const String pkiEnsureCertificate        = '$currentBaseUrl/pki/ensure-certificate';
+  static const String pkiSign                     = '$currentBaseUrl/pki/sign';
+  static String pkiVerify(String requestId)       => '$currentBaseUrl/pki/verify/$requestId';
+  static const String signedDocumentDeposit       = '$currentBaseUrl/clients/documents/signed';
 
   static String buildUrl(String endpoint, {Map<String, dynamic>? params}) {
     if (params == null || params.isEmpty) return endpoint;

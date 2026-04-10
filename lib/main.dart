@@ -42,6 +42,8 @@ import 'features/auth/presentation/pages/reset_password_screen.dart';
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/features/kyc/presentation/pages/kyc_gate_page.dart';
 import 'features/client/presentation/pages/signature_screen.dart';
+import 'package:secure_link/core/utils/session_storage.dart';
+import 'package:secure_link/core/utils/user_session.dart';
 import 'firebase_options.dart';
 
 // Handler background OBLIGATOIREMENT top-level
@@ -118,6 +120,84 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
     debugPrint('path: ${uri.path}');
     debugPrint('query: ${uri.queryParameters}');
     debugPrint('======================');
+
+    // ── Remote Sign : /mobile-sign?session=... ──
+    if (uri.host == 'pdf.secure.innovimpactdev.cloud' &&
+        uri.path.contains('/mobile-sign')) {
+      final sessionId = uri.queryParameters['session'] ?? '';
+      final isLoggedIn = UserSession.instance.accessToken.isNotEmpty;
+
+      debugPrint('[SIGN] sessionId=$sessionId isLoggedIn=$isLoggedIn');
+
+      if (!isLoggedIn) {
+        _navigateWhenReady(() {
+          navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            AppRoutes.login,
+            (route) => false,
+          );
+        });
+        return;
+      }
+
+      _navigateWhenReady(() {
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (_) => SignatureScreen(
+              requestId: sessionId.isNotEmpty ? sessionId : 'session-inconnue',
+              sessionId: sessionId.isNotEmpty ? sessionId : null,
+              checkUserMatch: true,
+              onUserMismatch: () async {
+                await SessionStorage.instance.clear();
+                navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                  AppRoutes.login,
+                  (route) => false,
+                );
+              },
+            ),
+          ),
+        );
+      });
+      return;
+    }
+
+    // Ancien format remoteSign=1 (fallback)
+    if (uri.host == 'pdf.secure.innovimpactdev.cloud' &&
+        uri.queryParameters['remoteSign'] == '1') {
+      String sessionId = uri.queryParameters['session'] ?? '';
+      if (sessionId.isEmpty) {
+        final match = RegExp(r'session=([^&]+)').firstMatch(uri.toString());
+        if (match != null) sessionId = match.group(1) ?? '';
+      }
+      final isLoggedIn = UserSession.instance.accessToken.isNotEmpty;
+      if (!isLoggedIn) {
+        _navigateWhenReady(() {
+          navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            AppRoutes.login,
+            (route) => false,
+          );
+        });
+        return;
+      }
+      _navigateWhenReady(() {
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (_) => SignatureScreen(
+              requestId: sessionId.isNotEmpty ? sessionId : 'session-inconnue',
+              sessionId: sessionId.isNotEmpty ? sessionId : null,
+              checkUserMatch: true,
+              onUserMismatch: () async {
+                await SessionStorage.instance.clear();
+                navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                  AppRoutes.login,
+                  (route) => false,
+                );
+              },
+            ),
+          ),
+        );
+      });
+      return;
+    }
 
     if (uri.host == 'secure.innovimpactdev.cloud') {
 

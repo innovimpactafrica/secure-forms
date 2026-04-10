@@ -37,6 +37,7 @@ dependencies:
   archive: ^3.4.10
   permission_handler: ^11.3.0
   web_socket_channel: ^2.4.0
+  socket_io_client: ^2.0.3+1
   google_mlkit_text_recognition: ^0.15.0
   image: ^4.3.0
 
