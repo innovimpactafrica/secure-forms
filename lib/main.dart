@@ -16,7 +16,7 @@ import 'package:secure_link/core/utils/navigator_key.dart';
 import 'features/splash/presentation/pages/splash_screen.dart';
 import 'features/auth/presentation/pages/welcome_screen.dart';
 import 'features/auth/presentation/pages/otp_verification_screen.dart';
-import 'features/auth/presentation/widgets/success_screen.dart';
+import 'features/auth/presentation/pages/success_screen.dart';
 import 'features/client/presentation/pages/main_shell.dart';
 import 'features/client/presentation/pages/client_demandes_screen.dart';
 import 'features/client/presentation/pages/client_banques_screen.dart';

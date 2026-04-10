@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../utils/responsive_utils.dart';
-import '../core/utils/app_colors.dart';
-import '../core/utils/app_constants.dart';
+import 'package:secure_link/utils/responsive_utils.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class ResponsiveModal extends StatelessWidget {
   final Widget child;

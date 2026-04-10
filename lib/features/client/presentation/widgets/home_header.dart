@@ -5,7 +5,7 @@ import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/notifications_state.dart';
 import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
-import 'package:secure_link/widgets/user_avatar.dart';
+import 'package:secure_link/core/widgets/user_avatar.dart';
 
 class HomeHeader extends StatelessWidget {
   final String initials;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../utils/responsive_utils.dart';
-import '../core/utils/app_colors.dart';
-import '../core/utils/app_constants.dart';
+import 'package:secure_link/utils/responsive_utils.dart';
+import 'package:secure_link/core/utils/app_colors.dart';
+import 'package:secure_link/core/utils/app_constants.dart';
 
 class ResponsiveMenuItem extends StatelessWidget {
   final String title;

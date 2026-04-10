@@ -11,7 +11,7 @@ import 'package:secure_link/features/client/data/models/profile_model.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
-import 'document_scanner_page.dart';
+import '../pages/document_scanner_page.dart';
 
 // ─────────────────────────────────────────────────────────────────
 // MODAL UPLOAD DOCUMENT AVEC VÉRIFICATION D'IDENTITÉ

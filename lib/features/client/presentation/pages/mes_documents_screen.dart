@@ -18,7 +18,7 @@ import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
-import 'document_upload_modal.dart' show showPickerSource;
+import '../widgets/document_upload_modal.dart' show showPickerSource;
 import 'package:secure_link/core/services/mlkit_ocr_service.dart';
 import 'document_scanner_page.dart';
 import 'face_verification_screen.dart';

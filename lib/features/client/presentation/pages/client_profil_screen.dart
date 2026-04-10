@@ -10,7 +10,7 @@ import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
 import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/notifications_event.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
-import 'package:secure_link/widgets/user_avatar.dart';
+import 'package:secure_link/core/widgets/user_avatar.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/presentation/pages/mes_archives_screen.dart';
 import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
