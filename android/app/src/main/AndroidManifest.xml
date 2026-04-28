@@ -23,7 +23,7 @@
         tools:node="remove"/>
 
     <application
-        android:label="Secure Forms"
+        android:label="Quick Forms"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <meta-data

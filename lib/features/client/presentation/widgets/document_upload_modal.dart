@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
@@ -483,9 +484,9 @@ class _UploadZone extends StatelessWidget {
       width: double.infinity,
       height: 120,
       decoration: BoxDecoration(
-        color: const Color(0xFFE8F0FE),
+        color: AppColors.docUploadBg,
         borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+        border: Border.all(color: AppColors.docUploadBorder, width: 1),
       ),
       child: isScanning
           ? Column(
@@ -549,10 +550,21 @@ class _UploadPlaceholder extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          hasFile ? Icons.insert_drive_file_outlined : Icons.cloud_upload_outlined,
-          size: AppConstants.iconSizeXXLarge,
-          color: AppColors.primary,
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppColors.docUploadIconBg,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: SvgPicture.asset(
+              'assets/icons/televerser.svg',
+              width: 20,
+              height: 20,
+              colorFilter: const ColorFilter.mode(AppColors.white, BlendMode.srcIn),
+            ),
+          ),
         ),
         const SizedBox(height: 8),
         Text(
@@ -561,7 +573,7 @@ class _UploadPlaceholder extends StatelessWidget {
             fontFamily: AppConstants.fontFamilySofiaSans,
             fontWeight: FontWeight.w600,
             fontSize: AppConstants.fontSizeMedium,
-            color: AppColors.primary,
+            color: AppColors.docUploadClickText,
           ),
         ),
         if (!hasFile)

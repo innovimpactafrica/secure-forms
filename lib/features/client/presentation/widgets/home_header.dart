@@ -18,11 +18,7 @@ class HomeHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SizedBox(
-            width: 54,
-            height: 54,
-            child: Image.asset('assets/images/SLLOGO.png', width: 44, height: 44, fit: BoxFit.contain),
-          ),
+          Image.asset('assets/images/qf.png', width: 160, height: 55, fit: BoxFit.contain, alignment: Alignment.centerLeft),
           Row(
             children: [
               GestureDetector(

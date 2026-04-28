@@ -25,17 +25,17 @@ class StatsGrid extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Expanded(child: StatCard(label: 'home.total_requests'.tr(), value: total, iconPath: 'assets/icons/logo.svg', iconColor: AppColors.textBlack45, borderColor: AppColors.progressTrack, applyColorFilter: false)),
+                  Expanded(child: StatCard(label: 'home.total_requests'.tr(), value: total, iconPath: 'assets/icons/td.svg', cardBg: AppColors.statTotalBg, borderColor: AppColors.statTotalBorder, iconColor: AppColors.statTotalIconColor, iconBgColor: AppColors.statTotalIconBg, applyColorFilter: false)),
                   const SizedBox(width: 12),
-                  Expanded(child: StatCard(label: 'home.in_progress'.tr(), value: inProgress, iconPath: 'assets/icons/bi_clock-history.svg', iconColor: AppColors.primary, borderColor: AppColors.primary)),
+                  Expanded(child: StatCard(label: 'home.in_progress'.tr(), value: inProgress, iconPath: 'assets/icons/bi_clock-history.svg', cardBg: AppColors.statInProgressBg, borderColor: AppColors.statInProgressBorder, iconColor: AppColors.statInProgressIconColor, iconBgColor: AppColors.statInProgressIconBg)),
                 ],
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(child: StatCard(label: 'home.pending'.tr(), value: pending, iconPath: 'assets/icons/carbon_rule-draft.svg', iconColor: AppColors.statusEnAttente, borderColor: AppColors.statusEnAttente)),
+                  Expanded(child: StatCard(label: 'home.pending'.tr(), value: pending, iconPath: 'assets/icons/carbon_rule-draft.svg', cardBg: AppColors.statPendingBg, borderColor: AppColors.statPendingBorder, iconColor: AppColors.statPendingIconColor, iconBgColor: AppColors.statPendingIconBg)),
                   const SizedBox(width: 12),
-                  Expanded(child: StatCard(label: 'home.validated'.tr(), value: validated, iconPath: 'assets/icons/bi_check2-circle (1).svg', iconColor: AppColors.statusValideGreen, borderColor: AppColors.statusValideGreen)),
+                  Expanded(child: StatCard(label: 'home.validated'.tr(), value: validated, iconPath: 'assets/icons/bi_check2-circle (1).svg', cardBg: AppColors.statValidatedBg, borderColor: AppColors.statValidatedBorder, iconColor: AppColors.statValidatedIconColor, iconBgColor: AppColors.statValidatedIconBg)),
                 ],
               ),
             ],
@@ -51,7 +51,9 @@ class StatCard extends StatelessWidget {
   final String value;
   final String iconPath;
   final Color iconColor;
+  final Color iconBgColor;
   final Color borderColor;
+  final Color cardBg;
   final bool applyColorFilter;
 
   const StatCard({
@@ -60,7 +62,9 @@ class StatCard extends StatelessWidget {
     required this.value,
     required this.iconPath,
     required this.iconColor,
+    required this.iconBgColor,
     required this.borderColor,
+    this.cardBg = AppColors.white,
     this.applyColorFilter = true,
   });
 
@@ -70,9 +74,9 @@ class StatCard extends StatelessWidget {
       height: 90,
       padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor, width: 1.2),
+        border: Border.all(color: borderColor, width: 1),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,9 +92,9 @@ class StatCard extends StatelessWidget {
           ),
           Container(
             width: 44, height: 44,
-            decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.12), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
             child: Center(
-              child: SvgPicture.asset(iconPath, width: 22, height: 22,
+              child: SvgPicture.asset(iconPath, width: 13, height: 13,
                   colorFilter: applyColorFilter ? ColorFilter.mode(iconColor, BlendMode.srcIn) : null),
             ),
           ),

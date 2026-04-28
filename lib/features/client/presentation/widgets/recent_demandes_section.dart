@@ -41,7 +41,7 @@ class _SearchBarSectionState extends State<SearchBarSection> {
       child: Container(
         height: 52,
         decoration: BoxDecoration(
-          color: AppColors.greyShade100,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(26),
           border: Border.all(color: AppColors.greyShade200),
         ),
@@ -226,3 +226,5 @@ class _StatusCfg {
   final Color bgColor;
   const _StatusCfg(this.label, this.textColor, this.bgColor);
 }
+
+

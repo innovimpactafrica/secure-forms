@@ -1,4 +1,4 @@
-﻿{
+{
   "navbar": {
     "home": "Accueil",
     "requests": "Mes demandes",
@@ -25,7 +25,7 @@
     "email_label": "Email",
     "password_label": "Mot de passe",
     "email_hint": "Ex: lamine.dieme@gmail.com",
-    "password_hint": "••••••••",
+    "password_hint": "",
     "required_field": "Champ obligatoire",
     "invalid_email": "Email invalide",
     "invalid_credentials": "Email ou mot de passe incorrect",
@@ -48,9 +48,9 @@
     "create_title": "Creez votre mot de passe",
     "create_subtitle": "Choisissez un mot de passe securisé pour proteger votre compte.",
     "new_password": "Nouveau mot de passe",
-    "new_password_hint": "••••••••",
+    "new_password_hint": "",
     "confirm_password": "Confirmer mot de passe",
-    "confirm_password_hint": "••••••••",
+    "confirm_password_hint": "",
     "confirm_button": "Confirmer",
     "min_length": "Minimum 8 caracteres incluant carcactere speciale et lettre majuscule",
     "mismatch": "Les mots de passe ne correspondent pas",
@@ -115,6 +115,7 @@
     "hello": "Bonjour",
     "welcome_on": "Bienvenue sur ",
     "secure": "secure ",
+    "quick": "Quick ",
     "forms": "Forms",
     "complete_profile": "Completez votre profil",
     "profile_completed": "Profil completé à 100% ",
@@ -246,8 +247,8 @@
     "delete_doc2": "Supprimer Document 2",
     "delete_file_confirm": "Êtes-vous sûr de vouloir supprimer ce fichier ? Cette action est irréversible.",
     "choose_to_delete": "Quel document supprimer ?",
-    "modify_choose": "Modifier — choisir le fichier",
-    "delete_choose": "Supprimer — choisir le fichier",
+    "modify_choose": "Modifier  choisir le fichier",
+    "delete_choose": "Supprimer  choisir le fichier",
     "swipe_hint": "Glisser pour voir Document 2",
     "select_file_required": "Veuillez sélectionner un fichier.",
     "add_second_file": "Ajouter un 2ème fichier",
@@ -445,5 +446,6 @@
     "enter_4_digits": "Veuillez saisir les 4 chiffres du code"
   }
 }
+
 
 

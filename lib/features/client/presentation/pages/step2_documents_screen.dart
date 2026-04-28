@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
@@ -306,7 +307,7 @@ class _StatusLegend extends StatelessWidget {
       children: [
         _LegendItem(color: AppColors.statusValideGreen, label: 'profile.validated'.tr()),
         _LegendItem(color: AppColors.statusEnAttente, label: 'profile.pending'.tr()),
-        _LegendItem(color: AppColors.primary, label: 'profile.in_progress'.tr()),
+        _LegendItem(color: AppColors.statusInProgressCircle, label: 'profile.in_progress'.tr()),
         _LegendItem(color: AppColors.statusRejected, label: 'profile.rejected'.tr()),
       ],
     );
@@ -606,7 +607,7 @@ class _DocumentCard extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: AppColors.documentCardBackground,
+                  color: hasDoc ? AppColors.white : AppColors.docCardEmptyBg,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(AppConstants.radiusSmall),
                     topRight: Radius.circular(AppConstants.radiusSmall),
@@ -634,10 +635,11 @@ class _DocumentCard extends StatelessWidget {
                                   directUrl: uploadedDocument!.fileUrl,
                                 ))
                           : Center(
-                              child: Icon(
-                                Icons.add_photo_alternate_outlined,
-                                size: 36,
-                                color: AppColors.primary,
+                              child: SvgPicture.asset(
+                                'assets/icons/ri_image-add-fill.svg',
+                                width: 32,
+                                height: 32,
+                                colorFilter: ColorFilter.mode(AppColors.docCardAddIconColor, BlendMode.srcIn),
                               ),
                             ),
                     ),

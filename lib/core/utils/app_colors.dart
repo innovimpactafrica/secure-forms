@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Couleurs principales
-  static const Color primary = Color(0xFF23A3A6);
-  static const Color primaryDark = Color(0xFF0B3C5C);
+  static const Color primary = Color(0xFFF39C12);
+  static const Color primaryDark = Color(0xFF8E342C);
   static const Color primaryDarker = Color(0xFF0A324A);
 
   // Couleurs de fond
@@ -81,6 +81,7 @@ class AppColors {
   static const Color progressTrack = Color(0xFFE0E0E0);
 
   // Couleurs texte supplémentaires
+  static const Color textPureBlack = Color(0xFF000000);
   static const Color textBlack87 = Color(0xDD000000);
   static const Color textBlack54 = Color(0x8A000000);
   static const Color textBlack45 = Color(0x73000000);
@@ -101,4 +102,46 @@ class AppColors {
 
   // Fond zone upload / card document
   static const Color documentCardBackground = Color(0xFFE8F0FE);
+
+  // Bouton retour (login / inscription)
+  static const Color backArrowColor = Color(0xFF97392D);
+  static const Color backCircleColor = Color(0x4DA7482F);
+
+  // OTP cases
+  static const Color otpEmptyFill = Color(0x4DE0C4C0);
+  static const Color otpActiveFill = Color(0x4D963A2D);
+  static const Color otpActiveBorder = Color(0xFF963A2D);
+  static const Color otpResendTimer = Color(0xFF963A2D);
+
+  // Stats cards home
+  static const Color statTotalBg = Color(0xFFFCFDFF);
+  static const Color statTotalBorder = Color(0x806B7280);
+  static const Color statTotalIconBg = Color(0xCCF0F0F0);
+  static const Color statTotalIconColor = Color(0xFF0B3C5C);
+
+  static const Color statInProgressBg = Color(0xFFF8FBFF);
+  static const Color statInProgressBorder = Color(0xFF3B83F6);
+  static const Color statInProgressIconBg = Color(0x1A3B83F6);
+  static const Color statInProgressIconColor = Color(0xFF3B83F6);
+
+  static const Color statPendingBg = Color(0xFFFFFCF5);
+  static const Color statPendingBorder = Color(0xFFF39C12);
+  static const Color statPendingIconBg = Color(0x1AF39C12);
+  static const Color statPendingIconColor = Color(0xFFF39C12);
+
+  static const Color statValidatedBg = Color(0xFFF7FFFE);
+  static const Color statValidatedBorder = Color(0xFF23A3A6);
+  static const Color statValidatedIconBg = Color(0x1A23A3A6);
+  static const Color statValidatedIconColor = Color(0xFF23A3A6);
+
+  // Profile completion page
+  static const Color statusInProgressCircle = Color(0xFF006FFD);
+  static const Color docCardEmptyBg = Color(0x4DE0C4C0);
+  static const Color docCardAddIconColor = Color(0x4D97392D);
+
+  // Document upload modal
+  static const Color docUploadBorder = Color(0xFFD4B3B0);
+  static const Color docUploadBg = Color(0xFFEEE7E8);
+  static const Color docUploadIconBg = Color(0xFFD4B3B0);
+  static const Color docUploadClickText = Color(0xFF343A40);
 }

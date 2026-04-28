@@ -127,6 +127,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
         return Scaffold(
           backgroundColor: AppColors.white,
+          resizeToAvoidBottomInset: true,
           body: SafeArea(
             child: Column(
               children: [
@@ -145,23 +146,23 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           width: AppConstants.avatarSizeSmall,
                           height: AppConstants.avatarSizeSmall,
                           decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.borderLight),
+                            border: Border.all(color: AppColors.backCircleColor, width: 1.26),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(Icons.arrow_back,
-                              color: AppColors.textDark,
-                              size: AppConstants.iconSizeMedium),
+                              color: AppColors.backArrowColor,
+                              size: 20.6),
                         ),
                       ),
-                      Image.asset('assets/images/securelink.png',
-                          height: AppConstants.logoHeight, fit: BoxFit.contain),
+                      Image.asset('assets/images/qfwithtext.png',
+                          height: 82, fit: BoxFit.contain),
                     ],
                   ),
                 ),
 
-                // ── Contenu ──
+                // ── Contenu scrollable ──
                 Expanded(
-                  child: Padding(
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(
                       AppConstants.paddingLarge,
                       AppConstants.paddingLarge,
@@ -249,17 +250,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                     fontFamily: AppConstants.fontFamilyInter,
                                     fontSize: AppConstants.fontSizeMedium,
                                     fontWeight: FontWeight.w500,
-                                    color: _canResend
-                                        ? AppColors.primary
-                                        : AppColors.textSecondary,
+                                    color: AppColors.otpResendTimer,
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-
-                        const Spacer(),
+                        const SizedBox(height: 40),
 
                         // ── Bouton Vérifier ──
                         SizedBox(
@@ -311,7 +309,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 // ═════════════════════════════════════════════════════════════════
 // CASE OTP
 // ═════════════════════════════════════════════════════════════════
-class _OtpBox extends StatelessWidget {
+class _OtpBox extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final ValueChanged<String> onChanged;
@@ -323,19 +321,31 @@ class _OtpBox extends StatelessWidget {
   });
 
   @override
+  State<_OtpBox> createState() => _OtpBoxState();
+}
+
+class _OtpBoxState extends State<_OtpBox> {
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(() => setState(() {}));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isFilled = controller.text.isNotEmpty;
+    final isFocused = widget.focusNode.hasFocus;
+
     return Container(
       width: AppConstants.otpBoxSize,
       height: AppConstants.otpBoxSize,
       margin: const EdgeInsets.symmetric(horizontal: 8),
       child: TextFormField(
-        controller: controller,
-        focusNode: focusNode,
+        controller: widget.controller,
+        focusNode: widget.focusNode,
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         maxLength: 1,
-        onChanged: onChanged,
+        onChanged: widget.onChanged,
         style: const TextStyle(
           fontFamily: AppConstants.fontFamilySofiaSans,
           fontSize: AppConstants.fontSizeXXLarge,
@@ -346,28 +356,22 @@ class _OtpBox extends StatelessWidget {
           counterText: '',
           contentPadding: EdgeInsets.zero,
           filled: true,
-          fillColor: AppColors.white,
+          fillColor: isFocused ? AppColors.otpActiveFill : AppColors.otpEmptyFill,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-            borderSide: BorderSide(
-              color: isFilled ? AppColors.primary : AppColors.borderLight,
-              width: isFilled ? AppConstants.borderWidthMedium : AppConstants.borderWidthThin,
-            ),
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-            borderSide: BorderSide(
-              color: isFilled ? AppColors.primary : AppColors.borderLight,
-              width: isFilled ? AppConstants.borderWidthMedium : AppConstants.borderWidthThin,
-            ),
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-            borderSide: const BorderSide(
-                color: AppColors.primary, width: AppConstants.borderWidthMedium),
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: AppColors.otpActiveBorder, width: 1),
           ),
         ),
       ),
     );
   }
 }
+

@@ -59,7 +59,8 @@ class CompleteProfileHeader extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: AppConstants.fontFamilyInter,
                       fontSize: AppConstants.fontSizeRegular,
-                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPureBlack,
                     ),
                   ),
                 ],

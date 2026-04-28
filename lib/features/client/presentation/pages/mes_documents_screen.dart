@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -285,7 +286,7 @@ class _StatusLegend extends StatelessWidget {
       children: [
         _LegendItem(color: AppColors.statusValideGreen, label: 'profile.validated'.tr()),
         _LegendItem(color: AppColors.statusEnAttente, label: 'profile.pending'.tr()),
-        _LegendItem(color: AppColors.primary, label: 'profile.in_progress'.tr()),
+        _LegendItem(color: AppColors.statusInProgressCircle, label: 'profile.in_progress'.tr()),
         _LegendItem(color: AppColors.statusRejected, label: 'profile.rejected'.tr()),
       ],
     );
@@ -515,7 +516,7 @@ class _DocumentCard extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: AppColors.documentCardBackground,
+                  color: hasDoc ? AppColors.white : AppColors.docCardEmptyBg,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(AppConstants.radiusSmall),
                     topRight: Radius.circular(AppConstants.radiusSmall),
@@ -551,10 +552,11 @@ class _DocumentCard extends StatelessWidget {
                                   directUrl: uploadedDocument!.fileUrl,
                                 ))
                           : Center(
-                              child: Icon(
-                                Icons.add_photo_alternate_outlined,
-                                size: 36,
-                                color: AppColors.primary,
+                              child: SvgPicture.asset(
+                                'assets/icons/ri_image-add-fill.svg',
+                                width: 32,
+                                height: 32,
+                                colorFilter: ColorFilter.mode(AppColors.docCardAddIconColor, BlendMode.srcIn),
                               ),
                             ),
                 ),
@@ -1006,9 +1008,9 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                   width: double.infinity,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: AppColors.documentCardBackground,
+                    color: AppColors.docUploadBg,
                     borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                    border: Border.all(color: AppColors.docUploadBorder, width: 1),
                   ),
                   child: _isScanning
                       ? Column(
@@ -1089,9 +1091,9 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                     width: double.infinity,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: AppColors.documentCardBackground,
+                      color: AppColors.docUploadBg,
                       borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                      border: Border.all(color: AppColors.docUploadBorder, width: 1),
                     ),
                     child: _backFilePath != null
                         ? ClipRRect(
@@ -1241,10 +1243,21 @@ class _UploadPlaceholder extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          hasFile ? Icons.insert_drive_file_outlined : Icons.cloud_upload_outlined,
-          size: 36,
-          color: AppColors.primary,
+        Container(
+          width: 44,
+          height: 44,
+          decoration: const BoxDecoration(
+            color: AppColors.docUploadIconBg,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: SvgPicture.asset(
+              'assets/icons/televerser.svg',
+              width: 20,
+              height: 20,
+              colorFilter: const ColorFilter.mode(AppColors.white, BlendMode.srcIn),
+            ),
+          ),
         ),
         const SizedBox(height: 8),
         Text(
@@ -1253,7 +1266,7 @@ class _UploadPlaceholder extends StatelessWidget {
             fontFamily: AppConstants.fontFamilySofiaSans,
             fontWeight: FontWeight.w600,
             fontSize: AppConstants.fontSizeMedium,
-            color: AppColors.primary,
+            color: AppColors.docUploadClickText,
           ),
         ),
         if (!hasFile)
@@ -1878,17 +1891,26 @@ class _SingleFileUpdateModalState extends State<_SingleFileUpdateModal> {
               onTap: () => _pickFile(),
               child: Container(
                 width: double.infinity, height: 140,
-                decoration: BoxDecoration(color: AppColors.documentCardBackground,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.3))),
+                decoration: BoxDecoration(
+                  color: AppColors.docUploadBg,
+                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                  border: Border.all(color: AppColors.docUploadBorder, width: 1),
+                ),
                 child: _filePath != null && isImage
                     ? ClipRRect(borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
                         child: Image.file(File(_filePath!), fit: BoxFit.cover, width: double.infinity))
                     : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                        Icon(_filePath != null ? Icons.insert_drive_file_outlined : Icons.cloud_upload_outlined, size: 36, color: AppColors.primary),
+                        Container(
+                          width: 44, height: 44,
+                          decoration: const BoxDecoration(color: AppColors.docUploadIconBg, shape: BoxShape.circle),
+                          child: Center(
+                            child: SvgPicture.asset('assets/icons/televerser.svg', width: 20, height: 20,
+                                colorFilter: const ColorFilter.mode(AppColors.white, BlendMode.srcIn)),
+                          ),
+                        ),
                         const SizedBox(height: 8),
                         Text(_filePath != null ? 'documents.file_selected'.tr() : 'documents.click_to_upload'.tr(),
-                            style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeMedium, color: AppColors.primary)),
+                            style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeMedium, color: AppColors.docUploadClickText)),
                         if (_filePath == null)
                           Text('PDF, JPG, PNG jusqu\'à 10 Mo',
                               style: TextStyle(fontFamily: AppConstants.fontFamilyInter, fontSize: AppConstants.fontSizeRegular, color: AppColors.textSecondary)),

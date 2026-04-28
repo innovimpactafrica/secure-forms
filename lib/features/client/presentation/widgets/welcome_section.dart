@@ -29,7 +29,7 @@ class WelcomeSection extends StatelessWidget {
               style: const TextStyle(fontFamily: AppConstants.fontFamilyInter, fontSize: 13, fontWeight: FontWeight.w400),
               children: [
                 TextSpan(text: 'home.welcome_on'.tr(), style: TextStyle(color: AppColors.textBlack54)),
-                TextSpan(text: 'home.secure'.tr(), style: TextStyle(color: AppColors.textBlack87, fontWeight: FontWeight.w600)),
+                TextSpan(text: 'home.quick'.tr(), style: const TextStyle(color: AppColors.backArrowColor, fontWeight: FontWeight.w600)),
                 TextSpan(text: 'home.forms'.tr(), style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
               ],
             ),

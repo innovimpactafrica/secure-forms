@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_messaging/firebase_messaging.dart'; // 👈 NOUVEAU
+import 'package:firebase_messaging/firebase_messaging.dart'; 
 import 'package:secure_link/core/utils/app_routes.dart';
 import 'package:secure_link/core/utils/app_colors.dart';
 import 'package:secure_link/core/utils/session_storage.dart';
@@ -11,7 +11,7 @@ import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
 import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
 import 'package:secure_link/features/client/domain/bloc/notifications_event.dart';
 import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/core/services/fcm_service.dart'; // 👈 NOUVEAU
+import 'package:secure_link/core/services/fcm_service.dart'; 
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -21,31 +21,58 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+    with TickerProviderStateMixin {
+  late AnimationController _slideController;
+  late Animation<double> _logoSlide;
+
+  late AnimationController _textController;
+  late Animation<double> _textOpacity;
+
+  late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    _animationController = AnimationController(
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 1100),
+      vsync: this,
+    );
+    // ← CHANGÉ : -90 → -55 pour que le logo ne parte pas trop loin
+    _logoSlide = Tween<double>(begin: 0.0, end: -55.0).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.easeInOut), // ← easeInOut comme demandé
+    );
+
+    _textController = AnimationController(
+      duration: const Duration(milliseconds: 1100),
+      vsync: this,
+    );
+    _textOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _textController, curve: Curves.easeInOut),
+    );
+
+    _fadeController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-
     _fadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-          parent: _animationController, curve: Curves.easeInOut),
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
     );
 
     _startAnimation();
   }
 
   void _startAnimation() async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    await _slideController.forward();
+
+    await Future.delayed(const Duration(milliseconds: 200));
+    _textController.forward();
+
     await Future.delayed(const Duration(milliseconds: 800));
-    _animationController.forward();
-    _animationController.addStatusListener((status) async {
+    _fadeController.forward();
+    _fadeController.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
         await _checkSession();
       }
@@ -61,7 +88,6 @@ class _SplashScreenState extends State<SplashScreen>
       return;
     }
 
-    // Refresh proactif uniquement si le token access est expiré ou proche de l'expiration
     final refreshToken = UserSession.instance.refreshToken;
     if (refreshToken.isNotEmpty && _isTokenExpiredOrSoon(UserSession.instance.accessToken)) {
       try {
@@ -73,9 +99,8 @@ class _SplashScreenState extends State<SplashScreen>
           if (mounted) Navigator.of(context).pushReplacementNamed(AppRoutes.login);
           return;
         }
-        print('[Splash] Token rafraîché avec succès');
+        print('[Splash] Token rafraîchi avec succès');
       } catch (_) {
-        // Erreur réseau → on tente avec le token existant
         print('[Splash] Erreur réseau lors du refresh → on continue avec le token existant');
       }
     } else {
@@ -99,7 +124,6 @@ class _SplashScreenState extends State<SplashScreen>
     });
   }
 
-  // Retourne true si le JWT est expiré ou expire dans moins de 5 minutes
   bool _isTokenExpiredOrSoon(String token) {
     try {
       final parts = token.split('.');
@@ -111,14 +135,12 @@ class _SplashScreenState extends State<SplashScreen>
       final exp = map['exp'] as int?;
       if (exp == null) return true;
       final expiry = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
-      // Refresh si expire dans moins de 5 minutes
       return DateTime.now().isAfter(expiry.subtract(const Duration(minutes: 5)));
     } catch (_) {
-      return true; // En cas d'erreur de décodage, on refresh par sécurité
+      return true;
     }
   }
 
-  // 👇 NOUVEAU — Récupère et envoie le token FCM au backend
   Future<void> _sendFcmTokenOnRestore() async {
     try {
       final fcmToken = await FirebaseMessaging.instance.getToken();
@@ -132,26 +154,61 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _slideController.dispose();
+    _textController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // ← AJOUTÉ : on récupère la largeur réelle de l'écran
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: AppColors.white,
       body: AnimatedBuilder(
-        animation: _fadeAnimation,
+        animation: Listenable.merge([_logoSlide, _textOpacity, _fadeAnimation]),
         builder: (context, child) {
           return Opacity(
             opacity: _fadeAnimation.value,
-            child: Center(
-              child: Image.asset(
-                'assets/images/secureforms_logo.png',
-                width: double.infinity,
-                height: 160,
-                fit: BoxFit.contain,
-              ),
+            child: Stack(
+              children: [
+                // ← CHANGÉ : on positionne le logo seul au centre exact de l'écran
+                // puis on le déplace avec Transform.translate
+                Positioned(
+                  // Centre vertical
+                  top: MediaQuery.of(context).size.height / 2 - 55,
+                  // Centre horizontal = milieu écran - moitié largeur logo
+                  // Le logo fait 110px de large, donc left = (screenWidth/2 - 55) + slide
+                  left: (screenWidth / 2 - 55) + _logoSlide.value,
+                  child: SizedBox(
+                    width: 110,
+                    height: 110,
+                    child: Image.asset(
+                      'assets/images/qf.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+                // ← CHANGÉ : texte positionné juste à droite du logo, sans espace
+                Positioned(
+                  top: MediaQuery.of(context).size.height / 2 - 55,
+                  // left du texte = left du logo + largeur logo (110) + slide
+                  left: (screenWidth / 2 - 55) + 110 + _logoSlide.value,
+                  child: Opacity(
+                    opacity: _textOpacity.value,
+                    child: SizedBox(
+                      width: 130,
+                      height: 110,
+                      child: Image.asset(
+                        'assets/images/textqf.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         },

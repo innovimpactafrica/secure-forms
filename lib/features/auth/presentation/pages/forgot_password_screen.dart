@@ -78,15 +78,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             width: AppConstants.avatarSizeSmall,
                             height: AppConstants.avatarSizeSmall,
                             decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.borderLight),
+                              border: Border.all(color: AppColors.backCircleColor, width: 1.26),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.arrow_back,
-                                color: AppColors.textDark,
-                                size: AppConstants.iconSizeMedium),
+                                color: AppColors.backArrowColor,
+                                size: 20.6),
                           ),
                         ),
-                        Image.asset('assets/images/secureforms_logo.png',
+                        Image.asset('assets/images/qfwithtext.png',
                             height: 82, fit: BoxFit.contain),
                       ],
                     ),
@@ -240,24 +240,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       filled: true,
       fillColor: AppColors.white,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+        borderRadius: BorderRadius.circular(AppConstants.radiusRound),
         borderSide: const BorderSide(color: AppColors.borderLight),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+        borderRadius: BorderRadius.circular(AppConstants.radiusRound),
         borderSide: const BorderSide(color: AppColors.borderLight),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+        borderRadius: BorderRadius.circular(AppConstants.radiusRound),
         borderSide: const BorderSide(
             color: AppColors.primary, width: AppConstants.borderWidthMedium),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+        borderRadius: BorderRadius.circular(AppConstants.radiusRound),
         borderSide: const BorderSide(color: AppColors.statusRejected),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+        borderRadius: BorderRadius.circular(AppConstants.radiusRound),
         borderSide: const BorderSide(color: AppColors.statusRejected),
       ),
     );

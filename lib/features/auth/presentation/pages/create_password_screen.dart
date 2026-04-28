@@ -101,16 +101,16 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                             width: AppConstants.avatarSizeSmall,
                             height: AppConstants.avatarSizeSmall,
                             decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.borderLight),
+                              border: Border.all(color: AppColors.backCircleColor, width: 1.26),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.arrow_back,
-                                color: AppColors.textDark,
-                                size: AppConstants.iconSizeMedium),
+                                color: AppColors.backArrowColor,
+                                size: 20.6),
                           ),
                         ),
-                        Image.asset('assets/images/securelink.png',
-                            height: AppConstants.logoHeight, fit: BoxFit.contain),
+                        Image.asset('assets/images/qfwithtext.png',
+                            height: 82, fit: BoxFit.contain),
                       ],
                     ),
                   ),
@@ -446,3 +446,4 @@ class _PasswordSuccessBottomSheet extends StatelessWidget {
     );
   }
 }
+

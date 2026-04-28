@@ -140,7 +140,7 @@ class DemandeZipService {
     // Charger le logo
     pw.ImageProvider? logo;
     try {
-      final data = await rootBundle.load('assets/images/SLLOGO.png');
+      final data = await rootBundle.load('assets/images/qf.png');
       logo = pw.MemoryImage(data.buffer.asUint8List());
     } catch (_) {}
 

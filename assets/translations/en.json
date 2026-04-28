@@ -25,7 +25,7 @@
     "email_label": "Email",
     "password_label": "Password",
     "email_hint": "Ex: lamine.dieme@gmail.com",
-    "password_hint": "••••••••",
+    "password_hint": "â¢â¢â¢â¢â¢â¢â¢â¢",
     "required_field": "Required field",
     "invalid_email": "Invalid email",
     "invalid_credentials": "Email or password incorrect",
@@ -101,9 +101,10 @@
     "hello": "Hello",
     "welcome_on": "Welcome to ",
     "secure": "secure ",
+    "quick": "Quick ",
     "forms": "Forms",
     "complete_profile": "Complete your profile",
-    "profile_completed": "Profile completed 100% ✓",
+    "profile_completed": "Profile completed 100% â",
     "start_now": "Start now",
     "total_requests": "Total requests",
     "in_progress": "In progress",
@@ -440,3 +441,4 @@
     "enter_4_digits": "Please enter the 4 digits of the code"
   }
 }
+

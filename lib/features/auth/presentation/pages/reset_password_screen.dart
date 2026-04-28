@@ -101,7 +101,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                 size: AppConstants.iconSizeMedium),
                           ),
                         ),
-                        Image.asset('assets/images/secureforms_logo.png',
+                        Image.asset('assets/images/qfwithtext.png',
                             height: 82, fit: BoxFit.contain),
                       ],
                     ),
@@ -369,7 +369,7 @@ class PasswordUpdatedScreen extends StatelessWidget {
               const Spacer(flex: 2),
 
               // Logo
-              Image.asset('assets/images/secureforms_logo.png',
+              Image.asset('assets/images/qfwithtext.png',
                   height: 82, fit: BoxFit.contain),
 
               const SizedBox(height: 40),

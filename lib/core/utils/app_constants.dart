@@ -74,7 +74,7 @@ class AppConstants {
   static const double chevronSize = 20.0;
   static const double separatorWidth = 1.0;
   static const double separatorHeight = 16.0;
-  static const double otpBoxSize = 60.0;
+  static const double otpBoxSize = 56.0;
   static const double successModalHeight = 264.0;
   static const double successModalWidth = 390.0;
   static const double successIconSize = 64.0;

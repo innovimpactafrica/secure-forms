@@ -84,7 +84,7 @@ class SecureLinkApp extends StatefulWidget {
 }
 
 class _SecureLinkAppState extends State<SecureLinkApp> {
-  // ✅ SUPPRIMÉ : _navigatorKey local — on utilise le global de navigator_key.dart
+  
   late final AppLinks _appLinks;
 
   @override

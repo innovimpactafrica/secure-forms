@@ -155,7 +155,7 @@ class _ResumeRegistrationOtpScreenState
                           size: AppConstants.iconSizeMedium),
                     ),
                   ),
-                  Image.asset('assets/images/secureforms_logo.png',
+                  Image.asset('assets/images/qfwithtext.png',
                       height: 82, fit: BoxFit.contain),
                 ],
               ),
