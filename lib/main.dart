@@ -19,7 +19,7 @@ import 'features/auth/presentation/pages/otp_verification_screen.dart';
 import 'features/auth/presentation/pages/success_screen.dart';
 import 'features/client/presentation/pages/main_shell.dart';
 import 'features/client/presentation/pages/client_demandes_screen.dart';
-import 'features/client/presentation/pages/client_banques_screen.dart';
+import 'features/client/presentation/pages/mes_banques_screen.dart';
 import 'features/client/presentation/pages/client_formulaires_screen.dart';
 import 'features/client/presentation/pages/client_methode_screen.dart';
 import 'features/client/presentation/pages/nouvelle_demande/nouvelle_demande_steps_7_12.dart';
@@ -358,7 +358,7 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
             create: (_) => DemandesBloc(),
             child: const ClientDemandesScreen(),
           ),
-          AppRoutes.clientBanques: (context) => const ClientBanquesScreen(),
+          AppRoutes.clientBanques: (context) => const MesBanquesScreen(),
           AppRoutes.clientFormulaires: (context) => const ClientFormulairesScreen(),
           AppRoutes.clientMethode: (context) => const ClientMethodeScreen(),
           AppRoutes.nouvelleDemandeStep7: (context) => const NouvelleDemandeStep7Screen(),

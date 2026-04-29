@@ -25,17 +25,17 @@ class StatsGrid extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Expanded(child: StatCard(label: 'home.total_requests'.tr(), value: total, iconPath: 'assets/icons/td.svg', cardBg: AppColors.statTotalBg, borderColor: AppColors.statTotalBorder, iconColor: AppColors.statTotalIconColor, iconBgColor: AppColors.statTotalIconBg, applyColorFilter: false)),
+                  Expanded(child: StatCard(label: 'home.total_requests'.tr(), value: total, iconPath: 'assets/icons/td.svg', cardBg: AppColors.statTotalBg, borderColor: AppColors.statTotalBorder, iconColor: AppColors.statTotalIconColor, iconBgColor: AppColors.statTotalIconBg, applyColorFilter: false, iconSize: 17)),
                   const SizedBox(width: 12),
-                  Expanded(child: StatCard(label: 'home.in_progress'.tr(), value: inProgress, iconPath: 'assets/icons/bi_clock-history.svg', cardBg: AppColors.statInProgressBg, borderColor: AppColors.statInProgressBorder, iconColor: AppColors.statInProgressIconColor, iconBgColor: AppColors.statInProgressIconBg)),
+                  Expanded(child: StatCard(label: 'home.in_progress'.tr(), value: inProgress, iconPath: 'assets/icons/bi_clock-history.svg', cardBg: AppColors.statInProgressBg, borderColor: AppColors.statInProgressBorder, iconColor: AppColors.statInProgressIconColor, iconBgColor: AppColors.statInProgressIconBg, iconSize: 22)),
                 ],
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(child: StatCard(label: 'home.pending'.tr(), value: pending, iconPath: 'assets/icons/carbon_rule-draft.svg', cardBg: AppColors.statPendingBg, borderColor: AppColors.statPendingBorder, iconColor: AppColors.statPendingIconColor, iconBgColor: AppColors.statPendingIconBg)),
+                  Expanded(child: StatCard(label: 'home.pending'.tr(), value: pending, iconPath: 'assets/icons/carbon_rule-draft.svg', cardBg: AppColors.statPendingBg, borderColor: AppColors.statPendingBorder, iconColor: AppColors.statPendingIconColor, iconBgColor: AppColors.statPendingIconBg, iconSize: 22)),
                   const SizedBox(width: 12),
-                  Expanded(child: StatCard(label: 'home.validated'.tr(), value: validated, iconPath: 'assets/icons/bi_check2-circle (1).svg', cardBg: AppColors.statValidatedBg, borderColor: AppColors.statValidatedBorder, iconColor: AppColors.statValidatedIconColor, iconBgColor: AppColors.statValidatedIconBg)),
+                  Expanded(child: StatCard(label: 'home.validated'.tr(), value: validated, iconPath: 'assets/icons/bi_check2-circle (1).svg', cardBg: AppColors.statValidatedBg, borderColor: AppColors.statValidatedBorder, iconColor: AppColors.statValidatedIconColor, iconBgColor: AppColors.statValidatedIconBg, iconSize: 22)),
                 ],
               ),
             ],
@@ -55,6 +55,7 @@ class StatCard extends StatelessWidget {
   final Color borderColor;
   final Color cardBg;
   final bool applyColorFilter;
+  final double iconSize;
 
   const StatCard({
     super.key,
@@ -66,6 +67,7 @@ class StatCard extends StatelessWidget {
     required this.borderColor,
     this.cardBg = AppColors.white,
     this.applyColorFilter = true,
+    this.iconSize = 13,
   });
 
   @override
@@ -94,7 +96,7 @@ class StatCard extends StatelessWidget {
             width: 44, height: 44,
             decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
             child: Center(
-              child: SvgPicture.asset(iconPath, width: 13, height: 13,
+              child: SvgPicture.asset(iconPath, width: iconSize, height: iconSize,
                   colorFilter: applyColorFilter ? ColorFilter.mode(iconColor, BlendMode.srcIn) : null),
             ),
           ),

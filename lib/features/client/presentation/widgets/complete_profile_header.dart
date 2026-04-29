@@ -6,7 +6,7 @@ import 'package:secure_link/core/utils/app_constants.dart';
 class CompleteProfileHeader extends StatelessWidget {
   final double progressValue;
   final String progressLabel;
-  final String subtitle;
+  final Widget subtitle;
 
   const CompleteProfileHeader({
     super.key,
@@ -54,53 +54,49 @@ class CompleteProfileHeader extends StatelessWidget {
                       color: AppColors.textDark,
                     ),
                   ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontFamily: AppConstants.fontFamilyInter,
-                      fontSize: AppConstants.fontSizeRegular,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPureBlack,
-                    ),
-                  ),
+                  subtitle,
                 ],
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Stack(
-            alignment: Alignment.centerLeft,
+          Row(
             children: [
-              Container(
-                height: 5,
-                decoration: BoxDecoration(
-                  color: AppColors.progressTrack,
-                  borderRadius: BorderRadius.circular(4),
+              Expanded(
+                child: Stack(
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    Container(
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: AppColors.progressTrack,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    FractionallySizedBox(
+                      widthFactor: progressValue,
+                      child: Container(
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryDark,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              FractionallySizedBox(
-                widthFactor: progressValue,
-                child: Container(
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryDark,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+              const SizedBox(width: 12),
+              Text(
+                progressLabel,
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontSize: AppConstants.fontSizeRegular,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
                 ),
               ),
             ],
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              progressLabel,
-              style: TextStyle(
-                fontFamily: AppConstants.fontFamilyInter,
-                fontSize: AppConstants.fontSizeRegular,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
-              ),
-            ),
           ),
           const SizedBox(height: 8),
         ],

@@ -47,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen>
   void initState() {
     super.initState();
     _authBloc = AuthBloc();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 1);
   }
 
   @override
@@ -332,6 +332,7 @@ class _LoginScreenState extends State<LoginScreen>
                               decoration: _inputDecoration(
                                 hint: 'login.password_hint'.tr(),
                                 prefixIcon: Icons.lock_outline,
+                                isPassword: true,
                                 suffixIcon: GestureDetector(
                                   onTap: () => setState(
                                       () => _obscurePassword = !_obscurePassword),
@@ -564,12 +565,13 @@ class _LoginScreenState extends State<LoginScreen>
     required String hint,
     required IconData prefixIcon,
     Widget? suffixIcon,
+    bool isPassword = false,
   }) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(
+      hintStyle: TextStyle(
         fontFamily: AppConstants.fontFamilyInter,
-        color: AppColors.hintText,
+        color: isPassword ? AppColors.hintPassword : AppColors.hintText,
         fontSize: AppConstants.fontSizeMedium,
       ),
       prefixIcon: Icon(prefixIcon,

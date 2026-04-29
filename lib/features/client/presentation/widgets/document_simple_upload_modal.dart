@@ -129,7 +129,9 @@ class _DocumentSimpleUploadModalState
       },
       child: Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
+          bottom: MediaQuery.of(context).viewInsets.bottom +
+              MediaQuery.of(context).padding.bottom +
+              16,
           left: 20,
           right: 20,
           top: 16,

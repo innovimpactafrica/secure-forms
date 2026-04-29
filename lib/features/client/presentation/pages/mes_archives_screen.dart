@@ -494,13 +494,17 @@ class _ArchiveCardState extends State<_ArchiveCard> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                        color: AppColors.gray,
+                        color: AppColors.grayLight,
                         borderRadius: BorderRadius.circular(10)),
                     child: Center(
                       child: SvgPicture.asset(
-                        'assets/icons/logo.svg',
+                        'assets/icons/archive.svg',
                         width: 28,
                         height: 28,
+                        colorFilter: const ColorFilter.mode(
+                          AppColors.backArrowColor,
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
                   ),

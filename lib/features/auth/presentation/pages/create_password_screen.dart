@@ -300,7 +300,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
       hintText: hint,
       hintStyle: const TextStyle(
         fontFamily: AppConstants.fontFamilyInter,
-        color: AppColors.hintText,
+        color: AppColors.hintPassword,
         fontSize: AppConstants.fontSizeMedium,
       ),
       prefixIcon: const Icon(Icons.lock_outline,

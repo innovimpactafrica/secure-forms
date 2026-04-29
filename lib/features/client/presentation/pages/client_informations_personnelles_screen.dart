@@ -672,7 +672,7 @@ class _ClientInformationsPersonnellesScreenState
       height: 48,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.docUploadBg,
         borderRadius: BorderRadius.circular(100),
       ),
       child: Row(

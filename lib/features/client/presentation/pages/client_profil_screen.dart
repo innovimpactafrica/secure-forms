@@ -13,6 +13,7 @@ import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
 import 'package:secure_link/core/widgets/user_avatar.dart';
 import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
 import 'package:secure_link/features/client/presentation/pages/mes_archives_screen.dart';
+import 'package:secure_link/features/client/presentation/pages/mes_banques_screen.dart';
 import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
 import 'client_informations_personnelles_screen.dart';
 import 'mes_documents_screen.dart';
@@ -115,6 +116,12 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (_) => const NotificationsScreen(),
+                        ),
+                      ),
+                      onBanquesTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MesBanquesScreen(),
                         ),
                       ),
                     ),
@@ -472,6 +479,7 @@ class _MenuSection extends StatelessWidget {
   final VoidCallback onInfosTap;
   final VoidCallback onArchivesTap;
   final VoidCallback onNotifsTap;
+  final VoidCallback onBanquesTap;
 
   const _MenuSection({
     required this.selectedLanguage,
@@ -481,6 +489,7 @@ class _MenuSection extends StatelessWidget {
     required this.onInfosTap,
     required this.onArchivesTap,
     required this.onNotifsTap,
+    required this.onBanquesTap,
   });
 
   @override
@@ -494,13 +503,16 @@ class _MenuSection extends StatelessWidget {
             title: 'profil.personal_info'.tr(),
             onTap: onInfosTap,
           ),
-          const _Divider(),
           _MenuItem(
-            iconPath: 'assets/images/documents.png',
+            iconPath: 'assets/icons/mes documents.svg',
             title: 'profil.my_documents'.tr(),
             onTap: onDocumentsTap,
           ),
-          const _Divider(),
+          _MenuItem(
+            iconPath: 'assets/icons/bank.svg',
+            title: 'profil.my_banks'.tr(),
+            onTap: onBanquesTap,
+          ),
           _MenuItem(
             iconPath: 'assets/icons/archive.svg',
             title: 'profil.archives'.tr(),
@@ -509,13 +521,11 @@ class _MenuSection extends StatelessWidget {
               MaterialPageRoute(builder: (_) => const MesArchivesScreen()),
             ),
           ),
-          const _Divider(),
           _MenuItem(
-            iconPath: 'assets/images/iconenotif.png',
+            iconPath: 'assets/icons/mes notifications.svg',
             title: 'profil.my_notifications'.tr(),
             onTap: onNotifsTap,
           ),
-          const _Divider(),
           _LanguageMenuItem(
             selectedLanguage: selectedLanguage,
             onTap: onLanguageTap,
@@ -544,18 +554,19 @@ class _MenuItem extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         child: Row(
           children: [
             isPng
                 ? Image.asset(iconPath,
                     width: AppConstants.iconSizeLarge,
-                    height: AppConstants.iconSizeLarge)
+                    height: AppConstants.iconSizeLarge,
+                    color: AppColors.primary)
                 : SvgPicture.asset(
                     iconPath,
                     width: AppConstants.iconSizeLarge,
                     height: AppConstants.iconSizeLarge,
-                    colorFilter: ColorFilter.mode(
+                    colorFilter: const ColorFilter.mode(
                       AppColors.primary,
                       BlendMode.srcIn,
                     ),
@@ -599,13 +610,13 @@ class _LanguageMenuItem extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         child: Row(
           children: [
             SvgPicture.asset(
               'assets/icons/material-symbols-light_language.svg',
-              width: AppConstants.iconSizeLarge,
-              height: AppConstants.iconSizeLarge,
+              width: AppConstants.iconSizeXLarge,
+              height: AppConstants.iconSizeXLarge,
               colorFilter: ColorFilter.mode(
                 AppColors.primary,
                 BlendMode.srcIn,
@@ -641,18 +652,6 @@ class _LanguageMenuItem extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _Divider extends StatelessWidget {
-  const _Divider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Divider(
-      height: 1,
-      color: AppColors.borderDivider,
     );
   }
 }

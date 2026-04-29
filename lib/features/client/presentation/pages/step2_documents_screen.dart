@@ -124,13 +124,26 @@ class _Step2DocumentsScreenState extends State<Step2DocumentsScreen> {
                   CompleteProfileHeader(
                     progressValue: progressValue,
                     progressLabel: progressLabel,
-                    subtitle: () {
-                      final userState = context.read<UserBloc>().state;
-                      if (userState is UserLoaded) {
-                        return userState.user.displayName;
-                      }
-                      return '';
-                    }(),
+                    subtitle: BlocBuilder<UserBloc, UserState>(
+                      buildWhen: (_, s) => s is UserLoaded,
+                      builder: (_, userState) {
+                        String name = '';
+                        if (userState is UserLoaded) {
+                          name = userState.user.displayName;
+                        } else {
+                          name = context.read<UserBloc>().cachedUser?.displayName ?? '';
+                        }
+                        return Text(
+                          name,
+                          style: TextStyle(
+                            fontFamily: AppConstants.fontFamilyInter,
+                            fontSize: AppConstants.fontSizeRegular,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPureBlack,
+                          ),
+                        );
+                      },
+                    ),
                   ),
                   Expanded(
                     child: isLoading && documentTypes.isEmpty

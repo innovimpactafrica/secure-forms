@@ -172,8 +172,8 @@ class RecentDemandeCard extends StatelessWidget {
           children: [
             Container(
               width: 40, height: 40,
-              decoration: BoxDecoration(color: AppColors.gray, borderRadius: BorderRadius.circular(10)),
-              child: Center(child: SvgPicture.asset('assets/icons/logo.svg', width: 22, height: 22)),
+              decoration: const BoxDecoration(color: AppColors.grayLight, shape: BoxShape.circle),
+              child: Center(child: SvgPicture.asset('assets/icons/icone.svg', width: 16, height: 16)),
             ),
             const SizedBox(width: 12),
             Expanded(

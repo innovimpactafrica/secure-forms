@@ -150,7 +150,7 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
         height: 44,
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(26),
           border: Border.all(color: AppColors.borderDivider),
         ),
         child: Row(
@@ -345,17 +345,17 @@ class _DemandeCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: AppColors.gray,
-                borderRadius: BorderRadius.circular(12),
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: AppColors.grayLight,
+                shape: BoxShape.circle,
               ),
               child: Center(
                 child: SvgPicture.asset(
-                  'assets/icons/logo.svg',
-                  width: 32,
-                  height: 32,
+                  'assets/icons/icone.svg',
+                  width: 16,
+                  height: 16,
                 ),
               ),
             ),

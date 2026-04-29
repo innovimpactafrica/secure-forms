@@ -1,4 +1,4 @@
-{
+﻿{
   "navbar": {
     "home": "Accueil",
     "requests": "Mes demandes",
@@ -25,7 +25,7 @@
     "email_label": "Email",
     "password_label": "Mot de passe",
     "email_hint": "Ex: lamine.dieme@gmail.com",
-    "password_hint": "",
+    "password_hint": "••••••••",
     "required_field": "Champ obligatoire",
     "invalid_email": "Email invalide",
     "invalid_credentials": "Email ou mot de passe incorrect",
@@ -34,7 +34,7 @@
     "register": "S'inscrire",
     "continue_registration": "Continuer mon inscription",
     "incomplete_title": "Inscription incomplète",
-    "incomplete_message": "Ce numéro ou email est déjà associé à un compte. Si vous avez déjà un compte, connectez-vous. Sinon, votre inscription est peut-être incomplète, continuez votre inscription.",
+    "incomplete_message": "Ce numéro ou email est déja  associé a  un compte. Si vous avez déja  un compte, connectez-vous. Sinon, votre inscription est peut etre incomplète, continuez votre inscription.",
     "incomplete_later": "Plus tard",
     "incomplete_action": "Continuer mon inscription",
     "tab_email": "Email",
@@ -48,9 +48,9 @@
     "create_title": "Creez votre mot de passe",
     "create_subtitle": "Choisissez un mot de passe securisé pour proteger votre compte.",
     "new_password": "Nouveau mot de passe",
-    "new_password_hint": "",
+    "new_password_hint": "••••••••",
     "confirm_password": "Confirmer mot de passe",
-    "confirm_password_hint": "",
+    "confirm_password_hint": "••••••••",
     "confirm_button": "Confirmer",
     "min_length": "Minimum 8 caracteres incluant carcactere speciale et lettre majuscule",
     "mismatch": "Les mots de passe ne correspondent pas",
@@ -103,8 +103,8 @@
     "number_verified": "Numero verifié",
     "account_created_title": "Inscription enregistrée",
     "check_email": "Consultez votre email",
-    "password_link_sent": "Un lien de création de mot de passe a été envoyé à votre adresse email. Consultez votre boite de réception (et les spams) puis cliquez sur le lien pour activer votre compte.",
-    "go_to_login": "Aller à  la connexion"
+    "password_link_sent": "Un lien de création de mot de passe a été envoyé à  votre adresse email. Consultez votre boite de réception (et les spams) puis cliquez sur le lien pour activer votre compte.",
+    "go_to_login": "Aller à la connexion"
   },
   "success": {
     "title": "Félicitations !",
@@ -118,7 +118,7 @@
     "quick": "Quick ",
     "forms": "Forms",
     "complete_profile": "Completez votre profil",
-    "profile_completed": "Profil completé à 100% ",
+    "profile_completed": "Profil completé a  100% ",
     "start_now": "Commencer maintenant",
     "total_requests": "Total demandes",
     "in_progress": "En cours",
@@ -197,7 +197,7 @@
     "your_first_name": "Votre prénom",
     "your_last_name": "Votre nom de famille",
     "phone_placeholder": "+221 xx xxx xx xx",
-    "full_address": "Votre adresse complÃ¨te",
+    "full_address": "Votre adresse complète",
     "doc_cni": "Pièce d'identité (CNI)",
     "doc_nationality": "Certificat de nationalité",
     "doc_driving_license": "Permis de conduire",
@@ -208,7 +208,7 @@
     "document_deleted": "Document supprimé",
     "no_document_types": "Aucun type de document disponible",
     "doc_type_unavailable": "Ce type de document n'est pas encore disponible",
-    "photo_updated": "Photo de profil mise à jour avec succés"
+    "photo_updated": "Photo de profil mise à  jour avec succés"
   },
   "notifications": {
     "title": "Mes notifications",
@@ -232,8 +232,8 @@
     "title": "Mes documents",
     "my_account": "Mon Compte",
     "update_button": "Mettre à jour",
-    "update_success": "Documents mis à  jour avec succès.",
-    "update_document": "Mettre à  jour le document",
+    "update_success": "Documents mis à jour avec succès.",
+    "update_document": "Mettre à jour le document",
     "cancel": "Annuler",
     "delete": "Supprimer",
     "delete_confirm_title": "Supprimer le document",
@@ -245,10 +245,10 @@
     "modify_doc2": "Modifier Document 2",
     "delete_doc1": "Supprimer Document 1",
     "delete_doc2": "Supprimer Document 2",
-    "delete_file_confirm": "Êtes-vous sûr de vouloir supprimer ce fichier ? Cette action est irréversible.",
+    "delete_file_confirm": "etes-vous sûr de vouloir supprimer ce fichier ? Cette action est irréversible.",
     "choose_to_delete": "Quel document supprimer ?",
-    "modify_choose": "Modifier  choisir le fichier",
-    "delete_choose": "Supprimer  choisir le fichier",
+    "modify_choose": "Modifier a— choisir le fichier",
+    "delete_choose": "Supprimer a— choisir le fichier",
     "swipe_hint": "Glisser pour voir Document 2",
     "select_file_required": "Veuillez sélectionner un fichier.",
     "add_second_file": "Ajouter un 2ème fichier",
@@ -296,6 +296,7 @@
     "my_account": "Mon Compte",
     "personal_info": "Informations personnelles",
     "my_documents": "Mes documents",
+    "my_banks": "Mes banques",
     "archives": "Archives",
     "my_notifications": "Mes notifications",
     "language": "Langue",
@@ -306,6 +307,33 @@
     "logout_title": "Déconnexion",
     "logout_message": "etes-vous sur de vouloir vous déconnecter ?",
     "cancel": "Annuler"
+  },
+  "banques": {
+    "title": "Mes banques",
+    "subtitle": "Suivez et gérer les comptes de mes banques",
+    "search_placeholder": "Rechercher une banque",
+    "no_banques": "Aucune banque trouvée",
+    "add_title": "Ajouter une banque",
+    "field_banque": "Banque",
+    "field_type_compte": "Type de compte",
+    "field_numero_compte": "Numéro de compte",
+    "field_titulaire": "Nom du titulaire",
+    "hint_search_banque": "Rechercher une banque",
+    "hint_numero_compte": "6578 890 6789",
+    "hint_titulaire": "Mamadou Diop",
+    "type_courant": "Compte courant",
+    "type_epargne": "Compte épargne",
+    "type_professionnel": "Compte professionnel",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "detail_subtitle": "Consulter et ajout un compte bancaire",
+    "search_compte": "Rechercher un compte banque",
+    "no_comptes": "Aucun compte trouvé",
+    "label_numero": "Numero de compte",
+    "label_type": "Type de compte",
+    "add_compte_title": "Ajouter un compte Bancaire",
+    "compte_ajoute": "Compte ajouté avec succès",
+    "banque_ajoutee": "Banque ajoutée avec succès"
   },
   "demandes": {
     "title": "Mes demandes",
@@ -348,7 +376,7 @@
     "field_hint": "Email ou téléphone",
     "email_hint": "Utilisez la meme adresse email qu'à l'inscription.",
     "send_button": "Envoyer le code",
-    "already_account": "Vous avez déja  un compte ? ",
+    "already_account": "Vous avez déja un compte ? ",
     "login_link": "Connectez-vous"
   },
   "kyc": {
@@ -371,8 +399,8 @@
     "instructions": "Instructions",
     "instruction1": "Placez votre document dans le cadre",
     "instruction2": "Assurez-vous que le document est bien éclairé",
-    "instruction3": "Toutes les informations doivent être lisibles",
-    "instruction4": "Évitez les reflets et les ombres",
+    "instruction3": "Toutes les informations doivent etre lisibles",
+    "instruction4": "Evitez les reflets et les ombres",
     "front_side": "Face avant (Recto)",
     "back_side": "Face arrière (Verso)",
     "take_photo_recto": "Prenez une photo RECTO de votre",
@@ -388,7 +416,7 @@
     "capturing_selfie": "Capture en cours...",
     "tip1": "Regardez directement la caméra frontale",
     "tip2": "Assurez-vous que l'éclairage est suffisant",
-    "tip3": "Votre visage doit être entièrement visible",
+    "tip3": "Votre visage doit Ãªtre entièrement visible",
     "verify_photo": "Vérifiez votre photo",
     "verify_subtitle": "Assurez-vous que votre visage est bien visible avant de\ncontinuer.",
     "verify_tip": "Assurez-vous que l'éclairage est suffisant et que\nvotre visage est visible clairement.",
@@ -446,6 +474,9 @@
     "enter_4_digits": "Veuillez saisir les 4 chiffres du code"
   }
 }
+
+
+
 
 
 

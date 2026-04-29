@@ -96,4 +96,5 @@ class AppConstants {
   static const double documentContainerHeight = 204.0;
   static const double floatingButtonSize = 52.0;
   static const double floatingButtonBorder = 4.0;
+  static const double compteCardHeight = 70.0;
 }

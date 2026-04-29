@@ -64,6 +64,7 @@ class AppColors {
   // Couleurs spécifiques
   static const Color divider = Color(0xFFD9D9D9);
   static const Color hintText = Color(0xFF9C9AA5);
+  static const Color hintPassword = Color(0xFFC4C4C4);
   static const Color iconGray = Color(0xFF9CA3AF);
   static const Color backgroundModal = Color(0xFF424242);
   static const Color backgroundDarker = Color(0xFF0A324A);
@@ -144,4 +145,13 @@ class AppColors {
   static const Color docUploadBg = Color(0xFFEEE7E8);
   static const Color docUploadIconBg = Color(0xFFD4B3B0);
   static const Color docUploadClickText = Color(0xFF343A40);
+
+  // Banque - icône compte
+  static const Color banqueIconBg = Color(0x1A90362E);
+
+  // Ajout compte bancaire modal
+  static const Color banqueFieldBg = Color(0xFFFBF7F7);
+  static const Color banqueFieldBorder = Color(0xFF97392D);
+  static const Color banqueLockIcon = Color(0xFF90362E);
+  static const Color compteVerifyBg = Color(0xFF10B981);
 }

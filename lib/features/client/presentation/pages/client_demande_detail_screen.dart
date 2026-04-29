@@ -438,6 +438,13 @@ class _ClientDemandeDetailScreenState
   // ── Card documents requis ─────────────────────────────────────────────────
 
   Widget _buildRequiredDocsCard(DemandeModel d) {
+    // Regrouper les documents par label (recto/verso → même entrée)
+    final Map<String, List<RequiredDocumentItem>> grouped = {};
+    for (final doc in d.requiredDocuments) {
+      grouped.putIfAbsent(doc.label, () => []).add(doc);
+    }
+    final entries = grouped.entries.toList();
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -448,23 +455,16 @@ class _ClientDemandeDetailScreenState
         ],
       ),
       child: Column(
-        children: d.requiredDocuments.asMap().entries.map((entry) {
+        children: entries.asMap().entries.map((entry) {
           final i = entry.key;
-          final doc = entry.value;
+          final label = entry.value.key;
+          final docs = entry.value.value;
           return Column(
             children: [
               if (i > 0) const Divider(height: 1, color: AppColors.borderDivider),
               InkWell(
-                onTap: doc.id.isNotEmpty
-                    ? () {
-                        final url = (doc.fileUrl != null && doc.fileUrl!.isNotEmpty)
-                            ? doc.fileUrl!
-                            : BaseUrl.profileDocumentFile(doc.id);
-                        // Tous les endpoints /api/... nécessitent un token
-                        // Seules les URLs MinIO (X-Amz-) n'en ont pas besoin
-                        final useToken = !url.contains('X-Amz-');
-                        _openViewer(context, label: doc.label, url: url, useToken: useToken);
-                      }
+                onTap: docs.first.id.isNotEmpty
+                    ? () => _openMultiViewer(context, label: label, docs: docs)
                     : null,
                 borderRadius: BorderRadius.circular(14),
                 child: Padding(
@@ -475,7 +475,7 @@ class _ClientDemandeDetailScreenState
                         width: 42,
                         height: 42,
                         decoration: BoxDecoration(
-                          color: AppColors.gray,
+                          color: AppColors.grayLight,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Center(
@@ -484,18 +484,40 @@ class _ClientDemandeDetailScreenState
                             width: 22,
                             height: 22,
                             colorFilter: const ColorFilter.mode(
-                                AppColors.textSecondary, BlendMode.srcIn),
+                                AppColors.backArrowColor, BlendMode.srcIn),
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Text(
-                          doc.label,
-                          style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textDark),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                label,
+                                style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textDark),
+                              ),
+                            ),
+                            if (docs.length > 1)
+                              Container(
+                                margin: const EdgeInsets.only(left: 6),
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryDark.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '${docs.length}',
+                                  style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.primaryDark),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -510,6 +532,14 @@ class _ClientDemandeDetailScreenState
         }).toList(),
       ),
     );
+  }
+
+  // ── Ouvrir viewer multi-fichiers (glisser recto/verso) ────────────────────
+
+  void _openMultiViewer(BuildContext context, {required String label, required List<RequiredDocumentItem> docs}) {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => _MultiDocViewerPage(label: label, docs: docs),
+    ));
   }
 
   // ── Ouvrir le viewer ──────────────────────────────────────────────────────
@@ -682,6 +712,126 @@ class _HeaderBadge extends StatelessWidget {
       child: Text(label,
           style: TextStyle(
               fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Page viewer multi-fichiers (recto/verso avec swipe)
+// ---------------------------------------------------------------------------
+
+class _MultiDocViewerPage extends StatefulWidget {
+  final String label;
+  final List<RequiredDocumentItem> docs;
+  const _MultiDocViewerPage({required this.label, required this.docs});
+
+  @override
+  State<_MultiDocViewerPage> createState() => _MultiDocViewerPageState();
+}
+
+class _MultiDocViewerPageState extends State<_MultiDocViewerPage> {
+  late final PageController _pageController;
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = widget.docs.length;
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: AppColors.white,
+        elevation: 0,
+        title: Text(
+          widget.label,
+          style: const TextStyle(
+            fontFamily: AppConstants.fontFamilySofiaSans,
+            fontWeight: FontWeight.w600,
+            fontSize: AppConstants.fontSizeLarge,
+            color: AppColors.white,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+        actions: [
+          if (total > 1)
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Center(
+                child: Text(
+                  '${_currentPage + 1}/$total',
+                  style: const TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    fontSize: AppConstants.fontSizeMedium,
+                    color: AppColors.white,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _pageController,
+            itemCount: total,
+            onPageChanged: (i) => setState(() => _currentPage = i),
+            itemBuilder: (_, i) {
+              final doc = widget.docs[i];
+              final url = (doc.fileUrl != null && doc.fileUrl!.isNotEmpty)
+                  ? doc.fileUrl!
+                  : BaseUrl.profileDocumentFile(doc.id);
+              final useToken = !url.contains('X-Amz-');
+              return _DocumentViewerPage(
+                label: widget.label,
+                url: url,
+                useToken: useToken,
+              );
+            },
+          ),
+          if (total > 1 && _currentPage == 0)
+            Positioned(
+              bottom: MediaQuery.of(context).padding.bottom + 24,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.swipe, color: AppColors.white, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        'documents.swipe_hint'.tr(),
+                        style: const TextStyle(
+                          fontFamily: AppConstants.fontFamilyInter,
+                          fontSize: AppConstants.fontSizeRegular,
+                          color: AppColors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
