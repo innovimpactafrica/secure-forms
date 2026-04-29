@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -360,27 +361,37 @@ class _AjouterBanqueModal extends StatefulWidget {
 }
 
 class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
-  final TextEditingController _searchBanqueController =
-      TextEditingController();
-  final TextEditingController _numeroCompteController =
-      TextEditingController();
-  final TextEditingController _titulaireController =
-      TextEditingController();
+  final TextEditingController _searchBanqueController = TextEditingController();
+  final TextEditingController _numeroCompteController = TextEditingController();
+  final TextEditingController _titulaireController = TextEditingController();
 
   String? _selectedTypeCompte;
   String? _selectedBanqueNom;
+  String? _selectedBanqueId;
+  bool _showSuggestions = false;
+  List<BanqueModel> _banquesFiltrees = [];
 
-  // Liste statique des banques pour la recherche — à remplacer par API
-  static const List<String> _toutesLesBanques = [
-    'Banque Nationale',
-    'Ecobank',
-    'UBA',
-    'Sunu Bank',
-    'Banque Islamique',
-    'Oragroup',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    final state = context.read<BanquesBloc>().state;
+    if (state is BanquesLoaded) {
+      _banquesFiltrees = List.from(state.banques);
+      debugPrint('[AjouterBanqueModal] initState: ${_banquesFiltrees.length} banques disponibles');
+    } else {
+      debugPrint('[AjouterBanqueModal] initState: BLoC pas en BanquesLoaded (${state.runtimeType})');
+    }
+  }
 
-  List<String> _banquesFiltrees = _toutesLesBanques;
+  void _filterBanques(String query) {
+    final state = context.read<BanquesBloc>().state;
+    final all = state is BanquesLoaded ? state.banques : <BanqueModel>[];
+    setState(() {
+      _banquesFiltrees = query.isEmpty
+          ? all
+          : all.where((b) => b.nom.toLowerCase().contains(query.toLowerCase())).toList();
+    });
+  }
 
   @override
   void dispose() {
@@ -388,16 +399,6 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
     _numeroCompteController.dispose();
     _titulaireController.dispose();
     super.dispose();
-  }
-
-  void _filterBanques(String query) {
-    setState(() {
-      _banquesFiltrees = query.isEmpty
-          ? _toutesLesBanques
-          : _toutesLesBanques
-              .where((b) => b.toLowerCase().contains(query.toLowerCase()))
-              .toList();
-    });
   }
 
   List<String> get _typesCompte => [
@@ -463,9 +464,8 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
             _buildLabel('banques.field_banque'.tr()),
             const SizedBox(height: AppConstants.paddingSmall),
             _buildSearchBanqueField(),
-            // Suggestions
-            if (_searchBanqueController.text.isNotEmpty &&
-                _selectedBanqueNom == null)
+            // Suggestions — visibles quand le champ est focusé et aucune banque sélectionnée
+            if (_showSuggestions && _selectedBanqueNom == null)
               _buildSuggestions(),
             const SizedBox(height: AppConstants.paddingLarge),
 
@@ -581,8 +581,16 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
           Expanded(
             child: TextField(
               controller: _searchBanqueController,
+              onTap: () {
+                setState(() => _showSuggestions = true);
+              },
               onChanged: (q) {
-                setState(() => _selectedBanqueNom = null);
+                setState(() {
+                  _selectedBanqueNom = null;
+                  _selectedBanqueId = null;
+                  _showSuggestions = true;
+                });
+                debugPrint('[AjouterBanqueModal] Recherche banque: "$q"');
                 _filterBanques(q);
               },
               style: const TextStyle(
@@ -621,13 +629,14 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
         ],
       ),
       child: Column(
-        children: _banquesFiltrees.map((nom) {
+        children: _banquesFiltrees.map((banque) {
           return InkWell(
             onTap: () {
               setState(() {
-                _selectedBanqueNom = nom;
-                _searchBanqueController.text = nom;
-                _banquesFiltrees = _toutesLesBanques;
+                _selectedBanqueNom = banque.nom;
+                _selectedBanqueId = banque.id;
+                _searchBanqueController.text = banque.nom;
+                _showSuggestions = false;
               });
             },
             child: Padding(
@@ -641,7 +650,7 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
                       color: AppColors.textSecondary),
                   const SizedBox(width: AppConstants.paddingSmall),
                   Text(
-                    nom,
+                    banque.nom,
                     style: const TextStyle(
                         fontSize: AppConstants.fontSizeMedium,
                         color: AppColors.textDark),
@@ -731,17 +740,36 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
     final numero = _numeroCompteController.text.trim();
     final titulaire = _titulaireController.text.trim();
     final banqueNom = _selectedBanqueNom ?? _searchBanqueController.text.trim();
-    if (banqueNom.isEmpty || numero.isEmpty) return;
+    var organisationId = _selectedBanqueId ?? '';
 
-    // Trouver l'organisationId depuis le BLoC
-    final state = context.read<BanquesBloc>().state;
-    String organisationId = '';
-    if (state is BanquesLoaded) {
-      final found = state.banques.where((b) => b.nom == banqueNom).firstOrNull;
-      organisationId = found?.id ?? '';
+    // Si pas sélectionné depuis la liste, chercher par nom dans le BLoC
+    if (organisationId.isEmpty && banqueNom.isNotEmpty) {
+      final state = context.read<BanquesBloc>().state;
+      if (state is BanquesLoaded) {
+        final found = state.banques
+            .where((b) => b.nom.toLowerCase() == banqueNom.toLowerCase())
+            .firstOrNull;
+        organisationId = found?.id ?? '';
+        debugPrint('[AjouterBanqueModal] Recherche par nom "$banqueNom" -> id=$organisationId');
+      }
     }
-    if (organisationId.isEmpty) return;
 
+    debugPrint('[AjouterBanqueModal] banqueNom=$banqueNom | organisationId=$organisationId | numero=$numero | titulaire=$titulaire');
+
+    if (banqueNom.isEmpty) {
+      debugPrint('[AjouterBanqueModal] BLOQUE: banqueNom vide');
+      return;
+    }
+    if (numero.isEmpty) {
+      debugPrint('[AjouterBanqueModal] BLOQUE: numero vide');
+      return;
+    }
+    if (organisationId.isEmpty) {
+      debugPrint('[AjouterBanqueModal] BLOQUE: organisationId vide — banque introuvable dans la liste');
+      return;
+    }
+
+    debugPrint('[AjouterBanqueModal] Dispatch AjouterBanqueEvent');
     context.read<BanquesBloc>().add(AjouterBanqueEvent(
           organisationId: organisationId,
           accountNumber: numero,

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:secure_link/features/client/data/services/banques_service.dart';
 import 'package:secure_link/core/utils/user_session.dart';
@@ -47,6 +48,7 @@ class BanquesBloc extends Bloc<BanquesEvent, BanquesState> {
   }
 
   Future<void> _onAjouter(AjouterBanqueEvent event, Emitter<BanquesState> emit) async {
+    debugPrint('[BanquesBloc] AjouterBanqueEvent reçu | organisationId=${event.organisationId} | accountNumber=${event.accountNumber} | accountHolder=${event.accountHolder}');
     emit(const BanqueAjoutEnCoursState());
     try {
       await _service.ajouterBanque(
