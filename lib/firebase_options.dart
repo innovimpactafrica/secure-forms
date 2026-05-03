@@ -54,9 +54,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDmcgkI6rXeKwvT8tJv-VYDZO8VKaT8Tc8',
-    appId: '1:49798505343:android:d30bf4d0a89ab9b9af304a',
+    appId: '1:49798505343:android:ddc14ea56c0a72e4af304a',
     messagingSenderId: '49798505343',
     projectId: 'innovimpactafrica',
     storageBucket: 'innovimpactafrica.firebasestorage.app',
   );
+
 }
