@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/widgets/auth_image.dart';
-import 'package:secure_link/features/client/data/models/banque_model.dart';
-import 'package:secure_link/features/client/data/models/compte_model.dart';
-import 'package:secure_link/features/client/domain/bloc/detail_banque_bloc/detail_banque_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/detail_banque_bloc/detail_banque_event.dart';
-import 'package:secure_link/features/client/domain/bloc/detail_banque_bloc/detail_banque_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/widgets/auth_image.dart';
+import 'package:quick_forms/features/client/data/models/banque_model.dart';
+import 'package:quick_forms/features/client/data/models/compte_model.dart';
+import 'package:quick_forms/features/client/domain/bloc/detail_banque_bloc/detail_banque_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/detail_banque_bloc/detail_banque_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/detail_banque_bloc/detail_banque_state.dart';
 
 class DetailBanqueScreen extends StatefulWidget {
   final BanqueModel banque;
@@ -68,7 +68,8 @@ class _DetailBanqueScreenState extends State<DetailBanqueScreen> {
                 backgroundColor: AppColors.statusValideGreen,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium)),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium)),
               ),
             );
           } else if (state is CompteAjoutErreurState) {
@@ -81,7 +82,8 @@ class _DetailBanqueScreenState extends State<DetailBanqueScreen> {
                 backgroundColor: AppColors.statusRejected,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium)),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium)),
               ),
             );
           }
@@ -164,7 +166,8 @@ class _DetailBanqueScreenState extends State<DetailBanqueScreen> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge),
       child: Container(
         height: 44,
         decoration: BoxDecoration(
@@ -240,7 +243,8 @@ class _DetailBanqueScreenState extends State<DetailBanqueScreen> {
                 AppConstants.paddingXLarge),
             itemCount: state.comptes.length,
             itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.only(bottom: AppConstants.paddingMedium),
+              padding:
+                  const EdgeInsets.only(bottom: AppConstants.paddingMedium),
               child: _CompteCard(compte: state.comptes[index]),
             ),
           );
@@ -540,7 +544,8 @@ class _AjouterCompteModalState extends State<_AjouterCompteModal> {
   Widget _buildBanqueField() {
     return Container(
       height: AppConstants.inputHeight,
-      padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge),
       decoration: BoxDecoration(
         color: AppColors.banqueFieldBg,
         borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
@@ -629,8 +634,7 @@ class _AjouterCompteModalState extends State<_AjouterCompteModal> {
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.check,
-                  size: AppConstants.iconSizeSmall,
-                  color: AppColors.white),
+                  size: AppConstants.iconSizeSmall, color: AppColors.white),
             ),
           ),
         ],
@@ -641,7 +645,8 @@ class _AjouterCompteModalState extends State<_AjouterCompteModal> {
   Widget _buildTypeCompteDropdown() {
     return Container(
       height: AppConstants.inputHeight,
-      padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
@@ -695,8 +700,8 @@ class _AjouterCompteModalState extends State<_AjouterCompteModal> {
               color: AppColors.textSecondary),
           border: InputBorder.none,
           isDense: false,
-          contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.paddingLarge),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge),
         ),
       ),
     );

@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
-import 'package:secure_link/features/auth/data/models/user_profile_model.dart';
+import 'package:quick_forms/features/auth/data/models/user_profile_model.dart';
 
 abstract class UserState extends Equatable {
   @override

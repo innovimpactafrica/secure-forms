@@ -3,8 +3,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 /// Écran de scan de document avec cadre guide (style iOS/Android natif)
 /// Retourne le chemin du fichier recadré ou null si annulé
@@ -58,7 +58,9 @@ class _DocumentScannerPageState extends State<DocumentScannerPage> {
   }
 
   Future<void> _capture() async {
-    if (_controller == null || !_controller!.value.isInitialized || _isCapturing) return;
+    if (_controller == null ||
+        !_controller!.value.isInitialized ||
+        _isCapturing) return;
     setState(() => _isCapturing = true);
 
     try {
@@ -88,8 +90,10 @@ class _DocumentScannerPageState extends State<DocumentScannerPage> {
 
     final cropX = (frameLeft * scaleX).round().clamp(0, original.width);
     final cropY = (frameTop * scaleY).round().clamp(0, original.height);
-    final cropW = (frameWidth * scaleX).round().clamp(1, original.width - cropX);
-    final cropH = (frameHeight * scaleY).round().clamp(1, original.height - cropY);
+    final cropW =
+        (frameWidth * scaleX).round().clamp(1, original.width - cropX);
+    final cropH =
+        (frameHeight * scaleY).round().clamp(1, original.height - cropY);
 
     final cropped = img.copyCrop(
       original,
@@ -100,7 +104,8 @@ class _DocumentScannerPageState extends State<DocumentScannerPage> {
     );
 
     final dir = await getTemporaryDirectory();
-    final outPath = '${dir.path}/scan_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final outPath =
+        '${dir.path}/scan_${DateTime.now().millisecondsSinceEpoch}.jpg';
     await File(outPath).writeAsBytes(img.encodeJpg(cropped, quality: 95));
     return outPath;
   }
@@ -170,7 +175,8 @@ class _DocumentScannerPageState extends State<DocumentScannerPage> {
                               color: Colors.black45,
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                            child: const Icon(Icons.arrow_back,
+                                color: Colors.white, size: 20),
                           ),
                         ),
                       ],
@@ -228,7 +234,8 @@ class _DocumentScannerPageState extends State<DocumentScannerPage> {
                               color: AppColors.primaryDark,
                             ),
                           )
-                        : const Icon(Icons.camera_alt, color: AppColors.primaryDark, size: 32),
+                        : const Icon(Icons.camera_alt,
+                            color: AppColors.primaryDark, size: 32),
                   ),
                 ),
               ),
@@ -244,7 +251,8 @@ class _ScanOverlayPainter extends CustomPainter {
   final double frameWidth;
   final double frameHeight;
 
-  const _ScanOverlayPainter({required this.frameWidth, required this.frameHeight});
+  const _ScanOverlayPainter(
+      {required this.frameWidth, required this.frameHeight});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -283,22 +291,36 @@ class _FrameCornersPainter extends CustomPainter {
     // Coin haut-gauche
     canvas.drawLine(Offset(r, 0), Offset(cornerLen, 0), paint);
     canvas.drawLine(Offset(0, r), Offset(0, cornerLen), paint);
-    canvas.drawArc(const Rect.fromLTWH(0, 0, r * 2, r * 2), 3.14, -1.57, false, paint);
+    canvas.drawArc(
+        const Rect.fromLTWH(0, 0, r * 2, r * 2), 3.14, -1.57, false, paint);
 
     // Coin haut-droit
-    canvas.drawLine(Offset(size.width - cornerLen, 0), Offset(size.width - r, 0), paint);
-    canvas.drawLine(Offset(size.width, r), Offset(size.width, cornerLen), paint);
-    canvas.drawArc(Rect.fromLTWH(size.width - r * 2, 0, r * 2, r * 2), 0, -1.57, false, paint);
+    canvas.drawLine(
+        Offset(size.width - cornerLen, 0), Offset(size.width - r, 0), paint);
+    canvas.drawLine(
+        Offset(size.width, r), Offset(size.width, cornerLen), paint);
+    canvas.drawArc(Rect.fromLTWH(size.width - r * 2, 0, r * 2, r * 2), 0, -1.57,
+        false, paint);
 
     // Coin bas-gauche
-    canvas.drawLine(Offset(0, size.height - cornerLen), Offset(0, size.height - r), paint);
-    canvas.drawLine(Offset(r, size.height), Offset(cornerLen, size.height), paint);
-    canvas.drawArc(Rect.fromLTWH(0, size.height - r * 2, r * 2, r * 2), 3.14, 1.57, false, paint);
+    canvas.drawLine(
+        Offset(0, size.height - cornerLen), Offset(0, size.height - r), paint);
+    canvas.drawLine(
+        Offset(r, size.height), Offset(cornerLen, size.height), paint);
+    canvas.drawArc(Rect.fromLTWH(0, size.height - r * 2, r * 2, r * 2), 3.14,
+        1.57, false, paint);
 
     // Coin bas-droit
-    canvas.drawLine(Offset(size.width, size.height - cornerLen), Offset(size.width, size.height - r), paint);
-    canvas.drawLine(Offset(size.width - cornerLen, size.height), Offset(size.width - r, size.height), paint);
-    canvas.drawArc(Rect.fromLTWH(size.width - r * 2, size.height - r * 2, r * 2, r * 2), 0, 1.57, false, paint);
+    canvas.drawLine(Offset(size.width, size.height - cornerLen),
+        Offset(size.width, size.height - r), paint);
+    canvas.drawLine(Offset(size.width - cornerLen, size.height),
+        Offset(size.width - r, size.height), paint);
+    canvas.drawArc(
+        Rect.fromLTWH(size.width - r * 2, size.height - r * 2, r * 2, r * 2),
+        0,
+        1.57,
+        false,
+        paint);
   }
 
   @override

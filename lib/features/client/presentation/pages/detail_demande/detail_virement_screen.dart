@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class DetailVirementScreen extends StatelessWidget {
   const DetailVirementScreen({super.key});
@@ -31,7 +31,8 @@ class DetailVirementScreen extends StatelessWidget {
                         height: AppConstants.backButtonSize,
                         decoration: BoxDecoration(
                           color: AppColors.whiteOverlay,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusMedium),
                         ),
                         child: Center(
                           child: SvgPicture.asset(
@@ -102,7 +103,8 @@ class DetailVirementScreen extends StatelessWidget {
                       padding: EdgeInsets.all(AppConstants.paddingLarge),
                       decoration: BoxDecoration(
                         color: AppColors.white,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusLarge),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,14 +158,16 @@ class DetailVirementScreen extends StatelessWidget {
                                     height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
                                       color: AppColors.primary,
-                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
+                                      borderRadius: BorderRadius.circular(
+                                          AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/bi_pencil (1).svg',
                                         width: AppConstants.iconSizeMedium,
                                         height: AppConstants.iconSizeMedium,
-                                        colorFilter: ColorFilter.mode(AppColors.white, BlendMode.srcIn),
+                                        colorFilter: ColorFilter.mode(
+                                            AppColors.white, BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
@@ -188,7 +192,8 @@ class DetailVirementScreen extends StatelessWidget {
                                   margin: const EdgeInsets.only(bottom: 32),
                                   decoration: BoxDecoration(
                                     color: AppColors.divider,
-                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                                    borderRadius: BorderRadius.circular(
+                                        AppConstants.radiusRound),
                                   ),
                                 ),
                               ),
@@ -200,14 +205,17 @@ class DetailVirementScreen extends StatelessWidget {
                                     height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
                                       color: AppColors.borderDivider,
-                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
+                                      borderRadius: BorderRadius.circular(
+                                          AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/bi_clock-history.svg',
                                         width: AppConstants.iconSizeMedium,
                                         height: AppConstants.iconSizeMedium,
-                                        colorFilter: ColorFilter.mode(AppColors.textLight, BlendMode.srcIn),
+                                        colorFilter: ColorFilter.mode(
+                                            AppColors.textLight,
+                                            BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
@@ -232,7 +240,8 @@ class DetailVirementScreen extends StatelessWidget {
                                   margin: const EdgeInsets.only(bottom: 32),
                                   decoration: BoxDecoration(
                                     color: AppColors.divider,
-                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                                    borderRadius: BorderRadius.circular(
+                                        AppConstants.radiusRound),
                                   ),
                                 ),
                               ),
@@ -244,14 +253,17 @@ class DetailVirementScreen extends StatelessWidget {
                                     height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
                                       color: AppColors.borderDivider,
-                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
+                                      borderRadius: BorderRadius.circular(
+                                          AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/ep_check.svg',
                                         width: AppConstants.iconSizeMedium,
                                         height: AppConstants.iconSizeMedium,
-                                        colorFilter: ColorFilter.mode(AppColors.textLight, BlendMode.srcIn),
+                                        colorFilter: ColorFilter.mode(
+                                            AppColors.textLight,
+                                            BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
@@ -281,11 +293,18 @@ class DetailVirementScreen extends StatelessWidget {
                     left: AppConstants.paddingXLarge,
                     right: AppConstants.paddingXLarge,
                     child: Container(
-                      padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.paddingXLarge, AppConstants.paddingLarge, AppConstants.paddingXLarge),
+                      padding: EdgeInsets.fromLTRB(
+                          AppConstants.paddingLarge,
+                          AppConstants.paddingXLarge,
+                          AppConstants.paddingLarge,
+                          AppConstants.paddingXLarge),
                       decoration: BoxDecoration(
                         color: AppColors.white,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-                        border: Border.all(color: AppColors.border, width: AppConstants.borderWidthThin),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusMedium),
+                        border: Border.all(
+                            color: AppColors.border,
+                            width: AppConstants.borderWidthThin),
                         boxShadow: [
                           BoxShadow(
                             color: AppColors.shadowDark,
@@ -320,10 +339,12 @@ class DetailVirementScreen extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 12),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsets.only(bottom: 8),
+                                        padding:
+                                            const EdgeInsets.only(bottom: 8),
                                         child: Text(
                                           'Acte de vente',
                                           style: TextStyle(
@@ -367,7 +388,8 @@ class DetailVirementScreen extends StatelessWidget {
                             height: 160,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFDEE8EE), width: 1),
+                              border: Border.all(
+                                  color: const Color(0xFFDEE8EE), width: 1),
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),
@@ -587,7 +609,8 @@ class DetailVirementScreen extends StatelessWidget {
                             'assets/icons/Group (1).svg',
                             width: 24,
                             height: 24,
-                            colorFilter: const ColorFilter.mode(Color(0xFF6B7280), BlendMode.srcIn),
+                            colorFilter: const ColorFilter.mode(
+                                Color(0xFF6B7280), BlendMode.srcIn),
                           ),
                           const SizedBox(width: 8),
                           Text(

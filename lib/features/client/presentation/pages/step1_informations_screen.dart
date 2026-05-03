@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_state.dart';
 import 'step2_documents_screen.dart';
 
 /// Étape 1 — Informations personnelles
@@ -33,11 +33,11 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
   String _selectedMaritalStatus = '';
 
   List<String> get _maritalStatusOptions => [
-    'profile.single'.tr(),
-    'profile.married'.tr(),
-    'profile.divorced'.tr(),
-    'profile.widowed'.tr(),
-  ];
+        'profile.single'.tr(),
+        'profile.married'.tr(),
+        'profile.divorced'.tr(),
+        'profile.widowed'.tr(),
+      ];
 
   @override
   void initState() {
@@ -51,7 +51,8 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
       _phoneController.text = profile.phone;
       _emailController.text = profile.email;
       _birthDateController.text = profile.birthDate;
-      _selectedGender = profile.gender.isNotEmpty ? profile.gender : 'profile.male'.tr();
+      _selectedGender =
+          profile.gender.isNotEmpty ? profile.gender : 'profile.male'.tr();
       _selectedMaritalStatus = profile.maritalStatus;
     }
   }
@@ -180,8 +181,10 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
                           prefixIcon: Icons.email_outlined,
                           keyboardType: TextInputType.emailAddress,
                           validator: (v) {
-                            if (v!.isEmpty) return 'profile.required_field'.tr();
-                            if (!v.contains('@')) return 'profile.invalid_email'.tr();
+                            if (v!.isEmpty)
+                              return 'profile.required_field'.tr();
+                            if (!v.contains('@'))
+                              return 'profile.invalid_email'.tr();
                             return null;
                           },
                         ),
@@ -211,8 +214,8 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
                               ? null
                               : _selectedMaritalStatus,
                           items: _maritalStatusOptions,
-                          onChanged: (val) =>
-                              setState(() => _selectedMaritalStatus = val ?? ''),
+                          onChanged: (val) => setState(
+                              () => _selectedMaritalStatus = val ?? ''),
                         ),
                         const SizedBox(height: 32),
 
@@ -227,8 +230,8 @@ class _Step1InformationsScreenState extends State<Step1InformationsScreen> {
                                 onPressed: isLoading ? null : _onValider,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primaryDark,
-                                  disabledBackgroundColor:
-                                      AppColors.primaryDark.withValues(alpha: 0.6),
+                                  disabledBackgroundColor: AppColors.primaryDark
+                                      .withValues(alpha: 0.6),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
                                         AppConstants.radiusRound),
@@ -433,7 +436,8 @@ class _FormField extends StatelessWidget {
               fontSize: AppConstants.fontSizeMedium,
             ),
             prefixIcon: Icon(prefixIcon,
-                color: AppColors.textSecondary, size: AppConstants.iconSizeMedium),
+                color: AppColors.textSecondary,
+                size: AppConstants.iconSizeMedium),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             filled: true,
@@ -607,7 +611,8 @@ class _DateField extends StatelessWidget {
               fontSize: AppConstants.fontSizeMedium,
             ),
             suffixIcon: Icon(Icons.calendar_today_outlined,
-                color: AppColors.textSecondary, size: AppConstants.iconSizeMedium),
+                color: AppColors.textSecondary,
+                size: AppConstants.iconSizeMedium),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             filled: true,
@@ -719,8 +724,7 @@ class _GenderOption extends StatelessWidget {
             style: TextStyle(
               fontFamily: AppConstants.fontFamilySofiaSans,
               fontSize: AppConstants.fontSizeMedium,
-              fontWeight:
-                  isSelected ? FontWeight.w600 : FontWeight.w400,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               color: isSelected ? AppColors.textDark : AppColors.textSecondary,
             ),
           ),
@@ -773,8 +777,7 @@ class _DropdownField extends StatelessWidget {
               fontSize: AppConstants.fontSizeMedium,
             ),
           ),
-          icon: Icon(Icons.keyboard_arrow_down,
-              color: AppColors.textSecondary),
+          icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
           decoration: InputDecoration(
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

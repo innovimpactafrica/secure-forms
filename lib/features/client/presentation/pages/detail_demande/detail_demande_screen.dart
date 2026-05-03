@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class DetailDemandeScreen extends StatelessWidget {
   const DetailDemandeScreen({super.key});
@@ -31,7 +31,8 @@ class DetailDemandeScreen extends StatelessWidget {
                         height: AppConstants.backButtonSize,
                         decoration: BoxDecoration(
                           color: AppColors.whiteOverlay,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusMedium),
                         ),
                         child: Center(
                           child: SvgPicture.asset(
@@ -102,7 +103,8 @@ class DetailDemandeScreen extends StatelessWidget {
                       padding: EdgeInsets.all(AppConstants.paddingLarge),
                       decoration: BoxDecoration(
                         color: AppColors.white,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusLarge),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,14 +158,16 @@ class DetailDemandeScreen extends StatelessWidget {
                                     height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
                                       color: AppColors.primary,
-                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
+                                      borderRadius: BorderRadius.circular(
+                                          AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/bi_pencil (1).svg',
                                         width: AppConstants.iconSizeMedium,
                                         height: AppConstants.iconSizeMedium,
-                                        colorFilter: ColorFilter.mode(AppColors.white, BlendMode.srcIn),
+                                        colorFilter: ColorFilter.mode(
+                                            AppColors.white, BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
@@ -188,7 +192,8 @@ class DetailDemandeScreen extends StatelessWidget {
                                   margin: const EdgeInsets.only(bottom: 32),
                                   decoration: BoxDecoration(
                                     color: AppColors.divider,
-                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                                    borderRadius: BorderRadius.circular(
+                                        AppConstants.radiusRound),
                                   ),
                                 ),
                               ),
@@ -200,14 +205,17 @@ class DetailDemandeScreen extends StatelessWidget {
                                     height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
                                       color: AppColors.borderDivider,
-                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
+                                      borderRadius: BorderRadius.circular(
+                                          AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/bi_clock-history.svg',
                                         width: AppConstants.iconSizeMedium,
                                         height: AppConstants.iconSizeMedium,
-                                        colorFilter: ColorFilter.mode(AppColors.textLight, BlendMode.srcIn),
+                                        colorFilter: ColorFilter.mode(
+                                            AppColors.textLight,
+                                            BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
@@ -232,7 +240,8 @@ class DetailDemandeScreen extends StatelessWidget {
                                   margin: const EdgeInsets.only(bottom: 32),
                                   decoration: BoxDecoration(
                                     color: AppColors.divider,
-                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                                    borderRadius: BorderRadius.circular(
+                                        AppConstants.radiusRound),
                                   ),
                                 ),
                               ),
@@ -244,14 +253,17 @@ class DetailDemandeScreen extends StatelessWidget {
                                     height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
                                       color: AppColors.borderDivider,
-                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
+                                      borderRadius: BorderRadius.circular(
+                                          AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
                                         'assets/icons/ep_check.svg',
                                         width: AppConstants.iconSizeMedium,
                                         height: AppConstants.iconSizeMedium,
-                                        colorFilter: ColorFilter.mode(AppColors.textLight, BlendMode.srcIn),
+                                        colorFilter: ColorFilter.mode(
+                                            AppColors.textLight,
+                                            BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
@@ -281,11 +293,18 @@ class DetailDemandeScreen extends StatelessWidget {
                     left: AppConstants.paddingXLarge,
                     right: AppConstants.paddingXLarge,
                     child: Container(
-                      padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.paddingXLarge, AppConstants.paddingLarge, AppConstants.paddingXLarge),
+                      padding: EdgeInsets.fromLTRB(
+                          AppConstants.paddingLarge,
+                          AppConstants.paddingXLarge,
+                          AppConstants.paddingLarge,
+                          AppConstants.paddingXLarge),
                       decoration: BoxDecoration(
                         color: AppColors.white,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-                        border: Border.all(color: AppColors.border, width: AppConstants.borderWidthThin),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusMedium),
+                        border: Border.all(
+                            color: AppColors.border,
+                            width: AppConstants.borderWidthThin),
                         boxShadow: [
                           BoxShadow(
                             color: AppColors.shadowDark,
@@ -315,22 +334,28 @@ class DetailDemandeScreen extends StatelessWidget {
                                         'assets/icons/earmark-text.svg',
                                         width: AppConstants.iconSizeLarge,
                                         height: AppConstants.iconSizeLarge,
-                                        colorFilter: const ColorFilter.mode(AppColors.backArrowColor, BlendMode.srcIn),
+                                        colorFilter: const ColorFilter.mode(
+                                            AppColors.backArrowColor,
+                                            BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
                                   SizedBox(width: AppConstants.paddingMedium),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Padding(
-                                        padding: EdgeInsets.only(bottom: AppConstants.paddingSmall),
+                                        padding: EdgeInsets.only(
+                                            bottom: AppConstants.paddingSmall),
                                         child: Text(
                                           'Acte de vente',
                                           style: TextStyle(
-                                            fontFamily: AppConstants.fontFamilyInter,
+                                            fontFamily:
+                                                AppConstants.fontFamilyInter,
                                             fontWeight: FontWeight.w600,
-                                            fontSize: AppConstants.fontSizeMedium,
+                                            fontSize:
+                                                AppConstants.fontSizeMedium,
                                             height: 1.0,
                                             letterSpacing: 0.03,
                                             color: AppColors.textDarkGray,
@@ -342,9 +367,11 @@ class DetailDemandeScreen extends StatelessWidget {
                                         child: Text(
                                           'Version 1.1',
                                           style: TextStyle(
-                                            fontFamily: AppConstants.fontFamilyInter,
+                                            fontFamily:
+                                                AppConstants.fontFamilyInter,
                                             fontWeight: FontWeight.w400,
-                                            fontSize: AppConstants.fontSizeRegular,
+                                            fontSize:
+                                                AppConstants.fontSizeRegular,
                                             height: 1.0,
                                             letterSpacing: 0.03,
                                             color: AppColors.textSecondary,
@@ -367,11 +394,15 @@ class DetailDemandeScreen extends StatelessWidget {
                             width: 350,
                             height: 160,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-                              border: Border.all(color: AppColors.borderLight, width: AppConstants.borderWidthThin),
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusMedium),
+                              border: Border.all(
+                                  color: AppColors.borderLight,
+                                  width: AppConstants.borderWidthThin),
                             ),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusMedium),
                               child: Image.asset(
                                 'assets/images/field.png',
                                 width: 350,
@@ -391,11 +422,18 @@ class DetailDemandeScreen extends StatelessWidget {
                     right: AppConstants.paddingXLarge,
                     child: Container(
                       height: 269,
-                      padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.paddingXLarge, AppConstants.paddingLarge, AppConstants.paddingXLarge),
+                      padding: EdgeInsets.fromLTRB(
+                          AppConstants.paddingLarge,
+                          AppConstants.paddingXLarge,
+                          AppConstants.paddingLarge,
+                          AppConstants.paddingXLarge),
                       decoration: BoxDecoration(
                         color: AppColors.white,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-                        border: Border.all(color: AppColors.border, width: AppConstants.borderWidthThin),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusMedium),
+                        border: Border.all(
+                            color: AppColors.border,
+                            width: AppConstants.borderWidthThin),
                         boxShadow: [
                           BoxShadow(
                             color: AppColors.shadowDark,
@@ -442,7 +480,8 @@ class DetailDemandeScreen extends StatelessWidget {
                             padding: EdgeInsets.all(15),
                             decoration: BoxDecoration(
                               color: AppColors.statusRejectedLight,
-                              borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusSmall),
                             ),
                             child: Text(
                               'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s',
@@ -467,7 +506,8 @@ class DetailDemandeScreen extends StatelessWidget {
             Container(
               width: AppConstants.screenWidth,
               color: AppColors.primaryDark,
-              padding: EdgeInsets.fromLTRB(AppConstants.paddingXLarge, AppConstants.paddingMedium, AppConstants.paddingXLarge, 0),
+              padding: EdgeInsets.fromLTRB(AppConstants.paddingXLarge,
+                  AppConstants.paddingMedium, AppConstants.paddingXLarge, 0),
               child: Text(
                 'Documents justificatifs',
                 style: TextStyle(
@@ -483,7 +523,8 @@ class DetailDemandeScreen extends StatelessWidget {
             Container(
               width: AppConstants.screenWidth,
               color: AppColors.primaryDark,
-              padding: EdgeInsets.fromLTRB(AppConstants.paddingXLarge, AppConstants.paddingMedium, AppConstants.paddingXLarge, 0),
+              padding: EdgeInsets.fromLTRB(AppConstants.paddingXLarge,
+                  AppConstants.paddingMedium, AppConstants.paddingXLarge, 0),
               child: Column(
                 children: [
                   Container(
@@ -492,7 +533,8 @@ class DetailDemandeScreen extends StatelessWidget {
                     padding: EdgeInsets.all(AppConstants.paddingLarge),
                     decoration: BoxDecoration(
                       color: AppColors.white,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusLarge),
                     ),
                     child: Column(
                       children: [
@@ -512,7 +554,9 @@ class DetailDemandeScreen extends StatelessWidget {
                                     'assets/icons/earmark-text.svg',
                                     width: AppConstants.iconSizeLarge,
                                     height: AppConstants.iconSizeLarge,
-                                    colorFilter: const ColorFilter.mode(AppColors.backArrowColor, BlendMode.srcIn),
+                                    colorFilter: const ColorFilter.mode(
+                                        AppColors.backArrowColor,
+                                        BlendMode.srcIn),
                                   ),
                                 ),
                               ),
@@ -591,7 +635,9 @@ class DetailDemandeScreen extends StatelessWidget {
                                     'assets/icons/earmark-text.svg',
                                     width: AppConstants.iconSizeLarge,
                                     height: AppConstants.iconSizeLarge,
-                                    colorFilter: const ColorFilter.mode(AppColors.backArrowColor, BlendMode.srcIn),
+                                    colorFilter: const ColorFilter.mode(
+                                        AppColors.backArrowColor,
+                                        BlendMode.srcIn),
                                   ),
                                 ),
                               ),
@@ -658,7 +704,8 @@ class DetailDemandeScreen extends StatelessWidget {
                     padding: EdgeInsets.all(AppConstants.paddingMedium),
                     decoration: BoxDecoration(
                       color: AppColors.backgroundDarker,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusRound),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -667,7 +714,8 @@ class DetailDemandeScreen extends StatelessWidget {
                           'assets/icons/Group (1).svg',
                           width: AppConstants.iconSizeLarge,
                           height: AppConstants.iconSizeLarge,
-                          colorFilter: ColorFilter.mode(AppColors.textSecondary, BlendMode.srcIn),
+                          colorFilter: ColorFilter.mode(
+                              AppColors.textSecondary, BlendMode.srcIn),
                         ),
                         SizedBox(width: AppConstants.paddingSmall),
                         Text(

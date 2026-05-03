@@ -2,26 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/core/utils/session_storage.dart';
-import 'package:secure_link/features/auth/domain/bloc/auth_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/auth_event.dart';
-import 'package:secure_link/features/auth/domain/bloc/auth_state.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
-import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/notifications_event.dart';
-import 'package:secure_link/features/auth/presentation/pages/register_screen.dart';
-import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_event.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
-import 'package:secure_link/features/home/domain/bloc/home_bloc.dart';
-import 'package:secure_link/features/home/domain/bloc/home_event.dart';
-import 'package:secure_link/core/services/fcm_service.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/core/utils/session_storage.dart';
+import 'package:quick_forms/features/auth/domain/bloc/auth_bloc.dart';
+import 'package:quick_forms/features/auth/domain/bloc/auth_event.dart';
+import 'package:quick_forms/features/auth/domain/bloc/auth_state.dart';
+import 'package:quick_forms/features/auth/domain/bloc/user_bloc.dart';
+import 'package:quick_forms/features/auth/domain/bloc/user_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/notifications_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/notifications_event.dart';
+import 'package:quick_forms/features/auth/presentation/pages/register_screen.dart';
+import 'package:quick_forms/features/client/domain/bloc/demandes_bloc/demandes_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/demandes_bloc/demandes_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_event.dart';
+import 'package:quick_forms/features/home/domain/bloc/home_bloc.dart';
+import 'package:quick_forms/features/home/domain/bloc/home_event.dart';
+import 'package:quick_forms/core/services/fcm_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:convert';
 
@@ -81,7 +81,8 @@ class _LoginScreenState extends State<LoginScreen>
           if (state is LoginSuccess) {
             UserSession.instance.accessToken = state.accessToken;
             UserSession.instance.refreshToken = state.refreshToken;
-            UserSession.instance.userId = _extractUserIdFromJwt(state.accessToken);
+            UserSession.instance.userId =
+                _extractUserIdFromJwt(state.accessToken);
             SessionStorage.instance.save(
               token: state.accessToken,
               refreshToken: state.refreshToken,
@@ -144,12 +145,13 @@ class _LoginScreenState extends State<LoginScreen>
                             width: AppConstants.avatarSizeSmall,
                             height: AppConstants.avatarSizeSmall,
                             decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.backCircleColor, width: 1.26),
+                              border: Border.all(
+                                  color: AppColors.backCircleColor,
+                                  width: 1.26),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.arrow_back,
-                                color: AppColors.backArrowColor,
-                                size: 20.6),
+                                color: AppColors.backArrowColor, size: 20.6),
                           ),
                         ),
                         Image.asset('assets/images/qfwithtext.png',
@@ -198,7 +200,8 @@ class _LoginScreenState extends State<LoginScreen>
                               height: 48,
                               decoration: BoxDecoration(
                                 color: AppColors.backgroundLight,
-                                borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                                borderRadius: BorderRadius.circular(
+                                    AppConstants.radiusRound),
                               ),
                               padding: const EdgeInsets.all(4),
                               child: AnimatedBuilder(
@@ -208,12 +211,14 @@ class _LoginScreenState extends State<LoginScreen>
                                     _LoginTabOption(
                                       label: 'login.tab_email'.tr(),
                                       isSelected: _tabController.index == 0,
-                                      onTap: () => setState(() => _tabController.animateTo(0)),
+                                      onTap: () => setState(
+                                          () => _tabController.animateTo(0)),
                                     ),
                                     _LoginTabOption(
                                       label: 'login.tab_phone'.tr(),
                                       isSelected: _tabController.index == 1,
-                                      onTap: () => setState(() => _tabController.animateTo(1)),
+                                      onTap: () => setState(
+                                          () => _tabController.animateTo(1)),
                                     ),
                                   ],
                                 ),
@@ -227,21 +232,28 @@ class _LoginScreenState extends State<LoginScreen>
                               builder: (_, __) {
                                 if (_tabController.index == 0) {
                                   return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      _FieldLabel(label: 'login.email_label'.tr()),
+                                      _FieldLabel(
+                                          label: 'login.email_label'.tr()),
                                       const SizedBox(height: 6),
                                       TextFormField(
                                         controller: _emailController,
-                                        keyboardType: TextInputType.emailAddress,
+                                        keyboardType:
+                                            TextInputType.emailAddress,
                                         validator: (v) {
-                                          if (_tabController.index != 0) return null;
-                                          if (v == null || v.isEmpty) return 'login.required_field'.tr();
-                                          if (!v.contains('@')) return 'login.invalid_email'.tr();
+                                          if (_tabController.index != 0)
+                                            return null;
+                                          if (v == null || v.isEmpty)
+                                            return 'login.required_field'.tr();
+                                          if (!v.contains('@'))
+                                            return 'login.invalid_email'.tr();
                                           return null;
                                         },
                                         style: const TextStyle(
-                                          fontFamily: AppConstants.fontFamilyInter,
+                                          fontFamily:
+                                              AppConstants.fontFamilyInter,
                                           fontSize: AppConstants.fontSizeMedium,
                                           color: AppColors.textDark,
                                         ),
@@ -254,53 +266,79 @@ class _LoginScreenState extends State<LoginScreen>
                                   );
                                 } else {
                                   return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      _FieldLabel(label: 'login.phone_label'.tr()),
+                                      _FieldLabel(
+                                          label: 'login.phone_label'.tr()),
                                       const SizedBox(height: 6),
                                       IntlPhoneField(
                                         controller: _phoneController,
                                         initialCountryCode: 'SN',
                                         keyboardType: TextInputType.phone,
                                         style: const TextStyle(
-                                          fontFamily: AppConstants.fontFamilyInter,
+                                          fontFamily:
+                                              AppConstants.fontFamilyInter,
                                           fontSize: AppConstants.fontSizeMedium,
                                           color: AppColors.textDark,
                                         ),
                                         decoration: InputDecoration(
-                                          hintText: 'login.phone_hint_field'.tr(),
+                                          hintText:
+                                              'login.phone_hint_field'.tr(),
                                           hintStyle: const TextStyle(
-                                            fontFamily: AppConstants.fontFamilyInter,
+                                            fontFamily:
+                                                AppConstants.fontFamilyInter,
                                             color: AppColors.hintText,
-                                            fontSize: AppConstants.fontSizeMedium,
+                                            fontSize:
+                                                AppConstants.fontSizeMedium,
                                           ),
-                                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                  horizontal: 16, vertical: 14),
                                           filled: true,
                                           fillColor: AppColors.white,
                                           border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-                                            borderSide: const BorderSide(color: AppColors.borderLight),
+                                            borderRadius: BorderRadius.circular(
+                                                AppConstants.radiusRound),
+                                            borderSide: const BorderSide(
+                                                color: AppColors.borderLight),
                                           ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-                                            borderSide: const BorderSide(color: AppColors.borderLight),
+                                            borderRadius: BorderRadius.circular(
+                                                AppConstants.radiusRound),
+                                            borderSide: const BorderSide(
+                                                color: AppColors.borderLight),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-                                            borderSide: const BorderSide(color: AppColors.primary, width: AppConstants.borderWidthMedium),
+                                            borderRadius: BorderRadius.circular(
+                                                AppConstants.radiusRound),
+                                            borderSide: const BorderSide(
+                                                color: AppColors.primary,
+                                                width: AppConstants
+                                                    .borderWidthMedium),
                                           ),
                                           errorBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-                                            borderSide: const BorderSide(color: AppColors.statusRejected),
+                                            borderRadius: BorderRadius.circular(
+                                                AppConstants.radiusRound),
+                                            borderSide: const BorderSide(
+                                                color:
+                                                    AppColors.statusRejected),
                                           ),
-                                          focusedErrorBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-                                            borderSide: const BorderSide(color: AppColors.statusRejected),
+                                          focusedErrorBorder:
+                                              OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                AppConstants.radiusRound),
+                                            borderSide: const BorderSide(
+                                                color:
+                                                    AppColors.statusRejected),
                                           ),
                                         ),
                                         validator: (phone) {
-                                          if (_tabController.index != 1) return null;
-                                          if (phone == null || phone.number.isEmpty) return 'login.required_field'.tr();
+                                          if (_tabController.index != 1)
+                                            return null;
+                                          if (phone == null ||
+                                              phone.number.isEmpty)
+                                            return 'login.required_field'.tr();
                                           return null;
                                         },
                                         onChanged: (phone) {
@@ -321,7 +359,8 @@ class _LoginScreenState extends State<LoginScreen>
                               controller: _passwordController,
                               obscureText: _obscurePassword,
                               validator: (v) {
-                                if (v == null || v.isEmpty) return 'login.required_field'.tr();
+                                if (v == null || v.isEmpty)
+                                  return 'login.required_field'.tr();
                                 return null;
                               },
                               style: const TextStyle(
@@ -334,8 +373,8 @@ class _LoginScreenState extends State<LoginScreen>
                                 prefixIcon: Icons.lock_outline,
                                 isPassword: true,
                                 suffixIcon: GestureDetector(
-                                  onTap: () => setState(
-                                      () => _obscurePassword = !_obscurePassword),
+                                  onTap: () => setState(() =>
+                                      _obscurePassword = !_obscurePassword),
                                   child: Icon(
                                     _obscurePassword
                                         ? Icons.visibility_off_outlined
@@ -384,14 +423,16 @@ class _LoginScreenState extends State<LoginScreen>
                           width: double.infinity,
                           height: AppConstants.logoutButtonHeight,
                           child: ElevatedButton(
-                            onPressed: isLoading ? null : () => _onLogin(context),
+                            onPressed:
+                                isLoading ? null : () => _onLogin(context),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryDark,
                               disabledBackgroundColor:
                                   AppColors.primaryDark.withValues(alpha: 0.6),
                               elevation: 0,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                                borderRadius: BorderRadius.circular(
+                                    AppConstants.radiusRound),
                               ),
                             ),
                             child: isLoading
@@ -402,13 +443,15 @@ class _LoginScreenState extends State<LoginScreen>
                                         width: 18,
                                         height: 18,
                                         child: CircularProgressIndicator(
-                                            strokeWidth: 2, color: AppColors.white),
+                                            strokeWidth: 2,
+                                            color: AppColors.white),
                                       ),
                                       const SizedBox(width: 12),
                                       Text(
                                         'Connexion en cours...',
                                         style: const TextStyle(
-                                          fontFamily: AppConstants.fontFamilySofiaSans,
+                                          fontFamily:
+                                              AppConstants.fontFamilySofiaSans,
                                           color: AppColors.white,
                                           fontWeight: FontWeight.w600,
                                           fontSize: AppConstants.fontSizeLarge,
@@ -419,7 +462,8 @@ class _LoginScreenState extends State<LoginScreen>
                                 : Text(
                                     'login.login_button'.tr(),
                                     style: const TextStyle(
-                                      fontFamily: AppConstants.fontFamilySofiaSans,
+                                      fontFamily:
+                                          AppConstants.fontFamilySofiaSans,
                                       color: AppColors.white,
                                       fontWeight: FontWeight.w600,
                                       fontSize: AppConstants.fontSizeLarge,
@@ -499,7 +543,7 @@ class _LoginScreenState extends State<LoginScreen>
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppConstants.radiusMedium)),
+            borderRadius: BorderRadius.circular(AppConstants.radiusMedium)),
         title: Row(children: [
           const Icon(Icons.info_outline,
               color: AppColors.primary, size: AppConstants.iconSizeLarge),
@@ -508,27 +552,26 @@ class _LoginScreenState extends State<LoginScreen>
             child: Text(
               'login.incomplete_title'.tr(),
               style: const TextStyle(
-                fontFamily: AppConstants.fontFamilySofiaSans,
-                fontWeight: FontWeight.w700,
-                fontSize: AppConstants.fontSizeLarge,
-                color: AppColors.textDark),
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontWeight: FontWeight.w700,
+                  fontSize: AppConstants.fontSizeLarge,
+                  color: AppColors.textDark),
             ),
           ),
         ]),
-        content: Text(
-          'login.incomplete_message'.tr(),
-          style: const TextStyle(
-            fontFamily: AppConstants.fontFamilyInter,
-            fontSize: AppConstants.fontSizeMedium,
-            color: AppColors.textSecondary,
-            height: 1.5)),
+        content: Text('login.incomplete_message'.tr(),
+            style: const TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                fontSize: AppConstants.fontSizeMedium,
+                color: AppColors.textSecondary,
+                height: 1.5)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: Text('login.incomplete_later'.tr(),
-              style: const TextStyle(
-                fontFamily: AppConstants.fontFamilyInter,
-                color: AppColors.textSecondary)),
+                style: const TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -536,20 +579,22 @@ class _LoginScreenState extends State<LoginScreen>
               Navigator.of(context).pushNamed(AppRoutes.resumeRegistration);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryDark,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+                backgroundColor: AppColors.primaryDark,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusRound))),
             child: Text('login.incomplete_action'.tr(),
-              style: const TextStyle(
-                fontFamily: AppConstants.fontFamilySofiaSans,
-                color: AppColors.white,
-                fontWeight: FontWeight.w600)),
+                style: const TextStyle(
+                    fontFamily: AppConstants.fontFamilySofiaSans,
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w600)),
           ),
         ],
       ),
     );
   }
+
   Future<void> _sendFcmTokenAfterLogin() async {
     try {
       final fcmToken = await FirebaseMessaging.instance.getToken();
@@ -645,7 +690,12 @@ class _LoginTabOption extends StatelessWidget {
             color: isSelected ? AppColors.white : AppColors.backgroundLight,
             borderRadius: BorderRadius.circular(AppConstants.radiusRound),
             boxShadow: isSelected
-                ? [BoxShadow(color: AppColors.shadowLight, blurRadius: 4, offset: const Offset(0, 2))]
+                ? [
+                    BoxShadow(
+                        color: AppColors.shadowLight,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2))
+                  ]
                 : [],
           ),
           alignment: Alignment.center,
@@ -737,15 +787,18 @@ class _LoginScreenDeepLinkState extends State<LoginScreenDeepLink> {
               name: '${state.firstName} ${state.lastName}'.trim(),
             );
             context.read<UserBloc>().add(LoadUserProfile(state.accessToken));
-            context.read<UserBloc>().add(LoadProfilePictureEvent(state.accessToken));
-            context.read<NotificationsBloc>().add(const LoadNotificationsEvent());
+            context
+                .read<UserBloc>()
+                .add(LoadProfilePictureEvent(state.accessToken));
+            context
+                .read<NotificationsBloc>()
+                .add(const LoadNotificationsEvent());
 
             // 👇 NOUVEAU — Envoyer le token FCM au backend après login
             _sendFcmTokenAfterLogin();
 
             // Seule différence : callback au lieu de pushNamedAndRemoveUntil
             widget.onLoginSuccess();
-
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text(state.message),
@@ -773,12 +826,13 @@ class _LoginScreenDeepLinkState extends State<LoginScreenDeepLink> {
                             width: AppConstants.avatarSizeSmall,
                             height: AppConstants.avatarSizeSmall,
                             decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.backCircleColor, width: 1.26),
+                              border: Border.all(
+                                  color: AppColors.backCircleColor,
+                                  width: 1.26),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.arrow_back,
-                                color: AppColors.backArrowColor,
-                                size: 20.6),
+                                color: AppColors.backArrowColor, size: 20.6),
                           ),
                         ),
                         Image.asset('assets/images/qfwithtext.png',
@@ -819,8 +873,10 @@ class _LoginScreenDeepLinkState extends State<LoginScreenDeepLink> {
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
                               validator: (v) {
-                                if (v!.isEmpty) return 'login.required_field'.tr();
-                                if (!v.contains('@')) return 'login.invalid_email'.tr();
+                                if (v!.isEmpty)
+                                  return 'login.required_field'.tr();
+                                if (!v.contains('@'))
+                                  return 'login.invalid_email'.tr();
                                 return null;
                               },
                               style: const TextStyle(
@@ -851,8 +907,8 @@ class _LoginScreenDeepLinkState extends State<LoginScreenDeepLink> {
                                 hint: 'login.password_hint'.tr(),
                                 prefixIcon: Icons.lock_outline,
                                 suffixIcon: GestureDetector(
-                                  onTap: () => setState(
-                                      () => _obscurePassword = !_obscurePassword),
+                                  onTap: () => setState(() =>
+                                      _obscurePassword = !_obscurePassword),
                                   child: Icon(
                                     _obscurePassword
                                         ? Icons.visibility_off_outlined
@@ -891,7 +947,8 @@ class _LoginScreenDeepLinkState extends State<LoginScreenDeepLink> {
                         ),
                         child: isLoading
                             ? const SizedBox(
-                                width: 22, height: 22,
+                                width: 22,
+                                height: 22,
                                 child: CircularProgressIndicator(
                                     strokeWidth: 2, color: AppColors.white))
                             : Text('login.login_button'.tr(),
@@ -940,8 +997,7 @@ class _LoginScreenDeepLinkState extends State<LoginScreenDeepLink> {
       focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusRound),
           borderSide: const BorderSide(
-              color: AppColors.primary,
-              width: AppConstants.borderWidthMedium)),
+              color: AppColors.primary, width: AppConstants.borderWidthMedium)),
       errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusRound),
           borderSide: const BorderSide(color: AppColors.statusRejected)),
@@ -951,7 +1007,3 @@ class _LoginScreenDeepLinkState extends State<LoginScreenDeepLink> {
     );
   }
 }
-
-
-
-

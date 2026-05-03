@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/features/client/data/models/demande_model.dart';
-import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_event.dart';
-import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/features/client/data/models/demande_model.dart';
+import 'package:quick_forms/features/client/domain/bloc/demandes_bloc/demandes_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/demandes_bloc/demandes_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/demandes_bloc/demandes_state.dart';
 
 class ClientDemandesScreen extends StatefulWidget {
   final bool fromHome;
@@ -110,7 +110,8 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
                   color: AppColors.primaryDark,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
+                child: const Icon(Icons.arrow_back,
+                    color: AppColors.white, size: 20),
               ),
             ),
             const SizedBox(width: 12),
@@ -142,7 +143,6 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
     );
   }
 
-
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -168,7 +168,8 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
                 style: const TextStyle(fontSize: 14, color: AppColors.textDark),
                 decoration: InputDecoration(
                   hintText: 'demandes.search_placeholder'.tr(),
-                  hintStyle: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                  hintStyle: const TextStyle(
+                      fontSize: 14, color: AppColors.textSecondary),
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
@@ -200,9 +201,11 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryDark : Colors.transparent,
+                  color:
+                      isSelected ? AppColors.primaryDark : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -210,7 +213,8 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                    color: isSelected ? AppColors.white : AppColors.textSecondary,
+                    color:
+                        isSelected ? AppColors.white : AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -225,7 +229,9 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
     return BlocBuilder<DemandesBloc, DemandesState>(
       builder: (context, state) {
         if (state is DemandesLoading) {
-          return const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryDark));
+          return const Center(
+              child: CircularProgressIndicator(
+                  strokeWidth: 2, color: AppColors.primaryDark));
         }
         if (state is DemandesError) {
           return Center(
@@ -234,13 +240,16 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.error_outline, color: AppColors.statusRejected, size: 40),
+                  const Icon(Icons.error_outline,
+                      color: AppColors.statusRejected, size: 40),
                   const SizedBox(height: 12),
                   Text(state.message,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: AppColors.statusRejected, fontSize: 14)),
+                      style: const TextStyle(
+                          color: AppColors.statusRejected, fontSize: 14)),
                   const SizedBox(height: 16),
-                  TextButton(onPressed: _load, child: Text('archives.retry'.tr())),
+                  TextButton(
+                      onPressed: _load, child: Text('archives.retry'.tr())),
                 ],
               ),
             ),
@@ -251,7 +260,8 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
             return Center(
               child: Text(
                 'demandes.no_demandes'.tr(),
-                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                style: const TextStyle(
+                    fontSize: 14, color: AppColors.textSecondary),
               ),
             );
           }
@@ -272,7 +282,8 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
                     ),
                     Text(
                       'demandes.title'.tr().toLowerCase(),
-                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      style: const TextStyle(
+                          fontSize: 13, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -281,13 +292,15 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
                 child: ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  itemCount: state.demandes.length + (state.isLoadingMore ? 1 : 0),
+                  itemCount:
+                      state.demandes.length + (state.isLoadingMore ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index == state.demandes.length) {
                       return const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Center(
-                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryDark),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: AppColors.primaryDark),
                         ),
                       );
                     }
@@ -365,7 +378,9 @@ class _DemandeCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.formType.isNotEmpty ? item.formType : item.requestNumber,
+                    item.formType.isNotEmpty
+                        ? item.formType
+                        : item.requestNumber,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -390,7 +405,8 @@ class _DemandeCard extends StatelessWidget {
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 100),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: statusCfg.bgColor,
                   borderRadius: BorderRadius.circular(999),
@@ -416,17 +432,23 @@ class _DemandeCard extends StatelessWidget {
   _StatusCfg _statusConfig(String status) {
     switch (status.toUpperCase()) {
       case 'EN_ATTENTE':
-        return _StatusCfg('demandes.pending'.tr(), AppColors.statusPending, AppColors.statusPendingLight);
+        return _StatusCfg('demandes.pending'.tr(), AppColors.statusPending,
+            AppColors.statusPendingLight);
       case 'EN_COURS':
-        return _StatusCfg('demandes.in_progress'.tr(), AppColors.statusInProgress, AppColors.statusInProgressLight);
+        return _StatusCfg('demandes.in_progress'.tr(),
+            AppColors.statusInProgress, AppColors.statusInProgressLight);
       case 'VALIDEE':
-        return _StatusCfg('demandes.validated'.tr(), AppColors.statusValidated, AppColors.statusValidatedLight);
+        return _StatusCfg('demandes.validated'.tr(), AppColors.statusValidated,
+            AppColors.statusValidatedLight);
       case 'REJETEE':
-        return _StatusCfg('demandes.rejected'.tr(), AppColors.statusRejected, AppColors.statusRejectedLight);
+        return _StatusCfg('demandes.rejected'.tr(), AppColors.statusRejected,
+            AppColors.statusRejectedLight);
       case 'BROUILLON':
-        return _StatusCfg('demandes.draft'.tr(), AppColors.statusDraft, AppColors.statusDraftLight);
+        return _StatusCfg('demandes.draft'.tr(), AppColors.statusDraft,
+            AppColors.statusDraftLight);
       default:
-        return _StatusCfg(status, AppColors.statusDraft, AppColors.statusDraftLight);
+        return _StatusCfg(
+            status, AppColors.statusDraft, AppColors.statusDraftLight);
     }
   }
 }

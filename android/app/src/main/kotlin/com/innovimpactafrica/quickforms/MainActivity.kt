@@ -1,4 +1,4 @@
-package com.wakana.secureforms
+package com.innovimpactafrica.quickforms
 
 import io.flutter.embedding.android.FlutterActivity
 

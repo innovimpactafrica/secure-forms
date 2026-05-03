@@ -4,15 +4,15 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/core/services/demande_zip_service.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/client/data/models/archive_model.dart';
-import 'package:secure_link/features/client/data/repositories/demandes_repository.dart';
-import 'package:secure_link/features/client/domain/bloc/archives_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/archives_event.dart';
-import 'package:secure_link/features/client/domain/bloc/archives_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/core/services/demande_zip_service.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/client/data/models/archive_model.dart';
+import 'package:quick_forms/features/client/data/repositories/demandes_repository.dart';
+import 'package:quick_forms/features/client/domain/bloc/archives_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/archives_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/archives_state.dart';
 
 class MesArchivesScreen extends StatefulWidget {
   final bool fromHome;
@@ -132,15 +132,17 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
                     textAlign: TextAlign.center),
                 const SizedBox(height: 16),
                 GestureDetector(
-                  onTap: () => _bloc.add(
-                      LoadArchivesEvent(status: _filterStatuses[_selectedFilter])),
+                  onTap: () => _bloc.add(LoadArchivesEvent(
+                      status: _filterStatuses[_selectedFilter])),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
                     decoration: BoxDecoration(
                         color: AppColors.primaryDark,
                         borderRadius: BorderRadius.circular(20)),
                     child: Text('archives.retry'.tr(),
-                        style: const TextStyle(color: AppColors.white, fontSize: 14)),
+                        style: const TextStyle(
+                            color: AppColors.white, fontSize: 14)),
                   ),
                 ),
               ],
@@ -154,7 +156,8 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
             return RefreshIndicator(
               color: AppColors.primaryDark,
               onRefresh: () async {
-                _bloc.add(LoadArchivesEvent(status: _filterStatuses[_selectedFilter]));
+                _bloc.add(LoadArchivesEvent(
+                    status: _filterStatuses[_selectedFilter]));
                 await Future.delayed(const Duration(milliseconds: 800));
               },
               child: ListView(
@@ -189,7 +192,8 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
                     ),
                     Text(
                       'archives.title'.tr().toLowerCase(),
-                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      style: const TextStyle(
+                          fontSize: 13, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -199,7 +203,8 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
                 child: RefreshIndicator(
                   color: AppColors.primaryDark,
                   onRefresh: () async {
-                    _bloc.add(LoadArchivesEvent(status: _filterStatuses[_selectedFilter]));
+                    _bloc.add(LoadArchivesEvent(
+                        status: _filterStatuses[_selectedFilter]));
                     await Future.delayed(const Duration(milliseconds: 800));
                   },
                   child: ListView.builder(
@@ -212,7 +217,8 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
                           child: Center(
-                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryDark),
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: AppColors.primaryDark),
                           ),
                         );
                       }
@@ -251,7 +257,8 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
               decoration: BoxDecoration(
                   color: AppColors.primaryDark,
                   borderRadius: BorderRadius.circular(10)),
-              child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
+              child: const Icon(Icons.arrow_back,
+                  color: AppColors.white, size: 20),
             ),
           ),
           const SizedBox(width: 12),
@@ -327,9 +334,11 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
               onTap: () => setState(() => _selectedFilter = index),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryDark : Colors.transparent,
+                  color:
+                      isSelected ? AppColors.primaryDark : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -337,7 +346,8 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                    color: isSelected ? AppColors.white : AppColors.textSecondary,
+                    color:
+                        isSelected ? AppColors.white : AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -377,7 +387,11 @@ class _ArchiveCardState extends State<_ArchiveCard> {
   // ── Génère le ZIP et le sauvegarde dans Téléchargements ──
   Future<void> _onDownload(BuildContext context) async {
     if (_isBusy) return;
-    setState(() { _isBusy = true; _progress = 0; _progressLabel = 'Préparation...'; });
+    setState(() {
+      _isBusy = true;
+      _progress = 0;
+      _progressLabel = 'Préparation...';
+    });
     try {
       final demande = await DemandesRepository().getRequestById(
         accessToken: _token(),
@@ -387,7 +401,11 @@ class _ArchiveCardState extends State<_ArchiveCard> {
       final zip = await DemandeZipService.genererEtZipper(
         demande: demande,
         onProgress: (p, label) {
-          if (mounted) setState(() { _progress = p; _progressLabel = label; });
+          if (mounted)
+            setState(() {
+              _progress = p;
+              _progressLabel = label;
+            });
         },
       );
 
@@ -425,14 +443,22 @@ class _ArchiveCardState extends State<_ArchiveCard> {
         ));
       }
     } finally {
-      if (mounted) setState(() { _isBusy = false; _progress = 0; });
+      if (mounted)
+        setState(() {
+          _isBusy = false;
+          _progress = 0;
+        });
     }
   }
 
   // ── Génère le ZIP et partage ──
   Future<void> _onShare(BuildContext context) async {
     if (_isBusy) return;
-    setState(() { _isBusy = true; _progress = 0; _progressLabel = 'Préparation...'; });
+    setState(() {
+      _isBusy = true;
+      _progress = 0;
+      _progressLabel = 'Préparation...';
+    });
     try {
       final demande = await DemandesRepository().getRequestById(
         accessToken: _token(),
@@ -442,7 +468,11 @@ class _ArchiveCardState extends State<_ArchiveCard> {
       final zip = await DemandeZipService.genererEtZipper(
         demande: demande,
         onProgress: (p, label) {
-          if (mounted) setState(() { _progress = p; _progressLabel = label; });
+          if (mounted)
+            setState(() {
+              _progress = p;
+              _progressLabel = label;
+            });
         },
       );
 
@@ -461,7 +491,11 @@ class _ArchiveCardState extends State<_ArchiveCard> {
         ));
       }
     } finally {
-      if (mounted) setState(() { _isBusy = false; _progress = 0; });
+      if (mounted)
+        setState(() {
+          _isBusy = false;
+          _progress = 0;
+        });
     }
   }
 
@@ -514,7 +548,9 @@ class _ArchiveCardState extends State<_ArchiveCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.item.title.isNotEmpty ? widget.item.title : '—',
+                          widget.item.title.isNotEmpty
+                              ? widget.item.title
+                              : '—',
                           style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -544,7 +580,8 @@ class _ArchiveCardState extends State<_ArchiveCard> {
             // ── Barre de progression ou boutons ──
             if (_isBusy)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -572,7 +609,8 @@ class _ArchiveCardState extends State<_ArchiveCard> {
                         value: _progress,
                         minHeight: 4,
                         backgroundColor: AppColors.borderDivider,
-                        valueColor: const AlwaysStoppedAnimation(AppColors.primaryDark),
+                        valueColor:
+                            const AlwaysStoppedAnimation(AppColors.primaryDark),
                       ),
                     ),
                   ],
@@ -602,7 +640,8 @@ class _ArchiveCardState extends State<_ArchiveCard> {
                         ),
                       ),
                     ),
-                    Container(width: 1, height: 24, color: const Color(0xFFEEEEEE)),
+                    Container(
+                        width: 1, height: 24, color: const Color(0xFFEEEEEE)),
                     // Télécharger
                     Expanded(
                       child: InkWell(
@@ -624,7 +663,8 @@ class _ArchiveCardState extends State<_ArchiveCard> {
                         ),
                       ),
                     ),
-                    Container(width: 1, height: 24, color: const Color(0xFFEEEEEE)),
+                    Container(
+                        width: 1, height: 24, color: const Color(0xFFEEEEEE)),
                     // Partager
                     Expanded(
                       child: InkWell(

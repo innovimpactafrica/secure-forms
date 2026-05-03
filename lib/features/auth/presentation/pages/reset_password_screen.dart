@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/features/auth/domain/bloc/forgot_password_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/forgot_password_event.dart';
-import 'package:secure_link/features/auth/domain/bloc/forgot_password_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/features/auth/domain/bloc/forgot_password_bloc.dart';
+import 'package:quick_forms/features/auth/domain/bloc/forgot_password_event.dart';
+import 'package:quick_forms/features/auth/domain/bloc/forgot_password_state.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
@@ -154,7 +154,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   return 'forgot_password.required_field'.tr();
                                 }
                                 if (v.length < 8) {
-                                  return 'forgot_password.password_too_short'.tr();
+                                  return 'forgot_password.password_too_short'
+                                      .tr();
                                 }
                                 return null;
                               },
@@ -184,7 +185,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   return 'forgot_password.required_field'.tr();
                                 }
                                 if (v != _passwordController.text) {
-                                  return 'forgot_password.password_mismatch'.tr();
+                                  return 'forgot_password.password_mismatch'
+                                      .tr();
                                 }
                                 return null;
                               },
@@ -237,8 +239,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                     width: 22,
                                     height: 22,
                                     child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: AppColors.white),
+                                        strokeWidth: 2, color: AppColors.white),
                                   )
                                 : Text(
                                     'forgot_password.save_button'.tr(),

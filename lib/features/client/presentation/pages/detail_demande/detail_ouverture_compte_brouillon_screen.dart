@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
   const DetailOuvertureCompteBrouillonScreen({super.key});
@@ -31,7 +31,8 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                         height: AppConstants.backButtonSize,
                         decoration: BoxDecoration(
                           color: AppColors.whiteOverlay,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusMedium),
                         ),
                         child: Center(
                           child: SvgPicture.asset(
@@ -104,7 +105,8 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                           height: AppConstants.progressBarHeight,
                           decoration: BoxDecoration(
                             color: AppColors.progressBar,
-                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusRound),
                           ),
                         ),
                         Container(
@@ -112,7 +114,8 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                           height: AppConstants.progressBarHeight,
                           decoration: BoxDecoration(
                             color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusRound),
                           ),
                         ),
                       ],
@@ -174,11 +177,18 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                     right: AppConstants.paddingXLarge,
                     child: Container(
                       height: AppConstants.documentContainerHeight,
-                      padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.paddingXLarge, AppConstants.paddingLarge, AppConstants.paddingXLarge),
+                      padding: EdgeInsets.fromLTRB(
+                          AppConstants.paddingLarge,
+                          AppConstants.paddingXLarge,
+                          AppConstants.paddingLarge,
+                          AppConstants.paddingXLarge),
                       decoration: BoxDecoration(
                         color: AppColors.white,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-                        border: Border.all(color: AppColors.border, width: AppConstants.borderWidthThin),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusMedium),
+                        border: Border.all(
+                            color: AppColors.border,
+                            width: AppConstants.borderWidthThin),
                         boxShadow: [
                           BoxShadow(
                             color: AppColors.shadowDark,
@@ -195,10 +205,15 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                             width: double.infinity,
                             height: 150,
                             margin: const EdgeInsets.symmetric(horizontal: 8),
-                            padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.radiusXLarge, AppConstants.paddingLarge, AppConstants.radiusXLarge),
+                            padding: EdgeInsets.fromLTRB(
+                                AppConstants.paddingLarge,
+                                AppConstants.radiusXLarge,
+                                AppConstants.paddingLarge,
+                                AppConstants.radiusXLarge),
                             decoration: BoxDecoration(
                               color: AppColors.statusValidatedLight,
-                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusMedium),
                               border: Border.all(
                                 color: AppColors.primary,
                                 width: AppConstants.borderWidthThin,
@@ -211,16 +226,22 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                                 Container(
                                   width: AppConstants.cardIconSize,
                                   height: AppConstants.cardIconSize,
-                                  padding: EdgeInsets.fromLTRB(AppConstants.paddingMedium, AppConstants.paddingSmall + 2, AppConstants.paddingMedium, AppConstants.paddingSmall + 2),
+                                  padding: EdgeInsets.fromLTRB(
+                                      AppConstants.paddingMedium,
+                                      AppConstants.paddingSmall + 2,
+                                      AppConstants.paddingMedium,
+                                      AppConstants.paddingSmall + 2),
                                   decoration: BoxDecoration(
                                     color: AppColors.primary,
-                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                                    borderRadius: BorderRadius.circular(
+                                        AppConstants.radiusRound),
                                   ),
                                   child: SvgPicture.asset(
                                     'assets/icons/bi_cloud-upload.svg',
                                     width: 12,
                                     height: 16,
-                                    colorFilter: ColorFilter.mode(AppColors.white, BlendMode.srcIn),
+                                    colorFilter: ColorFilter.mode(
+                                        AppColors.white, BlendMode.srcIn),
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -265,11 +286,18 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                       },
                       child: Container(
                         height: 88,
-                        padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.radiusXLarge, AppConstants.paddingLarge, AppConstants.radiusXLarge),
+                        padding: EdgeInsets.fromLTRB(
+                            AppConstants.paddingLarge,
+                            AppConstants.radiusXLarge,
+                            AppConstants.paddingLarge,
+                            AppConstants.radiusXLarge),
                         decoration: BoxDecoration(
                           color: AppColors.white,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-                          border: Border.all(color: AppColors.whiteOverlay, width: AppConstants.borderWidthThin),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusMedium),
+                          border: Border.all(
+                              color: AppColors.whiteOverlay,
+                              width: AppConstants.borderWidthThin),
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.shadowLight,
@@ -291,7 +319,8 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                                     child: Text(
                                       'Formulaire_ouverture_compte.pdf',
                                       style: TextStyle(
-                                        fontFamily: AppConstants.fontFamilySofiaSans,
+                                        fontFamily:
+                                            AppConstants.fontFamilySofiaSans,
                                         fontWeight: FontWeight.w600,
                                         fontSize: AppConstants.fontSizeLarge,
                                         height: 24 / 16,
@@ -302,7 +331,8 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                                   Text(
                                     'Document officiel • 1,2 Mo',
                                     style: TextStyle(
-                                      fontFamily: AppConstants.fontFamilySofiaSans,
+                                      fontFamily:
+                                          AppConstants.fontFamilySofiaSans,
                                       fontWeight: FontWeight.w400,
                                       fontSize: AppConstants.fontSizeRegular,
                                       height: 1.0,
@@ -313,7 +343,8 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(left: 1.5, top: 12),
+                              padding:
+                                  const EdgeInsets.only(left: 1.5, top: 12),
                               child: SvgPicture.asset(
                                 'assets/icons/iconamoon_trash.svg',
                                 width: 21,
@@ -332,14 +363,16 @@ class DetailOuvertureCompteBrouillonScreen extends StatelessWidget {
                     right: AppConstants.paddingXLarge,
                     child: GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/detail-ouverture-compte-continuer');
+                        Navigator.pushNamed(
+                            context, '/detail-ouverture-compte-continuer');
                       },
                       child: Container(
                         height: AppConstants.buttonHeightLarge,
                         padding: EdgeInsets.all(AppConstants.paddingMedium),
                         decoration: BoxDecoration(
                           color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusRound),
                         ),
                         child: Center(
                           child: Text(

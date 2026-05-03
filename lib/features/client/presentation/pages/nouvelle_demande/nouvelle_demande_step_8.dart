@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class NouvelleDemandeStep8Screen extends StatelessWidget {
   const NouvelleDemandeStep8Screen({super.key});
@@ -28,7 +28,8 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
                   height: AppConstants.backButtonSize,
                   decoration: BoxDecoration(
                     color: AppColors.whiteOverlay,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium),
                   ),
                   child: Center(
                     child: Icon(
@@ -80,7 +81,8 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
                     height: AppConstants.progressBarHeight,
                     decoration: BoxDecoration(
                       color: AppColors.progressBar,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusRound),
                     ),
                   ),
                   Container(
@@ -88,7 +90,8 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
                     height: AppConstants.progressBarHeight,
                     decoration: BoxDecoration(
                       color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusRound),
                     ),
                   ),
                 ],
@@ -172,10 +175,15 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
               right: AppConstants.paddingXLarge,
               child: Container(
                 height: 271.33331298828125,
-                padding: EdgeInsets.fromLTRB(AppConstants.paddingLarge, AppConstants.paddingXLarge, AppConstants.paddingLarge, AppConstants.paddingXLarge),
+                padding: EdgeInsets.fromLTRB(
+                    AppConstants.paddingLarge,
+                    AppConstants.paddingXLarge,
+                    AppConstants.paddingLarge,
+                    AppConstants.paddingXLarge),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.radiusMedium),
                   border: Border.all(
                     color: AppColors.border,
                     width: AppConstants.borderWidthThin,
@@ -191,215 +199,222 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                    // Container avec bordure en pointillés
-                    Container(
-                      width: 350,
-                      height: 131.3333282470703,
-                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xFF23A3A6),
-                          width: 1,
-                        ),
-                        color: const Color(0x0A23A3A6),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Ligne avec icône et texte
-                          Row(
-                            children: [
-                              // Icône id-card-alt
-                              SvgPicture.asset(
-                                'assets/icons/id-card-alt.svg',
-                                width: 24,
-                                height: 21.33333396911621,
-                              ),
-                              const SizedBox(width: 12),
-                              // Texte
-                              Text(
-                                'Pièce d\'identité (obligatoire)',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                  height: 1.0,
-                                  letterSpacing: 0,
-                                  color: const Color(0xFF343A40),
-                                ),
-                              ),
-                              const Spacer(),
-                              // Icône Vector
-                              Container(
-                                width: 16,
-                                height: 16,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF23A3A6),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                  size: 10,
-                                ),
-                              ),
-                            ],
+                      // Container avec bordure en pointillés
+                      Container(
+                        width: 350,
+                        height: 131.3333282470703,
+                        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFF23A3A6),
+                            width: 1,
                           ),
-                          const SizedBox(height: 16),
-                          // Container blanc
-                          Container(
-                            width: 318,
-                            height: 50,
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          color: const Color(0x0A23A3A6),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Ligne avec icône et texte
+                            Row(
                               children: [
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      // Image img (4).png
-                                      Container(
-                                        width: 32,
-                                        height: 32,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(3.56),
-                                          border: Border.all(
-                                            color: const Color(0x0D000000),
-                                            width: 0.17,
-                                          ),
-                                          color: const Color(0x33000000),
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(3.56),
-                                          child: Image.asset(
-                                            'assets/images/img (4).png',
-                                            width: 32,
-                                            height: 32,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      // Texte cni.png
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              'cni.png',
-                                              style: TextStyle(
-                                                fontFamily: 'Work Sans',
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 14,
-                                                height: 1.0,
-                                                letterSpacing: 0,
-                                                color: const Color(0xFF343A40),
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              '20KO',
-                                              style: TextStyle(
-                                                fontFamily: 'Work Sans',
-                                                fontWeight: FontWeight.w300,
-                                                fontSize: 12,
-                                                height: 1.0,
-                                                letterSpacing: 0,
-                                                color: const Color(0xFF95A5A6),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                // Icône id-card-alt
+                                SvgPicture.asset(
+                                  'assets/icons/id-card-alt.svg',
+                                  width: 24,
+                                  height: 21.33333396911621,
+                                ),
+                                const SizedBox(width: 12),
+                                // Texte
+                                Text(
+                                  'Pièce d\'identité (obligatoire)',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    height: 1.0,
+                                    letterSpacing: 0,
+                                    color: const Color(0xFF343A40),
                                   ),
                                 ),
-                                // Icône poubelle
+                                const Spacer(),
+                                // Icône Vector
                                 Container(
-                                  width: 24,
-                                  height: 24,
+                                  width: 16,
+                                  height: 16,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFFFEBEE),
+                                    color: const Color(0xFF23A3A6),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: Center(
-                                    child: SvgPicture.asset(
-                                      'assets/icons/iconamoon_trash.svg',
-                                      width: 16,
-                                      height: 16,
-                                      colorFilter: ColorFilter.mode(
-                                        const Color(0xFFF44336),
-                                        BlendMode.srcIn,
+                                  child: const Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 10,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            // Container blanc
+                            Container(
+                              width: 318,
+                              height: 50,
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                color: Colors.white,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        // Image img (4).png
+                                        Container(
+                                          width: 32,
+                                          height: 32,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(3.56),
+                                            border: Border.all(
+                                              color: const Color(0x0D000000),
+                                              width: 0.17,
+                                            ),
+                                            color: const Color(0x33000000),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(3.56),
+                                            child: Image.asset(
+                                              'assets/images/img (4).png',
+                                              width: 32,
+                                              height: 32,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        // Texte cni.png
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                'cni.png',
+                                                style: TextStyle(
+                                                  fontFamily: 'Work Sans',
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14,
+                                                  height: 1.0,
+                                                  letterSpacing: 0,
+                                                  color:
+                                                      const Color(0xFF343A40),
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                '20KO',
+                                                style: TextStyle(
+                                                  fontFamily: 'Work Sans',
+                                                  fontWeight: FontWeight.w300,
+                                                  fontSize: 12,
+                                                  height: 1.0,
+                                                  letterSpacing: 0,
+                                                  color:
+                                                      const Color(0xFF95A5A6),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // Icône poubelle
+                                  Container(
+                                    width: 24,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFEBEE),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: SvgPicture.asset(
+                                        'assets/icons/iconamoon_trash.svg',
+                                        width: 16,
+                                        height: 16,
+                                        colorFilter: ColorFilter.mode(
+                                          const Color(0xFFF44336),
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Nouveau container avec bordure en pointillés
-                    Container(
-                      width: 350,
-                      height: 68,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xFFCBD5E1),
-                          width: 1,
+                          ],
                         ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                // Icône list-solid
-                                SvgPicture.asset(
-                                  'assets/icons/list-solid.svg',
-                                  width: 24,
-                                  height: 24,
-                                ),
-                                const SizedBox(width: 8),
-                                // Texte
-                                Expanded(
-                                  child: Text(
-                                    'Preuve de transaction (facultatif)',
-                                    style: TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
-                                      height: 1.0,
-                                      letterSpacing: 0,
-                                      color: const Color(0xFF343A40),
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
+                      const SizedBox(height: 16),
+                      // Nouveau container avec bordure en pointillés
+                      Container(
+                        width: 350,
+                        height: 68,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFFCBD5E1),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  // Icône list-solid
+                                  SvgPicture.asset(
+                                    'assets/icons/list-solid.svg',
+                                    width: 24,
+                                    height: 24,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 8),
+                                  // Texte
+                                  Expanded(
+                                    child: Text(
+                                      'Preuve de transaction (facultatif)',
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        height: 1.0,
+                                        letterSpacing: 0,
+                                        color: const Color(0xFF343A40),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          // Icône btn-primary à droite
-                          SvgPicture.asset(
-                            'assets/icons/btn-primary.svg',
-                            width: 24,
-                            height: 24,
-                          ),
-                        ],
+                            // Icône btn-primary à droite
+                            SvgPicture.asset(
+                              'assets/icons/btn-primary.svg',
+                              width: 24,
+                              height: 24,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                     ],
                   ),
                 ),
@@ -420,7 +435,8 @@ class NouvelleDemandeStep8Screen extends StatelessWidget {
                   padding: EdgeInsets.all(AppConstants.paddingMedium),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusRound),
                   ),
                   child: Center(
                     child: Text(

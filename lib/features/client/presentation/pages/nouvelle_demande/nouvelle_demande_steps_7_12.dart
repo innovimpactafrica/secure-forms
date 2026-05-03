@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class NouvelleDemandeStep7Screen extends StatefulWidget {
   const NouvelleDemandeStep7Screen({super.key});
 
   @override
-  State<NouvelleDemandeStep7Screen> createState() => _NouvelleDemandeStep7ScreenState();
+  State<NouvelleDemandeStep7Screen> createState() =>
+      _NouvelleDemandeStep7ScreenState();
 }
 
-class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen> {
+class _NouvelleDemandeStep7ScreenState
+    extends State<NouvelleDemandeStep7Screen> {
   String? selectedBeneficiaire;
 
   @override
@@ -35,7 +37,8 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                   height: AppConstants.backButtonSize,
                   decoration: BoxDecoration(
                     color: AppColors.whiteOverlay,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium),
                   ),
                   child: Center(
                     child: Icon(
@@ -72,7 +75,7 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                   fontSize: 12,
                   height: 1.0,
                   letterSpacing: 0,
-                  color: Colors.white.withValues(alpha:0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                 ),
               ),
             ),
@@ -130,7 +133,7 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                   fontSize: 16,
                   height: 24 / 16,
                   letterSpacing: 0,
-                  color: const Color(0xFFFFFFFF).withValues(alpha:0.7),
+                  color: const Color(0xFFFFFFFF).withValues(alpha: 0.7),
                 ),
               ),
             ),
@@ -189,7 +192,8 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                           ),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 16),
                           child: Row(
                             children: [
                               // Icône personne
@@ -263,7 +267,8 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                           ),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 16),
                           child: Row(
                             children: [
                               // Icône montant
@@ -320,7 +325,8 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                           ),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 16),
                           child: Row(
                             children: [
                               // Texte placeholder référence
@@ -386,7 +392,7 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
 
   void _showBeneficiaireModal(BuildContext context) {
     String? localSelectedBeneficiaire = selectedBeneficiaire;
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -476,17 +482,20 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                             margin: const EdgeInsets.only(left: 10, right: 24),
                             width: 382,
                             height: 75,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 16),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: localSelectedBeneficiaire == 'cheikh' 
-                                    ? const Color(0xFF23A3A6) 
+                                color: localSelectedBeneficiaire == 'cheikh'
+                                    ? const Color(0xFF23A3A6)
                                     : const Color(0xFFDEE8EE),
-                                width: localSelectedBeneficiaire == 'cheikh' ? 2 : 1,
+                                width: localSelectedBeneficiaire == 'cheikh'
+                                    ? 2
+                                    : 1,
                               ),
-                              color: localSelectedBeneficiaire == 'cheikh' 
-                                  ? const Color(0x0D23A3A6) 
+                              color: localSelectedBeneficiaire == 'cheikh'
+                                  ? const Color(0x0D23A3A6)
                                   : Colors.transparent,
                             ),
                             child: Row(
@@ -495,7 +504,8 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                                 // Nom du bénéficiaire
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Cheikh GUEYE',
@@ -532,13 +542,14 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: localSelectedBeneficiaire == 'cheikh' 
-                                          ? const Color(0xFF23A3A6) 
-                                          : const Color(0xFF212121),
+                                      color:
+                                          localSelectedBeneficiaire == 'cheikh'
+                                              ? const Color(0xFF23A3A6)
+                                              : const Color(0xFF212121),
                                       width: 2.25,
                                     ),
-                                    color: localSelectedBeneficiaire == 'cheikh' 
-                                        ? const Color(0xFF23A3A6) 
+                                    color: localSelectedBeneficiaire == 'cheikh'
+                                        ? const Color(0xFF23A3A6)
                                         : Colors.transparent,
                                   ),
                                   child: localSelectedBeneficiaire == 'cheikh'
@@ -565,17 +576,20 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                             margin: const EdgeInsets.only(left: 10, right: 24),
                             width: 382,
                             height: 75,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 16),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: localSelectedBeneficiaire == 'maimouna' 
-                                    ? const Color(0xFF23A3A6) 
+                                color: localSelectedBeneficiaire == 'maimouna'
+                                    ? const Color(0xFF23A3A6)
                                     : const Color(0xFFDEE8EE),
-                                width: localSelectedBeneficiaire == 'maimouna' ? 2 : 1,
+                                width: localSelectedBeneficiaire == 'maimouna'
+                                    ? 2
+                                    : 1,
                               ),
-                              color: localSelectedBeneficiaire == 'maimouna' 
-                                  ? const Color(0x0D23A3A6) 
+                              color: localSelectedBeneficiaire == 'maimouna'
+                                  ? const Color(0x0D23A3A6)
                                   : Colors.transparent,
                             ),
                             child: Row(
@@ -584,7 +598,8 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                                 // Nom du bénéficiaire
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Maimouna Sow',
@@ -621,14 +636,16 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: localSelectedBeneficiaire == 'maimouna' 
-                                          ? const Color(0xFF23A3A6) 
+                                      color: localSelectedBeneficiaire ==
+                                              'maimouna'
+                                          ? const Color(0xFF23A3A6)
                                           : const Color(0xFF212121),
                                       width: 2.25,
                                     ),
-                                    color: localSelectedBeneficiaire == 'maimouna' 
-                                        ? const Color(0xFF23A3A6) 
-                                        : Colors.transparent,
+                                    color:
+                                        localSelectedBeneficiaire == 'maimouna'
+                                            ? const Color(0xFF23A3A6)
+                                            : Colors.transparent,
                                   ),
                                   child: localSelectedBeneficiaire == 'maimouna'
                                       ? const Icon(
@@ -805,7 +822,8 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                           ),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 11.94),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 11.94),
                           child: Row(
                             children: [
                               SvgPicture.asset(
@@ -855,7 +873,8 @@ class _NouvelleDemandeStep7ScreenState extends State<NouvelleDemandeStep7Screen>
                           ),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 11.94),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 11.94),
                           child: Row(
                             children: [
                               SvgPicture.asset(

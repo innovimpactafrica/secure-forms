@@ -5,10 +5,10 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/client/data/models/demande_model.dart';
-import 'package:secure_link/features/client/data/repositories/demandes_repository.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/client/data/models/demande_model.dart';
+import 'package:quick_forms/features/client/data/repositories/demandes_repository.dart';
 
 class DemandeZipService {
   static Future<File> genererEtZipper({
@@ -49,7 +49,8 @@ class DemandeZipService {
         final url = (d.fileUrl != null && d.fileUrl!.isNotEmpty)
             ? d.fileUrl!
             : BaseUrl.profileDocumentFile(d.id);
-        fichiers.add(_Fichier(nom: nom, url: url, useToken: !url.contains('X-Amz-')));
+        fichiers.add(
+            _Fichier(nom: nom, url: url, useToken: !url.contains('X-Amz-')));
       }
     }
 
@@ -66,7 +67,9 @@ class DemandeZipService {
           int suffix = 1;
           while (await dest.exists()) {
             final ext = nom.contains('.') ? '.${nom.split('.').last}' : '';
-            final base = nom.contains('.') ? nom.substring(0, nom.lastIndexOf('.')) : nom;
+            final base = nom.contains('.')
+                ? nom.substring(0, nom.lastIndexOf('.'))
+                : nom;
             nom = '${base}_$suffix$ext';
             dest = File('${dossier.path}/$nom');
             suffix++;
@@ -81,7 +84,8 @@ class DemandeZipService {
     onProgress?.call(0.85, 'Création du ZIP...');
 
     // 4. ZIP
-    final shortId = demande.id.length >= 8 ? demande.id.substring(0, 8) : demande.id;
+    final shortId =
+        demande.id.length >= 8 ? demande.id.substring(0, 8) : demande.id;
     final zipPath = '${dir.path}/demande_$shortId.zip';
     final encoder = ZipFileEncoder();
     encoder.create(zipPath);
@@ -101,7 +105,8 @@ class DemandeZipService {
     // 1. URL directe sans token (MinIO signé)
     if (!f.useToken) {
       try {
-        final res = await http.get(Uri.parse(f.url))
+        final res = await http
+            .get(Uri.parse(f.url))
             .timeout(const Duration(seconds: 30));
         if (res.statusCode == 200) return res.bodyBytes;
       } catch (_) {}
@@ -109,7 +114,8 @@ class DemandeZipService {
 
     // 2. URL directe avec token
     try {
-      final res = await http.get(Uri.parse(f.url), headers: authHeaders)
+      final res = await http
+          .get(Uri.parse(f.url), headers: authHeaders)
           .timeout(const Duration(seconds: 30));
       if (res.statusCode == 200) return res.bodyBytes;
     } catch (_) {}
@@ -120,7 +126,8 @@ class DemandeZipService {
       if (parts.length >= 3) {
         final objectKey = parts.sublist(2).join('/');
         final proxyUrl = BaseUrl.storageFile(objectKey);
-        final res = await http.get(Uri.parse(proxyUrl), headers: authHeaders)
+        final res = await http
+            .get(Uri.parse(proxyUrl), headers: authHeaders)
             .timeout(const Duration(seconds: 30));
         if (res.statusCode == 200) return res.bodyBytes;
       }
@@ -130,12 +137,13 @@ class DemandeZipService {
   }
 
   // ── Résumé PDF A4 professionnel ──
-  static Future<void> _genererResumePDF(DemandeModel demande, Directory dossier) async {
+  static Future<void> _genererResumePDF(
+      DemandeModel demande, Directory dossier) async {
     final pdf = pw.Document();
     final primaryColor = PdfColor.fromHex('#0B3C5C');
-    final accentColor  = PdfColor.fromHex('#23A3A6');
-    final bgLight      = PdfColor.fromHex('#F5F6FA');
-    final borderColor  = PdfColor.fromHex('#DEE8EE');
+    final accentColor = PdfColor.fromHex('#23A3A6');
+    final bgLight = PdfColor.fromHex('#F5F6FA');
+    final borderColor = PdfColor.fromHex('#DEE8EE');
 
     // Charger le logo
     pw.ImageProvider? logo;
@@ -145,10 +153,12 @@ class DemandeZipService {
     } catch (_) {}
 
     final statut = _labelStatut(demande.status);
-    final titre  = demande.formType.isNotEmpty ? demande.formType : demande.requestNumber;
-    final org    = demande.organisationName;
-    final now    = DateTime.now();
-    final dateStr = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+    final titre =
+        demande.formType.isNotEmpty ? demande.formType : demande.requestNumber;
+    final org = demande.organisationName;
+    final now = DateTime.now();
+    final dateStr =
+        '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
 
     pdf.addPage(
       pw.Page(
@@ -157,7 +167,6 @@ class DemandeZipService {
         build: (context) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.stretch,
           children: [
-
             // ── EN-TÊTE ──────────────────────────────────────────────
             pw.Container(
               color: primaryColor,
@@ -165,7 +174,6 @@ class DemandeZipService {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: [
-
                   // Logo + nom app
                   pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.center,
@@ -179,14 +187,16 @@ class DemandeZipService {
                         children: [
                           pw.Row(
                             children: [
-                              pw.Text('SECURE ',
+                              pw.Text(
+                                'SECURE ',
                                 style: pw.TextStyle(
                                   color: PdfColors.white,
                                   fontSize: 18,
                                   fontWeight: pw.FontWeight.bold,
                                 ),
                               ),
-                              pw.Text('FORMS',
+                              pw.Text(
+                                'FORMS',
                                 style: pw.TextStyle(
                                   color: accentColor,
                                   fontSize: 18,
@@ -239,7 +249,8 @@ class DemandeZipService {
                   // Badge statut centré
                   pw.Center(
                     child: pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(horizontal: 24, vertical: 7),
+                      padding: const pw.EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 7),
                       decoration: pw.BoxDecoration(
                         color: accentColor,
                         borderRadius: pw.BorderRadius.circular(20),
@@ -267,9 +278,9 @@ class DemandeZipService {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-
                     // Section Informations
-                    _sectionTitle('Informations de la demande', primaryColor, accentColor),
+                    _sectionTitle('Informations de la demande', primaryColor,
+                        accentColor),
                     pw.SizedBox(height: 12),
                     pw.Container(
                       decoration: pw.BoxDecoration(
@@ -277,32 +288,39 @@ class DemandeZipService {
                         borderRadius: pw.BorderRadius.circular(8),
                         border: pw.Border.all(color: borderColor),
                       ),
-                      padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      padding: const pw.EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 8),
                       child: pw.Column(children: [
-                        _ligneInfo('Référence',      demande.requestNumber, primaryColor),
+                        _ligneInfo(
+                            'Référence', demande.requestNumber, primaryColor),
                         _divider(borderColor),
-                        _ligneInfo('Statut',         statut, accentColor),
+                        _ligneInfo('Statut', statut, accentColor),
                         if (org.isNotEmpty) ...[
                           _divider(borderColor),
                           _ligneInfo('Organisation', org, primaryColor),
                         ],
                         _divider(borderColor),
-                        _ligneInfo('Date soumission', demande.createdAt, primaryColor),
+                        _ligneInfo(
+                            'Date soumission', demande.createdAt, primaryColor),
                         if (demande.inProgressAt != null) ...[
                           _divider(borderColor),
-                          _ligneInfo('En cours depuis', demande.inProgressAt!, primaryColor),
+                          _ligneInfo('En cours depuis', demande.inProgressAt!,
+                              primaryColor),
                         ],
                         if (demande.finalizedAt != null) ...[
                           _divider(borderColor),
-                          _ligneInfo('Finalisé le', demande.finalizedAt!, primaryColor),
+                          _ligneInfo('Finalisé le', demande.finalizedAt!,
+                              primaryColor),
                         ],
                       ]),
                     ),
 
                     // Section Fichiers
-                    if (demande.submittedForms.isNotEmpty || demande.requiredDocuments.isNotEmpty) ...[
+                    if (demande.submittedForms.isNotEmpty ||
+                        demande.requiredDocuments.isNotEmpty) ...[
                       pw.SizedBox(height: 24),
-                      _sectionTitle('Fichiers inclus dans ce dossier', primaryColor, accentColor),
+                      _sectionTitle('Fichiers inclus dans ce dossier',
+                          primaryColor, accentColor),
                       pw.SizedBox(height: 12),
                       pw.Container(
                         decoration: pw.BoxDecoration(
@@ -310,7 +328,8 @@ class DemandeZipService {
                           borderRadius: pw.BorderRadius.circular(8),
                           border: pw.Border.all(color: borderColor),
                         ),
-                        padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                        padding: const pw.EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 8),
                         child: pw.Column(children: [
                           ...demande.submittedForms
                               .where((f) => f.pdfUrl.isNotEmpty)
@@ -321,7 +340,9 @@ class DemandeZipService {
                           ...demande.requiredDocuments
                               .where((d) => d.id.isNotEmpty)
                               .map((d) => _ligneFichier(
-                                    d.label.isNotEmpty ? d.label : 'Pièce jointe',
+                                    d.label.isNotEmpty
+                                        ? d.label
+                                        : 'Pièce jointe',
                                     accentColor,
                                   )),
                         ]),
@@ -348,14 +369,16 @@ class DemandeZipService {
                                 pw.SizedBox(width: 6),
                               ],
                               pw.Row(children: [
-                                pw.Text('SECURE ',
+                                pw.Text(
+                                  'SECURE ',
                                   style: pw.TextStyle(
                                     color: primaryColor,
                                     fontSize: 9,
                                     fontWeight: pw.FontWeight.bold,
                                   ),
                                 ),
-                                pw.Text('FORMS',
+                                pw.Text(
+                                  'FORMS',
                                   style: pw.TextStyle(
                                     color: accentColor,
                                     fontSize: 9,
@@ -388,96 +411,103 @@ class DemandeZipService {
     await file.writeAsBytes(await pdf.save());
   }
 
-  static pw.Widget _sectionTitle(String title, PdfColor primary, PdfColor accent) =>
-    pw.Row(
-      children: [
-        pw.Container(width: 4, height: 18, color: accent),
-        pw.SizedBox(width: 10),
-        pw.Text(
-          title,
-          style: pw.TextStyle(
-            fontSize: 13,
-            fontWeight: pw.FontWeight.bold,
-            color: primary,
-          ),
-        ),
-      ],
-    );
-
-  static pw.Widget _ligneInfo(String label, String valeur, PdfColor valeurColor) =>
-    pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 7),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+  static pw.Widget _sectionTitle(
+          String title, PdfColor primary, PdfColor accent) =>
+      pw.Row(
         children: [
+          pw.Container(width: 4, height: 18, color: accent),
+          pw.SizedBox(width: 10),
           pw.Text(
-            label,
-            style: pw.TextStyle(fontSize: 11, color: PdfColors.grey700),
-          ),
-          pw.Text(
-            valeur,
+            title,
             style: pw.TextStyle(
-              fontSize: 11,
+              fontSize: 13,
               fontWeight: pw.FontWeight.bold,
-              color: valeurColor,
+              color: primary,
             ),
           ),
         ],
-      ),
-    );
+      );
 
-  static pw.Widget _divider(PdfColor color) => pw.Container(
-    height: 0.5,
-    color: color,
-  );
-
-  static pw.Widget _ligneFichier(String nom, PdfColor accentColor) =>
-    pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 6),
-      child: pw.Row(
-        children: [
-          pw.Container(
-            width: 30,
-            height: 18,
-            decoration: pw.BoxDecoration(
-              color: accentColor,
-              borderRadius: pw.BorderRadius.circular(4),
+  static pw.Widget _ligneInfo(
+          String label, String valeur, PdfColor valeurColor) =>
+      pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(vertical: 7),
+        child: pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text(
+              label,
+              style: pw.TextStyle(fontSize: 11, color: PdfColors.grey700),
             ),
-            child: pw.Center(
-              child: pw.Text(
-                'PDF',
-                style: pw.TextStyle(
-                  color: PdfColors.white,
-                  fontSize: 7,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          pw.SizedBox(width: 10),
-          pw.Expanded(
-            child: pw.Text(
-              nom,
+            pw.Text(
+              valeur,
               style: pw.TextStyle(
                 fontSize: 11,
                 fontWeight: pw.FontWeight.bold,
-                color: PdfColors.grey800,
+                color: valeurColor,
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+
+  static pw.Widget _divider(PdfColor color) => pw.Container(
+        height: 0.5,
+        color: color,
+      );
+
+  static pw.Widget _ligneFichier(String nom, PdfColor accentColor) =>
+      pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(vertical: 6),
+        child: pw.Row(
+          children: [
+            pw.Container(
+              width: 30,
+              height: 18,
+              decoration: pw.BoxDecoration(
+                color: accentColor,
+                borderRadius: pw.BorderRadius.circular(4),
+              ),
+              child: pw.Center(
+                child: pw.Text(
+                  'PDF',
+                  style: pw.TextStyle(
+                    color: PdfColors.white,
+                    fontSize: 7,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            pw.SizedBox(width: 10),
+            pw.Expanded(
+              child: pw.Text(
+                nom,
+                style: pw.TextStyle(
+                  fontSize: 11,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.grey800,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
 
   static String _labelStatut(String status) {
     switch (status.toUpperCase()) {
-      case 'EN_COURS':  return 'En cours';
+      case 'EN_COURS':
+        return 'En cours';
       case 'VALIDEE':
-      case 'VALIDE':    return 'Validée';
+      case 'VALIDE':
+        return 'Validée';
       case 'REJETEE':
-      case 'REJETE':    return 'Rejetée';
-      case 'BROUILLON': return 'Brouillon';
-      default:          return 'En attente';
+      case 'REJETE':
+        return 'Rejetée';
+      case 'BROUILLON':
+        return 'Brouillon';
+      default:
+        return 'En attente';
     }
   }
 
@@ -485,7 +515,8 @@ class DemandeZipService {
       name.replaceAll(RegExp(r'[^\w\s\-]'), '_').trim();
 
   static Future<DemandeModel> freshDemande(DemandeModel demande) async {
-    if (demande.submittedForms.isNotEmpty || demande.requiredDocuments.isNotEmpty) {
+    if (demande.submittedForms.isNotEmpty ||
+        demande.requiredDocuments.isNotEmpty) {
       return demande;
     }
     return DemandesRepository().getRequestById(
@@ -499,5 +530,6 @@ class _Fichier {
   final String nom;
   final String url;
   final bool useToken;
-  const _Fichier({required this.nom, required this.url, required this.useToken});
+  const _Fichier(
+      {required this.nom, required this.url, required this.useToken});
 }

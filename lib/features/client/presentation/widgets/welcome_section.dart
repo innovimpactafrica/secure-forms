@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class WelcomeSection extends StatelessWidget {
   final String firstName;
@@ -26,11 +26,23 @@ class WelcomeSection extends StatelessWidget {
           const SizedBox(height: 2),
           RichText(
             text: TextSpan(
-              style: const TextStyle(fontFamily: AppConstants.fontFamilyInter, fontSize: 13, fontWeight: FontWeight.w400),
+              style: const TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400),
               children: [
-                TextSpan(text: 'home.welcome_on'.tr(), style: TextStyle(color: AppColors.textBlack54)),
-                TextSpan(text: 'home.quick'.tr(), style: const TextStyle(color: AppColors.backArrowColor, fontWeight: FontWeight.w600)),
-                TextSpan(text: 'home.forms'.tr(), style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                TextSpan(
+                    text: 'home.welcome_on'.tr(),
+                    style: TextStyle(color: AppColors.textBlack54)),
+                TextSpan(
+                    text: 'home.quick'.tr(),
+                    style: const TextStyle(
+                        color: AppColors.backArrowColor,
+                        fontWeight: FontWeight.w600)),
+                TextSpan(
+                    text: 'home.forms'.tr(),
+                    style: TextStyle(
+                        color: AppColors.primary, fontWeight: FontWeight.w600)),
               ],
             ),
           ),

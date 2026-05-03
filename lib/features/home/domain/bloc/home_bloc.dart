@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/home/data/repositories/client_statistics_repository.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/home/data/repositories/client_statistics_repository.dart';
 import 'home_event.dart';
 import 'home_state.dart';
 
@@ -29,7 +29,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         UserSession.instance.accessToken,
       );
       // ignore: avoid_print
-      print('[HomeBloc] Stats: total=${stats.total} pending=${stats.pending} inProgress=${stats.inProgress} validated=${stats.validated} rejected=${stats.rejected}');
+      print(
+          '[HomeBloc] Stats: total=${stats.total} pending=${stats.pending} inProgress=${stats.inProgress} validated=${stats.validated} rejected=${stats.rejected}');
       emit(HomeStatisticsLoaded(statistics: stats));
     } catch (e) {
       // ignore: avoid_print

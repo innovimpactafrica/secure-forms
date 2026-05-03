@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/client/data/services/detail_banque_service.dart';
-import 'package:secure_link/features/client/data/models/compte_model.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/client/data/services/detail_banque_service.dart';
+import 'package:quick_forms/features/client/data/models/compte_model.dart';
 import 'detail_banque_event.dart';
 import 'detail_banque_state.dart';
 

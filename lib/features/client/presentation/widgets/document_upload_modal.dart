@@ -5,13 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/services/mlkit_ocr_service.dart';
-import 'package:secure_link/features/client/data/models/profile_model.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/services/mlkit_ocr_service.dart';
+import 'package:quick_forms/features/client/data/models/profile_model.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_state.dart';
 import '../pages/document_scanner_page.dart';
 
 // ─────────────────────────────────────────────────────────────────
@@ -47,7 +47,8 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
     _bloc = context.read<ProfileBloc>();
     if (widget.existingDocument != null) {
       _deliveryDateController.text = widget.existingDocument!.issueDate ?? '';
-      _expiryDateController.text = widget.existingDocument!.expirationDate ?? '';
+      _expiryDateController.text =
+          widget.existingDocument!.expirationDate ?? '';
     }
   }
 
@@ -90,16 +91,20 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
     if (choice == null) return;
 
     String? picked;
-    if (choice == 'camera' && !isBack && widget.documentType.hasExpirationDate) {
+    if (choice == 'camera' &&
+        !isBack &&
+        widget.documentType.hasExpirationDate) {
       // Prendre une photo sur doc avec expiration → scanner OCR
       picked = await Navigator.of(context).push<String>(
         MaterialPageRoute(builder: (_) => const DocumentScannerPage()),
       );
     } else if (choice == 'camera') {
-      final x = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 85);
+      final x = await ImagePicker()
+          .pickImage(source: ImageSource.camera, imageQuality: 85);
       picked = x?.path;
     } else if (choice == 'gallery') {
-      final x = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
+      final x = await ImagePicker()
+          .pickImage(source: ImageSource.gallery, imageQuality: 85);
       picked = x?.path;
     } else {
       final result = await FilePicker.platform.pickFiles(
@@ -123,7 +128,8 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
   Future<void> _runOcr(String filePath) async {
     setState(() => _isScanning = true);
     try {
-      final result = await MlKitOcrService.extractDatesFromDocument(File(filePath));
+      final result =
+          await MlKitOcrService.extractDatesFromDocument(File(filePath));
       if (!mounted) return;
       if (result.issueDate != null && _deliveryDateController.text.isEmpty) {
         _deliveryDateController.text = result.issueDate!;
@@ -136,12 +142,15 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
           SnackBar(
             content: Text(
               'Dates détectées automatiquement ✓',
-              style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.white),
+              style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  color: AppColors.white),
             ),
             backgroundColor: AppColors.statusValideGreen,
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 2),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
@@ -168,7 +177,8 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
           ),
           backgroundColor: AppColors.statusRejected,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
       return;
@@ -209,7 +219,8 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
               ),
               backgroundColor: AppColors.statusRejected,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
             ),
           );
         }
@@ -271,7 +282,8 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
               const SizedBox(height: 6),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
                   border: Border.all(color: AppColors.borderLight),
                   borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
@@ -304,7 +316,8 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.add_circle_outline, size: 16, color: AppColors.primary),
+                      Icon(Icons.add_circle_outline,
+                          size: 16, color: AppColors.primary),
                       const SizedBox(width: 6),
                       Text(
                         'profile.add_back_document'.tr(),
@@ -332,8 +345,12 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
                     ),
                     const Spacer(),
                     GestureDetector(
-                      onTap: () => setState(() { _showBack = false; _backFilePath = null; }),
-                      child: Icon(Icons.close, size: 16, color: AppColors.textSecondary),
+                      onTap: () => setState(() {
+                        _showBack = false;
+                        _backFilePath = null;
+                      }),
+                      child: Icon(Icons.close,
+                          size: 16, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -360,7 +377,8 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
                 _ModalDateField(
                   controller: _expiryDateController,
                   hint: 'profile.expiry_date_hint'.tr(),
-                  onTap: () => _pickDate(context, _expiryDateController, isExpiry: true),
+                  onTap: () =>
+                      _pickDate(context, _expiryDateController, isExpiry: true),
                 ),
                 const SizedBox(height: 16),
               ],
@@ -444,21 +462,32 @@ Future<String?> showPickerSource(BuildContext context) async {
         children: [
           const SizedBox(height: 8),
           ListTile(
-            leading: Icon(Icons.photo_library_outlined, color: AppColors.primary),
+            leading:
+                Icon(Icons.photo_library_outlined, color: AppColors.primary),
             title: Text('profile.gallery'.tr(),
-                style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.textDark, fontWeight: FontWeight.w500)),
+                style: TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.w500)),
             onTap: () => Navigator.pop(context, 'gallery'),
           ),
           ListTile(
             leading: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
             title: Text('profile.take_photo'.tr(),
-                style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.textDark, fontWeight: FontWeight.w500)),
+                style: TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.w500)),
             onTap: () => Navigator.pop(context, 'camera'),
           ),
           ListTile(
-            leading: Icon(Icons.insert_drive_file_outlined, color: AppColors.primary),
+            leading: Icon(Icons.insert_drive_file_outlined,
+                color: AppColors.primary),
             title: Text('profile.pick_file'.tr(),
-                style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.textDark, fontWeight: FontWeight.w500)),
+                style: TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.w500)),
             onTap: () => Navigator.pop(context, 'file'),
           ),
           const SizedBox(height: 8),
@@ -495,7 +524,8 @@ class _UploadZone extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
-                  width: 24, height: 24,
+                  width: 24,
+                  height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation(AppColors.primary),
@@ -516,8 +546,11 @@ class _UploadZone extends StatelessWidget {
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
                   child: _isImage
-                      ? Image.file(File(filePath!), fit: BoxFit.cover, width: double.infinity,
-                          errorBuilder: (_, __, ___) => const _UploadPlaceholder(hasFile: true))
+                      ? Image.file(File(filePath!),
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          errorBuilder: (_, __, ___) =>
+                              const _UploadPlaceholder(hasFile: true))
                       : const _UploadPlaceholder(hasFile: true),
                 )
               : const _UploadPlaceholder(hasFile: false),
@@ -564,7 +597,8 @@ class _UploadPlaceholder extends StatelessWidget {
               'assets/icons/televerser.svg',
               width: 20,
               height: 20,
-              colorFilter: const ColorFilter.mode(AppColors.white, BlendMode.srcIn),
+              colorFilter:
+                  const ColorFilter.mode(AppColors.white, BlendMode.srcIn),
             ),
           ),
         ),
@@ -626,7 +660,8 @@ class _ModalDateField extends StatelessWidget {
           color: AppColors.textSecondary,
           size: AppConstants.iconSizeMedium,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
           borderSide: BorderSide(color: AppColors.borderLight),

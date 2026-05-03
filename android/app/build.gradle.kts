@@ -15,7 +15,7 @@ val keyProperties = Properties()
 keyProperties.load(FileInputStream(keyPropertiesFile))
 
 android {
-    namespace = "com.wakana.secureforms"
+    namespace = "com.innovimpactafrica.quickforms"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -30,7 +30,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.wakana.secureforms"
+        applicationId = "com.innovimpactafrica.quickforms"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

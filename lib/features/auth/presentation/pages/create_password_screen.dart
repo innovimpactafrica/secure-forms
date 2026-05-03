@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/features/auth/domain/bloc/auth_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/auth_event.dart';
-import 'package:secure_link/features/auth/domain/bloc/auth_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/features/auth/domain/bloc/auth_bloc.dart';
+import 'package:quick_forms/features/auth/domain/bloc/auth_event.dart';
+import 'package:quick_forms/features/auth/domain/bloc/auth_state.dart';
 
 class CreatePasswordScreen extends StatefulWidget {
   final String token;
@@ -101,12 +101,13 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                             width: AppConstants.avatarSizeSmall,
                             height: AppConstants.avatarSizeSmall,
                             decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.backCircleColor, width: 1.26),
+                              border: Border.all(
+                                  color: AppColors.backCircleColor,
+                                  width: 1.26),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.arrow_back,
-                                color: AppColors.backArrowColor,
-                                size: 20.6),
+                                color: AppColors.backArrowColor, size: 20.6),
                           ),
                         ),
                         Image.asset('assets/images/qfwithtext.png',
@@ -152,11 +153,15 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                             // ── Règles du mot de passe ──
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                              padding: const EdgeInsets.all(
+                                  AppConstants.paddingMedium),
                               decoration: BoxDecoration(
                                 color: AppColors.primaryLight,
-                                borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                                borderRadius: BorderRadius.circular(
+                                    AppConstants.radiusSmall),
+                                border: Border.all(
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.3)),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,7 +175,8 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                                       Text(
                                         'register.password_rules_title'.tr(),
                                         style: const TextStyle(
-                                          fontFamily: AppConstants.fontFamilySofiaSans,
+                                          fontFamily:
+                                              AppConstants.fontFamilySofiaSans,
                                           fontSize: AppConstants.fontSizeMedium,
                                           fontWeight: FontWeight.w600,
                                           color: AppColors.primary,
@@ -179,11 +185,21 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                                     ],
                                   ),
                                   const SizedBox(height: 8),
-                                  _PasswordRule(text: 'register.password_rule_length'.tr()),
-                                  _PasswordRule(text: 'register.password_rule_upper'.tr()),
-                                  _PasswordRule(text: 'register.password_rule_lower'.tr()),
-                                  _PasswordRule(text: 'register.password_rule_number'.tr()),
-                                  _PasswordRule(text: 'register.password_rule_special'.tr()),
+                                  _PasswordRule(
+                                      text:
+                                          'register.password_rule_length'.tr()),
+                                  _PasswordRule(
+                                      text:
+                                          'register.password_rule_upper'.tr()),
+                                  _PasswordRule(
+                                      text:
+                                          'register.password_rule_lower'.tr()),
+                                  _PasswordRule(
+                                      text:
+                                          'register.password_rule_number'.tr()),
+                                  _PasswordRule(
+                                      text: 'register.password_rule_special'
+                                          .tr()),
                                 ],
                               ),
                             ),
@@ -196,8 +212,10 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                               controller: _passwordController,
                               obscureText: _obscurePassword,
                               validator: (v) {
-                                if (v == null || v.isEmpty) return 'login.required_field'.tr();
-                                if (v.length < 8) return 'password.min_length'.tr();
+                                if (v == null || v.isEmpty)
+                                  return 'login.required_field'.tr();
+                                if (v.length < 8)
+                                  return 'password.min_length'.tr();
                                 return null;
                               },
                               style: const TextStyle(
@@ -208,20 +226,24 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                               decoration: _passwordDecoration(
                                 hint: 'password.new_password_hint'.tr(),
                                 isObscure: _obscurePassword,
-                                onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
+                                onToggle: () => setState(
+                                    () => _obscurePassword = !_obscurePassword),
                               ),
                             ),
                             const SizedBox(height: AppConstants.paddingLarge),
 
                             // ── Confirmer mot de passe ──
-                            _FieldLabel(label: 'password.confirm_password'.tr()),
+                            _FieldLabel(
+                                label: 'password.confirm_password'.tr()),
                             const SizedBox(height: 6),
                             TextFormField(
                               controller: _confirmController,
                               obscureText: _obscureConfirm,
                               validator: (v) {
-                                if (v == null || v.isEmpty) return 'login.required_field'.tr();
-                                if (v != _passwordController.text) return 'password.mismatch'.tr();
+                                if (v == null || v.isEmpty)
+                                  return 'login.required_field'.tr();
+                                if (v != _passwordController.text)
+                                  return 'password.mismatch'.tr();
                                 return null;
                               },
                               style: const TextStyle(
@@ -232,7 +254,8 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                               decoration: _passwordDecoration(
                                 hint: 'password.confirm_password_hint'.tr(),
                                 isObscure: _obscureConfirm,
-                                onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                                onToggle: () => setState(
+                                    () => _obscureConfirm = !_obscureConfirm),
                               ),
                             ),
                           ],
@@ -260,7 +283,8 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                               AppColors.primaryDark.withValues(alpha: 0.6),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusRound),
                           ),
                         ),
                         child: isLoading
@@ -370,8 +394,7 @@ class _PasswordRule extends StatelessWidget {
       child: Row(
         children: [
           const Icon(Icons.check_circle_outline,
-              size: AppConstants.iconSizeSmall,
-              color: AppColors.primary),
+              size: AppConstants.iconSizeSmall, color: AppColors.primary),
           const SizedBox(width: 6),
           Text(
             text,
@@ -399,7 +422,8 @@ class _PasswordSuccessBottomSheet extends StatelessWidget {
       padding: EdgeInsets.only(
         left: AppConstants.paddingLarge,
         right: AppConstants.paddingLarge,
-        bottom: MediaQuery.of(context).padding.bottom + AppConstants.paddingLarge,
+        bottom:
+            MediaQuery.of(context).padding.bottom + AppConstants.paddingLarge,
       ),
       child: Container(
         width: double.infinity,
@@ -425,8 +449,8 @@ class _PasswordSuccessBottomSheet extends StatelessWidget {
                     color: AppColors.primary,
                     width: AppConstants.borderWidthThick),
               ),
-              child: const Icon(Icons.check,
-                  color: AppColors.primary, size: 22),
+              child:
+                  const Icon(Icons.check, color: AppColors.primary, size: 22),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -446,4 +470,3 @@ class _PasswordSuccessBottomSheet extends StatelessWidget {
     );
   }
 }
-

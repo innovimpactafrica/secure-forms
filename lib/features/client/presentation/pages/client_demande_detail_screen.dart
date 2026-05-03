@@ -5,13 +5,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:http/http.dart' as http;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/authenticated_http_client.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/client/data/models/demande_model.dart';
-import 'package:secure_link/features/client/data/repositories/demandes_repository.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/authenticated_http_client.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/client/data/models/demande_model.dart';
+import 'package:quick_forms/features/client/data/repositories/demandes_repository.dart';
 
 class ClientDemandeDetailScreen extends StatefulWidget {
   const ClientDemandeDetailScreen({super.key});
@@ -21,8 +21,7 @@ class ClientDemandeDetailScreen extends StatefulWidget {
       _ClientDemandeDetailScreenState();
 }
 
-class _ClientDemandeDetailScreenState
-    extends State<ClientDemandeDetailScreen> {
+class _ClientDemandeDetailScreenState extends State<ClientDemandeDetailScreen> {
   final _repo = DemandesRepository();
   DemandeModel? _demande;
   bool _loading = true;
@@ -40,7 +39,10 @@ class _ClientDemandeDetailScreenState
     if (args is Map) id = args['id']?.toString();
 
     if (id == null || id.isEmpty) {
-      setState(() { _loading = false; _error = 'ID manquant'; });
+      setState(() {
+        _loading = false;
+        _error = 'ID manquant';
+      });
       return;
     }
 
@@ -48,18 +50,29 @@ class _ClientDemandeDetailScreenState
       final token = UserSession.instance.accessToken;
       debugPrint('[DemandeDetail] loading id=$id');
       final demande = await _repo.getRequestById(accessToken: token, id: id);
-      debugPrint('[DemandeDetail] submittedForms=${demande.submittedForms.length}');
-      debugPrint('[DemandeDetail] requiredDocuments=${demande.requiredDocuments.length}');
+      debugPrint(
+          '[DemandeDetail] submittedForms=${demande.submittedForms.length}');
+      debugPrint(
+          '[DemandeDetail] requiredDocuments=${demande.requiredDocuments.length}');
       for (final f in demande.submittedForms) {
-        debugPrint('[DemandeDetail] pdf label=${f.label} fileName=${f.fileName}');
+        debugPrint(
+            '[DemandeDetail] pdf label=${f.label} fileName=${f.fileName}');
       }
       for (final d in demande.requiredDocuments) {
         debugPrint('[DemandeDetail] doc id=${d.id} label=${d.label}');
       }
-      if (mounted) setState(() { _demande = demande; _loading = false; });
+      if (mounted)
+        setState(() {
+          _demande = demande;
+          _loading = false;
+        });
     } catch (e) {
       debugPrint('[DemandeDetail] ERROR: $e');
-      if (mounted) setState(() { _loading = false; _error = e.toString().replaceAll('Exception: ', ''); });
+      if (mounted)
+        setState(() {
+          _loading = false;
+          _error = e.toString().replaceAll('Exception: ', '');
+        });
     }
   }
 
@@ -68,7 +81,8 @@ class _ClientDemandeDetailScreenState
     if (_loading) {
       return const Scaffold(
         backgroundColor: AppColors.white,
-        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        body:
+            Center(child: CircularProgressIndicator(color: AppColors.primary)),
       );
     }
 
@@ -94,7 +108,10 @@ class _ClientDemandeDetailScreenState
                       const SizedBox(height: 16),
                       TextButton(
                           onPressed: () {
-                            setState(() { _loading = true; _error = null; });
+                            setState(() {
+                              _loading = true;
+                              _error = null;
+                            });
                             _load();
                           },
                           child: Text('archives.retry'.tr())),
@@ -129,7 +146,13 @@ class _ClientDemandeDetailScreenState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildHeader(context, d.formType.isNotEmpty ? d.formType : d.requestNumber, d.organisationName, status),
+                          _buildHeader(
+                              context,
+                              d.formType.isNotEmpty
+                                  ? d.formType
+                                  : d.requestNumber,
+                              d.organisationName,
+                              status),
                           const SizedBox(height: 16),
                           _buildRefRow(d.requestNumber, d.createdAt),
                           const SizedBox(height: 20),
@@ -177,7 +200,8 @@ class _ClientDemandeDetailScreenState
 
   // ── Header ───────────────────────────────────────────────────────────────
 
-  Widget _buildHeader(BuildContext context, String title, String institution, _DemandeStatus status) {
+  Widget _buildHeader(BuildContext context, String title, String institution,
+      _DemandeStatus status) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -190,7 +214,8 @@ class _ClientDemandeDetailScreenState
               color: AppColors.primaryDark,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
+            child:
+                const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
           ),
         ),
         const SizedBox(width: 12),
@@ -231,8 +256,8 @@ class _ClientDemandeDetailScreenState
                 color: AppColors.textDark)),
         const SizedBox(height: 3),
         Text('${'demande_detail.submitted_on'.tr()} $date',
-            style: const TextStyle(
-                fontSize: 12, color: AppColors.textSecondary)),
+            style:
+                const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
       ],
     );
   }
@@ -262,7 +287,8 @@ class _ClientDemandeDetailScreenState
               width: 60,
               child: Text('demande_detail.submitted'.tr(),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  style: const TextStyle(
+                      fontSize: 11, color: AppColors.textSecondary)),
             ),
             // En cours
             SizedBox(
@@ -270,14 +296,19 @@ class _ClientDemandeDetailScreenState
               child: Column(
                 children: [
                   if (status == _DemandeStatus.enAttente)
-                    Image.asset('assets/images/sablier.png', width: 24, height: 24),
+                    Image.asset('assets/images/sablier.png',
+                        width: 24, height: 24),
                   Text('demandes.in_progress'.tr(),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      style: const TextStyle(
+                          fontSize: 11, color: AppColors.textSecondary)),
                   if (d.inProgressAt != null)
                     Text(d.inProgressAt!,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                        style: const TextStyle(
+                            fontSize: 10,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600)),
                 ],
               ),
             ),
@@ -286,15 +317,21 @@ class _ClientDemandeDetailScreenState
               width: 60,
               child: Column(
                 children: [
-                  if (status == _DemandeStatus.enAttente || status == _DemandeStatus.enCours)
-                    Image.asset('assets/images/sablier.png', width: 24, height: 24),
+                  if (status == _DemandeStatus.enAttente ||
+                      status == _DemandeStatus.enCours)
+                    Image.asset('assets/images/sablier.png',
+                        width: 24, height: 24),
                   Text('demande_detail.finalized'.tr(),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      style: const TextStyle(
+                          fontSize: 11, color: AppColors.textSecondary)),
                   if (d.finalizedAt != null)
                     Text(d.finalizedAt!,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                        style: const TextStyle(
+                            fontSize: 10,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600)),
                 ],
               ),
             ),
@@ -310,21 +347,48 @@ class _ClientDemandeDetailScreenState
       case _DemandeStatus.rejete:
       case _DemandeStatus.brouillon:
         return [
-          _StepData(circleState: _CircleState.active, icon: Icons.edit_outlined, lineActive: false),
-          _StepData(circleState: _CircleState.inactive, icon: Icons.access_time, lineActive: false),
-          _StepData(circleState: _CircleState.inactive, icon: Icons.check, lineActive: false),
+          _StepData(
+              circleState: _CircleState.active,
+              icon: Icons.edit_outlined,
+              lineActive: false),
+          _StepData(
+              circleState: _CircleState.inactive,
+              icon: Icons.access_time,
+              lineActive: false),
+          _StepData(
+              circleState: _CircleState.inactive,
+              icon: Icons.check,
+              lineActive: false),
         ];
       case _DemandeStatus.enCours:
         return [
-          _StepData(circleState: _CircleState.done, icon: Icons.check, lineActive: true),
-          _StepData(circleState: _CircleState.active, icon: Icons.access_time, lineActive: false),
-          _StepData(circleState: _CircleState.inactive, icon: Icons.check, lineActive: false),
+          _StepData(
+              circleState: _CircleState.done,
+              icon: Icons.check,
+              lineActive: true),
+          _StepData(
+              circleState: _CircleState.active,
+              icon: Icons.access_time,
+              lineActive: false),
+          _StepData(
+              circleState: _CircleState.inactive,
+              icon: Icons.check,
+              lineActive: false),
         ];
       case _DemandeStatus.valide:
         return [
-          _StepData(circleState: _CircleState.done, icon: Icons.check, lineActive: true),
-          _StepData(circleState: _CircleState.done, icon: Icons.check, lineActive: true),
-          _StepData(circleState: _CircleState.done, icon: Icons.check, lineActive: false),
+          _StepData(
+              circleState: _CircleState.done,
+              icon: Icons.check,
+              lineActive: true),
+          _StepData(
+              circleState: _CircleState.done,
+              icon: Icons.check,
+              lineActive: true),
+          _StepData(
+              circleState: _CircleState.done,
+              icon: Icons.check,
+              lineActive: false),
         ];
     }
   }
@@ -338,7 +402,8 @@ class _ClientDemandeDetailScreenState
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.borderDivider),
         boxShadow: const [
-          BoxShadow(color: AppColors.shadowDark, blurRadius: 8, offset: Offset(0, 2)),
+          BoxShadow(
+              color: AppColors.shadowDark, blurRadius: 8, offset: Offset(0, 2)),
         ],
       ),
       child: Column(
@@ -346,10 +411,12 @@ class _ClientDemandeDetailScreenState
           final i = entry.key;
           final f = entry.value;
           final sub = f.fileName;
-          final isGeneric = sub.isEmpty || sub == 'document.pdf.pdf' || sub == f.label;
+          final isGeneric =
+              sub.isEmpty || sub == 'document.pdf.pdf' || sub == f.label;
           return Column(
             children: [
-              if (i > 0) const Divider(height: 1, color: AppColors.borderDivider),
+              if (i > 0)
+                const Divider(height: 1, color: AppColors.borderDivider),
               InkWell(
                 onTap: f.pdfUrl.isNotEmpty
                     ? () => _openViewer(
@@ -363,7 +430,8 @@ class _ClientDemandeDetailScreenState
                     : null,
                 borderRadius: BorderRadius.circular(14),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   child: Row(
                     children: [
                       Container(
@@ -411,9 +479,11 @@ class _ClientDemandeDetailScreenState
                             size: 18, color: AppColors.primary)
                       else
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: AppColors.statusValidated.withValues(alpha: 0.12),
+                            color: AppColors.statusValidated
+                                .withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -451,7 +521,8 @@ class _ClientDemandeDetailScreenState
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.borderDivider),
         boxShadow: const [
-          BoxShadow(color: AppColors.shadowDark, blurRadius: 8, offset: Offset(0, 2)),
+          BoxShadow(
+              color: AppColors.shadowDark, blurRadius: 8, offset: Offset(0, 2)),
         ],
       ),
       child: Column(
@@ -461,14 +532,16 @@ class _ClientDemandeDetailScreenState
           final docs = entry.value.value;
           return Column(
             children: [
-              if (i > 0) const Divider(height: 1, color: AppColors.borderDivider),
+              if (i > 0)
+                const Divider(height: 1, color: AppColors.borderDivider),
               InkWell(
                 onTap: docs.first.id.isNotEmpty
                     ? () => _openMultiViewer(context, label: label, docs: docs)
                     : null,
                 borderRadius: BorderRadius.circular(14),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   child: Row(
                     children: [
                       Container(
@@ -504,9 +577,11 @@ class _ClientDemandeDetailScreenState
                             if (docs.length > 1)
                               Container(
                                 margin: const EdgeInsets.only(left: 6),
-                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 7, vertical: 3),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primaryDark.withValues(alpha: 0.1),
+                                  color: AppColors.primaryDark
+                                      .withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -536,7 +611,8 @@ class _ClientDemandeDetailScreenState
 
   // ── Ouvrir viewer multi-fichiers (glisser recto/verso) ────────────────────
 
-  void _openMultiViewer(BuildContext context, {required String label, required List<RequiredDocumentItem> docs}) {
+  void _openMultiViewer(BuildContext context,
+      {required String label, required List<RequiredDocumentItem> docs}) {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => _MultiDocViewerPage(label: label, docs: docs),
     ));
@@ -544,9 +620,19 @@ class _ClientDemandeDetailScreenState
 
   // ── Ouvrir le viewer ──────────────────────────────────────────────────────
 
-  void _openViewer(BuildContext context, {required String label, required String url, required bool useToken, String? requestId, int formIndex = 0}) {
+  void _openViewer(BuildContext context,
+      {required String label,
+      required String url,
+      required bool useToken,
+      String? requestId,
+      int formIndex = 0}) {
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => _DocumentViewerPage(label: label, url: url, useToken: useToken, requestId: requestId, formIndex: formIndex),
+      builder: (_) => _DocumentViewerPage(
+          label: label,
+          url: url,
+          useToken: useToken,
+          requestId: requestId,
+          formIndex: formIndex),
     ));
   }
 
@@ -590,12 +676,18 @@ class _ClientDemandeDetailScreenState
 
   _DemandeStatus _parseStatus(String raw) {
     switch (raw.toUpperCase()) {
-      case 'EN_COURS':        return _DemandeStatus.enCours;
-      case 'VALIDEE':         return _DemandeStatus.valide;
-      case 'REJETEE':         return _DemandeStatus.rejete;
-      case 'BROUILLON':       return _DemandeStatus.brouillon;
-      case 'VALIDATION_FINALE': return _DemandeStatus.valide;
-      default:                return _DemandeStatus.enAttente;
+      case 'EN_COURS':
+        return _DemandeStatus.enCours;
+      case 'VALIDEE':
+        return _DemandeStatus.valide;
+      case 'REJETEE':
+        return _DemandeStatus.rejete;
+      case 'BROUILLON':
+        return _DemandeStatus.brouillon;
+      case 'VALIDATION_FINALE':
+        return _DemandeStatus.valide;
+      default:
+        return _DemandeStatus.enAttente;
     }
   }
 }
@@ -630,13 +722,17 @@ class _BackButton extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 enum _DemandeStatus { enAttente, enCours, valide, rejete, brouillon }
+
 enum _CircleState { active, done, inactive }
 
 class _StepData {
   final _CircleState circleState;
   final IconData icon;
   final bool lineActive;
-  const _StepData({required this.circleState, required this.icon, required this.lineActive});
+  const _StepData(
+      {required this.circleState,
+      required this.icon,
+      required this.lineActive});
 }
 
 class _StepCircle extends StatelessWidget {
@@ -659,8 +755,7 @@ class _StepCircle extends StatelessWidget {
         ),
       ),
       child: Icon(icon,
-          size: 16,
-          color: isActive ? AppColors.white : AppColors.borderGray),
+          size: 16, color: isActive ? AppColors.white : AppColors.borderGray),
     );
   }
 }
@@ -690,15 +785,20 @@ class _HeaderBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (status) {
       case _DemandeStatus.enAttente:
-        return _badge('demandes.pending'.tr(), AppColors.statusPending, AppColors.statusPending.withValues(alpha: 0.15));
+        return _badge('demandes.pending'.tr(), AppColors.statusPending,
+            AppColors.statusPending.withValues(alpha: 0.15));
       case _DemandeStatus.enCours:
-        return _badge('demandes.in_progress'.tr(), AppColors.statusInProgress, AppColors.statusInProgress.withValues(alpha: 0.15));
+        return _badge('demandes.in_progress'.tr(), AppColors.statusInProgress,
+            AppColors.statusInProgress.withValues(alpha: 0.15));
       case _DemandeStatus.valide:
-        return _badge('profile.validated'.tr(), AppColors.statusValidated, AppColors.statusValidated.withValues(alpha: 0.15));
+        return _badge('profile.validated'.tr(), AppColors.statusValidated,
+            AppColors.statusValidated.withValues(alpha: 0.15));
       case _DemandeStatus.rejete:
-        return _badge('profile.rejected'.tr(), AppColors.statusRejected, AppColors.statusRejected.withValues(alpha: 0.15));
+        return _badge('profile.rejected'.tr(), AppColors.statusRejected,
+            AppColors.statusRejected.withValues(alpha: 0.15));
       case _DemandeStatus.brouillon:
-        return _badge('demandes.draft'.tr(), AppColors.statusDraft, AppColors.statusDraft.withValues(alpha: 0.15));
+        return _badge('demandes.draft'.tr(), AppColors.statusDraft,
+            AppColors.statusDraft.withValues(alpha: 0.15));
     }
   }
 
@@ -807,7 +907,8 @@ class _MultiDocViewerPageState extends State<_MultiDocViewerPage> {
               right: 0,
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.black54,
                     borderRadius: BorderRadius.circular(20),
@@ -875,10 +976,14 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
     final cached = _cache[widget.url];
     if (cached != null) {
       final isPdf = cached.length >= 4 &&
-          cached[0] == 0x25 && cached[1] == 0x50 &&
-          cached[2] == 0x44 && cached[3] == 0x46;
-      if (isPdf) _pdfBytes = cached;
-      else _imageBytes = cached;
+          cached[0] == 0x25 &&
+          cached[1] == 0x50 &&
+          cached[2] == 0x44 &&
+          cached[3] == 0x46;
+      if (isPdf)
+        _pdfBytes = cached;
+      else
+        _imageBytes = cached;
       _loading = false;
     } else {
       _load();
@@ -918,20 +1023,29 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
       }
 
       final isPdf = bytes.length >= 4 &&
-          bytes[0] == 0x25 && bytes[1] == 0x50 &&
-          bytes[2] == 0x44 && bytes[3] == 0x46;
+          bytes[0] == 0x25 &&
+          bytes[1] == 0x50 &&
+          bytes[2] == 0x44 &&
+          bytes[3] == 0x46;
 
-      if (mounted) setState(() {
-        if (isPdf) _pdfBytes = bytes;
-        else _imageBytes = bytes;
-        _cache[widget.url] = bytes;
-        _loading = false;
-      });
+      if (mounted)
+        setState(() {
+          if (isPdf)
+            _pdfBytes = bytes;
+          else
+            _imageBytes = bytes;
+          _cache[widget.url] = bytes;
+          _loading = false;
+        });
     } catch (e) {
       if (widget.requestId != null) {
         await _fallbackViaApi(token);
       } else {
-        if (mounted) setState(() { _loading = false; _error = e.toString(); });
+        if (mounted)
+          setState(() {
+            _loading = false;
+            _error = e.toString();
+          });
       }
     }
   }
@@ -939,9 +1053,11 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
   Future<void> _fallbackViaApi(String token) async {
     try {
       // Re-refresh au cas où le token aurait expiré entre temps
-      final freshToken = await AuthenticatedHttpClient.instance.ensureFreshToken();
+      final freshToken =
+          await AuthenticatedHttpClient.instance.ensureFreshToken();
       final repo = DemandesRepository();
-      final demande = await repo.getRequestById(accessToken: freshToken, id: widget.requestId!);
+      final demande = await repo.getRequestById(
+          accessToken: freshToken, id: widget.requestId!);
 
       // Chercher par index exact d'abord, puis par label, puis premier disponible
       SubmittedFormItem? form;
@@ -952,11 +1068,11 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
       form ??= demande.submittedForms
           .where((f) => f.label == widget.label && f.pdfUrl.isNotEmpty)
           .firstOrNull;
-      form ??= demande.submittedForms
-          .where((f) => f.pdfUrl.isNotEmpty)
-          .firstOrNull;
+      form ??=
+          demande.submittedForms.where((f) => f.pdfUrl.isNotEmpty).firstOrNull;
 
-      if (form == null || form.pdfUrl.isEmpty) throw Exception('PDF introuvable');
+      if (form == null || form.pdfUrl.isEmpty)
+        throw Exception('PDF introuvable');
 
       final freshUrl = form.pdfUrl;
       final isMinIO = freshUrl.contains('X-Amz-');
@@ -964,21 +1080,31 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
       if (isMinIO) {
         bytes = await compute(_fetchDirect, freshUrl);
       } else {
-        bytes = await compute(_fetchWithToken, {'url': freshUrl, 'token': freshToken});
+        bytes = await compute(
+            _fetchWithToken, {'url': freshUrl, 'token': freshToken});
       }
 
       final isPdf = bytes.length >= 4 &&
-          bytes[0] == 0x25 && bytes[1] == 0x50 &&
-          bytes[2] == 0x44 && bytes[3] == 0x46;
+          bytes[0] == 0x25 &&
+          bytes[1] == 0x50 &&
+          bytes[2] == 0x44 &&
+          bytes[3] == 0x46;
 
-      if (mounted) setState(() {
-        if (isPdf) _pdfBytes = bytes;
-        else _imageBytes = bytes;
-        _cache[freshUrl] = bytes;
-        _loading = false;
-      });
+      if (mounted)
+        setState(() {
+          if (isPdf)
+            _pdfBytes = bytes;
+          else
+            _imageBytes = bytes;
+          _cache[freshUrl] = bytes;
+          _loading = false;
+        });
     } catch (e) {
-      if (mounted) setState(() { _loading = false; _error = e.toString(); });
+      if (mounted)
+        setState(() {
+          _loading = false;
+          _error = e.toString();
+        });
     }
   }
 
@@ -991,7 +1117,8 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
       Uri.parse(rawUrl),
       headers: {'Authorization': 'Bearer $token'},
     ).timeout(const Duration(seconds: 30));
-    debugPrint('[Viewer] status=${res.statusCode} bytes=${res.bodyBytes.length}');
+    debugPrint(
+        '[Viewer] status=${res.statusCode} bytes=${res.bodyBytes.length}');
     if (res.statusCode != 200) {
       debugPrint('[Viewer] error body=${res.body}');
       throw Exception('Erreur ${res.statusCode}');
@@ -1000,7 +1127,8 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
   }
 
   static Future<Uint8List> _fetchDirect(String url) async {
-    final res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 20));
+    final res =
+        await http.get(Uri.parse(url)).timeout(const Duration(seconds: 20));
     if (res.statusCode == 403 || res.statusCode == 404) {
       throw Exception('EXPIRED_${res.statusCode}');
     }
@@ -1038,7 +1166,8 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
         ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary))
           : _error != null
               ? Center(
                   child: Padding(
@@ -1069,7 +1198,8 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
                               fit: BoxFit.contain,
                               errorBuilder: (_, __, ___) => const Icon(
                                   Icons.insert_drive_file_outlined,
-                                  size: 80, color: AppColors.primary),
+                                  size: 80,
+                                  color: AppColors.primary),
                             ),
                           ),
                         )

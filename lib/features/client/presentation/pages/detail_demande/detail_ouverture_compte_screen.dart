@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class DetailOuvertureCompteScreen extends StatelessWidget {
   const DetailOuvertureCompteScreen({super.key});
@@ -31,7 +31,8 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                         height: AppConstants.backButtonSize,
                         decoration: BoxDecoration(
                           color: AppColors.whiteOverlay,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusMedium),
                         ),
                         child: Center(
                           child: SvgPicture.asset(
@@ -102,7 +103,8 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                       padding: EdgeInsets.all(AppConstants.paddingLarge),
                       decoration: BoxDecoration(
                         color: AppColors.white,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusLarge),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +158,8 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                                     height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
                                       color: AppColors.primaryDark,
-                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
+                                      borderRadius: BorderRadius.circular(
+                                          AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
@@ -191,7 +194,8 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                                   margin: EdgeInsets.only(bottom: 32),
                                   decoration: BoxDecoration(
                                     color: AppColors.divider,
-                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                                    borderRadius: BorderRadius.circular(
+                                        AppConstants.radiusRound),
                                   ),
                                 ),
                               ),
@@ -203,7 +207,8 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                                     height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
                                       color: AppColors.borderDivider,
-                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
+                                      borderRadius: BorderRadius.circular(
+                                          AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
@@ -238,7 +243,8 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                                   margin: EdgeInsets.only(bottom: 32),
                                   decoration: BoxDecoration(
                                     color: AppColors.divider,
-                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                                    borderRadius: BorderRadius.circular(
+                                        AppConstants.radiusRound),
                                   ),
                                 ),
                               ),
@@ -250,7 +256,8 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                                     height: AppConstants.progressStepSize,
                                     decoration: BoxDecoration(
                                       color: AppColors.borderDivider,
-                                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
+                                      borderRadius: BorderRadius.circular(
+                                          AppConstants.radiusXLarge),
                                     ),
                                     child: Center(
                                       child: SvgPicture.asset(
@@ -299,7 +306,8 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.white,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusMedium),
                         border: Border.all(
                           color: AppColors.border,
                           width: AppConstants.borderWidthThin,
@@ -356,14 +364,16 @@ class DetailOuvertureCompteScreen extends StatelessWidget {
                     right: AppConstants.paddingLarge + 8,
                     child: GestureDetector(
                       onTap: () {
-                        Navigator.of(context).pushNamed('/detail-ouverture-compte-brouillon');
+                        Navigator.of(context)
+                            .pushNamed('/detail-ouverture-compte-brouillon');
                       },
                       child: Container(
                         height: AppConstants.buttonHeightLarge,
                         padding: EdgeInsets.all(AppConstants.paddingMedium),
                         decoration: BoxDecoration(
                           color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusRound),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,

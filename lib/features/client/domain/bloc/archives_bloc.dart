@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/client/data/services/archives_service.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/client/data/services/archives_service.dart';
 import 'archives_event.dart';
 import 'archives_state.dart';
 

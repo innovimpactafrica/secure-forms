@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/http_client.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/http_client.dart';
 import '../models/notification_model.dart';
 
 class NotificationsService {
@@ -15,7 +15,8 @@ class NotificationsService {
   }) async {
     final params = <String, String>{};
     if (unreadOnly) params['unreadOnly'] = 'true';
-    final uri = Uri.parse(BaseUrl.getNotifications).replace(queryParameters: params);
+    final uri =
+        Uri.parse(BaseUrl.getNotifications).replace(queryParameters: params);
 
     final response = await _client.get(
       uri,
@@ -30,7 +31,9 @@ class NotificationsService {
       final List<dynamic> list = decoded is List
           ? decoded
           : (decoded['data'] ?? decoded['notifications'] ?? []);
-      return list.map((e) => NotificationModel.fromJson(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
     throw Exception('Erreur chargement notifications: ${response.statusCode}');
   }
@@ -38,7 +41,10 @@ class NotificationsService {
   Future<void> markRead(String accessToken, List<String> ids) async {
     await _client.post(
       Uri.parse(BaseUrl.markNotificationsRead),
-      headers: {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'},
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json'
+      },
       body: jsonEncode({'ids': ids}),
     );
   }

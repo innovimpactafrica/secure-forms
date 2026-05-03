@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/navigator_key.dart';
-import 'package:secure_link/core/utils/session_storage.dart';
-import 'package:secure_link/core/utils/user_session.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/navigator_key.dart';
+import 'package:quick_forms/core/utils/session_storage.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
 
 /// Client HTTP qui intercepte les 401 et rafraîchit automatiquement le token.
 /// Toutes les requêtes parallèles attendent le même refresh (pas de double refresh).
@@ -55,7 +55,8 @@ class AuthenticatedHttpClient extends http.BaseClient {
         return response;
       }
 
-      print('[AuthenticatedHttpClient] Token rafraîchi ✓ → relance ${request.url.path}');
+      print(
+          '[AuthenticatedHttpClient] Token rafraîchi ✓ → relance ${request.url.path}');
       final retryRequest = await _copyRequest(request, newToken);
       return _inner.send(retryRequest).timeout(_timeout);
     } catch (e) {
@@ -83,14 +84,16 @@ class AuthenticatedHttpClient extends http.BaseClient {
   Future<String> _doRefresh(String refreshToken) async {
     print('[AuthenticatedHttpClient] _doRefresh → POST /auth/refresh');
     try {
-      final response = await _inner.post(
-        Uri.parse(BaseUrl.refreshToken),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({'refreshToken': refreshToken}),
-      ).timeout(_timeout);
+      final response = await _inner
+          .post(
+            Uri.parse(BaseUrl.refreshToken),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode({'refreshToken': refreshToken}),
+          )
+          .timeout(_timeout);
 
       print('[AuthenticatedHttpClient] refresh status: ${response.statusCode}');
 
@@ -113,7 +116,8 @@ class AuthenticatedHttpClient extends http.BaseClient {
       }
 
       // Refresh token expiré ou invalide
-      print('[AuthenticatedHttpClient] Refresh refusé (${response.statusCode})');
+      print(
+          '[AuthenticatedHttpClient] Refresh refusé (${response.statusCode})');
       return '';
     } catch (e) {
       print('[AuthenticatedHttpClient] Erreur réseau refresh: $e');
@@ -149,8 +153,7 @@ class AuthenticatedHttpClient extends http.BaseClient {
       for (final f in original.files) {
         if (f.filename != null) {
           try {
-            r.files.add(await http.MultipartFile.fromPath(
-                f.field, f.filename!,
+            r.files.add(await http.MultipartFile.fromPath(f.field, f.filename!,
                 contentType: f.contentType));
           } catch (_) {
             r.files.add(f);

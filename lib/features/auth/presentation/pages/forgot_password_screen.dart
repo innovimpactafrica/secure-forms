@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/features/auth/domain/bloc/forgot_password_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/forgot_password_event.dart';
-import 'package:secure_link/features/auth/domain/bloc/forgot_password_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/features/auth/domain/bloc/forgot_password_bloc.dart';
+import 'package:quick_forms/features/auth/domain/bloc/forgot_password_event.dart';
+import 'package:quick_forms/features/auth/domain/bloc/forgot_password_state.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -78,12 +78,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             width: AppConstants.avatarSizeSmall,
                             height: AppConstants.avatarSizeSmall,
                             decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.backCircleColor, width: 1.26),
+                              border: Border.all(
+                                  color: AppColors.backCircleColor,
+                                  width: 1.26),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.arrow_back,
-                                color: AppColors.backArrowColor,
-                                size: 20.6),
+                                color: AppColors.backArrowColor, size: 20.6),
                           ),
                         ),
                         Image.asset('assets/images/qfwithtext.png',
@@ -126,7 +127,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               ),
                             ),
                             const SizedBox(height: 32),
-                            _FieldLabel(label: 'forgot_password.email_label'.tr()),
+                            _FieldLabel(
+                                label: 'forgot_password.email_label'.tr()),
                             const SizedBox(height: 6),
                             TextFormField(
                               controller: _emailController,
@@ -174,8 +176,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                   AppColors.primaryDark.withValues(alpha: 0.6),
                               elevation: 0,
                               shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppConstants.radiusRound),
+                                borderRadius: BorderRadius.circular(
+                                    AppConstants.radiusRound),
                               ),
                             ),
                             child: isLoading
@@ -188,7 +190,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 : Text(
                                     'forgot_password.send_button'.tr(),
                                     style: const TextStyle(
-                                      fontFamily: AppConstants.fontFamilySofiaSans,
+                                      fontFamily:
+                                          AppConstants.fontFamilySofiaSans,
                                       color: AppColors.white,
                                       fontWeight: FontWeight.w600,
                                       fontSize: AppConstants.fontSizeLarge,
@@ -198,7 +201,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ),
                         const SizedBox(height: 16),
                         GestureDetector(
-                          onTap: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                          onTap: () =>
+                              Navigator.of(context).pushNamedAndRemoveUntil(
                             AppRoutes.login,
                             (route) => false,
                           ),

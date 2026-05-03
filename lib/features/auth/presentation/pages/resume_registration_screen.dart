@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/features/auth/data/services/auth_service.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/features/auth/data/services/auth_service.dart';
 
 class ResumeRegistrationScreen extends StatefulWidget {
   const ResumeRegistrationScreen({super.key});
@@ -72,12 +72,12 @@ class _ResumeRegistrationScreenState extends State<ResumeRegistrationScreen> {
                       width: AppConstants.avatarSizeSmall,
                       height: AppConstants.avatarSizeSmall,
                       decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.backCircleColor, width: 1.26),
+                        border: Border.all(
+                            color: AppColors.backCircleColor, width: 1.26),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.arrow_back,
-                          color: AppColors.backArrowColor,
-                          size: 20.6),
+                          color: AppColors.backArrowColor, size: 20.6),
                     ),
                   ),
                   Image.asset('assets/images/qfwithtext.png',

@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 /// Écran caméra plein écran avec cadre de scan document en overlay.
 /// Retourne un [File] ou null si annulé.
@@ -74,7 +74,8 @@ class _KycCameraDocumentPageState extends State<KycCameraDocumentPage>
   }
 
   Future<void> _capture() async {
-    if (_controller == null || !_controller!.value.isInitialized || _isTaking) return;
+    if (_controller == null || !_controller!.value.isInitialized || _isTaking)
+      return;
     setState(() => _isTaking = true);
     try {
       final xfile = await _controller!.takePicture();
@@ -117,7 +118,8 @@ class _KycCameraDocumentPageState extends State<KycCameraDocumentPage>
             right: 0,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 child: Column(
                   children: [
                     Text(
@@ -192,9 +194,7 @@ class _KycCameraDocumentPageState extends State<KycCameraDocumentPage>
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 3),
-                          color: _isTaking
-                              ? Colors.white38
-                              : Colors.white24,
+                          color: _isTaking ? Colors.white38 : Colors.white24,
                         ),
                         child: Center(
                           child: Container(
@@ -246,9 +246,11 @@ class _DocumentOverlayPainter extends CustomPainter {
 
     // Fond sombre avec trou
     final darkPaint = Paint()..color = Colors.black.withValues(alpha: 0.55);
-    final fullPath = Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    final fullPath = Path()
+      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
     final holePath = Path()..addRRect(frameRect);
-    final overlayPath = Path.combine(PathOperation.difference, fullPath, holePath);
+    final overlayPath =
+        Path.combine(PathOperation.difference, fullPath, holePath);
     canvas.drawPath(overlayPath, darkPaint);
 
     // Bordure du cadre
@@ -268,24 +270,36 @@ class _DocumentOverlayPainter extends CustomPainter {
     const cLen = 28.0;
 
     // Haut-gauche
-    canvas.drawLine(Offset(frameL + r, frameT), Offset(frameL + r + cLen, frameT), cornerPaint);
-    canvas.drawLine(Offset(frameL, frameT + r), Offset(frameL, frameT + r + cLen), cornerPaint);
-    canvas.drawArc(Rect.fromLTWH(frameL, frameT, r * 2, r * 2), 3.14159, -1.5708, false, cornerPaint);
+    canvas.drawLine(Offset(frameL + r, frameT),
+        Offset(frameL + r + cLen, frameT), cornerPaint);
+    canvas.drawLine(Offset(frameL, frameT + r),
+        Offset(frameL, frameT + r + cLen), cornerPaint);
+    canvas.drawArc(Rect.fromLTWH(frameL, frameT, r * 2, r * 2), 3.14159,
+        -1.5708, false, cornerPaint);
 
     // Haut-droit
-    canvas.drawLine(Offset(frameR - r - cLen, frameT), Offset(frameR - r, frameT), cornerPaint);
-    canvas.drawLine(Offset(frameR, frameT + r), Offset(frameR, frameT + r + cLen), cornerPaint);
-    canvas.drawArc(Rect.fromLTWH(frameR - r * 2, frameT, r * 2, r * 2), 4.71239, -1.5708, false, cornerPaint);
+    canvas.drawLine(Offset(frameR - r - cLen, frameT),
+        Offset(frameR - r, frameT), cornerPaint);
+    canvas.drawLine(Offset(frameR, frameT + r),
+        Offset(frameR, frameT + r + cLen), cornerPaint);
+    canvas.drawArc(Rect.fromLTWH(frameR - r * 2, frameT, r * 2, r * 2), 4.71239,
+        -1.5708, false, cornerPaint);
 
     // Bas-gauche
-    canvas.drawLine(Offset(frameL, frameB - r - cLen), Offset(frameL, frameB - r), cornerPaint);
-    canvas.drawLine(Offset(frameL + r, frameB), Offset(frameL + r + cLen, frameB), cornerPaint);
-    canvas.drawArc(Rect.fromLTWH(frameL, frameB - r * 2, r * 2, r * 2), 1.5708, -1.5708, false, cornerPaint);
+    canvas.drawLine(Offset(frameL, frameB - r - cLen),
+        Offset(frameL, frameB - r), cornerPaint);
+    canvas.drawLine(Offset(frameL + r, frameB),
+        Offset(frameL + r + cLen, frameB), cornerPaint);
+    canvas.drawArc(Rect.fromLTWH(frameL, frameB - r * 2, r * 2, r * 2), 1.5708,
+        -1.5708, false, cornerPaint);
 
     // Bas-droit
-    canvas.drawLine(Offset(frameR, frameB - r - cLen), Offset(frameR, frameB - r), cornerPaint);
-    canvas.drawLine(Offset(frameR - r - cLen, frameB), Offset(frameR - r, frameB), cornerPaint);
-    canvas.drawArc(Rect.fromLTWH(frameR - r * 2, frameB - r * 2, r * 2, r * 2), 0, -1.5708, false, cornerPaint);
+    canvas.drawLine(Offset(frameR, frameB - r - cLen),
+        Offset(frameR, frameB - r), cornerPaint);
+    canvas.drawLine(Offset(frameR - r - cLen, frameB),
+        Offset(frameR - r, frameB), cornerPaint);
+    canvas.drawArc(Rect.fromLTWH(frameR - r * 2, frameB - r * 2, r * 2, r * 2),
+        0, -1.5708, false, cornerPaint);
   }
 
   @override

@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/features/auth/data/models/auth_request.dart';
-import 'package:secure_link/features/auth/domain/bloc/auth_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/auth_event.dart';
-import 'package:secure_link/features/auth/domain/bloc/auth_state.dart';
-import 'package:secure_link/features/auth/presentation/pages/otp_verification_screen.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/features/auth/data/models/auth_request.dart';
+import 'package:quick_forms/features/auth/domain/bloc/auth_bloc.dart';
+import 'package:quick_forms/features/auth/domain/bloc/auth_event.dart';
+import 'package:quick_forms/features/auth/domain/bloc/auth_state.dart';
+import 'package:quick_forms/features/auth/presentation/pages/otp_verification_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -49,7 +49,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     'profile.divorced': 'DIVORCE',
     'profile.widowed': 'VEUF',
   };
-
 
   @override
   void dispose() {
@@ -109,8 +108,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              Navigator.of(context)
-                  .pushNamed(AppRoutes.resumeRegistration);
+              Navigator.of(context).pushNamed(AppRoutes.resumeRegistration);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryDark,
@@ -145,7 +143,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               address: 'Dakar',
               dateOfBirth: _birthDateController.text.trim(),
               gender: _genderMap[_selectedGender] ?? 'HOMME',
-              maritalStatus: _maritalMap[_selectedMaritalStatus] ?? 'CELIBATAIRE',
+              maritalStatus:
+                  _maritalMap[_selectedMaritalStatus] ?? 'CELIBATAIRE',
             ),
           ),
         );
@@ -158,7 +157,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is RegisterSuccess) {
-          
             final authBloc = context.read<AuthBloc>();
             final email = state.email;
             final sessionToken = state.sessionToken;
@@ -184,7 +182,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => BlocProvider.value(
-                    value: authBloc, 
+                    value: authBloc,
                     child: OtpVerificationScreen(
                       email: email,
                       sessionToken: sessionToken,
@@ -240,7 +238,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             width: AppConstants.avatarSizeSmall,
                             height: AppConstants.avatarSizeSmall,
                             decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.backCircleColor, width: 1.26),
+                              border: Border.all(
+                                  color: AppColors.backCircleColor,
+                                  width: 1.26),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -292,31 +292,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ),
                             const SizedBox(height: AppConstants.paddingXLarge),
-
                             _FormField(
                               label: 'register.first_name'.tr(),
                               controller: _firstNameController,
                               hint: 'register.first_name_hint'.tr(),
                               prefixIcon: Icons.person_outline,
-                              validator: (v) => v!.isEmpty ? 'login.required_field'.tr() : null,
+                              validator: (v) => v!.isEmpty
+                                  ? 'login.required_field'.tr()
+                                  : null,
                             ),
                             const SizedBox(height: AppConstants.paddingLarge),
-
                             _FormField(
                               label: 'register.last_name'.tr(),
                               controller: _lastNameController,
                               hint: 'register.last_name_hint'.tr(),
                               prefixIcon: Icons.person_outline,
-                              validator: (v) => v!.isEmpty ? 'login.required_field'.tr() : null,
+                              validator: (v) => v!.isEmpty
+                                  ? 'login.required_field'.tr()
+                                  : null,
                             ),
                             const SizedBox(height: AppConstants.paddingLarge),
-
                             _IntlPhoneField(
                               controller: _phoneController,
-                              onChanged: (phone) => _fullPhone = phone.completeNumber,
+                              onChanged: (phone) =>
+                                  _fullPhone = phone.completeNumber,
                             ),
                             const SizedBox(height: AppConstants.paddingLarge),
-
                             _FormField(
                               label: 'login.email_label'.tr(),
                               controller: _emailController,
@@ -324,47 +325,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               prefixIcon: Icons.email_outlined,
                               keyboardType: TextInputType.emailAddress,
                               validator: (v) {
-                                if (v!.isEmpty) return 'login.required_field'.tr();
-                                if (!v.contains('@')) return 'login.invalid_email'.tr();
+                                if (v!.isEmpty)
+                                  return 'login.required_field'.tr();
+                                if (!v.contains('@'))
+                                  return 'login.invalid_email'.tr();
                                 return null;
                               },
                             ),
                             const SizedBox(height: AppConstants.paddingLarge),
-
                             _DateField(
                               label: 'register.birth_date'.tr(),
                               controller: _birthDateController,
                               hint: 'register.birth_date_hint'.tr(),
                             ),
                             const SizedBox(height: AppConstants.paddingLarge),
-
                             _GenderSelector(
                               selected: _selectedGender,
-                              onChanged: (val) => setState(() => _selectedGender = val),
+                              onChanged: (val) =>
+                                  setState(() => _selectedGender = val),
                             ),
                             const SizedBox(height: AppConstants.paddingLarge),
-
                             _DropdownField(
                               label: 'register.marital_status'.tr(),
                               hint: 'register.select'.tr(),
-                              value: _selectedMaritalStatus.isEmpty ? null : _selectedMaritalStatus,
+                              value: _selectedMaritalStatus.isEmpty
+                                  ? null
+                                  : _selectedMaritalStatus,
                               items: _maritalStatusOptions,
-                              onChanged: (val) => setState(() => _selectedMaritalStatus = val ?? ''),
+                              onChanged: (val) => setState(
+                                  () => _selectedMaritalStatus = val ?? ''),
                             ),
                             const SizedBox(height: 32),
-
                             SizedBox(
                               width: double.infinity,
                               height: AppConstants.logoutButtonHeight,
                               child: ElevatedButton(
-                                onPressed: isLoading ? null : () => _onRegister(context),
+                                onPressed: isLoading
+                                    ? null
+                                    : () => _onRegister(context),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primaryDark,
-                                  disabledBackgroundColor:
-                                      AppColors.primaryDark.withValues(alpha: 0.6),
+                                  disabledBackgroundColor: AppColors.primaryDark
+                                      .withValues(alpha: 0.6),
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                                    borderRadius: BorderRadius.circular(
+                                        AppConstants.radiusRound),
                                   ),
                                 ),
                                 child: isLoading
@@ -379,7 +385,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     : Text(
                                         'register.register_button'.tr(),
                                         style: const TextStyle(
-                                          fontFamily: AppConstants.fontFamilySofiaSans,
+                                          fontFamily:
+                                              AppConstants.fontFamilySofiaSans,
                                           color: AppColors.white,
                                           fontWeight: FontWeight.w600,
                                           fontSize: AppConstants.fontSizeLarge,
@@ -388,7 +395,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ),
                             const SizedBox(height: AppConstants.paddingXLarge),
-
                             Center(
                               child: GestureDetector(
                                 onTap: () => Navigator.of(context).pop(),
@@ -398,7 +404,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       TextSpan(
                                         text: 'register.already_account'.tr(),
                                         style: const TextStyle(
-                                          fontFamily: AppConstants.fontFamilyInter,
+                                          fontFamily:
+                                              AppConstants.fontFamilyInter,
                                           fontSize: AppConstants.fontSizeMedium,
                                           color: AppColors.textSecondary,
                                         ),
@@ -406,7 +413,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       TextSpan(
                                         text: 'register.login_link'.tr(),
                                         style: const TextStyle(
-                                          fontFamily: AppConstants.fontFamilyInter,
+                                          fontFamily:
+                                              AppConstants.fontFamilyInter,
                                           fontSize: AppConstants.fontSizeMedium,
                                           fontWeight: FontWeight.w600,
                                           color: AppColors.primary,
@@ -495,7 +503,8 @@ class _FormField extends StatelessWidget {
     );
   }
 
-  InputDecoration _inputDecoration({required String hint, required IconData prefixIcon}) {
+  InputDecoration _inputDecoration(
+      {required String hint, required IconData prefixIcon}) {
     return InputDecoration(
       hintText: hint,
       hintStyle: const TextStyle(
@@ -503,7 +512,8 @@ class _FormField extends StatelessWidget {
         color: AppColors.hintText,
         fontSize: AppConstants.fontSizeMedium,
       ),
-      prefixIcon: Icon(prefixIcon, color: AppColors.textSecondary, size: AppConstants.iconSizeMedium),
+      prefixIcon: Icon(prefixIcon,
+          color: AppColors.textSecondary, size: AppConstants.iconSizeMedium),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       filled: true,
       fillColor: AppColors.white,
@@ -517,7 +527,8 @@ class _FormField extends StatelessWidget {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-        borderSide: const BorderSide(color: AppColors.primary, width: AppConstants.borderWidthMedium),
+        borderSide: const BorderSide(
+            color: AppColors.primary, width: AppConstants.borderWidthMedium),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppConstants.radiusRound),
@@ -568,7 +579,8 @@ class _IntlPhoneField extends StatelessWidget {
               color: AppColors.hintText,
               fontSize: AppConstants.fontSizeMedium,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             filled: true,
             fillColor: AppColors.white,
             border: OutlineInputBorder(
@@ -581,7 +593,9 @@ class _IntlPhoneField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-              borderSide: const BorderSide(color: AppColors.primary, width: AppConstants.borderWidthMedium),
+              borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: AppConstants.borderWidthMedium),
             ),
           ),
         ),
@@ -595,7 +609,8 @@ class _DateField extends StatelessWidget {
   final String hint;
   final TextEditingController controller;
 
-  const _DateField({required this.label, required this.hint, required this.controller});
+  const _DateField(
+      {required this.label, required this.hint, required this.controller});
 
   Future<void> _pickDate(BuildContext context) async {
     final picked = await showDatePicker(
@@ -643,8 +658,11 @@ class _DateField extends StatelessWidget {
               color: AppColors.hintText,
               fontSize: AppConstants.fontSizeMedium,
             ),
-            suffixIcon: const Icon(Icons.calendar_today_outlined, color: AppColors.textSecondary, size: AppConstants.iconSizeMedium),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            suffixIcon: const Icon(Icons.calendar_today_outlined,
+                color: AppColors.textSecondary,
+                size: AppConstants.iconSizeMedium),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             filled: true,
             fillColor: AppColors.white,
             border: OutlineInputBorder(
@@ -657,7 +675,9 @@ class _DateField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-              borderSide: const BorderSide(color: AppColors.primary, width: AppConstants.borderWidthMedium),
+              borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: AppConstants.borderWidthMedium),
             ),
           ),
         ),
@@ -711,7 +731,8 @@ class _GenderOption extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _GenderOption({required this.label, required this.isSelected, required this.onTap});
+  const _GenderOption(
+      {required this.label, required this.isSelected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -724,7 +745,12 @@ class _GenderOption extends StatelessWidget {
             color: isSelected ? AppColors.white : AppColors.backgroundLight,
             borderRadius: BorderRadius.circular(AppConstants.radiusRound),
             boxShadow: isSelected
-                ? [const BoxShadow(color: AppColors.shadowLight, blurRadius: 4, offset: Offset(0, 2))]
+                ? [
+                    const BoxShadow(
+                        color: AppColors.shadowLight,
+                        blurRadius: 4,
+                        offset: Offset(0, 2))
+                  ]
                 : [],
           ),
           alignment: Alignment.center,
@@ -772,9 +798,11 @@ class _DropdownField extends StatelessWidget {
                   fontFamily: AppConstants.fontFamilyInter,
                   color: AppColors.hintText,
                   fontSize: AppConstants.fontSizeMedium)),
-          icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
+          icon: const Icon(Icons.keyboard_arrow_down,
+              color: AppColors.textSecondary),
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             filled: true,
             fillColor: AppColors.white,
             border: OutlineInputBorder(
@@ -787,7 +815,9 @@ class _DropdownField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-              borderSide: const BorderSide(color: AppColors.primary, width: AppConstants.borderWidthMedium),
+              borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: AppConstants.borderWidthMedium),
             ),
           ),
           items: items
@@ -832,7 +862,8 @@ class _RegisterSuccessBottomSheet extends StatelessWidget {
       padding: EdgeInsets.only(
         left: AppConstants.paddingLarge,
         right: AppConstants.paddingLarge,
-        bottom: MediaQuery.of(context).padding.bottom + AppConstants.paddingLarge,
+        bottom:
+            MediaQuery.of(context).padding.bottom + AppConstants.paddingLarge,
       ),
       child: Container(
         width: double.infinity,
@@ -893,6 +924,3 @@ class _RegisterSuccessBottomSheet extends StatelessWidget {
     );
   }
 }
-
-
-

@@ -1,4 +1,4 @@
-import 'package:secure_link/features/client/data/models/notification_model.dart';
+import 'package:quick_forms/features/client/data/models/notification_model.dart';
 
 abstract class NotificationsState {
   const NotificationsState();

@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/kyc/data/models/identity_document_model.dart';
-import 'package:secure_link/features/kyc/data/repositories/identity_document_repository.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/kyc/data/models/identity_document_model.dart';
+import 'package:quick_forms/features/kyc/data/repositories/identity_document_repository.dart';
 import 'kyc_event.dart';
 import 'kyc_state.dart';
 
@@ -72,7 +72,8 @@ class KycBloc extends Bloc<KycEvent, KycState> {
       _log('hasRecto=$hasRecto | hasSelfie=$hasSelfie');
 
       if (hasRecto && hasSelfie) {
-        _log('API: recto+selfie présents → KYC validé, sauvegarde cache + KycCompleted émis');
+        _log(
+            'API: recto+selfie présents → KYC validé, sauvegarde cache + KycCompleted émis');
         await prefs.setBool(_kycKey, true);
         emit(const KycCompleted());
       } else {
@@ -104,7 +105,8 @@ class KycBloc extends Bloc<KycEvent, KycState> {
     _log('━━━ KycUploadIdDocuments ━━━');
     _log('recto: ${event.recto.path}');
     _log('verso: ${event.verso.path}');
-    _log('token présent: ${event.token.isNotEmpty} (longueur: ${event.token.length})');
+    _log(
+        'token présent: ${event.token.isNotEmpty} (longueur: ${event.token.length})');
     emit(const KycUploading(message: 'Envoi de la pièce d\'identité...'));
     try {
       _log('Upload RECTO → kind=RECTO documentTypeId=${event.documentTypeId}');
@@ -137,7 +139,8 @@ class KycBloc extends Bloc<KycEvent, KycState> {
       KycUploadSelfie event, Emitter<KycState> emit) async {
     _log('━━━ KycUploadSelfie ━━━');
     _log('selfie: ${event.selfie.path}');
-    _log('token présent: ${event.token.isNotEmpty} (longueur: ${event.token.length})');
+    _log(
+        'token présent: ${event.token.isNotEmpty} (longueur: ${event.token.length})');
     emit(const KycUploading(message: 'Envoi du selfie...'));
     try {
       _log('Upload SELFIE → kind=SELFIE');
@@ -146,8 +149,10 @@ class KycBloc extends Bloc<KycEvent, KycState> {
         file: event.selfie,
         kind: DocumentKind.selfie,
       );
-      _log('SELFIE uploadé ✓ id=${selfieResult.id} status=${selfieResult.status}');
-      _log('KycSelfieUploaded émis (KycMarkCompleted sera appelé par la page preview)');
+      _log(
+          'SELFIE uploadé ✓ id=${selfieResult.id} status=${selfieResult.status}');
+      _log(
+          'KycSelfieUploaded émis (KycMarkCompleted sera appelé par la page preview)');
       emit(KycSelfieUploaded(selfie: selfieResult));
     } catch (e) {
       _log('ERREUR upload selfie: $e');

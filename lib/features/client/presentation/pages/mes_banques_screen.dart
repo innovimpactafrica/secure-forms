@@ -2,14 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/features/client/data/models/banque_model.dart';
-import 'package:secure_link/features/client/domain/bloc/banques_bloc/banques_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/banques_bloc/banques_event.dart';
-import 'package:secure_link/features/client/domain/bloc/banques_bloc/banques_state.dart';
-import 'package:secure_link/core/widgets/auth_image.dart';
-import 'package:secure_link/features/client/presentation/pages/detail_banque_screen.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/features/client/data/models/banque_model.dart';
+import 'package:quick_forms/features/client/domain/bloc/banques_bloc/banques_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/banques_bloc/banques_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/banques_bloc/banques_state.dart';
+import 'package:quick_forms/core/widgets/auth_image.dart';
+import 'package:quick_forms/features/client/presentation/pages/detail_banque_screen.dart';
 
 class MesBanquesScreen extends StatefulWidget {
   const MesBanquesScreen({super.key});
@@ -67,7 +67,8 @@ class _MesBanquesScreenState extends State<MesBanquesScreen> {
                 backgroundColor: AppColors.statusValideGreen,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium)),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium)),
               ),
             );
           } else if (state is BanqueAjoutErreurState) {
@@ -80,7 +81,8 @@ class _MesBanquesScreenState extends State<MesBanquesScreen> {
                 backgroundColor: AppColors.statusRejected,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium)),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium)),
               ),
             );
           }
@@ -126,12 +128,10 @@ class _MesBanquesScreenState extends State<MesBanquesScreen> {
               height: AppConstants.avatarSizeSmall,
               decoration: BoxDecoration(
                 color: AppColors.primaryDark,
-                borderRadius:
-                    BorderRadius.circular(AppConstants.radiusSmall),
+                borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
               ),
               child: const Icon(Icons.arrow_back,
-                  color: AppColors.white,
-                  size: AppConstants.iconSizeMedium),
+                  color: AppColors.white, size: AppConstants.iconSizeMedium),
             ),
           ),
           const SizedBox(width: AppConstants.paddingMedium),
@@ -164,14 +164,13 @@ class _MesBanquesScreenState extends State<MesBanquesScreen> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppConstants.paddingLarge),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge),
       child: Container(
         height: 44,
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius:
-              BorderRadius.circular(AppConstants.radiusRound),
+          borderRadius: BorderRadius.circular(AppConstants.radiusRound),
           border: Border.all(color: AppColors.borderDivider),
         ),
         child: Row(
@@ -210,8 +209,7 @@ class _MesBanquesScreenState extends State<MesBanquesScreen> {
       builder: (context, state) {
         if (state is BanquesLoading) {
           return const Center(
-              child: CircularProgressIndicator(
-                  color: AppColors.primaryDark));
+              child: CircularProgressIndicator(color: AppColors.primaryDark));
         }
         if (state is BanquesError) {
           return Center(
@@ -243,7 +241,8 @@ class _MesBanquesScreenState extends State<MesBanquesScreen> {
                 AppConstants.paddingXLarge),
             itemCount: state.banques.length,
             itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.only(bottom: AppConstants.paddingMedium),
+              padding:
+                  const EdgeInsets.only(bottom: AppConstants.paddingMedium),
               child: _BanqueCard(banque: state.banques[index]),
             ),
           );
@@ -272,68 +271,69 @@ class _BanqueCard extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-        border: Border.all(
-          color: AppColors.white.withValues(alpha: 0.08),
-          width: AppConstants.borderWidthThin,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F000000),
-            blurRadius: 48,
-            offset: Offset(0, 2),
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+          border: Border.all(
+            color: AppColors.white.withValues(alpha: 0.08),
+            width: AppConstants.borderWidthThin,
           ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppConstants.paddingLarge,
-        vertical: AppConstants.paddingMedium,
-      ),
-      child: Row(
-        children: [
-          ClipOval(
-            child: banque.logoUrl != null
-                ? AuthImage(
-                    url: banque.logoUrl!,
-                    width: AppConstants.avatarSizeLarge,
-                    height: AppConstants.avatarSizeLarge,
-                    fit: BoxFit.cover,
-                    fallback: _buildFallbackIcon,
-                  )
-                : _buildFallbackIcon(),
-          ),
-          const SizedBox(width: AppConstants.paddingMedium),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  banque.nom,
-                  style: const TextStyle(
-                    fontSize: AppConstants.fontSizeMedium,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textDark,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  banque.description,
-                  style: const TextStyle(
-                    fontSize: AppConstants.fontSizeRegular,
-                    color: AppColors.textSecondary,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0F000000),
+              blurRadius: 48,
+              offset: Offset(0, 2),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.paddingLarge,
+          vertical: AppConstants.paddingMedium,
+        ),
+        child: Row(
+          children: [
+            ClipOval(
+              child: banque.logoUrl != null
+                  ? AuthImage(
+                      url: banque.logoUrl!,
+                      width: AppConstants.avatarSizeLarge,
+                      height: AppConstants.avatarSizeLarge,
+                      fit: BoxFit.cover,
+                      fallback: _buildFallbackIcon,
+                    )
+                  : _buildFallbackIcon(),
+            ),
+            const SizedBox(width: AppConstants.paddingMedium),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    banque.nom,
+                    style: const TextStyle(
+                      fontSize: AppConstants.fontSizeMedium,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    banque.description,
+                    style: const TextStyle(
+                      fontSize: AppConstants.fontSizeRegular,
+                      color: AppColors.textSecondary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+
   Widget _buildFallbackIcon() {
     return Container(
       width: AppConstants.avatarSizeLarge,
@@ -343,8 +343,7 @@ class _BanqueCard extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       child: const Icon(Icons.account_balance,
-          color: AppColors.textSecondary,
-          size: AppConstants.iconSizeMedium),
+          color: AppColors.textSecondary, size: AppConstants.iconSizeMedium),
     );
   }
 }
@@ -377,9 +376,11 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
     final state = context.read<BanquesBloc>().state;
     if (state is BanquesLoaded) {
       _banquesFiltrees = List.from(state.banques);
-      debugPrint('[AjouterBanqueModal] initState: ${_banquesFiltrees.length} banques disponibles');
+      debugPrint(
+          '[AjouterBanqueModal] initState: ${_banquesFiltrees.length} banques disponibles');
     } else {
-      debugPrint('[AjouterBanqueModal] initState: BLoC pas en BanquesLoaded (${state.runtimeType})');
+      debugPrint(
+          '[AjouterBanqueModal] initState: BLoC pas en BanquesLoaded (${state.runtimeType})');
     }
   }
 
@@ -389,7 +390,9 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
     setState(() {
       _banquesFiltrees = query.isEmpty
           ? all
-          : all.where((b) => b.nom.toLowerCase().contains(query.toLowerCase())).toList();
+          : all
+              .where((b) => b.nom.toLowerCase().contains(query.toLowerCase()))
+              .toList();
     });
   }
 
@@ -501,8 +504,7 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
                 height: AppConstants.buttonHeight,
                 decoration: BoxDecoration(
                   color: AppColors.primaryDark,
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.radiusRound),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                 ),
                 child: Center(
                   child: Text(
@@ -526,8 +528,7 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
                 height: AppConstants.buttonHeight,
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.radiusRound),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                   border: Border.all(
                       color: AppColors.primaryDark,
                       width: AppConstants.borderWidthThin),
@@ -667,8 +668,8 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
   Widget _buildTypeCompteDropdown() {
     return Container(
       height: AppConstants.inputHeight,
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppConstants.paddingLarge),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
@@ -688,8 +689,7 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
               color: AppColors.textSecondary,
               size: AppConstants.iconSizeMedium),
           style: const TextStyle(
-              fontSize: AppConstants.fontSizeMedium,
-              color: AppColors.textDark),
+              fontSize: AppConstants.fontSizeMedium, color: AppColors.textDark),
           dropdownColor: AppColors.white,
           borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
           items: _typesCompte.map((type) {
@@ -720,8 +720,7 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
         controller: controller,
         keyboardType: keyboardType,
         style: const TextStyle(
-            fontSize: AppConstants.fontSizeMedium,
-            color: AppColors.textDark),
+            fontSize: AppConstants.fontSizeMedium, color: AppColors.textDark),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: const TextStyle(
@@ -729,8 +728,8 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
               color: AppColors.textSecondary),
           border: InputBorder.none,
           isDense: false,
-          contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.paddingLarge),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge),
         ),
       ),
     );
@@ -750,11 +749,13 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
             .where((b) => b.nom.toLowerCase() == banqueNom.toLowerCase())
             .firstOrNull;
         organisationId = found?.id ?? '';
-        debugPrint('[AjouterBanqueModal] Recherche par nom "$banqueNom" -> id=$organisationId');
+        debugPrint(
+            '[AjouterBanqueModal] Recherche par nom "$banqueNom" -> id=$organisationId');
       }
     }
 
-    debugPrint('[AjouterBanqueModal] banqueNom=$banqueNom | organisationId=$organisationId | numero=$numero | titulaire=$titulaire');
+    debugPrint(
+        '[AjouterBanqueModal] banqueNom=$banqueNom | organisationId=$organisationId | numero=$numero | titulaire=$titulaire');
 
     if (banqueNom.isEmpty) {
       debugPrint('[AjouterBanqueModal] BLOQUE: banqueNom vide');
@@ -765,7 +766,8 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
       return;
     }
     if (organisationId.isEmpty) {
-      debugPrint('[AjouterBanqueModal] BLOQUE: organisationId vide — banque introuvable dans la liste');
+      debugPrint(
+          '[AjouterBanqueModal] BLOQUE: organisationId vide — banque introuvable dans la liste');
       return;
     }
 

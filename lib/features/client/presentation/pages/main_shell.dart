@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_bloc.dart';
-import 'package:secure_link/features/client/presentation/pages/client_home_screen.dart';
-import 'package:secure_link/features/client/presentation/pages/client_demandes_screen.dart';
-import 'package:secure_link/features/client/presentation/pages/mes_archives_screen.dart';
-import 'package:secure_link/features/client/presentation/pages/client_profil_screen.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/features/client/domain/bloc/demandes_bloc/demandes_bloc.dart';
+import 'package:quick_forms/features/client/presentation/pages/client_home_screen.dart';
+import 'package:quick_forms/features/client/presentation/pages/client_demandes_screen.dart';
+import 'package:quick_forms/features/client/presentation/pages/mes_archives_screen.dart';
+import 'package:quick_forms/features/client/presentation/pages/client_profil_screen.dart';
 
 class MainShell extends StatefulWidget {
   final int initialIndex;
@@ -267,15 +267,21 @@ class _NotchPainter extends CustomPainter {
     path.lineTo(cx - half - smooth, 0);
     // Courbe d'entrée gauche
     path.cubicTo(
-      cx - half, 0,
-      cx - half, notchDepth,
-      cx, notchDepth,
+      cx - half,
+      0,
+      cx - half,
+      notchDepth,
+      cx,
+      notchDepth,
     );
     // Courbe de sortie droite
     path.cubicTo(
-      cx + half, notchDepth,
-      cx + half, 0,
-      cx + half + smooth, 0,
+      cx + half,
+      notchDepth,
+      cx + half,
+      0,
+      cx + half + smooth,
+      0,
     );
     // Ligne jusqu'au coin haut-droit
     path.lineTo(size.width, 0);

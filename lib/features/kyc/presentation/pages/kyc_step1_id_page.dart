@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/kyc/data/models/identity_document_model.dart';
-import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
-import 'package:secure_link/features/kyc/domain/bloc/kyc_event.dart';
-import 'package:secure_link/features/kyc/domain/bloc/kyc_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/kyc/data/models/identity_document_model.dart';
+import 'package:quick_forms/features/kyc/domain/bloc/kyc_bloc.dart';
+import 'package:quick_forms/features/kyc/domain/bloc/kyc_event.dart';
+import 'package:quick_forms/features/kyc/domain/bloc/kyc_state.dart';
 import 'kyc_camera_document_page.dart';
 import 'kyc_step2_face_page.dart';
 
@@ -47,7 +47,8 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
     }
   }
 
-  int get _uploadedCount => (_frontImage != null ? 1 : 0) + (_backImage != null ? 1 : 0);
+  int get _uploadedCount =>
+      (_frontImage != null ? 1 : 0) + (_backImage != null ? 1 : 0);
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +82,8 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -96,7 +98,8 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                                   color: AppColors.primaryDark,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
+                                child: const Icon(Icons.arrow_back,
+                                    color: AppColors.white, size: 20),
                               ),
                             ),
                             const SizedBox(width: 14),
@@ -106,7 +109,8 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                                 Text(
                                   'kyc.title'.tr(),
                                   style: TextStyle(
-                                    fontFamily: AppConstants.fontFamilySofiaSans,
+                                    fontFamily:
+                                        AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w600,
                                     fontSize: AppConstants.fontSizeLarge,
                                     color: AppColors.textBlack87,
@@ -133,7 +137,8 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                                 child: LinearProgressIndicator(
                                   value: _uploadedCount / 2,
                                   backgroundColor: AppColors.progressBar,
-                                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryDark),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.primaryDark),
                                   minHeight: 5,
                                 ),
                               ),
@@ -152,7 +157,6 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                       ],
                     ),
                   ),
-
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -171,7 +175,8 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                                 Text(
                                   'kyc.instructions'.tr(),
                                   style: TextStyle(
-                                    fontFamily: AppConstants.fontFamilySofiaSans,
+                                    fontFamily:
+                                        AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w600,
                                     fontSize: AppConstants.fontSizeMedium,
                                     color: AppColors.textBlack87,
@@ -186,7 +191,6 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                             ),
                           ),
                           const SizedBox(height: 24),
-
                           Text(
                             'kyc.front_side'.tr(),
                             style: TextStyle(
@@ -204,7 +208,6 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                             onRetake: () => setState(() => _frontImage = null),
                           ),
                           const SizedBox(height: 24),
-
                           Text(
                             'kyc.back_side'.tr(),
                             style: TextStyle(
@@ -226,7 +229,6 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                       ),
                     ),
                   ),
-
                   Padding(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
                     child: GestureDetector(
@@ -234,7 +236,9 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                           ? () {
                               final token = UserSession.instance.accessToken;
                               if (token.isNotEmpty) {
-                                context.read<KycBloc>().add(KycUploadIdDocuments(
+                                context
+                                    .read<KycBloc>()
+                                    .add(KycUploadIdDocuments(
                                       recto: _frontImage!,
                                       verso: _backImage!,
                                       token: token,
@@ -272,13 +276,15 @@ class _KycStep1IdPageState extends State<KycStep1IdPage> {
                                   height: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryDark),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppColors.primaryDark),
                                   ),
                                 )
                               : Text(
                                   'kyc.continue'.tr(),
                                   style: TextStyle(
-                                    fontFamily: AppConstants.fontFamilySofiaSans,
+                                    fontFamily:
+                                        AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w600,
                                     fontSize: AppConstants.fontSizeLarge,
                                     color: (_uploadedCount == 2 && !isLoading)
@@ -362,7 +368,8 @@ class _CaptureBox extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.primaryDark.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
+          border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -374,7 +381,8 @@ class _CaptureBox extends StatelessWidget {
                 color: AppColors.primaryDark,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.camera_alt, color: AppColors.white, size: 40),
+              child: const Icon(Icons.camera_alt,
+                  color: AppColors.white, size: 40),
             ),
             const SizedBox(height: 14),
             Text(
@@ -414,7 +422,8 @@ class _InstructionItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('• ', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+          Text('• ',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
           Expanded(
             child: Text(
               text,

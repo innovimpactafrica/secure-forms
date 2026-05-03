@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/client/data/models/profile_model.dart';
-import 'package:secure_link/features/client/data/repositories/profile_document_repository.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/client/data/models/profile_model.dart';
+import 'package:quick_forms/features/client/data/repositories/profile_document_repository.dart';
 import 'profile_event.dart';
 import 'profile_state.dart';
 
@@ -58,7 +58,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     _log('LoadDocumentTypes — token présent: ${token.isNotEmpty}');
 
     // Si déjà chargé et pas de force refresh, réémettre l'état actuel
-    if (!event.forceRefresh && _documentTypes.isNotEmpty && _uploadedDocuments.isNotEmpty) {
+    if (!event.forceRefresh &&
+        _documentTypes.isNotEmpty &&
+        _uploadedDocuments.isNotEmpty) {
       _log('LoadDocumentTypes — données en cache, skip API');
       final currentProfile = _currentProfile(state).copyWith(
         progressPercent: _completion.completion / 100.0,
@@ -83,7 +85,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       _documentTypes = results[0] as List<DocumentTypeModel>;
       _completion = results[1] as ProfileCompletionModel;
       _uploadedDocuments = results[2] as List<UploadedDocumentModel>;
-      _log('${_documentTypes.length} type(s), ${_uploadedDocuments.length} doc(s), complétion=${_completion.completion}%');
+      _log(
+          '${_documentTypes.length} type(s), ${_uploadedDocuments.length} doc(s), complétion=${_completion.completion}%');
 
       final currentProfile = _currentProfile(state).copyWith(
         progressPercent: _completion.completion / 100.0,
@@ -111,7 +114,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     final token = UserSession.instance.accessToken;
     _log('UploadProfileDocument — documentTypeId=${event.documentTypeId}');
     _log('issueDate=${event.issueDate} expirationDate=${event.expirationDate}');
-    _log('token vide: ${token.isEmpty} | token (50 premiers chars): ${token.length > 50 ? token.substring(0, 50) : token}');
+    _log(
+        'token vide: ${token.isEmpty} | token (50 premiers chars): ${token.length > 50 ? token.substring(0, 50) : token}');
     _log('backFile présent: ${event.backFile != null}');
     if (event.backFile != null) _log('backFile path: ${event.backFile!.path}');
 
@@ -132,16 +136,19 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             .where((d) => d.documentTypeId == event.documentTypeId)
             .firstOrNull;
         if (existing != null) {
-          _log('Document existant trouvé id=${existing.id} status=${existing.status} — suppression avant re-upload');
+          _log(
+              'Document existant trouvé id=${existing.id} status=${existing.status} — suppression avant re-upload');
           try {
-            await _repository.deleteDocument(token: token, documentId: existing.id);
+            await _repository.deleteDocument(
+                token: token, documentId: existing.id);
             ProfileDocumentRepository.invalidate(existing.id);
             _log('Suppression préalable réussie ✓');
           } catch (e) {
             _log('Suppression préalable échouée (on continue quand même): $e');
           }
         } else {
-          _log('Aucun document existant pour typeId=${event.documentTypeId} — upload direct');
+          _log(
+              'Aucun document existant pour typeId=${event.documentTypeId} — upload direct');
         }
       } else {
         _log('skipPreDelete=true — suppression déjà faite en amont');
@@ -220,7 +227,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     final currentProfile = _currentProfile(state);
 
     try {
-      await _repository.deleteDocument(token: token, documentId: event.documentId);
+      await _repository.deleteDocument(
+          token: token, documentId: event.documentId);
       _log('Suppression réussie ✓');
 
       final refreshed = await Future.wait([
@@ -409,8 +417,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     } else {
       updatedDocuments.add(event.document);
     }
-    final updatedProfile =
-        currentProfile.copyWith(documents: updatedDocuments);
+    final updatedProfile = currentProfile.copyWith(documents: updatedDocuments);
     emit(ProfileDocumentAdded(
       profile: updatedProfile,
       addedDocument: event.document,
@@ -490,8 +497,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     );
     // Vider le cache des fichiers pour le nouvel utilisateur
     ProfileDocumentRepository.clearCache();
-    emit(const ProfileInProgress(
-        profile: ProfileModel(progressPercent: 0.50)));
+    emit(const ProfileInProgress(profile: ProfileModel(progressPercent: 0.50)));
   }
 
   void _onCompleteProfile(

@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:secure_link/core/utils/user_session.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
 
 /// Charge une image en essayant d'abord l'URL directe (MinIO sans token),
 /// puis fallback sur l'URL avec Bearer token → Image.memory.
@@ -29,8 +29,8 @@ class AuthImage extends StatefulWidget {
 
 class _AuthImageState extends State<AuthImage> {
   bool _loading = true;
-  String? _directUrl;   // URL MinIO directe → CachedNetworkImage
-  Uint8List? _bytes;    // fallback avec token → Image.memory
+  String? _directUrl; // URL MinIO directe → CachedNetworkImage
+  Uint8List? _bytes; // fallback avec token → Image.memory
 
   @override
   void initState() {
@@ -45,7 +45,11 @@ class _AuthImageState extends State<AuthImage> {
           .get(Uri.parse(widget.url))
           .timeout(const Duration(seconds: 10));
       if (res.statusCode == 200) {
-        if (mounted) setState(() { _directUrl = widget.url; _loading = false; });
+        if (mounted)
+          setState(() {
+            _directUrl = widget.url;
+            _loading = false;
+          });
         return;
       }
     } catch (_) {}
@@ -54,10 +58,16 @@ class _AuthImageState extends State<AuthImage> {
     try {
       final res = await http.get(
         Uri.parse(widget.url),
-        headers: {'Authorization': 'Bearer ${UserSession.instance.accessToken}'},
+        headers: {
+          'Authorization': 'Bearer ${UserSession.instance.accessToken}'
+        },
       ).timeout(const Duration(seconds: 15));
       if (res.statusCode == 200) {
-        if (mounted) setState(() { _bytes = res.bodyBytes; _loading = false; });
+        if (mounted)
+          setState(() {
+            _bytes = res.bodyBytes;
+            _loading = false;
+          });
         return;
       }
     } catch (_) {}
@@ -84,7 +94,8 @@ class _AuthImageState extends State<AuthImage> {
         placeholder: (_, __) => SizedBox(
           width: widget.width,
           height: widget.height,
-          child: const Center(child: CircularProgressIndicator(strokeWidth: 1.5)),
+          child:
+              const Center(child: CircularProgressIndicator(strokeWidth: 1.5)),
         ),
         errorWidget: (_, __, ___) => widget.fallback(),
       );

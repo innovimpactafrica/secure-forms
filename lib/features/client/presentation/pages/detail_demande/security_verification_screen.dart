@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class SecurityVerificationScreen extends StatefulWidget {
   const SecurityVerificationScreen({super.key});
 
   @override
-  State<SecurityVerificationScreen> createState() => _SecurityVerificationScreenState();
+  State<SecurityVerificationScreen> createState() =>
+      _SecurityVerificationScreenState();
 }
 
-class _SecurityVerificationScreenState extends State<SecurityVerificationScreen> {
-  final List<TextEditingController> _otpControllers = List.generate(4, (index) => TextEditingController());
+class _SecurityVerificationScreenState
+    extends State<SecurityVerificationScreen> {
+  final List<TextEditingController> _otpControllers =
+      List.generate(4, (index) => TextEditingController());
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +34,12 @@ class _SecurityVerificationScreenState extends State<SecurityVerificationScreen>
                       height: AppConstants.progressStepSize,
                       decoration: BoxDecoration(
                         color: AppColors.whiteOverlay,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusSmall),
                       ),
-                      child: Icon(Icons.arrow_back, color: AppColors.white, size: AppConstants.iconSizeMedium),
+                      child: Icon(Icons.arrow_back,
+                          color: AppColors.white,
+                          size: AppConstants.iconSizeMedium),
                     ),
                   ),
                   SizedBox(width: AppConstants.paddingLarge),
@@ -53,10 +59,13 @@ class _SecurityVerificationScreenState extends State<SecurityVerificationScreen>
                             ),
                             const Spacer(),
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium, vertical: 4),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: AppConstants.paddingMedium,
+                                  vertical: 4),
                               decoration: BoxDecoration(
                                 color: AppColors.statusDraftLight,
-                                borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                                borderRadius: BorderRadius.circular(
+                                    AppConstants.radiusMedium),
                               ),
                               child: Text(
                                 'Brouillon',
@@ -84,7 +93,8 @@ class _SecurityVerificationScreenState extends State<SecurityVerificationScreen>
             ),
             // Progress bar
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppConstants.paddingXLarge),
+              padding:
+                  EdgeInsets.symmetric(horizontal: AppConstants.paddingXLarge),
               child: Row(
                 children: [
                   Expanded(
@@ -126,7 +136,8 @@ class _SecurityVerificationScreenState extends State<SecurityVerificationScreen>
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(AppConstants.paddingXLarge)),
+                  borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(AppConstants.paddingXLarge)),
                 ),
                 child: Padding(
                   padding: EdgeInsets.all(AppConstants.paddingXLarge),
@@ -160,7 +171,8 @@ class _SecurityVerificationScreenState extends State<SecurityVerificationScreen>
                             height: AppConstants.otpBoxSize,
                             decoration: BoxDecoration(
                               color: AppColors.gray,
-                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusMedium),
                             ),
                             child: TextField(
                               controller: _otpControllers[index],

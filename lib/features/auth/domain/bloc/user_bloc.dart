@@ -2,10 +2,10 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:secure_link/core/services/fcm_service.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/auth/data/models/user_profile_model.dart';
-import 'package:secure_link/features/auth/data/services/user_profile_service.dart';
+import 'package:quick_forms/core/services/fcm_service.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/auth/data/models/user_profile_model.dart';
+import 'package:quick_forms/features/auth/data/services/user_profile_service.dart';
 import 'user_event.dart';
 import 'user_state.dart';
 
@@ -51,7 +51,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(UserLoading());
     try {
       final user = await _service.getProfile(event.accessToken);
-      print('=== USER PROFILE LOADED: firstName=${user.firstName} lastName=${user.lastName} ===');
+      print(
+          '=== USER PROFILE LOADED: firstName=${user.firstName} lastName=${user.lastName} ===');
       _cachedUser = user;
       UserSession.instance.userId = user.id;
       _persistUserId(user.id);
@@ -104,9 +105,11 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       _profilePictureBytes = null;
       UserProfileService.invalidateCache();
       final userId = _cachedUser?.id ?? UserSession.instance.userId;
-      final bytes = await _service.getProfilePicture(event.accessToken, userId: userId);
+      final bytes =
+          await _service.getProfilePicture(event.accessToken, userId: userId);
       _profilePictureBytes = Uint8List.fromList(bytes);
-      print('=== PROFILE PICTURE REFRESHED: ${_profilePictureBytes!.length} bytes ===');
+      print(
+          '=== PROFILE PICTURE REFRESHED: ${_profilePictureBytes!.length} bytes ===');
       emit(UserProfilePictureUpdated(_profilePictureBytes!));
       if (_cachedUser != null) emit(UserLoaded(_cachedUser!));
     } catch (e) {
@@ -127,9 +130,11 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     }
     try {
       final userId = _cachedUser?.id ?? UserSession.instance.userId;
-      final bytes = await _service.getProfilePicture(event.accessToken, userId: userId);
+      final bytes =
+          await _service.getProfilePicture(event.accessToken, userId: userId);
       _profilePictureBytes = Uint8List.fromList(bytes);
-      print('=== PROFILE PICTURE LOADED: ${_profilePictureBytes!.length} bytes ===');
+      print(
+          '=== PROFILE PICTURE LOADED: ${_profilePictureBytes!.length} bytes ===');
       emit(UserProfilePictureLoaded(_profilePictureBytes!));
     } catch (_) {
       _profilePictureBytes = null;

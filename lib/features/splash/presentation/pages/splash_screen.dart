@@ -1,17 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_messaging/firebase_messaging.dart'; 
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/session_storage.dart';
-import 'package:secure_link/core/utils/authenticated_http_client.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
-import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/notifications_event.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/core/services/fcm_service.dart'; 
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/session_storage.dart';
+import 'package:quick_forms/core/utils/authenticated_http_client.dart';
+import 'package:quick_forms/features/auth/domain/bloc/user_bloc.dart';
+import 'package:quick_forms/features/auth/domain/bloc/user_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/notifications_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/notifications_event.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/core/services/fcm_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -41,7 +41,9 @@ class _SplashScreenState extends State<SplashScreen>
     );
     // ← CHANGÉ : -90 → -55 pour que le logo ne parte pas trop loin
     _logoSlide = Tween<double>(begin: 0.0, end: -55.0).animate(
-      CurvedAnimation(parent: _slideController, curve: Curves.easeInOut), // ← easeInOut comme demandé
+      CurvedAnimation(
+          parent: _slideController,
+          curve: Curves.easeInOut), // ← easeInOut comme demandé
     );
 
     _textController = AnimationController(
@@ -89,19 +91,23 @@ class _SplashScreenState extends State<SplashScreen>
     }
 
     final refreshToken = UserSession.instance.refreshToken;
-    if (refreshToken.isNotEmpty && _isTokenExpiredOrSoon(UserSession.instance.accessToken)) {
+    if (refreshToken.isNotEmpty &&
+        _isTokenExpiredOrSoon(UserSession.instance.accessToken)) {
       try {
         print('[Splash] Token expiré ou bientôt → refresh proactif...');
-        final freshToken = await AuthenticatedHttpClient.instance.ensureFreshToken();
+        final freshToken =
+            await AuthenticatedHttpClient.instance.ensureFreshToken();
         if (freshToken.isEmpty) {
           print('[Splash] Refresh échoué → reconnexion requise');
           await SessionStorage.instance.clear();
-          if (mounted) Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+          if (mounted)
+            Navigator.of(context).pushReplacementNamed(AppRoutes.login);
           return;
         }
         print('[Splash] Token rafraîchi avec succès');
       } catch (_) {
-        print('[Splash] Erreur réseau lors du refresh → on continue avec le token existant');
+        print(
+            '[Splash] Erreur réseau lors du refresh → on continue avec le token existant');
       }
     } else {
       print('[Splash] Token encore valide → pas de refresh nécessaire');
@@ -135,7 +141,8 @@ class _SplashScreenState extends State<SplashScreen>
       final exp = map['exp'] as int?;
       if (exp == null) return true;
       final expiry = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
-      return DateTime.now().isAfter(expiry.subtract(const Duration(minutes: 5)));
+      return DateTime.now()
+          .isAfter(expiry.subtract(const Duration(minutes: 5)));
     } catch (_) {
       return true;
     }

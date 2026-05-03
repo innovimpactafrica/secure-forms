@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'kyc_camera_selfie_page.dart';
 import 'kyc_step2_face_preview_page.dart';
 
@@ -64,7 +64,8 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                         color: AppColors.primaryDark,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
+                      child: const Icon(Icons.arrow_back,
+                          color: AppColors.white, size: 20),
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -93,7 +94,6 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                 ],
               ),
             ),
-
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -121,7 +121,6 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 28),
-
                     GestureDetector(
                       onTap: _isCapturing ? null : _takePhoto,
                       child: Container(
@@ -130,7 +129,9 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                         decoration: BoxDecoration(
                           color: AppColors.primaryDark.withValues(alpha: 0.04),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
+                          border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              width: 1.5),
                         ),
                         child: Stack(
                           alignment: Alignment.center,
@@ -163,7 +164,8 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                               right: 0,
                               child: Center(
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 8),
                                   decoration: BoxDecoration(
                                     color: AppColors.primary,
                                     borderRadius: BorderRadius.circular(20),
@@ -171,10 +173,13 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.camera_front, color: AppColors.white, size: 18),
+                                      const Icon(Icons.camera_front,
+                                          color: AppColors.white, size: 18),
                                       const SizedBox(width: 6),
                                       Text(
-                                        _isCapturing ? 'kyc.capturing'.tr() : 'kyc.tap_selfie'.tr(),
+                                        _isCapturing
+                                            ? 'kyc.capturing'.tr()
+                                            : 'kyc.tap_selfie'.tr(),
                                         style: const TextStyle(
                                           color: AppColors.white,
                                           fontSize: 12,
@@ -190,7 +195,6 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 20),
                     Container(
                       padding: const EdgeInsets.all(14),
@@ -211,7 +215,6 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                 ),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
               child: GestureDetector(
@@ -227,10 +230,13 @@ class _KycStep2FacePageState extends State<KycStep2FacePage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.camera_front_outlined, color: AppColors.white, size: 20),
+                      const Icon(Icons.camera_front_outlined,
+                          color: AppColors.white, size: 20),
                       const SizedBox(width: 10),
                       Text(
-                        _isCapturing ? 'kyc.capturing_selfie'.tr() : 'kyc.taking_selfie'.tr(),
+                        _isCapturing
+                            ? 'kyc.capturing_selfie'.tr()
+                            : 'kyc.taking_selfie'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilySofiaSans,
                           fontWeight: FontWeight.w600,
@@ -265,14 +271,22 @@ class _FaceOvalPainter extends CustomPainter {
     final rx = size.width * 0.22;
     final ry = size.height * 0.26;
 
-    canvas.drawLine(Offset(cx - rx, cy - ry + cornerLen), Offset(cx - rx, cy - ry), cornerPaint);
-    canvas.drawLine(Offset(cx - rx, cy - ry), Offset(cx - rx + cornerLen, cy - ry), cornerPaint);
-    canvas.drawLine(Offset(cx + rx - cornerLen, cy - ry), Offset(cx + rx, cy - ry), cornerPaint);
-    canvas.drawLine(Offset(cx + rx, cy - ry), Offset(cx + rx, cy - ry + cornerLen), cornerPaint);
-    canvas.drawLine(Offset(cx - rx, cy + ry - cornerLen), Offset(cx - rx, cy + ry), cornerPaint);
-    canvas.drawLine(Offset(cx - rx, cy + ry), Offset(cx - rx + cornerLen, cy + ry), cornerPaint);
-    canvas.drawLine(Offset(cx + rx - cornerLen, cy + ry), Offset(cx + rx, cy + ry), cornerPaint);
-    canvas.drawLine(Offset(cx + rx, cy + ry), Offset(cx + rx, cy + ry - cornerLen), cornerPaint);
+    canvas.drawLine(Offset(cx - rx, cy - ry + cornerLen),
+        Offset(cx - rx, cy - ry), cornerPaint);
+    canvas.drawLine(Offset(cx - rx, cy - ry),
+        Offset(cx - rx + cornerLen, cy - ry), cornerPaint);
+    canvas.drawLine(Offset(cx + rx - cornerLen, cy - ry),
+        Offset(cx + rx, cy - ry), cornerPaint);
+    canvas.drawLine(Offset(cx + rx, cy - ry),
+        Offset(cx + rx, cy - ry + cornerLen), cornerPaint);
+    canvas.drawLine(Offset(cx - rx, cy + ry - cornerLen),
+        Offset(cx - rx, cy + ry), cornerPaint);
+    canvas.drawLine(Offset(cx - rx, cy + ry),
+        Offset(cx - rx + cornerLen, cy + ry), cornerPaint);
+    canvas.drawLine(Offset(cx + rx - cornerLen, cy + ry),
+        Offset(cx + rx, cy + ry), cornerPaint);
+    canvas.drawLine(Offset(cx + rx, cy + ry),
+        Offset(cx + rx, cy + ry - cornerLen), cornerPaint);
   }
 
   @override
@@ -290,7 +304,8 @@ class _TipItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('• ', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+          Text('• ',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
           Expanded(
             child: Text(
               text,

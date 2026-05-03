@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/features/client/data/models/notification_model.dart';
-import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/notifications_event.dart';
-import 'package:secure_link/features/client/domain/bloc/notifications_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/features/client/data/models/notification_model.dart';
+import 'package:quick_forms/features/client/domain/bloc/notifications_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/notifications_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/notifications_state.dart';
 
 // ─────────────────────────────────────────────────────────────────
 // ÉCRAN NOTIFICATIONS
@@ -41,7 +41,9 @@ class _NotificationsViewState extends State<_NotificationsView> {
     }
     // Marquer toutes comme lues dès l'ouverture → badge à 0
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<NotificationsBloc>().add(const MarkAllNotificationsReadEvent());
+      context
+          .read<NotificationsBloc>()
+          .add(const MarkAllNotificationsReadEvent());
     });
   }
 
@@ -115,7 +117,8 @@ class _NotificationsViewState extends State<_NotificationsView> {
                 builder: (context, state) {
                   if (state is NotificationsLoading) {
                     return const Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
+                      child:
+                          CircularProgressIndicator(color: AppColors.primary),
                     );
                   }
                   if (state is NotificationsError) {
@@ -161,7 +164,9 @@ class _NotificationsViewState extends State<_NotificationsView> {
                     return RefreshIndicator(
                       color: AppColors.primaryDark,
                       onRefresh: () async {
-                        context.read<NotificationsBloc>().add(const LoadNotificationsEvent());
+                        context
+                            .read<NotificationsBloc>()
+                            .add(const LoadNotificationsEvent());
                         await Future.delayed(const Duration(milliseconds: 800));
                       },
                       child: _buildList(context, state.notifications),
@@ -254,7 +259,8 @@ class _NotifHeader extends StatelessWidget {
                 color: AppColors.primaryDark,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.arrow_back, color: AppColors.white, size: 18),
+              child: const Icon(Icons.arrow_back,
+                  color: AppColors.white, size: 18),
             ),
           ),
           const SizedBox(width: 16),
@@ -414,7 +420,8 @@ class _NotifCard extends StatelessWidget {
                           item.title,
                           style: TextStyle(
                             fontFamily: AppConstants.fontFamilySofiaSans,
-                            fontWeight: item.isRead ? FontWeight.w500 : FontWeight.w700,
+                            fontWeight:
+                                item.isRead ? FontWeight.w500 : FontWeight.w700,
                             fontSize: AppConstants.fontSizeMedium,
                             color: AppColors.textDark,
                           ),
@@ -423,7 +430,8 @@ class _NotifCard extends StatelessWidget {
                       const SizedBox(width: 8),
                       if (!item.isRead)
                         Container(
-                          width: 8, height: 8,
+                          width: 8,
+                          height: 8,
                           margin: const EdgeInsets.only(top: 4),
                           decoration: const BoxDecoration(
                             color: AppColors.statusRejected,

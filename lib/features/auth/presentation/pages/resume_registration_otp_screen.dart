@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/features/auth/data/services/auth_service.dart';
-import 'package:secure_link/features/auth/presentation/pages/email_sent_screen.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/features/auth/data/services/auth_service.dart';
+import 'package:quick_forms/features/auth/presentation/pages/email_sent_screen.dart';
 
 class ResumeRegistrationOtpScreen extends StatefulWidget {
   final String email;
@@ -288,8 +288,8 @@ class _ResumeRegistrationOtpScreenState
                               AppColors.primaryDark.withValues(alpha: 0.6),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                AppConstants.radiusRound),
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusRound),
                           ),
                         ),
                         child: _isLoading

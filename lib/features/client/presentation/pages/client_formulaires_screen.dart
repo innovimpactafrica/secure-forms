@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class ClientFormulairesScreen extends StatefulWidget {
   const ClientFormulairesScreen({super.key});
 
   @override
-  State<ClientFormulairesScreen> createState() => _ClientFormulairesScreenState();
+  State<ClientFormulairesScreen> createState() =>
+      _ClientFormulairesScreenState();
 }
 
 class _ClientFormulairesScreenState extends State<ClientFormulairesScreen> {
@@ -36,7 +37,8 @@ class _ClientFormulairesScreenState extends State<ClientFormulairesScreen> {
                   height: AppConstants.backButtonSize,
                   decoration: BoxDecoration(
                     color: AppColors.whiteOverlay,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium),
                   ),
                   child: Center(
                     child: SvgPicture.asset(
@@ -88,7 +90,8 @@ class _ClientFormulairesScreenState extends State<ClientFormulairesScreen> {
                     height: AppConstants.progressBarHeight,
                     decoration: BoxDecoration(
                       color: AppColors.progressBar,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusRound),
                     ),
                   ),
                   Container(
@@ -96,7 +99,8 @@ class _ClientFormulairesScreenState extends State<ClientFormulairesScreen> {
                     height: AppConstants.progressBarHeight,
                     decoration: BoxDecoration(
                       color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusRound),
                     ),
                   ),
                 ],
@@ -154,8 +158,11 @@ class _ClientFormulairesScreenState extends State<ClientFormulairesScreen> {
                       height: 78,
                       padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
                       decoration: BoxDecoration(
-                        color: selectedCard == 0 ? AppColors.primary : AppColors.white,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        color: selectedCard == 0
+                            ? AppColors.primary
+                            : AppColors.white,
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusMedium),
                         border: Border.all(color: AppColors.whiteOverlay),
                         boxShadow: [
                           BoxShadow(
@@ -181,23 +188,29 @@ class _ClientFormulairesScreenState extends State<ClientFormulairesScreen> {
                                 Text(
                                   'Demande de transfert',
                                   style: TextStyle(
-                                    fontFamily: AppConstants.fontFamilySofiaSans,
+                                    fontFamily:
+                                        AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w600,
                                     fontSize: AppConstants.fontSizeXLarge,
                                     height: 24 / 18,
                                     letterSpacing: 0,
-                                    color: selectedCard == 0 ? AppColors.white : AppColors.textDark,
+                                    color: selectedCard == 0
+                                        ? AppColors.white
+                                        : AppColors.textDark,
                                   ),
                                 ),
                                 Text(
                                   'Délai traitement 24h',
                                   style: TextStyle(
-                                    fontFamily: AppConstants.fontFamilySofiaSans,
+                                    fontFamily:
+                                        AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w400,
                                     fontSize: AppConstants.fontSizeRegular,
                                     height: 1.0,
                                     letterSpacing: 0,
-                                    color: selectedCard == 0 ? AppColors.whiteOpacity(0.8) : AppColors.textSecondary,
+                                    color: selectedCard == 0
+                                        ? AppColors.whiteOpacity(0.8)
+                                        : AppColors.textSecondary,
                                   ),
                                 ),
                               ],
@@ -239,8 +252,11 @@ class _ClientFormulairesScreenState extends State<ClientFormulairesScreen> {
                       height: 78,
                       padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
                       decoration: BoxDecoration(
-                        color: selectedCard == 1 ? AppColors.primary : AppColors.white,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        color: selectedCard == 1
+                            ? AppColors.primary
+                            : AppColors.white,
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusMedium),
                         border: Border.all(color: AppColors.whiteOverlay),
                         boxShadow: [
                           BoxShadow(
@@ -266,23 +282,29 @@ class _ClientFormulairesScreenState extends State<ClientFormulairesScreen> {
                                 Text(
                                   'Ouverture de compte',
                                   style: TextStyle(
-                                    fontFamily: AppConstants.fontFamilySofiaSans,
+                                    fontFamily:
+                                        AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w600,
                                     fontSize: AppConstants.fontSizeXLarge,
                                     height: 24 / 18,
                                     letterSpacing: 0,
-                                    color: selectedCard == 1 ? AppColors.white : AppColors.textDark,
+                                    color: selectedCard == 1
+                                        ? AppColors.white
+                                        : AppColors.textDark,
                                   ),
                                 ),
                                 Text(
                                   'Délai traitement 24h',
                                   style: TextStyle(
-                                    fontFamily: AppConstants.fontFamilySofiaSans,
+                                    fontFamily:
+                                        AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w400,
                                     fontSize: AppConstants.fontSizeRegular,
                                     height: 1.0,
                                     letterSpacing: 0,
-                                    color: selectedCard == 1 ? AppColors.whiteOpacity(0.8) : AppColors.textSecondary,
+                                    color: selectedCard == 1
+                                        ? AppColors.whiteOpacity(0.8)
+                                        : AppColors.textSecondary,
                                   ),
                                 ),
                               ],
@@ -324,8 +346,11 @@ class _ClientFormulairesScreenState extends State<ClientFormulairesScreen> {
                       height: 78,
                       padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
                       decoration: BoxDecoration(
-                        color: selectedCard == 2 ? AppColors.primary : AppColors.white,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        color: selectedCard == 2
+                            ? AppColors.primary
+                            : AppColors.white,
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusMedium),
                         border: Border.all(color: AppColors.whiteOverlay),
                         boxShadow: [
                           BoxShadow(
@@ -351,23 +376,29 @@ class _ClientFormulairesScreenState extends State<ClientFormulairesScreen> {
                                 Text(
                                   'Demande de prêt',
                                   style: TextStyle(
-                                    fontFamily: AppConstants.fontFamilySofiaSans,
+                                    fontFamily:
+                                        AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w600,
                                     fontSize: AppConstants.fontSizeXLarge,
                                     height: 24 / 18,
                                     letterSpacing: 0,
-                                    color: selectedCard == 2 ? AppColors.white : AppColors.textDark,
+                                    color: selectedCard == 2
+                                        ? AppColors.white
+                                        : AppColors.textDark,
                                   ),
                                 ),
                                 Text(
                                   'Délai traitement 24h',
                                   style: TextStyle(
-                                    fontFamily: AppConstants.fontFamilySofiaSans,
+                                    fontFamily:
+                                        AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w400,
                                     fontSize: AppConstants.fontSizeRegular,
                                     height: 1.0,
                                     letterSpacing: 0,
-                                    color: selectedCard == 2 ? AppColors.whiteOpacity(0.8) : AppColors.textSecondary,
+                                    color: selectedCard == 2
+                                        ? AppColors.whiteOpacity(0.8)
+                                        : AppColors.textSecondary,
                                   ),
                                 ),
                               ],
@@ -409,8 +440,11 @@ class _ClientFormulairesScreenState extends State<ClientFormulairesScreen> {
                       height: 78,
                       padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
                       decoration: BoxDecoration(
-                        color: selectedCard == 3 ? AppColors.primary : AppColors.white,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        color: selectedCard == 3
+                            ? AppColors.primary
+                            : AppColors.white,
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusMedium),
                         border: Border.all(color: AppColors.whiteOverlay),
                         boxShadow: [
                           BoxShadow(
@@ -436,23 +470,29 @@ class _ClientFormulairesScreenState extends State<ClientFormulairesScreen> {
                                 Text(
                                   'Opposition de cartes',
                                   style: TextStyle(
-                                    fontFamily: AppConstants.fontFamilySofiaSans,
+                                    fontFamily:
+                                        AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w600,
                                     fontSize: AppConstants.fontSizeXLarge,
                                     height: 24 / 18,
                                     letterSpacing: 0,
-                                    color: selectedCard == 3 ? AppColors.white : AppColors.textDark,
+                                    color: selectedCard == 3
+                                        ? AppColors.white
+                                        : AppColors.textDark,
                                   ),
                                 ),
                                 Text(
                                   'Délai traitement 24h',
                                   style: TextStyle(
-                                    fontFamily: AppConstants.fontFamilySofiaSans,
+                                    fontFamily:
+                                        AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w400,
                                     fontSize: AppConstants.fontSizeRegular,
                                     height: 1.0,
                                     letterSpacing: 0,
-                                    color: selectedCard == 3 ? AppColors.whiteOpacity(0.8) : AppColors.textSecondary,
+                                    color: selectedCard == 3
+                                        ? AppColors.whiteOpacity(0.8)
+                                        : AppColors.textSecondary,
                                   ),
                                 ),
                               ],
@@ -493,21 +533,28 @@ class _ClientFormulairesScreenState extends State<ClientFormulairesScreen> {
                 width: 382,
                 height: AppConstants.buttonHeight,
                 decoration: BoxDecoration(
-                  color: selectedCard != null ? AppColors.primary : AppColors.primaryDarker,
+                  color: selectedCard != null
+                      ? AppColors.primary
+                      : AppColors.primaryDarker,
                   borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                 ),
                 child: Center(
                   child: GestureDetector(
-                    onTap: selectedCard != null ? () {
-                      Navigator.pushNamed(context, AppRoutes.clientMethode);
-                    } : null,
+                    onTap: selectedCard != null
+                        ? () {
+                            Navigator.pushNamed(
+                                context, AppRoutes.clientMethode);
+                          }
+                        : null,
                     child: Text(
                       'Continuer',
                       style: TextStyle(
                         fontFamily: AppConstants.fontFamilyInter,
                         fontWeight: FontWeight.w600,
                         fontSize: AppConstants.fontSizeLarge,
-                        color: selectedCard != null ? AppColors.white : AppColors.textLightGray,
+                        color: selectedCard != null
+                            ? AppColors.white
+                            : AppColors.textLightGray,
                       ),
                     ),
                   ),

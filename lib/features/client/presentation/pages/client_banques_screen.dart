@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class ClientBanquesScreen extends StatefulWidget {
   const ClientBanquesScreen({super.key});
@@ -36,7 +36,8 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
                   height: AppConstants.backButtonSize,
                   decoration: BoxDecoration(
                     color: AppColors.whiteOverlay,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium),
                   ),
                   child: Center(
                     child: SvgPicture.asset(
@@ -131,11 +132,15 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
               right: AppConstants.paddingXLarge,
               child: Container(
                 height: AppConstants.searchBarHeight,
-                padding: EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium, vertical: AppConstants.paddingMedium),
+                padding: EdgeInsets.symmetric(
+                    horizontal: AppConstants.paddingMedium,
+                    vertical: AppConstants.paddingMedium),
                 decoration: BoxDecoration(
                   color: AppColors.searchBackground,
                   borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-                  border: Border.all(color: AppColors.borderOverlay, width: AppConstants.borderWidthThin),
+                  border: Border.all(
+                      color: AppColors.borderOverlay,
+                      width: AppConstants.borderWidthThin),
                 ),
                 child: Row(
                   children: [
@@ -167,10 +172,12 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
               child: Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge, vertical: 10),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: AppConstants.paddingLarge, vertical: 10),
                     decoration: BoxDecoration(
                       color: AppColors.whiteOverlayLight,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusXLarge),
                     ),
                     child: Text(
                       'Notaire',
@@ -183,10 +190,12 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
                   ),
                   SizedBox(width: AppConstants.paddingMedium),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge, vertical: 10),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: AppConstants.paddingLarge, vertical: 10),
                     decoration: BoxDecoration(
                       color: AppColors.whiteOverlayLight,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusXLarge),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusXLarge),
                     ),
                     child: Text(
                       'Banque',
@@ -214,15 +223,21 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.pushNamed(context, AppRoutes.clientFormulaires);
+                            Navigator.pushNamed(
+                                context, AppRoutes.clientFormulaires);
                           },
                           child: Container(
                             width: 183,
                             height: 162,
-                            padding: EdgeInsets.fromLTRB(AppConstants.paddingMedium, AppConstants.paddingLarge, AppConstants.paddingMedium, AppConstants.paddingLarge),
+                            padding: EdgeInsets.fromLTRB(
+                                AppConstants.paddingMedium,
+                                AppConstants.paddingLarge,
+                                AppConstants.paddingMedium,
+                                AppConstants.paddingLarge),
                             decoration: BoxDecoration(
                               color: AppColors.white,
-                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusMedium),
                               border: Border.all(color: AppColors.whiteOverlay),
                               boxShadow: [
                                 BoxShadow(
@@ -236,7 +251,8 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Image.asset(
@@ -307,7 +323,8 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Image.asset(
@@ -382,7 +399,8 @@ class _ClientBanquesScreenState extends State<ClientBanquesScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Image.asset(

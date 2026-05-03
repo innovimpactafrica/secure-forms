@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/features/home/domain/bloc/home_bloc.dart';
-import 'package:secure_link/features/home/domain/bloc/home_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/features/home/domain/bloc/home_bloc.dart';
+import 'package:quick_forms/features/home/domain/bloc/home_state.dart';
 
 class StatsGrid extends StatelessWidget {
   const StatsGrid({super.key});
@@ -15,27 +15,68 @@ class StatsGrid extends StatelessWidget {
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
         final stats = state is HomeStatisticsLoaded ? state.statistics : null;
-        final total      = stats != null ? stats.total.toString().padLeft(2, '0')      : '--';
-        final inProgress = stats != null ? stats.inProgress.toString().padLeft(2, '0') : '--';
-        final pending    = stats != null ? stats.pending.toString().padLeft(2, '0')    : '--';
-        final validated  = stats != null ? stats.validated.toString().padLeft(2, '0')  : '--';
+        final total =
+            stats != null ? stats.total.toString().padLeft(2, '0') : '--';
+        final inProgress =
+            stats != null ? stats.inProgress.toString().padLeft(2, '0') : '--';
+        final pending =
+            stats != null ? stats.pending.toString().padLeft(2, '0') : '--';
+        final validated =
+            stats != null ? stats.validated.toString().padLeft(2, '0') : '--';
         return Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
           child: Column(
             children: [
               Row(
                 children: [
-                  Expanded(child: StatCard(label: 'home.total_requests'.tr(), value: total, iconPath: 'assets/icons/td.svg', cardBg: AppColors.statTotalBg, borderColor: AppColors.statTotalBorder, iconColor: AppColors.statTotalIconColor, iconBgColor: AppColors.statTotalIconBg, applyColorFilter: false, iconSize: 17)),
+                  Expanded(
+                      child: StatCard(
+                          label: 'home.total_requests'.tr(),
+                          value: total,
+                          iconPath: 'assets/icons/td.svg',
+                          cardBg: AppColors.statTotalBg,
+                          borderColor: AppColors.statTotalBorder,
+                          iconColor: AppColors.statTotalIconColor,
+                          iconBgColor: AppColors.statTotalIconBg,
+                          applyColorFilter: false,
+                          iconSize: 17)),
                   const SizedBox(width: 12),
-                  Expanded(child: StatCard(label: 'home.in_progress'.tr(), value: inProgress, iconPath: 'assets/icons/bi_clock-history.svg', cardBg: AppColors.statInProgressBg, borderColor: AppColors.statInProgressBorder, iconColor: AppColors.statInProgressIconColor, iconBgColor: AppColors.statInProgressIconBg, iconSize: 22)),
+                  Expanded(
+                      child: StatCard(
+                          label: 'home.in_progress'.tr(),
+                          value: inProgress,
+                          iconPath: 'assets/icons/bi_clock-history.svg',
+                          cardBg: AppColors.statInProgressBg,
+                          borderColor: AppColors.statInProgressBorder,
+                          iconColor: AppColors.statInProgressIconColor,
+                          iconBgColor: AppColors.statInProgressIconBg,
+                          iconSize: 22)),
                 ],
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(child: StatCard(label: 'home.pending'.tr(), value: pending, iconPath: 'assets/icons/carbon_rule-draft.svg', cardBg: AppColors.statPendingBg, borderColor: AppColors.statPendingBorder, iconColor: AppColors.statPendingIconColor, iconBgColor: AppColors.statPendingIconBg, iconSize: 22)),
+                  Expanded(
+                      child: StatCard(
+                          label: 'home.pending'.tr(),
+                          value: pending,
+                          iconPath: 'assets/icons/carbon_rule-draft.svg',
+                          cardBg: AppColors.statPendingBg,
+                          borderColor: AppColors.statPendingBorder,
+                          iconColor: AppColors.statPendingIconColor,
+                          iconBgColor: AppColors.statPendingIconBg,
+                          iconSize: 22)),
                   const SizedBox(width: 12),
-                  Expanded(child: StatCard(label: 'home.validated'.tr(), value: validated, iconPath: 'assets/icons/bi_check2-circle (1).svg', cardBg: AppColors.statValidatedBg, borderColor: AppColors.statValidatedBorder, iconColor: AppColors.statValidatedIconColor, iconBgColor: AppColors.statValidatedIconBg, iconSize: 22)),
+                  Expanded(
+                      child: StatCard(
+                          label: 'home.validated'.tr(),
+                          value: validated,
+                          iconPath: 'assets/icons/bi_check2-circle (1).svg',
+                          cardBg: AppColors.statValidatedBg,
+                          borderColor: AppColors.statValidatedBorder,
+                          iconColor: AppColors.statValidatedIconColor,
+                          iconBgColor: AppColors.statValidatedIconBg,
+                          iconSize: 22)),
                 ],
               ),
             ],
@@ -88,16 +129,32 @@ class StatCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(label, style: TextStyle(fontFamily: AppConstants.fontFamilyInter, fontSize: 11, color: AppColors.textBlack54, fontWeight: FontWeight.w400)),
-              Text(value, style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontSize: 30, fontWeight: FontWeight.w700, color: AppColors.textBlack87)),
+              Text(label,
+                  style: TextStyle(
+                      fontFamily: AppConstants.fontFamilyInter,
+                      fontSize: 11,
+                      color: AppColors.textBlack54,
+                      fontWeight: FontWeight.w400)),
+              Text(value,
+                  style: TextStyle(
+                      fontFamily: AppConstants.fontFamilySofiaSans,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textBlack87)),
             ],
           ),
           Container(
-            width: 44, height: 44,
-            decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
+            width: 44,
+            height: 44,
+            decoration:
+                BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
             child: Center(
-              child: SvgPicture.asset(iconPath, width: iconSize, height: iconSize,
-                  colorFilter: applyColorFilter ? ColorFilter.mode(iconColor, BlendMode.srcIn) : null),
+              child: SvgPicture.asset(iconPath,
+                  width: iconSize,
+                  height: iconSize,
+                  colorFilter: applyColorFilter
+                      ? ColorFilter.mode(iconColor, BlendMode.srcIn)
+                      : null),
             ),
           ),
         ],

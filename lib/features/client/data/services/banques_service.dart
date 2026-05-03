@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/http_client.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/http_client.dart';
 import '../models/banque_model.dart';
 
 class BanquesService {
@@ -21,7 +21,8 @@ class BanquesService {
         .replace(queryParameters: params.isEmpty ? null : params);
 
     debugPrint('[BanquesService] GET $uri');
-    debugPrint('[BanquesService] Token: ${accessToken.substring(0, accessToken.length > 20 ? 20 : accessToken.length)}...');
+    debugPrint(
+        '[BanquesService] Token: ${accessToken.substring(0, accessToken.length > 20 ? 20 : accessToken.length)}...');
 
     final response = await _client.get(
       uri,
@@ -32,7 +33,8 @@ class BanquesService {
     );
 
     debugPrint('[BanquesService] Status: ${response.statusCode}');
-    debugPrint('[BanquesService] Body: ${response.body.substring(0, response.body.length > 300 ? 300 : response.body.length)}');
+    debugPrint(
+        '[BanquesService] Body: ${response.body.substring(0, response.body.length > 300 ? 300 : response.body.length)}');
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(response.body);

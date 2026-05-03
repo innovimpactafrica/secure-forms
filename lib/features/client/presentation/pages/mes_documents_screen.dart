@@ -8,19 +8,19 @@ import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/client/data/models/profile_model.dart';
-import 'package:secure_link/features/client/data/repositories/profile_document_repository.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/client/data/models/profile_model.dart';
+import 'package:quick_forms/features/client/data/repositories/profile_document_repository.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import '../widgets/document_upload_modal.dart' show showPickerSource;
-import 'package:secure_link/core/services/mlkit_ocr_service.dart';
+import 'package:quick_forms/core/services/mlkit_ocr_service.dart';
 import 'document_scanner_page.dart';
 import 'face_verification_screen.dart';
 
@@ -61,7 +61,8 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
       final types = await _repository.getDocumentTypes(token);
       final docs = await _repository.getDocuments(token);
       // ignore: avoid_print
-      print('[MesDocumentsScreen] ${docs.length} doc(s) — backFileIds: ${docs.map((d) => "${d.documentTypeTitle}:backId=${d.backFileId}").join(", ")}');
+      print(
+          '[MesDocumentsScreen] ${docs.length} doc(s) — backFileIds: ${docs.map((d) => "${d.documentTypeTitle}:backId=${d.backFileId}").join(", ")}');
       if (mounted) {
         setState(() {
           _documentTypes = types;
@@ -70,7 +71,11 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
         });
       }
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString().replaceAll('Exception: ', ''); _isLoading = false; });
+      if (mounted)
+        setState(() {
+          _error = e.toString().replaceAll('Exception: ', '');
+          _isLoading = false;
+        });
     }
   }
 
@@ -133,7 +138,8 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                 child: _isLoading
                     ? Center(
                         child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation(AppColors.primaryDark),
+                          valueColor:
+                              AlwaysStoppedAnimation(AppColors.primaryDark),
                         ),
                       )
                     : _error != null
@@ -151,12 +157,16 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                         : RefreshIndicator(
                             color: AppColors.primaryDark,
                             onRefresh: () async {
-                              setState(() { _isLoading = true; _error = null; });
+                              setState(() {
+                                _isLoading = true;
+                                _error = null;
+                              });
                               await _loadData();
                             },
                             child: SingleChildScrollView(
                               physics: const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                              padding:
+                                  const EdgeInsets.fromLTRB(20, 16, 20, 24),
                               child: _DocumentsGrid(
                                 documentTypes: _documentTypes,
                                 uploadedDocuments: _uploadedDocuments,
@@ -196,7 +206,8 @@ class _MesDocumentsScreenState extends State<MesDocumentsScreen> {
                       backgroundColor: AppColors.primaryDark,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusRound),
                       ),
                     ),
                     child: Text(
@@ -284,10 +295,16 @@ class _StatusLegend extends StatelessWidget {
     return Wrap(
       spacing: 12,
       children: [
-        _LegendItem(color: AppColors.statusValideGreen, label: 'profile.validated'.tr()),
-        _LegendItem(color: AppColors.statusEnAttente, label: 'profile.pending'.tr()),
-        _LegendItem(color: AppColors.statusInProgressCircle, label: 'profile.in_progress'.tr()),
-        _LegendItem(color: AppColors.statusRejected, label: 'profile.rejected'.tr()),
+        _LegendItem(
+            color: AppColors.statusValideGreen,
+            label: 'profile.validated'.tr()),
+        _LegendItem(
+            color: AppColors.statusEnAttente, label: 'profile.pending'.tr()),
+        _LegendItem(
+            color: AppColors.statusInProgressCircle,
+            label: 'profile.in_progress'.tr()),
+        _LegendItem(
+            color: AppColors.statusRejected, label: 'profile.rejected'.tr()),
       ],
     );
   }
@@ -477,9 +494,19 @@ class _DocumentCard extends StatelessWidget {
       final parsed = DateTime.tryParse(date);
       if (parsed == null) return date;
       const months = [
-        '', 'janv.', 'févr.', 'mars', 'avr.',
-        'mai', 'juin', 'juil.', 'août',
-        'sept.', 'oct.', 'nov.', 'déc.'
+        '',
+        'janv.',
+        'févr.',
+        'mars',
+        'avr.',
+        'mai',
+        'juin',
+        'juil.',
+        'août',
+        'sept.',
+        'oct.',
+        'nov.',
+        'déc.'
       ];
       return '${parsed.day} ${months[parsed.month]}${parsed.year}';
     } catch (_) {
@@ -533,21 +560,24 @@ class _DocumentCard extends StatelessWidget {
                           fit: BoxFit.cover,
                           width: double.infinity,
                           errorBuilder: (_, __, ___) => _DocumentImage(
-                            key: ValueKey('${uploadedDocument?.id}_$refreshKey'),
+                            key:
+                                ValueKey('${uploadedDocument?.id}_$refreshKey'),
                             documentId: uploadedDocument!.id,
                           ),
                         )
                       : hasDoc
                           ? (uploadedDocument!.backFileId != null
                               ? _DocumentImageDouble(
-                                  key: ValueKey('${uploadedDocument!.id}_${uploadedDocument!.backFileId}_$refreshKey'),
+                                  key: ValueKey(
+                                      '${uploadedDocument!.id}_${uploadedDocument!.backFileId}_$refreshKey'),
                                   id1: uploadedDocument!.id,
                                   url1: uploadedDocument!.fileUrl,
                                   id2: uploadedDocument!.backFileId!,
                                   url2: uploadedDocument!.backFileUrl,
                                 )
                               : _DocumentImage(
-                                  key: ValueKey('${uploadedDocument!.id}_$refreshKey'),
+                                  key: ValueKey(
+                                      '${uploadedDocument!.id}_$refreshKey'),
                                   documentId: uploadedDocument!.id,
                                   directUrl: uploadedDocument!.fileUrl,
                                 ))
@@ -556,7 +586,9 @@ class _DocumentCard extends StatelessWidget {
                                 'assets/icons/ri_image-add-fill.svg',
                                 width: 32,
                                 height: 32,
-                                colorFilter: ColorFilter.mode(AppColors.docCardAddIconColor, BlendMode.srcIn),
+                                colorFilter: ColorFilter.mode(
+                                    AppColors.docCardAddIconColor,
+                                    BlendMode.srcIn),
                               ),
                             ),
                 ),
@@ -737,8 +769,10 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
     super.initState();
     _bloc = context.read<ProfileBloc>();
     if (widget.existingDocument != null) {
-      _deliveryDateController.text = _toDisplayDate(widget.existingDocument!.issueDate);
-      _expiryDateController.text = _toDisplayDate(widget.existingDocument!.expirationDate);
+      _deliveryDateController.text =
+          _toDisplayDate(widget.existingDocument!.issueDate);
+      _expiryDateController.text =
+          _toDisplayDate(widget.existingDocument!.expirationDate);
     }
   }
 
@@ -778,15 +812,19 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
     if (choice == null || !mounted) return;
 
     String? path;
-    if (choice == 'camera' && !isBack && widget.documentType.hasExpirationDate) {
+    if (choice == 'camera' &&
+        !isBack &&
+        widget.documentType.hasExpirationDate) {
       path = await Navigator.of(context).push<String>(
         MaterialPageRoute(builder: (_) => const DocumentScannerPage()),
       );
     } else if (choice == 'camera') {
-      final x = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 85);
+      final x = await ImagePicker()
+          .pickImage(source: ImageSource.camera, imageQuality: 85);
       path = x?.path;
     } else if (choice == 'gallery') {
-      final x = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
+      final x = await ImagePicker()
+          .pickImage(source: ImageSource.gallery, imageQuality: 85);
       path = x?.path;
     } else {
       final result = await FilePicker.platform.pickFiles(
@@ -801,7 +839,10 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
     if (isBack) {
       setState(() => _backFilePath = path);
     } else {
-      setState(() { _uploadedFilePath = path; _isImage = ext != 'pdf'; });
+      setState(() {
+        _uploadedFilePath = path;
+        _isImage = ext != 'pdf';
+      });
       widget.onFileSelected?.call(path);
       if (widget.documentType.hasExpirationDate) {
         await _runOcr(path);
@@ -812,7 +853,8 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
   Future<void> _runOcr(String filePath) async {
     setState(() => _isScanning = true);
     try {
-      final result = await MlKitOcrService.extractDatesFromDocument(File(filePath));
+      final result =
+          await MlKitOcrService.extractDatesFromDocument(File(filePath));
       if (!mounted) return;
       if (result.issueDate != null && _deliveryDateController.text.isEmpty) {
         _deliveryDateController.text = result.issueDate!;
@@ -825,12 +867,15 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
           SnackBar(
             content: Text(
               'Dates détectées automatiquement ✓',
-              style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.white),
+              style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  color: AppColors.white),
             ),
             backgroundColor: AppColors.statusValideGreen,
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 2),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
@@ -850,18 +895,25 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('profile.fill_all_fields'.tr(),
-                style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.white)),
+                style: TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    color: AppColors.white)),
             backgroundColor: AppColors.statusRejected,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
         return;
       }
       _bloc.add(PatchProfileDocumentEvent(
         documentId: widget.existingDocument!.id,
-        issueDate: _deliveryDateController.text.isNotEmpty ? _deliveryDateController.text : null,
-        expirationDate: _expiryDateController.text.isNotEmpty ? _expiryDateController.text : null,
+        issueDate: _deliveryDateController.text.isNotEmpty
+            ? _deliveryDateController.text
+            : null,
+        expirationDate: _expiryDateController.text.isNotEmpty
+            ? _expiryDateController.text
+            : null,
       ));
       if (mounted) Navigator.of(context).pop();
       return;
@@ -875,10 +927,13 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('profile.fill_all_fields'.tr(),
-              style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.white)),
+              style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  color: AppColors.white)),
           backgroundColor: AppColors.statusRejected,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
       return;
@@ -888,8 +943,12 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
       file: File(_uploadedFilePath!),
       backFile: _backFilePath != null ? File(_backFilePath!) : null,
       documentTypeId: widget.documentType.id,
-      issueDate: _deliveryDateController.text.isNotEmpty ? _deliveryDateController.text : null,
-      expirationDate: _expiryDateController.text.isNotEmpty ? _expiryDateController.text : null,
+      issueDate: _deliveryDateController.text.isNotEmpty
+          ? _deliveryDateController.text
+          : null,
+      expirationDate: _expiryDateController.text.isNotEmpty
+          ? _expiryDateController.text
+          : null,
     ));
     if (mounted) Navigator.of(context).pop();
   }
@@ -943,10 +1002,12 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                   GestureDetector(
                     onTap: () => _confirmDelete(context),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
                         color: AppColors.statusRejected.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusSmall),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -1009,18 +1070,22 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                   height: 120,
                   decoration: BoxDecoration(
                     color: AppColors.docUploadBg,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                    border: Border.all(color: AppColors.docUploadBorder, width: 1),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusSmall),
+                    border:
+                        Border.all(color: AppColors.docUploadBorder, width: 1),
                   ),
                   child: _isScanning
                       ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SizedBox(
-                              width: 24, height: 24,
+                              width: 24,
+                              height: 24,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                                valueColor:
+                                    AlwaysStoppedAnimation(AppColors.primary),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -1036,10 +1101,15 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                         )
                       : _uploadedFilePath != null && _isImage
                           ? ClipRRect(
-                              borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                              child: Image.file(File(_uploadedFilePath!), fit: BoxFit.cover, width: double.infinity,
-                                  errorBuilder: (_, __, ___) => const _UploadPlaceholder(hasFile: true)))
-                          : _UploadPlaceholder(hasFile: _uploadedFilePath != null),
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusSmall),
+                              child: Image.file(File(_uploadedFilePath!),
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  errorBuilder: (_, __, ___) =>
+                                      const _UploadPlaceholder(hasFile: true)))
+                          : _UploadPlaceholder(
+                              hasFile: _uploadedFilePath != null),
                 ),
               ),
               const SizedBox(height: 10),
@@ -1051,7 +1121,8 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.add_circle_outline, size: 16, color: AppColors.primary),
+                      Icon(Icons.add_circle_outline,
+                          size: 16, color: AppColors.primary),
                       const SizedBox(width: 6),
                       Text(
                         'profile.add_back_document'.tr(),
@@ -1079,8 +1150,12 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                     ),
                     const Spacer(),
                     GestureDetector(
-                      onTap: () => setState(() { _showBack = false; _backFilePath = null; }),
-                      child: Icon(Icons.close, size: 16, color: AppColors.textSecondary),
+                      onTap: () => setState(() {
+                        _showBack = false;
+                        _backFilePath = null;
+                      }),
+                      child: Icon(Icons.close,
+                          size: 16, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -1092,14 +1167,20 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                     height: 120,
                     decoration: BoxDecoration(
                       color: AppColors.docUploadBg,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                      border: Border.all(color: AppColors.docUploadBorder, width: 1),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusSmall),
+                      border: Border.all(
+                          color: AppColors.docUploadBorder, width: 1),
                     ),
                     child: _backFilePath != null
                         ? ClipRRect(
-                            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                            child: Image.file(File(_backFilePath!), fit: BoxFit.cover, width: double.infinity,
-                                errorBuilder: (_, __, ___) => const _UploadPlaceholder(hasFile: true)))
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusSmall),
+                            child: Image.file(File(_backFilePath!),
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                errorBuilder: (_, __, ___) =>
+                                    const _UploadPlaceholder(hasFile: true)))
                         : const _UploadPlaceholder(hasFile: false),
                   ),
                 ),
@@ -1112,7 +1193,9 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
                 decoration: BoxDecoration(
                   color: AppColors.statusValideGreenLight,
                   borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                  border: Border.all(color: AppColors.statusValideGreen.withValues(alpha: 0.4)),
+                  border: Border.all(
+                      color:
+                          AppColors.statusValideGreen.withValues(alpha: 0.4)),
                 ),
                 child: Row(
                   children: [
@@ -1151,7 +1234,8 @@ class _DocumentUpdateModalState extends State<_DocumentUpdateModal> {
               _ModalDateField(
                 controller: _expiryDateController,
                 hint: 'profile.expiry_date_hint'.tr(),
-                onTap: () => _pickDate(context, _expiryDateController, isExpiry: true),
+                onTap: () =>
+                    _pickDate(context, _expiryDateController, isExpiry: true),
               ),
               const SizedBox(height: 16),
             ],
@@ -1255,7 +1339,8 @@ class _UploadPlaceholder extends StatelessWidget {
               'assets/icons/televerser.svg',
               width: 20,
               height: 20,
-              colorFilter: const ColorFilter.mode(AppColors.white, BlendMode.srcIn),
+              colorFilter:
+                  const ColorFilter.mode(AppColors.white, BlendMode.srcIn),
             ),
           ),
         ),
@@ -1314,7 +1399,8 @@ class _ModalDateField extends StatelessWidget {
         ),
         suffixIcon: Icon(Icons.calendar_today_outlined,
             color: AppColors.textSecondary, size: AppConstants.iconSizeMedium),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
           borderSide: BorderSide(color: AppColors.borderLight),
@@ -1347,9 +1433,9 @@ class _DocumentImage extends StatefulWidget {
 class _DocumentImageState extends State<_DocumentImage> {
   bool _loading = true;
   bool _isPdf = false;
-  String? _pdfPath;       // fichier temp pour PDF
+  String? _pdfPath; // fichier temp pour PDF
   Uint8List? _imageBytes; // bytes pour image via fallback token
-  String? _imageUrl;      // URL directe valide pour CachedNetworkImage
+  String? _imageUrl; // URL directe valide pour CachedNetworkImage
 
   @override
   void initState() {
@@ -1371,34 +1457,53 @@ class _DocumentImageState extends State<_DocumentImage> {
         // ── PDF : télécharge → fichier temp → PdfViewer.file ──
         final data = await _fetchBytes(directUrl, fallbackUrl, token);
         final dir = await getTemporaryDirectory();
-        final file = File('${dir.path}/thumb_mes_docs_${widget.documentId}.pdf');
+        final file =
+            File('${dir.path}/thumb_mes_docs_${widget.documentId}.pdf');
         await file.writeAsBytes(data);
-        if (mounted) setState(() { _isPdf = true; _pdfPath = file.path; _loading = false; });
+        if (mounted)
+          setState(() {
+            _isPdf = true;
+            _pdfPath = file.path;
+            _loading = false;
+          });
       } else {
         // ── Image : essai URL directe MinIO d'abord ──
         if (directUrl != null && directUrl.isNotEmpty) {
           try {
-            final res = await http.get(Uri.parse(directUrl)).timeout(const Duration(seconds: 15));
+            final res = await http
+                .get(Uri.parse(directUrl))
+                .timeout(const Duration(seconds: 15));
             if (res.statusCode == 200) {
               // URL directe OK → CachedNetworkImage (fluide)
-              if (mounted) setState(() { _imageUrl = directUrl; _loading = false; });
+              if (mounted)
+                setState(() {
+                  _imageUrl = directUrl;
+                  _loading = false;
+                });
               return;
             }
           } catch (_) {}
         }
         // Fallback : endpoint /file avec Bearer token → Image.memory
         final data = await _fetchBytes(null, fallbackUrl, token);
-        if (mounted) setState(() { _imageBytes = data; _loading = false; });
+        if (mounted)
+          setState(() {
+            _imageBytes = data;
+            _loading = false;
+          });
       }
     } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  Future<Uint8List> _fetchBytes(String? directUrl, String fallbackUrl, String token) async {
+  Future<Uint8List> _fetchBytes(
+      String? directUrl, String fallbackUrl, String token) async {
     if (directUrl != null && directUrl.isNotEmpty) {
       try {
-        final res = await http.get(Uri.parse(directUrl)).timeout(const Duration(seconds: 20));
+        final res = await http
+            .get(Uri.parse(directUrl))
+            .timeout(const Duration(seconds: 20));
         if (res.statusCode == 200) return res.bodyBytes;
       } catch (_) {}
     }
@@ -1417,7 +1522,8 @@ class _DocumentImageState extends State<_DocumentImage> {
         color: AppColors.documentCardBackground,
         child: Center(
           child: SizedBox(
-            width: 20, height: 20,
+            width: 20,
+            height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation(AppColors.primary),
@@ -1436,7 +1542,8 @@ class _DocumentImageState extends State<_DocumentImage> {
               color: AppColors.documentCardBackground,
               child: Center(
                 child: SizedBox(
-                  width: 20, height: 20,
+                  width: 20,
+                  height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation(AppColors.primary),
@@ -1458,7 +1565,8 @@ class _DocumentImageState extends State<_DocumentImage> {
           color: AppColors.documentCardBackground,
           child: Center(
             child: SizedBox(
-              width: 20, height: 20,
+              width: 20,
+              height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation(AppColors.primary),
@@ -1482,9 +1590,11 @@ class _DocumentImageState extends State<_DocumentImage> {
   }
 
   Widget _placeholder() => Container(
-    color: AppColors.documentCardBackground,
-    child: Center(child: Icon(Icons.insert_drive_file_outlined, size: 36, color: AppColors.primary)),
-  );
+        color: AppColors.documentCardBackground,
+        child: Center(
+            child: Icon(Icons.insert_drive_file_outlined,
+                size: 36, color: AppColors.primary)),
+      );
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -1495,15 +1605,22 @@ class _DocumentImageDouble extends StatelessWidget {
   final String? url1;
   final String id2;
   final String? url2;
-  const _DocumentImageDouble({super.key, required this.id1, this.url1, required this.id2, this.url2});
+  const _DocumentImageDouble(
+      {super.key, required this.id1, this.url1, required this.id2, this.url2});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(child: SizedBox.expand(child: _DocumentImage(key: ValueKey(id1), documentId: id1, directUrl: url1))),
+        Expanded(
+            child: SizedBox.expand(
+                child: _DocumentImage(
+                    key: ValueKey(id1), documentId: id1, directUrl: url1))),
         Container(height: 1, color: AppColors.borderLight),
-        Expanded(child: SizedBox.expand(child: _DocumentImage(key: ValueKey(id2), documentId: id2, directUrl: url2))),
+        Expanded(
+            child: SizedBox.expand(
+                child: _DocumentImage(
+                    key: ValueKey(id2), documentId: id2, directUrl: url2))),
       ],
     );
   }
@@ -1531,10 +1648,15 @@ class _DocumentOptionsSheet extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: AppColors.white,
       useSafeArea: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => BlocProvider.value(
         value: bloc,
-        child: _SingleFileUpdateModal(fileId: fileId, label: label, documentType: documentType, existing: existing),
+        child: _SingleFileUpdateModal(
+            fileId: fileId,
+            label: label,
+            documentType: documentType,
+            existing: existing),
       ),
     );
   }
@@ -1545,13 +1667,26 @@ class _DocumentOptionsSheet extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusMedium)),
-        title: Text('${'documents.delete'.tr()} $label', style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w700, fontSize: AppConstants.fontSizeLarge, color: AppColors.textDark)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppConstants.radiusMedium)),
+        title: Text('${'documents.delete'.tr()} $label',
+            style: TextStyle(
+                fontFamily: AppConstants.fontFamilySofiaSans,
+                fontWeight: FontWeight.w700,
+                fontSize: AppConstants.fontSizeLarge,
+                color: AppColors.textDark)),
         content: Text('documents.delete_file_confirm'.tr(),
-            style: TextStyle(fontFamily: AppConstants.fontFamilyInter, fontSize: AppConstants.fontSizeMedium, color: AppColors.textSecondary)),
+            style: TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                fontSize: AppConstants.fontSizeMedium,
+                color: AppColors.textSecondary)),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(),
-              child: Text('documents.cancel'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.textSecondary))),
+          TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text('documents.cancel'.tr(),
+                  style: TextStyle(
+                      fontFamily: AppConstants.fontFamilyInter,
+                      color: AppColors.textSecondary))),
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
@@ -1559,7 +1694,11 @@ class _DocumentOptionsSheet extends StatelessWidget {
               ProfileDocumentRepository.invalidate(fileId);
               bloc.add(DeleteProfileDocumentEvent(documentId: fileId));
             },
-            child: Text('documents.delete'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.statusRejected, fontWeight: FontWeight.w600)),
+            child: Text('documents.delete'.tr(),
+                style: TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    color: AppColors.statusRejected,
+                    fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -1576,15 +1715,27 @@ class _DocumentOptionsSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Center(child: Container(width: AppConstants.modalHandleWidth, height: AppConstants.modalHandleHeight,
-                decoration: BoxDecoration(color: AppColors.modalHandle, borderRadius: BorderRadius.circular(999)))),
+            Center(
+                child: Container(
+                    width: AppConstants.modalHandleWidth,
+                    height: AppConstants.modalHandleHeight,
+                    decoration: BoxDecoration(
+                        color: AppColors.modalHandle,
+                        borderRadius: BorderRadius.circular(999)))),
             const SizedBox(height: 20),
-            Align(alignment: Alignment.centerLeft,
-                child: Text(documentType.title, style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w700, fontSize: AppConstants.fontSizeXXLarge, color: AppColors.textDark))),
+            Align(
+                alignment: Alignment.centerLeft,
+                child: Text(documentType.title,
+                    style: TextStyle(
+                        fontFamily: AppConstants.fontFamilySofiaSans,
+                        fontWeight: FontWeight.w700,
+                        fontSize: AppConstants.fontSizeXXLarge,
+                        color: AppColors.textDark))),
             const SizedBox(height: 24),
             // Visualiser
             SizedBox(
-              width: double.infinity, height: AppConstants.logoutButtonHeight,
+              width: double.infinity,
+              height: AppConstants.logoutButtonHeight,
               child: ElevatedButton.icon(
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -1596,14 +1747,24 @@ class _DocumentOptionsSheet extends StatelessWidget {
                   ));
                 },
                 icon: const Icon(Icons.visibility_outlined, size: 18),
-                label: Text('documents.view'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge)),
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryDark, foregroundColor: AppColors.white, elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+                label: Text('documents.view'.tr(),
+                    style: TextStyle(
+                        fontFamily: AppConstants.fontFamilySofiaSans,
+                        fontWeight: FontWeight.w600,
+                        fontSize: AppConstants.fontSizeLarge)),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryDark,
+                    foregroundColor: AppColors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusRound))),
               ),
             ),
             const SizedBox(height: 12),
             // Modifier
-            _outlinedBtn(context, Icons.edit_outlined, 'documents.modify'.tr(), () {
+            _outlinedBtn(context, Icons.edit_outlined, 'documents.modify'.tr(),
+                () {
               if (!hasTwo) {
                 _openSingleFileModal(context, existing.id, 'Document 1');
               } else {
@@ -1614,7 +1775,8 @@ class _DocumentOptionsSheet extends StatelessWidget {
             }),
             const SizedBox(height: 8),
             // Supprimer
-            _dangerBtn(context, Icons.delete_outline, 'documents.delete'.tr(), () {
+            _dangerBtn(context, Icons.delete_outline, 'documents.delete'.tr(),
+                () {
               if (!hasTwo) {
                 _confirmDeleteFile(context, existing.id, 'Document 1');
               } else {
@@ -1634,7 +1796,8 @@ class _DocumentOptionsSheet extends StatelessWidget {
       context: context,
       backgroundColor: AppColors.white,
       useSafeArea: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) {
         final bp = MediaQuery.of(ctx).padding.bottom;
         return BlocProvider.value(
@@ -1644,14 +1807,26 @@ class _DocumentOptionsSheet extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Center(child: Container(width: AppConstants.modalHandleWidth, height: AppConstants.modalHandleHeight,
-                    decoration: BoxDecoration(color: AppColors.modalHandle, borderRadius: BorderRadius.circular(999)))),
+                Center(
+                    child: Container(
+                        width: AppConstants.modalHandleWidth,
+                        height: AppConstants.modalHandleHeight,
+                        decoration: BoxDecoration(
+                            color: AppColors.modalHandle,
+                            borderRadius: BorderRadius.circular(999)))),
                 const SizedBox(height: 16),
-                Align(alignment: Alignment.centerLeft,
+                Align(
+                    alignment: Alignment.centerLeft,
                     child: Text('documents.modify_choose'.tr(),
-                        style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w700, fontSize: AppConstants.fontSizeLarge, color: AppColors.textDark))),
+                        style: TextStyle(
+                            fontFamily: AppConstants.fontFamilySofiaSans,
+                            fontWeight: FontWeight.w700,
+                            fontSize: AppConstants.fontSizeLarge,
+                            color: AppColors.textDark))),
                 const SizedBox(height: 16),
-                SizedBox(width: double.infinity, height: AppConstants.logoutButtonHeight,
+                SizedBox(
+                  width: double.infinity,
+                  height: AppConstants.logoutButtonHeight,
                   child: OutlinedButton.icon(
                     onPressed: () {
                       Navigator.of(ctx).pop();
@@ -1660,18 +1835,37 @@ class _DocumentOptionsSheet extends StatelessWidget {
                         isScrollControlled: true,
                         backgroundColor: AppColors.white,
                         useSafeArea: true,
-                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-                        builder: (_) => BlocProvider.value(value: bloc,
-                            child: _SingleFileUpdateModal(fileId: existing.id, label: 'Document 1', documentType: documentType, existing: existing)),
+                        shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(20))),
+                        builder: (_) => BlocProvider.value(
+                            value: bloc,
+                            child: _SingleFileUpdateModal(
+                                fileId: existing.id,
+                                label: 'Document 1',
+                                documentType: documentType,
+                                existing: existing)),
                       );
                     },
-                    icon: Icon(Icons.edit_outlined, size: 18, color: AppColors.primaryDark),
-                    label: Text('documents.modify_doc1'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge, color: AppColors.primaryDark)),
-                    style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.primaryDark), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+                    icon: Icon(Icons.edit_outlined,
+                        size: 18, color: AppColors.primaryDark),
+                    label: Text('documents.modify_doc1'.tr(),
+                        style: TextStyle(
+                            fontFamily: AppConstants.fontFamilySofiaSans,
+                            fontWeight: FontWeight.w600,
+                            fontSize: AppConstants.fontSizeLarge,
+                            color: AppColors.primaryDark)),
+                    style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: AppColors.primaryDark),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                AppConstants.radiusRound))),
                   ),
                 ),
                 const SizedBox(height: 8),
-                SizedBox(width: double.infinity, height: AppConstants.logoutButtonHeight,
+                SizedBox(
+                  width: double.infinity,
+                  height: AppConstants.logoutButtonHeight,
                   child: OutlinedButton.icon(
                     onPressed: () {
                       Navigator.of(ctx).pop();
@@ -1680,14 +1874,31 @@ class _DocumentOptionsSheet extends StatelessWidget {
                         isScrollControlled: true,
                         backgroundColor: AppColors.white,
                         useSafeArea: true,
-                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-                        builder: (_) => BlocProvider.value(value: bloc,
-                            child: _SingleFileUpdateModal(fileId: existing.backFileId!, label: 'Document 2', documentType: documentType, existing: existing)),
+                        shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(20))),
+                        builder: (_) => BlocProvider.value(
+                            value: bloc,
+                            child: _SingleFileUpdateModal(
+                                fileId: existing.backFileId!,
+                                label: 'Document 2',
+                                documentType: documentType,
+                                existing: existing)),
                       );
                     },
-                    icon: Icon(Icons.edit_outlined, size: 18, color: AppColors.primaryDark),
-                    label: Text('documents.modify_doc2'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge, color: AppColors.primaryDark)),
-                    style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.primaryDark), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+                    icon: Icon(Icons.edit_outlined,
+                        size: 18, color: AppColors.primaryDark),
+                    label: Text('documents.modify_doc2'.tr(),
+                        style: TextStyle(
+                            fontFamily: AppConstants.fontFamilySofiaSans,
+                            fontWeight: FontWeight.w600,
+                            fontSize: AppConstants.fontSizeLarge,
+                            color: AppColors.primaryDark)),
+                    style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: AppColors.primaryDark),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                AppConstants.radiusRound))),
                   ),
                 ),
               ],
@@ -1703,7 +1914,8 @@ class _DocumentOptionsSheet extends StatelessWidget {
       context: context,
       backgroundColor: AppColors.white,
       useSafeArea: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) {
         final bp = MediaQuery.of(ctx).padding.bottom;
         return BlocProvider.value(
@@ -1713,34 +1925,70 @@ class _DocumentOptionsSheet extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Center(child: Container(width: AppConstants.modalHandleWidth, height: AppConstants.modalHandleHeight,
-                    decoration: BoxDecoration(color: AppColors.modalHandle, borderRadius: BorderRadius.circular(999)))),
+                Center(
+                    child: Container(
+                        width: AppConstants.modalHandleWidth,
+                        height: AppConstants.modalHandleHeight,
+                        decoration: BoxDecoration(
+                            color: AppColors.modalHandle,
+                            borderRadius: BorderRadius.circular(999)))),
                 const SizedBox(height: 16),
-                Align(alignment: Alignment.centerLeft,
+                Align(
+                    alignment: Alignment.centerLeft,
                     child: Text('documents.delete_choose'.tr(),
-                        style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w700, fontSize: AppConstants.fontSizeLarge, color: AppColors.textDark))),
+                        style: TextStyle(
+                            fontFamily: AppConstants.fontFamilySofiaSans,
+                            fontWeight: FontWeight.w700,
+                            fontSize: AppConstants.fontSizeLarge,
+                            color: AppColors.textDark))),
                 const SizedBox(height: 16),
-                SizedBox(width: double.infinity, height: AppConstants.logoutButtonHeight,
+                SizedBox(
+                  width: double.infinity,
+                  height: AppConstants.logoutButtonHeight,
                   child: OutlinedButton.icon(
                     onPressed: () {
                       Navigator.of(ctx).pop();
-                      _confirmDeleteFileDirect(ctx, bloc, existing.id, 'Document 1');
+                      _confirmDeleteFileDirect(
+                          ctx, bloc, existing.id, 'Document 1');
                     },
-                    icon: Icon(Icons.delete_outline, size: 18, color: AppColors.statusRejected),
-                    label: Text('documents.delete_doc1'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge, color: AppColors.statusRejected)),
-                    style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.statusRejected), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+                    icon: Icon(Icons.delete_outline,
+                        size: 18, color: AppColors.statusRejected),
+                    label: Text('documents.delete_doc1'.tr(),
+                        style: TextStyle(
+                            fontFamily: AppConstants.fontFamilySofiaSans,
+                            fontWeight: FontWeight.w600,
+                            fontSize: AppConstants.fontSizeLarge,
+                            color: AppColors.statusRejected)),
+                    style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: AppColors.statusRejected),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                AppConstants.radiusRound))),
                   ),
                 ),
                 const SizedBox(height: 8),
-                SizedBox(width: double.infinity, height: AppConstants.logoutButtonHeight,
+                SizedBox(
+                  width: double.infinity,
+                  height: AppConstants.logoutButtonHeight,
                   child: OutlinedButton.icon(
                     onPressed: () {
                       Navigator.of(ctx).pop();
-                      _confirmDeleteFileDirect(ctx, bloc, existing.backFileId!, 'Document 2');
+                      _confirmDeleteFileDirect(
+                          ctx, bloc, existing.backFileId!, 'Document 2');
                     },
-                    icon: Icon(Icons.delete_outline, size: 18, color: AppColors.statusRejected),
-                    label: Text('documents.delete_doc2'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge, color: AppColors.statusRejected)),
-                    style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.statusRejected), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
+                    icon: Icon(Icons.delete_outline,
+                        size: 18, color: AppColors.statusRejected),
+                    label: Text('documents.delete_doc2'.tr(),
+                        style: TextStyle(
+                            fontFamily: AppConstants.fontFamilySofiaSans,
+                            fontWeight: FontWeight.w600,
+                            fontSize: AppConstants.fontSizeLarge,
+                            color: AppColors.statusRejected)),
+                    style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: AppColors.statusRejected),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                AppConstants.radiusRound))),
                   ),
                 ),
               ],
@@ -1751,52 +1999,92 @@ class _DocumentOptionsSheet extends StatelessWidget {
     );
   }
 
-  void _confirmDeleteFileDirect(BuildContext context, ProfileBloc bloc, String fileId, String label) {
+  void _confirmDeleteFileDirect(
+      BuildContext context, ProfileBloc bloc, String fileId, String label) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusMedium)),
-        title: Text('${'documents.delete'.tr()} $label', style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w700, fontSize: AppConstants.fontSizeLarge, color: AppColors.textDark)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppConstants.radiusMedium)),
+        title: Text('${'documents.delete'.tr()} $label',
+            style: TextStyle(
+                fontFamily: AppConstants.fontFamilySofiaSans,
+                fontWeight: FontWeight.w700,
+                fontSize: AppConstants.fontSizeLarge,
+                color: AppColors.textDark)),
         content: Text('documents.delete_file_confirm'.tr(),
-            style: TextStyle(fontFamily: AppConstants.fontFamilyInter, fontSize: AppConstants.fontSizeMedium, color: AppColors.textSecondary)),
+            style: TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                fontSize: AppConstants.fontSizeMedium,
+                color: AppColors.textSecondary)),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(),
-              child: Text('documents.cancel'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.textSecondary))),
+          TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text('documents.cancel'.tr(),
+                  style: TextStyle(
+                      fontFamily: AppConstants.fontFamilyInter,
+                      color: AppColors.textSecondary))),
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               ProfileDocumentRepository.invalidate(fileId);
               bloc.add(DeleteProfileDocumentEvent(documentId: fileId));
             },
-            child: Text('documents.delete'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.statusRejected, fontWeight: FontWeight.w600)),
+            child: Text('documents.delete'.tr(),
+                style: TextStyle(
+                    fontFamily: AppConstants.fontFamilyInter,
+                    color: AppColors.statusRejected,
+                    fontWeight: FontWeight.w600)),
           ),
         ],
       ),
     );
   }
 
-  Widget _outlinedBtn(BuildContext context, IconData icon, String label, VoidCallback onTap) => SizedBox(
-    width: double.infinity, height: AppConstants.logoutButtonHeight,
-    child: OutlinedButton.icon(
-      onPressed: onTap,
-      icon: Icon(icon, size: 18, color: AppColors.primaryDark),
-      label: Text(label, style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge, color: AppColors.primaryDark)),
-      style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.primaryDark),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
-    ),
-  );
+  Widget _outlinedBtn(BuildContext context, IconData icon, String label,
+          VoidCallback onTap) =>
+      SizedBox(
+        width: double.infinity,
+        height: AppConstants.logoutButtonHeight,
+        child: OutlinedButton.icon(
+          onPressed: onTap,
+          icon: Icon(icon, size: 18, color: AppColors.primaryDark),
+          label: Text(label,
+              style: TextStyle(
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontWeight: FontWeight.w600,
+                  fontSize: AppConstants.fontSizeLarge,
+                  color: AppColors.primaryDark)),
+          style: OutlinedButton.styleFrom(
+              side: BorderSide(color: AppColors.primaryDark),
+              shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.radiusRound))),
+        ),
+      );
 
-  Widget _dangerBtn(BuildContext context, IconData icon, String label, VoidCallback onTap) => SizedBox(
-    width: double.infinity, height: AppConstants.logoutButtonHeight,
-    child: OutlinedButton.icon(
-      onPressed: onTap,
-      icon: Icon(icon, size: 18, color: AppColors.statusRejected),
-      label: Text(label, style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge, color: AppColors.statusRejected)),
-      style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.statusRejected),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
-    ),
-  );
+  Widget _dangerBtn(BuildContext context, IconData icon, String label,
+          VoidCallback onTap) =>
+      SizedBox(
+        width: double.infinity,
+        height: AppConstants.logoutButtonHeight,
+        child: OutlinedButton.icon(
+          onPressed: onTap,
+          icon: Icon(icon, size: 18, color: AppColors.statusRejected),
+          label: Text(label,
+              style: TextStyle(
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontWeight: FontWeight.w600,
+                  fontSize: AppConstants.fontSizeLarge,
+                  color: AppColors.statusRejected)),
+          style: OutlinedButton.styleFrom(
+              side: BorderSide(color: AppColors.statusRejected),
+              shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.radiusRound))),
+        ),
+      );
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -1808,7 +2096,11 @@ class _SingleFileUpdateModal extends StatefulWidget {
   final DocumentTypeModel documentType;
   final UploadedDocumentModel existing;
 
-  const _SingleFileUpdateModal({required this.fileId, required this.label, required this.documentType, required this.existing});
+  const _SingleFileUpdateModal(
+      {required this.fileId,
+      required this.label,
+      required this.documentType,
+      required this.existing});
 
   @override
   State<_SingleFileUpdateModal> createState() => _SingleFileUpdateModalState();
@@ -1820,7 +2112,10 @@ class _SingleFileUpdateModalState extends State<_SingleFileUpdateModal> {
   late final ProfileBloc _bloc;
 
   @override
-  void initState() { super.initState(); _bloc = context.read<ProfileBloc>(); }
+  void initState() {
+    super.initState();
+    _bloc = context.read<ProfileBloc>();
+  }
 
   Future<void> _pickFile({bool isSecond = false}) async {
     final choice = await showPickerSource(context);
@@ -1828,10 +2123,12 @@ class _SingleFileUpdateModalState extends State<_SingleFileUpdateModal> {
 
     String? path;
     if (choice == 'camera') {
-      final x = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 85);
+      final x = await ImagePicker()
+          .pickImage(source: ImageSource.camera, imageQuality: 85);
       path = x?.path;
     } else if (choice == 'gallery') {
-      final x = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
+      final x = await ImagePicker()
+          .pickImage(source: ImageSource.gallery, imageQuality: 85);
       path = x?.path;
     } else {
       final result = await FilePicker.platform.pickFiles(
@@ -1848,8 +2145,12 @@ class _SingleFileUpdateModalState extends State<_SingleFileUpdateModal> {
   void _onEnvoyer() {
     if (_filePath == null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Veuillez sélectionner un fichier.', style: TextStyle(fontFamily: AppConstants.fontFamilyInter, color: AppColors.white)),
-        backgroundColor: AppColors.statusRejected, behavior: SnackBarBehavior.floating,
+        content: Text('Veuillez sélectionner un fichier.',
+            style: TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                color: AppColors.white)),
+        backgroundColor: AppColors.statusRejected,
+        behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ));
       return;
@@ -1867,70 +2168,138 @@ class _SingleFileUpdateModalState extends State<_SingleFileUpdateModal> {
   @override
   Widget build(BuildContext context) {
     final isImage = _filePath != null && !_filePath!.endsWith('.pdf');
-    final isImage2 = _secondFilePath != null && !_secondFilePath!.endsWith('.pdf');
+    final isImage2 =
+        _secondFilePath != null && !_secondFilePath!.endsWith('.pdf');
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 16, left: 20, right: 20, top: 16),
+      padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom +
+              MediaQuery.of(context).padding.bottom +
+              16,
+          left: 20,
+          right: 20,
+          top: 16),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(child: Container(width: AppConstants.modalHandleWidth, height: AppConstants.modalHandleHeight,
-                decoration: BoxDecoration(color: AppColors.modalHandle, borderRadius: BorderRadius.circular(999)))),
+            Center(
+                child: Container(
+                    width: AppConstants.modalHandleWidth,
+                    height: AppConstants.modalHandleHeight,
+                    decoration: BoxDecoration(
+                        color: AppColors.modalHandle,
+                        borderRadius: BorderRadius.circular(999)))),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('${'documents.modify_doc_label'.tr()} ${widget.label}', style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w700, fontSize: AppConstants.fontSizeXXLarge, color: AppColors.textDark)),
-                GestureDetector(onTap: () => Navigator.of(context).pop(),
-                    child: Icon(Icons.close, color: AppColors.textSecondary, size: AppConstants.iconSizeLarge)),
+                Text('${'documents.modify_doc_label'.tr()} ${widget.label}',
+                    style: TextStyle(
+                        fontFamily: AppConstants.fontFamilySofiaSans,
+                        fontWeight: FontWeight.w700,
+                        fontSize: AppConstants.fontSizeXXLarge,
+                        color: AppColors.textDark)),
+                GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Icon(Icons.close,
+                        color: AppColors.textSecondary,
+                        size: AppConstants.iconSizeLarge)),
               ],
             ),
             const SizedBox(height: 20),
             GestureDetector(
               onTap: () => _pickFile(),
               child: Container(
-                width: double.infinity, height: 140,
+                width: double.infinity,
+                height: 140,
                 decoration: BoxDecoration(
                   color: AppColors.docUploadBg,
                   borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                  border: Border.all(color: AppColors.docUploadBorder, width: 1),
+                  border:
+                      Border.all(color: AppColors.docUploadBorder, width: 1),
                 ),
                 child: _filePath != null && isImage
-                    ? ClipRRect(borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                        child: Image.file(File(_filePath!), fit: BoxFit.cover, width: double.infinity))
-                    : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                        Container(
-                          width: 44, height: 44,
-                          decoration: const BoxDecoration(color: AppColors.docUploadIconBg, shape: BoxShape.circle),
-                          child: Center(
-                            child: SvgPicture.asset('assets/icons/televerser.svg', width: 20, height: 20,
-                                colorFilter: const ColorFilter.mode(AppColors.white, BlendMode.srcIn)),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(_filePath != null ? 'documents.file_selected'.tr() : 'documents.click_to_upload'.tr(),
-                            style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeMedium, color: AppColors.docUploadClickText)),
-                        if (_filePath == null)
-                          Text('PDF, JPG, PNG jusqu\'à 10 Mo',
-                              style: TextStyle(fontFamily: AppConstants.fontFamilyInter, fontSize: AppConstants.fontSizeRegular, color: AppColors.textSecondary)),
-                      ]),
+                    ? ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusSmall),
+                        child: Image.file(File(_filePath!),
+                            fit: BoxFit.cover, width: double.infinity))
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: const BoxDecoration(
+                                  color: AppColors.docUploadIconBg,
+                                  shape: BoxShape.circle),
+                              child: Center(
+                                child: SvgPicture.asset(
+                                    'assets/icons/televerser.svg',
+                                    width: 20,
+                                    height: 20,
+                                    colorFilter: const ColorFilter.mode(
+                                        AppColors.white, BlendMode.srcIn)),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                                _filePath != null
+                                    ? 'documents.file_selected'.tr()
+                                    : 'documents.click_to_upload'.tr(),
+                                style: TextStyle(
+                                    fontFamily:
+                                        AppConstants.fontFamilySofiaSans,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: AppConstants.fontSizeMedium,
+                                    color: AppColors.docUploadClickText)),
+                            if (_filePath == null)
+                              Text('PDF, JPG, PNG jusqu\'à 10 Mo',
+                                  style: TextStyle(
+                                      fontFamily: AppConstants.fontFamilyInter,
+                                      fontSize: AppConstants.fontSizeRegular,
+                                      color: AppColors.textSecondary)),
+                          ]),
               ),
             ),
             const SizedBox(height: 20),
-            SizedBox(width: double.infinity, height: AppConstants.logoutButtonHeight,
-              child: ElevatedButton(onPressed: _onEnvoyer,
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryDark, elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
-                child: Text('documents.send_for_validation'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, color: AppColors.white, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge)),
+            SizedBox(
+              width: double.infinity,
+              height: AppConstants.logoutButtonHeight,
+              child: ElevatedButton(
+                onPressed: _onEnvoyer,
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryDark,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusRound))),
+                child: Text('documents.send_for_validation'.tr(),
+                    style: TextStyle(
+                        fontFamily: AppConstants.fontFamilySofiaSans,
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: AppConstants.fontSizeLarge)),
               ),
             ),
             const SizedBox(height: 12),
-            SizedBox(width: double.infinity, height: AppConstants.logoutButtonHeight,
-              child: OutlinedButton(onPressed: () => Navigator.of(context).pop(),
-                style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.primaryDark),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radiusRound))),
-                child: Text('documents.cancel'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, color: AppColors.primaryDark, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge)),
+            SizedBox(
+              width: double.infinity,
+              height: AppConstants.logoutButtonHeight,
+              child: OutlinedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppColors.primaryDark),
+                    shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusRound))),
+                child: Text('documents.cancel'.tr(),
+                    style: TextStyle(
+                        fontFamily: AppConstants.fontFamilySofiaSans,
+                        color: AppColors.primaryDark,
+                        fontWeight: FontWeight.w600,
+                        fontSize: AppConstants.fontSizeLarge)),
               ),
             ),
             const SizedBox(height: 8),
@@ -1992,8 +2361,10 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
           directUrl: f['url'] as String?,
         );
         final isPdf = data.length >= 4 &&
-            data[0] == 0x25 && data[1] == 0x50 &&
-            data[2] == 0x44 && data[3] == 0x46;
+            data[0] == 0x25 &&
+            data[1] == 0x50 &&
+            data[2] == 0x44 &&
+            data[3] == 0x46;
         if (isPdf) {
           final dir = await getTemporaryDirectory();
           final file = File('${dir.path}/viewer_mes_docs_${f["id"]}.pdf');
@@ -2006,7 +2377,11 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
         results.add({'error': e.toString()});
       }
     }
-    if (mounted) setState(() { _pages.addAll(results); _loading = false; });
+    if (mounted)
+      setState(() {
+        _pages.addAll(results);
+        _loading = false;
+      });
   }
 
   /// Essaie d'abord l'URL MinIO directe, fallback sur l'endpoint /file avec token
@@ -2017,7 +2392,9 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
   }) async {
     if (directUrl != null && directUrl.isNotEmpty) {
       try {
-        final res = await http.get(Uri.parse(directUrl)).timeout(const Duration(seconds: 20));
+        final res = await http
+            .get(Uri.parse(directUrl))
+            .timeout(const Duration(seconds: 20));
         if (res.statusCode == 200) return res.bodyBytes;
       } catch (_) {}
     }
@@ -2027,13 +2404,19 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
         if (parts.length >= 3) {
           final objectKey = parts.sublist(2).join('/');
           final proxyUrl = BaseUrl.storageFile(objectKey);
-          final r = await http.get(Uri.parse(proxyUrl), headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'}).timeout(const Duration(seconds: 30));
+          final r = await http.get(Uri.parse(proxyUrl), headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': '*/*'
+          }).timeout(const Duration(seconds: 30));
           if (r.statusCode == 200) return r.bodyBytes;
         }
       } catch (_) {}
     }
     final url = BaseUrl.profileDocumentFile(fileId);
-    final res = await http.get(Uri.parse(url), headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'}).timeout(const Duration(seconds: 30));
+    final res = await http.get(Uri.parse(url), headers: {
+      'Authorization': 'Bearer $token',
+      'Accept': '*/*'
+    }).timeout(const Duration(seconds: 30));
     if (res.statusCode == 200) return res.bodyBytes;
     throw Exception('Erreur ${res.statusCode}');
   }
@@ -2078,7 +2461,8 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
                     ),
                     if (!_loading && total > 1)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: AppColors.primaryDark.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
@@ -2114,37 +2498,46 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
                     ),
                   )
                 : total == 0
-                    ? Center(child: Icon(Icons.insert_drive_file_outlined, size: 80, color: AppColors.primary))
+                    ? Center(
+                        child: Icon(Icons.insert_drive_file_outlined,
+                            size: 80, color: AppColors.primary))
                     : Stack(
                         children: [
                           PageView.builder(
                             controller: _pageController,
                             itemCount: total,
-                            onPageChanged: (i) => setState(() => _currentPage = i),
+                            onPageChanged: (i) =>
+                                setState(() => _currentPage = i),
                             itemBuilder: (_, i) => _buildPage(_pages[i]),
                           ),
                           if (total > 1 && _currentPage == 0)
                             Positioned(
-                              bottom: MediaQuery.of(context).padding.bottom + 24,
+                              bottom:
+                                  MediaQuery.of(context).padding.bottom + 24,
                               left: 0,
                               right: 0,
                               child: Center(
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: AppColors.textDark.withValues(alpha: 0.65),
+                                    color: AppColors.textDark
+                                        .withValues(alpha: 0.65),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.swipe, color: AppColors.white, size: 16),
+                                      Icon(Icons.swipe,
+                                          color: AppColors.white, size: 16),
                                       const SizedBox(width: 6),
                                       Text(
                                         'documents.swipe_hint'.tr(),
                                         style: TextStyle(
-                                          fontFamily: AppConstants.fontFamilyInter,
-                                          fontSize: AppConstants.fontSizeRegular,
+                                          fontFamily:
+                                              AppConstants.fontFamilyInter,
+                                          fontSize:
+                                              AppConstants.fontSizeRegular,
                                           color: AppColors.white,
                                         ),
                                       ),
@@ -2167,7 +2560,8 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, color: AppColors.statusRejected, size: 48),
+            Icon(Icons.error_outline,
+                color: AppColors.statusRejected, size: 48),
             const SizedBox(height: 12),
             Text(
               page['error'] as String,
@@ -2187,7 +2581,9 @@ class _DocumentViewerSheetState extends State<_DocumentViewerSheet> {
     if (page['bytes'] != null) {
       return _ZoomablePage(bytes: page['bytes'] as Uint8List);
     }
-    return Center(child: Icon(Icons.insert_drive_file_outlined, size: 80, color: AppColors.primary));
+    return Center(
+        child: Icon(Icons.insert_drive_file_outlined,
+            size: 80, color: AppColors.primary));
   }
 }
 
@@ -2238,8 +2634,10 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
           directUrl: f['url'] as String?,
         );
         final isPdf = data.length >= 4 &&
-            data[0] == 0x25 && data[1] == 0x50 &&
-            data[2] == 0x44 && data[3] == 0x46;
+            data[0] == 0x25 &&
+            data[1] == 0x50 &&
+            data[2] == 0x44 &&
+            data[3] == 0x46;
         if (isPdf) {
           final dir = await getTemporaryDirectory();
           final file = File('${dir.path}/viewer_page_${f["id"]}.pdf');
@@ -2252,7 +2650,11 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
         results.add({'error': e.toString()});
       }
     }
-    if (mounted) setState(() { _pages.addAll(results); _loading = false; });
+    if (mounted)
+      setState(() {
+        _pages.addAll(results);
+        _loading = false;
+      });
   }
 
   Future<Uint8List> _fetchFile({
@@ -2262,7 +2664,9 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
   }) async {
     if (directUrl != null && directUrl.isNotEmpty) {
       try {
-        final res = await http.get(Uri.parse(directUrl)).timeout(const Duration(seconds: 20));
+        final res = await http
+            .get(Uri.parse(directUrl))
+            .timeout(const Duration(seconds: 20));
         if (res.statusCode == 200) return res.bodyBytes;
       } catch (_) {}
     }
@@ -2272,13 +2676,19 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
         if (parts.length >= 3) {
           final objectKey = parts.sublist(2).join('/');
           final proxyUrl = BaseUrl.storageFile(objectKey);
-          final r = await http.get(Uri.parse(proxyUrl), headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'}).timeout(const Duration(seconds: 30));
+          final r = await http.get(Uri.parse(proxyUrl), headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': '*/*'
+          }).timeout(const Duration(seconds: 30));
           if (r.statusCode == 200) return r.bodyBytes;
         }
       } catch (_) {}
     }
     final url = BaseUrl.profileDocumentFile(fileId);
-    final res = await http.get(Uri.parse(url), headers: {'Authorization': 'Bearer $token', 'Accept': '*/*'}).timeout(const Duration(seconds: 30));
+    final res = await http.get(Uri.parse(url), headers: {
+      'Authorization': 'Bearer $token',
+      'Accept': '*/*'
+    }).timeout(const Duration(seconds: 30));
     if (res.statusCode == 200) return res.bodyBytes;
     throw Exception('Erreur ${res.statusCode}');
   }
@@ -2448,7 +2858,8 @@ class _ZoomablePage extends StatelessWidget {
           child: Image.memory(
             bytes,
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => Icon(Icons.insert_drive_file_outlined, size: 80, color: AppColors.primary),
+            errorBuilder: (_, __, ___) => Icon(Icons.insert_drive_file_outlined,
+                size: 80, color: AppColors.primary),
           ),
         ),
       ),

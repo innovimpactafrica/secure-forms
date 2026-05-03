@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:secure_link/utils/responsive_utils.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/utils/responsive_utils.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class ResponsiveModal extends StatelessWidget {
   final Widget child;
@@ -21,13 +21,15 @@ class ResponsiveModal extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: ResponsiveUtils.getResponsiveHeight(context, height),
-      margin: margin ?? EdgeInsets.symmetric(
-        horizontal: ResponsiveUtils.getResponsiveWidth(context, 8),
-      ),
+      margin: margin ??
+          EdgeInsets.symmetric(
+            horizontal: ResponsiveUtils.getResponsiveWidth(context, 8),
+          ),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(
-          ResponsiveUtils.getResponsiveValue(context, AppConstants.fontSizeTitle),
+          ResponsiveUtils.getResponsiveValue(
+              context, AppConstants.fontSizeTitle),
         ),
       ),
       child: Stack(
@@ -39,8 +41,10 @@ class ResponsiveModal extends StatelessWidget {
               right: 0,
               child: Center(
                 child: Container(
-                  width: ResponsiveUtils.getResponsiveWidth(context, AppConstants.modalHandleWidth),
-                  height: ResponsiveUtils.getResponsiveHeight(context, AppConstants.modalHandleHeight),
+                  width: ResponsiveUtils.getResponsiveWidth(
+                      context, AppConstants.modalHandleWidth),
+                  height: ResponsiveUtils.getResponsiveHeight(
+                      context, AppConstants.modalHandleHeight),
                   decoration: BoxDecoration(
                     color: AppColors.modalHandle,
                     borderRadius: BorderRadius.circular(
@@ -51,7 +55,9 @@ class ResponsiveModal extends StatelessWidget {
               ),
             ),
           Positioned.fill(
-            top: hasHandle ? ResponsiveUtils.getResponsiveHeight(context, 24) : 0,
+            top: hasHandle
+                ? ResponsiveUtils.getResponsiveHeight(context, 24)
+                : 0,
             child: child,
           ),
         ],
@@ -85,7 +91,9 @@ class ResponsiveButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: width != null ? ResponsiveUtils.getResponsiveWidth(context, width!) : null,
+        width: width != null
+            ? ResponsiveUtils.getResponsiveWidth(context, width!)
+            : null,
         height: ResponsiveUtils.getResponsiveHeight(context, height),
         decoration: BoxDecoration(
           color: backgroundColor ?? Colors.transparent,
@@ -99,7 +107,8 @@ class ResponsiveButton extends StatelessWidget {
             style: TextStyle(
               fontFamily: AppConstants.fontFamilyInter,
               fontWeight: FontWeight.w500,
-              fontSize: ResponsiveUtils.getResponsiveFontSize(context, AppConstants.fontSizeLarge),
+              fontSize: ResponsiveUtils.getResponsiveFontSize(
+                  context, AppConstants.fontSizeLarge),
               color: textColor ?? AppColors.textSecondary,
             ),
           ),

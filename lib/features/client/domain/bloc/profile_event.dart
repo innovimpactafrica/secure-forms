@@ -1,6 +1,5 @@
-
 import 'dart:io';
-import 'package:secure_link/features/client/data/models/profile_model.dart';
+import 'package:quick_forms/features/client/data/models/profile_model.dart';
 
 /// Events du ProfileBloc
 abstract class ProfileEvent {

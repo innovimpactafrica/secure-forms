@@ -1,5 +1,4 @@
-
-import 'package:secure_link/features/client/data/models/profile_model.dart';
+import 'package:quick_forms/features/client/data/models/profile_model.dart';
 
 /// États du ProfileBloc
 abstract class ProfileState {
@@ -22,10 +21,9 @@ class ProfileInProgress extends ProfileState {
 
   double get progress => profile.progressPercent;
   bool get isPersonalInfoComplete => profile.firstName.isNotEmpty;
-  int get validatedDocumentsCount =>
-      profile.documents
-          .where((d) => d.status == DocumentStatus.validated)
-          .length;
+  int get validatedDocumentsCount => profile.documents
+      .where((d) => d.status == DocumentStatus.validated)
+      .length;
 }
 
 /// Étape 1 validée

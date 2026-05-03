@@ -1,9 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:secure_link/features/auth/data/services/forgot_password_service.dart';
+import 'package:quick_forms/features/auth/data/services/forgot_password_service.dart';
 import 'forgot_password_event.dart';
 import 'forgot_password_state.dart';
 
-class ForgotPasswordBloc extends Bloc<ForgotPasswordEvent, ForgotPasswordState> {
+class ForgotPasswordBloc
+    extends Bloc<ForgotPasswordEvent, ForgotPasswordState> {
   final ForgotPasswordService _service;
 
   ForgotPasswordBloc({ForgotPasswordService? service})

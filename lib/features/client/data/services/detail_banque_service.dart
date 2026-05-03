@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/http_client.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/http_client.dart';
 import '../models/compte_model.dart';
 
 class DetailBanqueService {

@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/client/data/repositories/demandes_repository.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/client/data/repositories/demandes_repository.dart';
 import 'demandes_event.dart';
 import 'demandes_state.dart';
 
@@ -99,7 +99,8 @@ class DemandesBloc extends Bloc<DemandesEvent, DemandesState> {
     Emitter<DemandesState> emit,
   ) async {
     final current = state;
-    if (current is! DemandesLoaded || !current.hasMore || current.isLoadingMore) return;
+    if (current is! DemandesLoaded || !current.hasMore || current.isLoadingMore)
+      return;
     emit(current.copyWith(isLoadingMore: true));
     try {
       final token = UserSession.instance.accessToken;

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class NouvelleDemandeStep9Screen extends StatefulWidget {
   const NouvelleDemandeStep9Screen({super.key});
 
   @override
-  State<NouvelleDemandeStep9Screen> createState() => _NouvelleDemandeStep9ScreenState();
+  State<NouvelleDemandeStep9Screen> createState() =>
+      _NouvelleDemandeStep9ScreenState();
 }
 
-class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen> {
+class _NouvelleDemandeStep9ScreenState
+    extends State<NouvelleDemandeStep9Screen> {
   void _showSuccessModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -64,7 +66,7 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
         ),
       ),
     );
-    
+
     // Redirection après 1.5 secondes
     final navigator = Navigator.of(context);
     Future.delayed(const Duration(milliseconds: 1500), () {
@@ -96,7 +98,8 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
                   height: AppConstants.backButtonSize,
                   decoration: BoxDecoration(
                     color: AppColors.whiteOverlay,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium),
                   ),
                   child: Center(
                     child: Icon(
@@ -148,7 +151,8 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
                     height: AppConstants.progressBarHeight,
                     decoration: BoxDecoration(
                       color: AppColors.progressBar,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusRound),
                     ),
                   ),
                   Container(
@@ -156,7 +160,8 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
                     height: AppConstants.progressBarHeight,
                     decoration: BoxDecoration(
                       color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusRound),
                     ),
                   ),
                 ],
@@ -345,7 +350,8 @@ class _NouvelleDemandeStep9ScreenState extends State<NouvelleDemandeStep9Screen>
                   padding: EdgeInsets.all(AppConstants.paddingMedium),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusRound),
                   ),
                   child: Center(
                     child: Text(

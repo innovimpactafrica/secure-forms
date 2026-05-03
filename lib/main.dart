@@ -4,15 +4,15 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:secure_link/features/home/domain/bloc/home_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/demandes_bloc/demandes_bloc.dart';
-import 'package:secure_link/features/auth/presentation/pages/login_screen.dart';
-import 'package:secure_link/features/auth/presentation/pages/create_password_screen.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
-import 'package:secure_link/core/services/fcm_service.dart';
-import 'package:secure_link/core/utils/navigator_key.dart'; 
+import 'package:quick_forms/features/home/domain/bloc/home_bloc.dart';
+import 'package:quick_forms/features/auth/domain/bloc/user_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/notifications_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/demandes_bloc/demandes_bloc.dart';
+import 'package:quick_forms/features/auth/presentation/pages/login_screen.dart';
+import 'package:quick_forms/features/auth/presentation/pages/create_password_screen.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_bloc.dart';
+import 'package:quick_forms/core/services/fcm_service.dart';
+import 'package:quick_forms/core/utils/navigator_key.dart';
 import 'features/splash/presentation/pages/splash_screen.dart';
 import 'features/auth/presentation/pages/welcome_screen.dart';
 import 'features/auth/presentation/pages/otp_verification_screen.dart';
@@ -39,12 +39,15 @@ import 'features/auth/presentation/pages/resume_registration_otp_screen.dart';
 import 'features/auth/presentation/pages/forgot_password_screen.dart';
 import 'features/auth/presentation/pages/forgot_password_otp_screen.dart';
 import 'features/auth/presentation/pages/reset_password_screen.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/features/kyc/presentation/pages/kyc_gate_page.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/features/kyc/presentation/pages/kyc_gate_page.dart';
 import 'features/client/presentation/pages/signature_screen.dart';
-import 'package:secure_link/core/utils/session_storage.dart';
-import 'package:secure_link/core/utils/user_session.dart';
+import 'package:quick_forms/core/utils/session_storage.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
 import 'firebase_options.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'dart:ui';
 
 // Handler background OBLIGATOIREMENT top-level
 @pragma('vm:entry-point')
@@ -60,6 +63,13 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Crashlytics
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
   // Enregistrer le handler background
   FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
 
@@ -71,20 +81,19 @@ void main() async {
       supportedLocales: const [Locale('fr'), Locale('en')],
       path: 'assets/translations',
       fallbackLocale: const Locale('fr'),
-      child: const SecureLinkApp(),
+      child: const QuickFormsApp(),
     ),
   );
 }
 
-class SecureLinkApp extends StatefulWidget {
-  const SecureLinkApp({super.key});
+class QuickFormsApp extends StatefulWidget {
+  const QuickFormsApp({super.key});
 
   @override
-  State<SecureLinkApp> createState() => _SecureLinkAppState();
+ State<QuickFormsApp> createState() => _QuickFormsAppState();
 }
 
-class _SecureLinkAppState extends State<SecureLinkApp> {
-  
+class _QuickFormsAppState extends State<QuickFormsApp> {
   late final AppLinks _appLinks;
 
   @override
@@ -200,7 +209,6 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
     }
 
     if (uri.host == 'secure.innovimpactdev.cloud') {
-
       if (uri.path.contains('/mobile/login')) {
         _navigateWhenReady(() {
           navigatorKey.currentState?.pushNamedAndRemoveUntil(
@@ -208,9 +216,7 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
             (route) => false,
           );
         });
-      }
-
-      else if (uri.path.contains('setup-password')) {
+      } else if (uri.path.contains('setup-password')) {
         final token = uri.queryParameters['token'] ?? '';
         if (token.isNotEmpty) {
           _navigateWhenReady(() {
@@ -220,9 +226,7 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
             );
           });
         }
-      }
-
-      else if (uri.path.contains('/kyc')) {
+      } else if (uri.path.contains('/kyc')) {
         final jwt = uri.queryParameters['jwt'] ?? '';
         _navigateWhenReady(() {
           navigatorKey.currentState?.pushAndRemoveUntil(
@@ -235,9 +239,7 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
             (route) => false,
           );
         });
-      }
-
-      else if (uri.path.contains('/sign')) {
+      } else if (uri.path.contains('/sign')) {
         final requestId = uri.queryParameters['requestId'] ?? '';
         final wsUrl = uri.queryParameters['wsUrl'];
         final sessionId = uri.queryParameters['sessionId'];
@@ -255,9 +257,7 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
           });
         }
       }
-    }
-
-    else if (uri.scheme == 'secureforms' && uri.host == 'kyc') {
+    } else if (uri.scheme == 'secureforms' && uri.host == 'kyc') {
       final jwt = uri.queryParameters['jwt'] ?? '';
       _navigateWhenReady(() {
         navigatorKey.currentState?.pushAndRemoveUntil(
@@ -294,7 +294,7 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
         BlocProvider(create: (_) => HomeBloc()),
       ],
       child: MaterialApp(
-        title: 'Secure Link',
+        title: 'Quick Forms',
         navigatorKey: navigatorKey, // ✅ utilise le global key
         debugShowCheckedModeBanner: false,
         localizationsDelegates: context.localizationDelegates,
@@ -351,28 +351,37 @@ class _SecureLinkAppState extends State<SecureLinkApp> {
           AppRoutes.login: (context) => const LoginScreen(),
           '/success': (context) => const SuccessScreen(),
           AppRoutes.clientHome: (context) => const MainShell(),
-          AppRoutes.resumeRegistration: (context) => const ResumeRegistrationScreen(),
+          AppRoutes.resumeRegistration: (context) =>
+              const ResumeRegistrationScreen(),
           AppRoutes.forgotPassword: (context) => const ForgotPasswordScreen(),
           AppRoutes.passwordUpdated: (context) => const PasswordUpdatedScreen(),
           AppRoutes.clientDemandes: (context) => BlocProvider(
-            create: (_) => DemandesBloc(),
-            child: const ClientDemandesScreen(),
-          ),
+                create: (_) => DemandesBloc(),
+                child: const ClientDemandesScreen(),
+              ),
           AppRoutes.clientBanques: (context) => const MesBanquesScreen(),
-          AppRoutes.clientFormulaires: (context) => const ClientFormulairesScreen(),
+          AppRoutes.clientFormulaires: (context) =>
+              const ClientFormulairesScreen(),
           AppRoutes.clientMethode: (context) => const ClientMethodeScreen(),
-          AppRoutes.nouvelleDemandeStep7: (context) => const NouvelleDemandeStep7Screen(),
-          AppRoutes.nouvelleDemandeStep8: (context) => const NouvelleDemandeStep8Screen(),
-          AppRoutes.nouvelleDemandeStep9: (context) => const NouvelleDemandeStep9Screen(),
+          AppRoutes.nouvelleDemandeStep7: (context) =>
+              const NouvelleDemandeStep7Screen(),
+          AppRoutes.nouvelleDemandeStep8: (context) =>
+              const NouvelleDemandeStep8Screen(),
+          AppRoutes.nouvelleDemandeStep9: (context) =>
+              const NouvelleDemandeStep9Screen(),
           AppRoutes.detailDemande: (context) => const DetailDemandeScreen(),
           AppRoutes.detailVirement: (context) => const DetailVirementScreen(),
           AppRoutes.detailActeVente: (context) => const DetailActeVenteScreen(),
           AppRoutes.detailPret: (context) => const DetailPretScreen(),
-          AppRoutes.detailOuvertureCompte: (context) => const DetailOuvertureCompteScreen(),
-          AppRoutes.detailOuvertureCompteBrouillon: (context) => const DetailOuvertureCompteBrouillonScreen(),
+          AppRoutes.detailOuvertureCompte: (context) =>
+              const DetailOuvertureCompteScreen(),
+          AppRoutes.detailOuvertureCompteBrouillon: (context) =>
+              const DetailOuvertureCompteBrouillonScreen(),
           AppRoutes.clientProfil: (context) => const ClientProfilScreen(),
-          '/detail-ouverture-compte-continuer': (context) => const DetailOuvertureCompteContinuerScreen(),
-          AppRoutes.clientDemandeDetail: (context) => const ClientDemandeDetailScreen(),
+          '/detail-ouverture-compte-continuer': (context) =>
+              const DetailOuvertureCompteContinuerScreen(),
+          AppRoutes.clientDemandeDetail: (context) =>
+              const ClientDemandeDetailScreen(),
         },
       ),
     );

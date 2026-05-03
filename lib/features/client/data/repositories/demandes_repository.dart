@@ -1,5 +1,5 @@
-import 'package:secure_link/features/client/data/models/demande_model.dart';
-import 'package:secure_link/features/client/data/services/demandes_service.dart';
+import 'package:quick_forms/features/client/data/models/demande_model.dart';
+import 'package:quick_forms/features/client/data/services/demandes_service.dart';
 
 class DemandesRepository {
   final DemandesService _service;

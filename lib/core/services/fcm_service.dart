@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/navigator_key.dart';
-import 'package:secure_link/core/utils/user_session.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/navigator_key.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
 
 // Handler top-level pour les taps sur notifications locales quand app en fond
 @pragma('vm:entry-point')
@@ -41,11 +41,11 @@ class FcmService {
   }
 
   static Future<void> _createAndroidChannel() async {
-  await _localNotifications
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(_channel);
-}
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(_channel);
+  }
 
   static Future<void> _initializeLocalNotifications() async {
     const androidSettings =
@@ -61,7 +61,8 @@ class FcmService {
         // Tap sur notification locale (app ouverte au premier plan)
         _handleNavigationFromPayload(response.payload);
       },
-      onDidReceiveBackgroundNotificationResponse: _backgroundNotificationHandler,
+      onDidReceiveBackgroundNotificationResponse:
+          _backgroundNotificationHandler,
     );
   }
 
@@ -116,7 +117,8 @@ class FcmService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         print('[FCM]  Token envoyé au backend avec succès');
       } else {
-        print('[FCM]  Erreur envoi token: ${response.statusCode} — ${response.body}');
+        print(
+            '[FCM]  Erreur envoi token: ${response.statusCode} — ${response.body}');
       }
 
       // 2. S'abonner au topic utilisateur : secureform_fcm_{userId}
@@ -146,14 +148,21 @@ class FcmService {
     // App OUVERTE → afficher manuellement
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('[FCM] onMessage reçu: messageId=${message.messageId}');
-      print('[FCM] onMessage notification: title=${message.notification?.title} body=${message.notification?.body}');
+      print(
+          '[FCM] onMessage notification: title=${message.notification?.title} body=${message.notification?.body}');
       print('[FCM] onMessage data: ${message.data}');
 
       final notification = message.notification;
 
       // Si pas de notification block → construire depuis les data
-      final title = notification?.title ?? message.data['title'] ?? message.data['subject'] ?? 'Secure Forms';
-      final body  = notification?.body  ?? message.data['body']  ?? message.data['message'] ?? '';
+      final title = notification?.title ??
+          message.data['title'] ??
+          message.data['subject'] ??
+          'Secure Forms';
+      final body = notification?.body ??
+          message.data['body'] ??
+          message.data['message'] ??
+          '';
 
       if (title.isEmpty && body.isEmpty) {
         print('[FCM] Message sans contenu affichable — ignoré');
@@ -205,9 +214,9 @@ class FcmService {
     print('[FCM] data reçu pour navigation: $data');
 
     final relatedType = data['relatedType']?.toString() ?? '';
-    final relatedId   = data['relatedId']?.toString() ?? '';
-    final type        = data['type']?.toString() ?? '';
-    final screen      = data['screen']?.toString() ?? '';
+    final relatedId = data['relatedId']?.toString() ?? '';
+    final type = data['type']?.toString() ?? '';
+    final screen = data['screen']?.toString() ?? '';
 
     void navigate() {
       final nav = navigatorKey.currentState;
@@ -220,7 +229,8 @@ class FcmService {
       // Cas 1 : notification liée à une demande
       if (relatedType == 'request' && relatedId.isNotEmpty) {
         print('[FCM] → détail demande id=$relatedId');
-        nav.pushNamed(AppRoutes.clientDemandeDetail, arguments: {'id': relatedId});
+        nav.pushNamed(AppRoutes.clientDemandeDetail,
+            arguments: {'id': relatedId});
         return;
       }
 
@@ -232,7 +242,8 @@ class FcmService {
         case 'REQUEST_PENDING':
         case 'REQUEST_IN_PROGRESS':
           if (relatedId.isNotEmpty) {
-            nav.pushNamed(AppRoutes.clientDemandeDetail, arguments: {'id': relatedId});
+            nav.pushNamed(AppRoutes.clientDemandeDetail,
+                arguments: {'id': relatedId});
           } else {
             nav.pushNamed(AppRoutes.clientDemandes);
           }
@@ -255,9 +266,15 @@ class FcmService {
 
       // Cas 3 : champ screen explicite
       switch (screen) {
-        case 'demandes':      nav.pushNamed(AppRoutes.clientDemandes); return;
-        case 'profil':        nav.pushNamed(AppRoutes.clientProfil);   return;
-        case 'notifications': nav.pushNamed(AppRoutes.clientHome);     return;
+        case 'demandes':
+          nav.pushNamed(AppRoutes.clientDemandes);
+          return;
+        case 'profil':
+          nav.pushNamed(AppRoutes.clientProfil);
+          return;
+        case 'notifications':
+          nav.pushNamed(AppRoutes.clientHome);
+          return;
       }
 
       // Fallback

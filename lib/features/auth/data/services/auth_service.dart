@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/http_client.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/http_client.dart';
 import '../models/auth_request.dart';
 import '../models/auth_response.dart';
 
@@ -10,7 +10,8 @@ class AuthService {
   // Client dédié pour le login — sans intercepteur 401, timeout court
   final http.Client _loginClient = http.Client();
 
-  AuthService({http.Client? client}) : _client = client ?? HttpClientSingleton.instance;
+  AuthService({http.Client? client})
+      : _client = client ?? HttpClientSingleton.instance;
 
   Map<String, String> get _headers => {
         'Content-Type': 'application/json',
@@ -32,7 +33,8 @@ class AuthService {
   }
 
   // POST /api/auth/login/client — email OU phone
-  Future<LoginResponse> login({String? email, String? phone, required String password}) async {
+  Future<LoginResponse> login(
+      {String? email, String? phone, required String password}) async {
     const maxAttempts = 3;
     Exception? lastError;
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -40,11 +42,13 @@ class AuthService {
         final body = <String, dynamic>{'password': password};
         if (email != null && email.isNotEmpty) body['email'] = email;
         if (phone != null && phone.isNotEmpty) body['phone'] = phone;
-        final response = await _loginClient.post(
-          Uri.parse(BaseUrl.login),
-          headers: _headers,
-          body: jsonEncode(body),
-        ).timeout(const Duration(seconds: 15));
+        final response = await _loginClient
+            .post(
+              Uri.parse(BaseUrl.login),
+              headers: _headers,
+              body: jsonEncode(body),
+            )
+            .timeout(const Duration(seconds: 15));
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         if (response.statusCode == 200 || response.statusCode == 201) {
           return LoginResponse.fromJson(data);
@@ -53,8 +57,10 @@ class AuthService {
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
         final msg = e.toString();
-        if (!msg.contains('timeout') && !msg.contains('SocketException') &&
-            !msg.contains('connection') && !msg.contains('Connection')) {
+        if (!msg.contains('timeout') &&
+            !msg.contains('SocketException') &&
+            !msg.contains('connection') &&
+            !msg.contains('Connection')) {
           rethrow;
         }
         if (attempt < maxAttempts) {
@@ -66,7 +72,8 @@ class AuthService {
   }
 
   // POST /api/auth/register/client/verify-otp
-  Future<OtpVerifyResponse> verifyRegistrationOtp(OtpVerifyRequest request) async {
+  Future<OtpVerifyResponse> verifyRegistrationOtp(
+      OtpVerifyRequest request) async {
     final response = await _client.post(
       Uri.parse(BaseUrl.verifyRegistrationOtp),
       headers: _headers,

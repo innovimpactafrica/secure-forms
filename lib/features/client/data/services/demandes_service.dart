@@ -3,13 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/http_client.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/http_client.dart';
 import '../models/demande_model.dart';
 
 class DemandesService {
   final http.Client _client;
-  DemandesService({http.Client? client}) : _client = client ?? HttpClientSingleton.instance;
+  DemandesService({http.Client? client})
+      : _client = client ?? HttpClientSingleton.instance;
 
   Map<String, String> _headers(String token) => {
         'Authorization': 'Bearer $token',
@@ -28,11 +29,13 @@ class DemandesService {
     final params = <String, String>{'limit': '$limit'};
     if (status != null && status.isNotEmpty) params['status'] = status;
     if (category != null && category.isNotEmpty) params['category'] = category;
-    if (institution != null && institution.isNotEmpty) params['institution'] = institution;
+    if (institution != null && institution.isNotEmpty)
+      params['institution'] = institution;
     if (type != null && type.isNotEmpty) params['type'] = type;
     if (search != null && search.isNotEmpty) params['search'] = search;
 
-    final uri = Uri.parse(BaseUrl.recentRequests).replace(queryParameters: params);
+    final uri =
+        Uri.parse(BaseUrl.recentRequests).replace(queryParameters: params);
     final response = await _client.get(uri, headers: _headers(accessToken));
     // ignore: avoid_print
     print('[RecentRequests] status=${response.statusCode}');
@@ -41,7 +44,8 @@ class DemandesService {
       // ignore: avoid_print
       print('[RecentRequests] decoded type=${decoded.runtimeType}');
       // ignore: avoid_print
-      print('[RecentRequests] raw body=${response.body.substring(0, response.body.length.clamp(0, 800))}');
+      print(
+          '[RecentRequests] raw body=${response.body.substring(0, response.body.length.clamp(0, 800))}');
       final List<dynamic> list = decoded is List
           ? decoded
           : (decoded['items'] ?? decoded['data'] ?? decoded['requests'] ?? []);
@@ -54,7 +58,9 @@ class DemandesService {
         // ignore: avoid_print
         print('[RecentRequests] first full=$first');
       }
-      return list.map((e) => DemandeModel.fromJson(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => DemandeModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
     throw Exception('Erreur demandes récentes: ${response.statusCode}');
   }
@@ -80,8 +86,11 @@ class DemandesService {
     if (response.statusCode == 200) {
       final decoded = jsonDecode(response.body);
       if (decoded is List) {
-        final items = decoded.map((e) => DemandeModel.fromJson(e as Map<String, dynamic>)).toList();
-        return DemandesPage(items: items, total: items.length, page: page, limit: limit);
+        final items = decoded
+            .map((e) => DemandeModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return DemandesPage(
+            items: items, total: items.length, page: page, limit: limit);
       }
       final items = (decoded['items'] as List? ?? [])
           .map((e) => DemandeModel.fromJson(e as Map<String, dynamic>))
@@ -104,13 +113,13 @@ class DemandesService {
     final response = await _client.get(uri, headers: _headers(accessToken));
     debugPrint('[DemandesService] GET $uri → ${response.statusCode}');
     if (response.statusCode == 200) {
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-debugPrint('[DemandesService] submittedForms raw=${json['submittedForms']}');
-debugPrint('[DemandesService] requiredDocuments raw=${json['requiredDocuments']}');
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      debugPrint(
+          '[DemandesService] submittedForms raw=${json['submittedForms']}');
+      debugPrint(
+          '[DemandesService] requiredDocuments raw=${json['requiredDocuments']}');
 
-
-
-return json;
+      return json;
     }
     throw Exception('Erreur détail demande: ${response.statusCode}');
   }

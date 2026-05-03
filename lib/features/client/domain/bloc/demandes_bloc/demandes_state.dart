@@ -1,4 +1,4 @@
-import 'package:secure_link/features/client/data/models/demande_model.dart';
+import 'package:quick_forms/features/client/data/models/demande_model.dart';
 
 abstract class DemandesState {
   const DemandesState();

@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/http_client.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/http_client.dart';
 import '../models/archive_model.dart';
 
 class ArchivesService {
   final http.Client _client;
-  ArchivesService({http.Client? client}) : _client = client ?? HttpClientSingleton.instance;
+  ArchivesService({http.Client? client})
+      : _client = client ?? HttpClientSingleton.instance;
 
   Future<ArchivesPage> getArchives({
     required String accessToken,
@@ -34,10 +35,16 @@ class ArchivesService {
     if (response.statusCode == 200) {
       final decoded = jsonDecode(response.body);
       if (decoded is List) {
-        final items = decoded.map((e) => ArchiveModel.fromJson(e as Map<String, dynamic>)).toList();
-        return ArchivesPage(items: items, total: items.length, page: page, limit: limit);
+        final items = decoded
+            .map((e) => ArchiveModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return ArchivesPage(
+            items: items, total: items.length, page: page, limit: limit);
       }
-      final items = ((decoded['items'] ?? decoded['data'] ?? decoded['archives'] ?? []) as List)
+      final items = ((decoded['items'] ??
+              decoded['data'] ??
+              decoded['archives'] ??
+              []) as List)
           .map((e) => ArchiveModel.fromJson(e as Map<String, dynamic>))
           .toList();
       return ArchivesPage(
@@ -56,6 +63,10 @@ class ArchivesPage {
   final int total;
   final int page;
   final int limit;
-  const ArchivesPage({required this.items, required this.total, required this.page, required this.limit});
+  const ArchivesPage(
+      {required this.items,
+      required this.total,
+      required this.page,
+      required this.limit});
   bool get hasMore => (page * limit) < total;
 }

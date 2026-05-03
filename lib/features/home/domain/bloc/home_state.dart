@@ -1,4 +1,4 @@
-import 'package:secure_link/features/home/data/models/client_statistics_model.dart';
+import 'package:quick_forms/features/home/data/models/client_statistics_model.dart';
 
 abstract class HomeState {
   const HomeState();

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/features/auth/domain/bloc/user_bloc.dart';
+import 'package:quick_forms/features/auth/domain/bloc/user_state.dart';
 
 /// Avatar réutilisable : affiche la photo si disponible, sinon les initiales,
 /// sinon un shimmer pendant le chargement.

@@ -2,19 +2,20 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
-import 'package:secure_link/features/kyc/domain/bloc/kyc_event.dart';
-import 'package:secure_link/features/kyc/domain/bloc/kyc_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/kyc/domain/bloc/kyc_bloc.dart';
+import 'package:quick_forms/features/kyc/domain/bloc/kyc_event.dart';
+import 'package:quick_forms/features/kyc/domain/bloc/kyc_state.dart';
 import 'kyc_step2_face_page.dart';
 
 class KycStep2FacePreviewPage extends StatelessWidget {
   final File photo;
   final VoidCallback? onSuccess;
-  const KycStep2FacePreviewPage({super.key, required this.photo, this.onSuccess});
+  const KycStep2FacePreviewPage(
+      {super.key, required this.photo, this.onSuccess});
 
   void _submit(BuildContext context) {
     final token = UserSession.instance.accessToken;
@@ -58,8 +59,10 @@ class KycStep2FacePreviewPage extends StatelessWidget {
           _showSuccessModal(context);
         } else if (state is KycError) {
           final msg = state.message.toLowerCase();
-          if (msg.contains('499') || msg.contains('client closed') ||
-              msg.contains('formatexception') || msg.contains('unexpected character')) {
+          if (msg.contains('499') ||
+              msg.contains('client closed') ||
+              msg.contains('formatexception') ||
+              msg.contains('unexpected character')) {
             context.read<KycBloc>().add(const KycMarkCompleted());
             _showSuccessModal(context);
           } else {
@@ -82,7 +85,8 @@ class KycStep2FacePreviewPage extends StatelessWidget {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
                     child: Row(
                       children: [
                         GestureDetector(
@@ -94,7 +98,8 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                               color: AppColors.primaryDark,
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
+                            child: const Icon(Icons.arrow_back,
+                                color: AppColors.white, size: 20),
                           ),
                         ),
                         const SizedBox(width: 14),
@@ -123,7 +128,6 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -157,7 +161,8 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                             height: 260,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppColors.borderLight, width: 2),
+                              border: Border.all(
+                                  color: AppColors.borderLight, width: 2),
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(14),
@@ -179,7 +184,6 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   Padding(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
                     child: Column(
@@ -203,16 +207,19 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                                     height: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          AppColors.white),
                                     ),
                                   )
                                 else ...[
-                                  const Icon(Icons.send_outlined, color: AppColors.white, size: 20),
+                                  const Icon(Icons.send_outlined,
+                                      color: AppColors.white, size: 20),
                                   const SizedBox(width: 10),
                                   Text(
                                     'kyc.send_validation'.tr(),
                                     style: TextStyle(
-                                      fontFamily: AppConstants.fontFamilySofiaSans,
+                                      fontFamily:
+                                          AppConstants.fontFamilySofiaSans,
                                       fontWeight: FontWeight.w600,
                                       fontSize: AppConstants.fontSizeLarge,
                                       color: AppColors.white,
@@ -231,7 +238,8 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                                     MaterialPageRoute(
                                       builder: (_) => BlocProvider.value(
                                         value: context.read<KycBloc>(),
-                                        child: KycStep2FacePage(onSuccess: onSuccess),
+                                        child: KycStep2FacePage(
+                                            onSuccess: onSuccess),
                                       ),
                                     ),
                                   ),
@@ -245,12 +253,14 @@ class KycStep2FacePreviewPage extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.refresh, color: AppColors.textBlack87, size: 20),
+                                const Icon(Icons.refresh,
+                                    color: AppColors.textBlack87, size: 20),
                                 const SizedBox(width: 10),
                                 Text(
                                   'kyc.retake_photo'.tr(),
                                   style: TextStyle(
-                                    fontFamily: AppConstants.fontFamilySofiaSans,
+                                    fontFamily:
+                                        AppConstants.fontFamilySofiaSans,
                                     fontWeight: FontWeight.w600,
                                     fontSize: AppConstants.fontSizeLarge,
                                     color: AppColors.textBlack87,
@@ -294,7 +304,8 @@ class _KycSuccessModal extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Center(
-                child: Icon(Icons.check_circle_outline, color: AppColors.primary, size: 52),
+                child: Icon(Icons.check_circle_outline,
+                    color: AppColors.primary, size: 52),
               ),
             ),
             const SizedBox(height: 20),

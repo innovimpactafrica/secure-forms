@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/client/data/services/notifications_service.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/client/data/services/notifications_service.dart';
 import 'notifications_event.dart';
 import 'notifications_state.dart';
 
@@ -12,7 +12,8 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
         super(const NotificationsInitial()) {
     on<LoadNotificationsEvent>(_onLoad);
     on<MarkAllNotificationsReadEvent>(_onMarkAllRead);
-    on<ResetNotificationsEvent>((_, emit) => emit(const NotificationsInitial()));
+    on<ResetNotificationsEvent>(
+        (_, emit) => emit(const NotificationsInitial()));
   }
 
   Future<void> _onLoad(
@@ -23,8 +24,12 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     if (state is! NotificationsLoaded) emit(const NotificationsLoading());
     try {
       final token = UserSession.instance.accessToken;
-      if (token.isEmpty) { emit(const NotificationsError('Token absent')); return; }
-      final notifs = await _service.getNotifications(accessToken: token, unreadOnly: event.unreadOnly);
+      if (token.isEmpty) {
+        emit(const NotificationsError('Token absent'));
+        return;
+      }
+      final notifs = await _service.getNotifications(
+          accessToken: token, unreadOnly: event.unreadOnly);
       emit(NotificationsLoaded(notifs));
     } catch (e) {
       if (state is! NotificationsLoaded) {

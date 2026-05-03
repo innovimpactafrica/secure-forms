@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:socket_io_client/socket_io_client.dart' as sio;
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/user_session.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
 
 // URL Socket.IO backend
 const _kSocketUrl = 'https://api.secure.innovimpactdev.cloud';
@@ -45,8 +45,9 @@ class _SignatureScreenState extends State<SignatureScreen>
   // Taille du canvas pour normaliser les coordonnées (comme Angular)
   Size _canvasSize = Size.zero;
 
-  String get _sid =>
-      (widget.sessionId?.isNotEmpty == true) ? widget.sessionId! : widget.requestId;
+  String get _sid => (widget.sessionId?.isNotEmpty == true)
+      ? widget.sessionId!
+      : widget.requestId;
 
   @override
   void initState() {
@@ -276,8 +277,7 @@ class _SignatureScreenState extends State<SignatureScreen>
                   color: _connected
                       ? AppColors.statusValideGreen.withValues(alpha: 0.2)
                       : AppColors.statusRejected.withValues(alpha: 0.2),
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.radiusRound),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                   border: Border.all(
                     color: _connected
                         ? AppColors.statusValideGreen.withValues(alpha: 0.4)
@@ -462,8 +462,7 @@ class _SignatureScreenState extends State<SignatureScreen>
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.radiusSmall),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
                 ),
                 textStyle: const TextStyle(
                   fontFamily: AppConstants.fontFamilyInter,
@@ -475,12 +474,10 @@ class _SignatureScreenState extends State<SignatureScreen>
           ),
           const SizedBox(width: 12),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               color: AppColors.backgroundLight,
-              borderRadius:
-                  BorderRadius.circular(AppConstants.radiusSmall),
+              borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
               border: Border.all(color: AppColors.borderLight),
             ),
             child: Row(
@@ -518,10 +515,9 @@ class _SignatureScreenState extends State<SignatureScreen>
         width: double.infinity,
         height: AppConstants.logoutButtonHeight,
         child: ElevatedButton(
-          onPressed:
-              (_strokes.isEmpty || _isSending || _signatureDone)
-                  ? null
-                  : _confirmSignature,
+          onPressed: (_strokes.isEmpty || _isSending || _signatureDone)
+              ? null
+              : _confirmSignature,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryDark,
             disabledBackgroundColor:

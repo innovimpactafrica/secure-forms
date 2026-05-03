@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/features/client/data/models/profile_model.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/features/client/data/models/profile_model.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'document_upload_modal.dart' show showPickerSource;
@@ -31,8 +31,7 @@ class DocumentSimpleUploadModal extends StatefulWidget {
       _DocumentSimpleUploadModalState();
 }
 
-class _DocumentSimpleUploadModalState
-    extends State<DocumentSimpleUploadModal> {
+class _DocumentSimpleUploadModalState extends State<DocumentSimpleUploadModal> {
   File? _selectedFile;
   File? _backFile;
   bool _isImage = false;
@@ -51,10 +50,12 @@ class _DocumentSimpleUploadModalState
 
     String? path;
     if (choice == 'gallery') {
-      final x = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
+      final x = await ImagePicker()
+          .pickImage(source: ImageSource.gallery, imageQuality: 85);
       path = x?.path;
     } else if (choice == 'camera') {
-      final x = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 85);
+      final x = await ImagePicker()
+          .pickImage(source: ImageSource.camera, imageQuality: 85);
       path = x?.path;
     } else {
       final result = await FilePicker.platform.pickFiles(
@@ -70,7 +71,10 @@ class _DocumentSimpleUploadModalState
     if (isBack) {
       setState(() => _backFile = file);
     } else {
-      setState(() { _selectedFile = file; _isImage = ext != 'pdf'; });
+      setState(() {
+        _selectedFile = file;
+        _isImage = ext != 'pdf';
+      });
     }
   }
 
@@ -88,7 +92,8 @@ class _DocumentSimpleUploadModalState
           ),
           backgroundColor: AppColors.statusRejected,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
       return;
@@ -196,8 +201,7 @@ class _DocumentSimpleUploadModalState
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
                   border: Border.all(color: AppColors.borderLight),
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.radiusSmall),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
                 ),
                 child: Text(
                   widget.documentType.title,
@@ -218,14 +222,20 @@ class _DocumentSimpleUploadModalState
                   height: 120,
                   decoration: BoxDecoration(
                     color: AppColors.docUploadBg,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                    border: Border.all(color: AppColors.docUploadBorder, width: 1),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusSmall),
+                    border:
+                        Border.all(color: AppColors.docUploadBorder, width: 1),
                   ),
                   child: _selectedFile != null && _isImage
                       ? ClipRRect(
-                          borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                          child: Image.file(_selectedFile!, fit: BoxFit.cover, width: double.infinity,
-                              errorBuilder: (_, __, ___) => const _UploadPlaceholder(hasFile: true)))
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusSmall),
+                          child: Image.file(_selectedFile!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              errorBuilder: (_, __, ___) =>
+                                  const _UploadPlaceholder(hasFile: true)))
                       : _UploadPlaceholder(hasFile: _selectedFile != null),
                 ),
               ),
@@ -238,7 +248,8 @@ class _DocumentSimpleUploadModalState
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.add_circle_outline, size: 16, color: AppColors.primary),
+                      Icon(Icons.add_circle_outline,
+                          size: 16, color: AppColors.primary),
                       const SizedBox(width: 6),
                       Text(
                         'profile.add_back_document'.tr(),
@@ -266,8 +277,12 @@ class _DocumentSimpleUploadModalState
                     ),
                     const Spacer(),
                     GestureDetector(
-                      onTap: () => setState(() { _showBack = false; _backFile = null; }),
-                      child: Icon(Icons.close, size: 16, color: AppColors.textSecondary),
+                      onTap: () => setState(() {
+                        _showBack = false;
+                        _backFile = null;
+                      }),
+                      child: Icon(Icons.close,
+                          size: 16, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -279,14 +294,20 @@ class _DocumentSimpleUploadModalState
                     height: 120,
                     decoration: BoxDecoration(
                       color: AppColors.docUploadBg,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                      border: Border.all(color: AppColors.docUploadBorder, width: 1),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusSmall),
+                      border: Border.all(
+                          color: AppColors.docUploadBorder, width: 1),
                     ),
                     child: _backFile != null
                         ? ClipRRect(
-                            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                            child: Image.file(_backFile!, fit: BoxFit.cover, width: double.infinity,
-                                errorBuilder: (_, __, ___) => const _UploadPlaceholder(hasFile: true)))
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusSmall),
+                            child: Image.file(_backFile!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                errorBuilder: (_, __, ___) =>
+                                    const _UploadPlaceholder(hasFile: true)))
                         : const _UploadPlaceholder(hasFile: false),
                   ),
                 ),
@@ -348,15 +369,14 @@ class _UploadPlaceholder extends StatelessWidget {
               'assets/icons/televerser.svg',
               width: 20,
               height: 20,
-              colorFilter: const ColorFilter.mode(AppColors.white, BlendMode.srcIn),
+              colorFilter:
+                  const ColorFilter.mode(AppColors.white, BlendMode.srcIn),
             ),
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          hasFile
-              ? 'profile.file_selected'.tr()
-              : 'profile.click_upload'.tr(),
+          hasFile ? 'profile.file_selected'.tr() : 'profile.click_upload'.tr(),
           style: TextStyle(
             fontFamily: AppConstants.fontFamilySofiaSans,
             fontWeight: FontWeight.w600,

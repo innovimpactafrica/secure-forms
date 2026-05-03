@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 import '../../../../utils/responsive_utils.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -72,12 +72,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilySofiaSans,
                           fontWeight: FontWeight.w700,
-                          fontSize: ResponsiveUtils.getResponsiveFontSize(context, 42),
+                          fontSize: ResponsiveUtils.getResponsiveFontSize(
+                              context, 42),
                           color: AppColors.white,
                         ),
                       ),
                     ),
-                    SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 16)),
+                    SizedBox(
+                        height:
+                            ResponsiveUtils.getResponsiveHeight(context, 16)),
                     SizedBox(
                       width: ResponsiveUtils.getResponsiveWidth(context, 406),
                       child: Text(
@@ -86,27 +89,34 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilySofiaSans,
                           fontWeight: FontWeight.w400,
-                          fontSize: ResponsiveUtils.getResponsiveFontSize(context, 18),
+                          fontSize: ResponsiveUtils.getResponsiveFontSize(
+                              context, 18),
                           height: 28 / 18,
                           color: AppColors.whiteOpacity(0.7),
                         ),
                       ),
                     ),
-                    SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 32)),
+                    SizedBox(
+                        height:
+                            ResponsiveUtils.getResponsiveHeight(context, 32)),
                     GestureDetector(
                       onTap: () {
                         Navigator.of(context).pushNamed(AppRoutes.login);
                       },
                       child: Container(
                         width: ResponsiveUtils.getResponsiveWidth(context, 382),
-                        height: ResponsiveUtils.getResponsiveHeight(context, 64),
+                        height:
+                            ResponsiveUtils.getResponsiveHeight(context, 64),
                         padding: EdgeInsets.symmetric(
-                          horizontal: ResponsiveUtils.getResponsiveWidth(context, 24),
-                          vertical: ResponsiveUtils.getResponsiveHeight(context, 16),
+                          horizontal:
+                              ResponsiveUtils.getResponsiveWidth(context, 24),
+                          vertical:
+                              ResponsiveUtils.getResponsiveHeight(context, 16),
                         ),
                         decoration: BoxDecoration(
                           color: AppColors.primaryDark,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.radiusRound),
                         ),
                         child: Center(
                           child: Text(
@@ -114,7 +124,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             style: TextStyle(
                               fontFamily: AppConstants.fontFamilySofiaSans,
                               fontWeight: FontWeight.w500,
-                              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 18),
+                              fontSize: ResponsiveUtils.getResponsiveFontSize(
+                                  context, 18),
                               height: 1.0,
                               color: AppColors.white,
                             ),
@@ -155,7 +166,8 @@ class _LanguageToggleState extends State<_LanguageToggle> {
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.2),
+          border: Border.all(
+              color: Colors.white.withValues(alpha: 0.5), width: 1.2),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

@@ -4,13 +4,14 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/http_client.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/http_client.dart';
 import '../models/user_profile_model.dart';
 
 class UserProfileService {
   final http.Client _client;
-  UserProfileService({http.Client? client}) : _client = client ?? HttpClientSingleton.instance;
+  UserProfileService({http.Client? client})
+      : _client = client ?? HttpClientSingleton.instance;
 
   // Cache mémoire de la photo
   static Uint8List? _pictureCache;
@@ -52,7 +53,11 @@ class UserProfileService {
     );
     request.headers['Authorization'] = 'Bearer $accessToken';
     final ext = picture.path.split('.').last.toLowerCase();
-    final mime = ext == 'png' ? 'image/png' : ext == 'webp' ? 'image/webp' : 'image/jpeg';
+    final mime = ext == 'png'
+        ? 'image/png'
+        : ext == 'webp'
+            ? 'image/webp'
+            : 'image/jpeg';
     request.files.add(await http.MultipartFile.fromPath(
       'profilePicture',
       picture.path,
@@ -68,9 +73,11 @@ class UserProfileService {
   }
 
   /// GET /api/users/me/profile-picture — avec cache mémoire + disque
-  Future<List<int>> getProfilePicture(String accessToken, {String? userId}) async {
+  Future<List<int>> getProfilePicture(String accessToken,
+      {String? userId}) async {
     // 1. Cache mémoire
-    if (_pictureCache != null && (userId == null || userId == _pictureCacheUserId)) {
+    if (_pictureCache != null &&
+        (userId == null || userId == _pictureCacheUserId)) {
       print('=== PROFILE PICTURE: cache mémoire HIT ===');
       return _pictureCache!;
     }
@@ -90,7 +97,8 @@ class UserProfileService {
       Uri.parse(BaseUrl.getProfilePicture),
       // Token injecté automatiquement par AuthenticatedHttpClient
     );
-    print('=== GET /users/me/profile-picture STATUS: ${response.statusCode} ===');
+    print(
+        '=== GET /users/me/profile-picture STATUS: ${response.statusCode} ===');
     if (response.statusCode == 200) {
       final bytes = Uint8List.fromList(response.bodyBytes);
       _pictureCache = bytes;
@@ -119,7 +127,8 @@ class UserProfileService {
     return null;
   }
 
-  static Future<void> _saveCachedPicture(Uint8List bytes, String? userId) async {
+  static Future<void> _saveCachedPicture(
+      Uint8List bytes, String? userId) async {
     try {
       final path = await _cacheFilePath(userId);
       await File(path).writeAsBytes(bytes);
@@ -129,8 +138,11 @@ class UserProfileService {
   static Future<void> _deleteCachedPicture() async {
     try {
       final dir = await getTemporaryDirectory();
-      final files = dir.listSync().where((f) => f.path.contains('profile_picture'));
-      for (final f in files) { await f.delete(); }
+      final files =
+          dir.listSync().where((f) => f.path.contains('profile_picture'));
+      for (final f in files) {
+        await f.delete();
+      }
     } catch (_) {}
   }
 

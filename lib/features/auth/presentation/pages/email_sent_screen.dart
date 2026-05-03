@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/features/auth/presentation/pages/login_screen.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/features/auth/presentation/pages/login_screen.dart';
 
 class EmailSentScreen extends StatelessWidget {
   const EmailSentScreen({super.key});
@@ -13,7 +13,8 @@ class EmailSentScreen extends StatelessWidget {
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingXLarge),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.paddingXLarge),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -81,7 +82,8 @@ class EmailSentScreen extends StatelessWidget {
                     backgroundColor: AppColors.primaryDark,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusRound),
                     ),
                   ),
                   child: Text(

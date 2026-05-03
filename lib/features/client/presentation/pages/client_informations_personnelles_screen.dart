@@ -6,12 +6,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/auth/domain/bloc/user_bloc.dart';
+import 'package:quick_forms/features/auth/domain/bloc/user_event.dart';
+import 'package:quick_forms/features/auth/domain/bloc/user_state.dart';
 
 class ClientInformationsPersonnellesScreen extends StatefulWidget {
   const ClientInformationsPersonnellesScreen({super.key});
@@ -99,18 +99,25 @@ class _ClientInformationsPersonnellesScreenState
   /// Convertit la valeur API (ex: "CELIBATAIRE") en label traduit
   String? _maritalStatusToLabel(String apiValue) {
     switch (apiValue.toUpperCase()) {
-      case 'CELIBATAIRE': return 'profile.single'.tr();
-      case 'MARIE':       return 'profile.married'.tr();
-      case 'DIVORCE':     return 'profile.divorced'.tr();
-      case 'VEUF':        return 'profile.widowed'.tr();
-      default:            return null;
+      case 'CELIBATAIRE':
+        return 'profile.single'.tr();
+      case 'MARIE':
+        return 'profile.married'.tr();
+      case 'DIVORCE':
+        return 'profile.divorced'.tr();
+      case 'VEUF':
+        return 'profile.widowed'.tr();
+      default:
+        return null;
     }
   }
 
   String _genderToLabel(String apiValue) {
     switch (apiValue.toUpperCase()) {
-      case 'FEMME': return 'profile.female'.tr();
-      default:      return 'profile.male'.tr();
+      case 'FEMME':
+        return 'profile.female'.tr();
+      default:
+        return 'profile.male'.tr();
     }
   }
 
@@ -120,17 +127,105 @@ class _ClientInformationsPersonnellesScreenState
     if (fullPhone.isEmpty) return '';
     // Liste des indicatifs courants triés par longueur décroissante
     const dialCodes = [
-      '+1', '+7', '+20', '+27', '+30', '+31', '+32', '+33', '+34', '+36',
-      '+39', '+40', '+41', '+43', '+44', '+45', '+46', '+47', '+48', '+49',
-      '+51', '+52', '+53', '+54', '+55', '+56', '+57', '+58', '+60', '+61',
-      '+62', '+63', '+64', '+65', '+66', '+81', '+82', '+84', '+86', '+90',
-      '+91', '+92', '+93', '+94', '+95', '+98', '+212', '+213', '+216',
-      '+218', '+220', '+221', '+222', '+223', '+224', '+225', '+226', '+227',
-      '+228', '+229', '+230', '+231', '+232', '+233', '+234', '+235', '+236',
-      '+237', '+238', '+239', '+240', '+241', '+242', '+243', '+244', '+245',
-      '+246', '+247', '+248', '+249', '+250', '+251', '+252', '+253', '+254',
-      '+255', '+256', '+257', '+258', '+260', '+261', '+262', '+263', '+264',
-      '+265', '+266', '+267', '+268', '+269',
+      '+1',
+      '+7',
+      '+20',
+      '+27',
+      '+30',
+      '+31',
+      '+32',
+      '+33',
+      '+34',
+      '+36',
+      '+39',
+      '+40',
+      '+41',
+      '+43',
+      '+44',
+      '+45',
+      '+46',
+      '+47',
+      '+48',
+      '+49',
+      '+51',
+      '+52',
+      '+53',
+      '+54',
+      '+55',
+      '+56',
+      '+57',
+      '+58',
+      '+60',
+      '+61',
+      '+62',
+      '+63',
+      '+64',
+      '+65',
+      '+66',
+      '+81',
+      '+82',
+      '+84',
+      '+86',
+      '+90',
+      '+91',
+      '+92',
+      '+93',
+      '+94',
+      '+95',
+      '+98',
+      '+212',
+      '+213',
+      '+216',
+      '+218',
+      '+220',
+      '+221',
+      '+222',
+      '+223',
+      '+224',
+      '+225',
+      '+226',
+      '+227',
+      '+228',
+      '+229',
+      '+230',
+      '+231',
+      '+232',
+      '+233',
+      '+234',
+      '+235',
+      '+236',
+      '+237',
+      '+238',
+      '+239',
+      '+240',
+      '+241',
+      '+242',
+      '+243',
+      '+244',
+      '+245',
+      '+246',
+      '+247',
+      '+248',
+      '+249',
+      '+250',
+      '+251',
+      '+252',
+      '+253',
+      '+254',
+      '+255',
+      '+256',
+      '+257',
+      '+258',
+      '+260',
+      '+261',
+      '+262',
+      '+263',
+      '+264',
+      '+265',
+      '+266',
+      '+267',
+      '+268',
+      '+269',
     ];
     // Trier par longueur décroissante pour matcher le plus long en premier
     final sorted = [...dialCodes]..sort((a, b) => b.length.compareTo(a.length));
@@ -194,7 +289,8 @@ class _ClientInformationsPersonnellesScreenState
               _fullPhone = user.phone;
               _telephoneController.text = _extractLocalNumber(user.phone);
             }
-            if (_dateNaissanceController.text.isEmpty && user.dateOfBirth.isNotEmpty) {
+            if (_dateNaissanceController.text.isEmpty &&
+                user.dateOfBirth.isNotEmpty) {
               final dt = DateTime.tryParse(user.dateOfBirth);
               if (dt != null) {
                 _dateNaissanceController.text =
@@ -575,11 +671,14 @@ class _ClientInformationsPersonnellesScreenState
       initialCountryCode: 'SN',
       onChanged: (phone) => _fullPhone = phone.completeNumber,
       style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-      dropdownTextStyle: const TextStyle(fontSize: 15, color: AppColors.textDark),
+      dropdownTextStyle:
+          const TextStyle(fontSize: 15, color: AppColors.textDark),
       decoration: InputDecoration(
         hintText: '77 123 45 67',
-        hintStyle: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        hintStyle:
+            const TextStyle(fontSize: 15, color: AppColors.textSecondary),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         filled: true,
         fillColor: AppColors.white,
         border: OutlineInputBorder(

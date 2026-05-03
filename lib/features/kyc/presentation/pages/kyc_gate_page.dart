@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
-import 'package:secure_link/features/kyc/presentation/pages/kyc_intro_page.dart';
-import 'package:secure_link/features/auth/presentation/pages/login_screen.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/kyc/domain/bloc/kyc_bloc.dart';
+import 'package:quick_forms/features/kyc/presentation/pages/kyc_intro_page.dart';
+import 'package:quick_forms/features/auth/presentation/pages/login_screen.dart';
 import 'dart:convert';
-import 'package:secure_link/core/utils/session_storage.dart';
+import 'package:quick_forms/core/utils/session_storage.dart';
 
 class KycGatePage extends StatefulWidget {
   final bool fromDeepLink;
@@ -40,91 +40,59 @@ class _KycGatePageState extends State<KycGatePage> {
   }
 
   void _handleDeepLinkRoute() {
-  final deepLinkJwt = widget.jwt;
-  final mobileUserId = UserSession.instance.userId;
-  final deepLinkUserId = deepLinkJwt.isNotEmpty
-      ? _extractUserIdFromJwt(deepLinkJwt)
-      : '';
+    final deepLinkJwt = widget.jwt;
+    final mobileUserId = UserSession.instance.userId;
+    final deepLinkUserId =
+        deepLinkJwt.isNotEmpty ? _extractUserIdFromJwt(deepLinkJwt) : '';
 
-  debugPrint('[KycGatePage] mobileUserId=$mobileUserId deepLinkUserId=$deepLinkUserId');
+    debugPrint(
+        '[KycGatePage] mobileUserId=$mobileUserId deepLinkUserId=$deepLinkUserId');
 
-  // Pas de JWT → comportement normal
-  if (deepLinkJwt.isEmpty) {
-    if (UserSession.instance.accessToken.isNotEmpty) {
-      _goToKyc();
-    } else {
-      _goToLoginThenKyc();
+    // Pas de JWT → comportement normal
+    if (deepLinkJwt.isEmpty) {
+      if (UserSession.instance.accessToken.isNotEmpty) {
+        _goToKyc();
+      } else {
+        _goToLoginThenKyc();
+      }
+      return;
     }
-    return;
+
+    // Même utilisateur web et mobile → KYC direct
+    if (mobileUserId.isNotEmpty && mobileUserId == deepLinkUserId) {
+      debugPrint('[KycGatePage] Même utilisateur → KYC direct');
+      _goToKyc();
+      return;
+    }
+
+    // Utilisateur différent OU non connecté → déconnexion + login
+    debugPrint('[KycGatePage] Utilisateur différent → déconnexion + login');
+    _logoutAndGoToLogin(deepLinkJwt);
   }
 
-  // Même utilisateur web et mobile → KYC direct
-  if (mobileUserId.isNotEmpty && mobileUserId == deepLinkUserId) {
-    debugPrint('[KycGatePage] Même utilisateur → KYC direct');
-    _goToKyc();
-    return;
+  void _goToKyc() {
+    final userId = UserSession.instance.userId;
+    debugPrint('[KycGatePage] _goToKyc userId=$userId');
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (_) => KycBloc(userId: userId),
+          child: const KycIntroPage(),
+        ),
+      ),
+      (route) => false, // ← efface toute la stack
+    );
   }
 
-  // Utilisateur différent OU non connecté → déconnexion + login
-  debugPrint('[KycGatePage] Utilisateur différent → déconnexion + login');
-  _logoutAndGoToLogin(deepLinkJwt);
-}
-
-void _goToKyc() {
-  final userId = UserSession.instance.userId;
-  debugPrint('[KycGatePage] _goToKyc userId=$userId');
-  Navigator.of(context).pushAndRemoveUntil(
-    MaterialPageRoute(
-      builder: (_) => BlocProvider(
-        create: (_) => KycBloc(userId: userId),
-        child: const KycIntroPage(),
-      ),
-    ),
-    (route) => false, // ← efface toute la stack
-  );
-}
-
-void _goToLoginThenKyc() {
-  debugPrint('[KycGatePage] _goToLoginThenKyc');
-  Navigator.of(context).pushAndRemoveUntil(
-    MaterialPageRoute(
-      builder: (_) => LoginScreenDeepLink(
-        onLoginSuccess: () {
-          // Après login → aller au KYC en effaçant la stack
-          final userId = UserSession.instance.userId;
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => BlocProvider(
-                create: (_) => KycBloc(userId: userId),
-                child: const KycIntroPage(),
-              ),
-            ),
-            (route) => false,
-          );
-        },
-      ),
-    ),
-    (route) => false, // ← efface toute la stack
-  );
-}
-
-void _logoutAndGoToLogin(String deepLinkJwt) {
-  UserSession.instance.clear();
-  SessionStorage.instance.clear();
-
-  Navigator.of(context).pushAndRemoveUntil(
-    MaterialPageRoute(
-      builder: (newContext) => LoginScreenDeepLink(
-        onLoginSuccess: () {
-          final loggedUserId = UserSession.instance.userId;
-          final expectedUserId = _extractUserIdFromJwt(deepLinkJwt);
-
-          debugPrint('[KycGatePage] loggedUserId=$loggedUserId expectedUserId=$expectedUserId');
-
-          if (loggedUserId == expectedUserId) {
-            // Bon utilisateur → KYC en utilisant le context du LoginScreen
+  void _goToLoginThenKyc() {
+    debugPrint('[KycGatePage] _goToLoginThenKyc');
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => LoginScreenDeepLink(
+          onLoginSuccess: () {
+            // Après login → aller au KYC en effaçant la stack
             final userId = UserSession.instance.userId;
-            Navigator.of(newContext).pushAndRemoveUntil(
+            Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
                 builder: (_) => BlocProvider(
                   create: (_) => KycBloc(userId: userId),
@@ -133,44 +101,76 @@ void _logoutAndGoToLogin(String deepLinkJwt) {
               ),
               (route) => false,
             );
-          } else {
-            ScaffoldMessenger.of(newContext).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Connectez-vous avec le compte utilisé sur le web.',
-                ),
-                backgroundColor: Colors.red,
-                duration: Duration(seconds: 4),
-              ),
-            );
-            // Re-login avec le bon context
-            Navigator.of(newContext).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (_) => LoginScreenDeepLink(
-                  onLoginSuccess: () {
-                    final userId = UserSession.instance.userId;
-                    Navigator.of(newContext).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider(
-                          create: (_) => KycBloc(userId: userId),
-                          child: const KycIntroPage(),
-                        ),
-                      ),
-                      (route) => false,
-                    );
-                  },
-                ),
-              ),
-              (route) => false,
-            );
-          }
-        },
+          },
+        ),
       ),
-    ),
-    (route) => false,
-  );
-}
- 
+      (route) => false, // ← efface toute la stack
+    );
+  }
+
+  void _logoutAndGoToLogin(String deepLinkJwt) {
+    UserSession.instance.clear();
+    SessionStorage.instance.clear();
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (newContext) => LoginScreenDeepLink(
+          onLoginSuccess: () {
+            final loggedUserId = UserSession.instance.userId;
+            final expectedUserId = _extractUserIdFromJwt(deepLinkJwt);
+
+            debugPrint(
+                '[KycGatePage] loggedUserId=$loggedUserId expectedUserId=$expectedUserId');
+
+            if (loggedUserId == expectedUserId) {
+              // Bon utilisateur → KYC en utilisant le context du LoginScreen
+              final userId = UserSession.instance.userId;
+              Navigator.of(newContext).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider(
+                    create: (_) => KycBloc(userId: userId),
+                    child: const KycIntroPage(),
+                  ),
+                ),
+                (route) => false,
+              );
+            } else {
+              ScaffoldMessenger.of(newContext).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Connectez-vous avec le compte utilisé sur le web.',
+                  ),
+                  backgroundColor: Colors.red,
+                  duration: Duration(seconds: 4),
+                ),
+              );
+              // Re-login avec le bon context
+              Navigator.of(newContext).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => LoginScreenDeepLink(
+                    onLoginSuccess: () {
+                      final userId = UserSession.instance.userId;
+                      Navigator.of(newContext).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider(
+                            create: (_) => KycBloc(userId: userId),
+                            child: const KycIntroPage(),
+                          ),
+                        ),
+                        (route) => false,
+                      );
+                    },
+                  ),
+                ),
+                (route) => false,
+              );
+            }
+          },
+        ),
+      ),
+      (route) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -275,4 +275,3 @@ String _extractUserIdFromJwt(String token) {
     return '';
   }
 }
-

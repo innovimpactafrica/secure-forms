@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:secure_link/utils/responsive_utils.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/utils/responsive_utils.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class ResponsiveStatsCard extends StatelessWidget {
   final String title;
@@ -20,13 +20,15 @@ class ResponsiveStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardWidth = (ResponsiveUtils.getScreenWidth(context) - 
-        ResponsiveUtils.getResponsiveWidth(context, 48) - 
-        ResponsiveUtils.getResponsiveWidth(context, 16)) / 2;
+    final cardWidth = (ResponsiveUtils.getScreenWidth(context) -
+            ResponsiveUtils.getResponsiveWidth(context, 48) -
+            ResponsiveUtils.getResponsiveWidth(context, 16)) /
+        2;
 
     return Container(
       width: cardWidth,
-      height: ResponsiveUtils.getResponsiveHeight(context, AppConstants.profileCardHeight),
+      height: ResponsiveUtils.getResponsiveHeight(
+          context, AppConstants.profileCardHeight),
       padding: EdgeInsets.fromLTRB(
         ResponsiveUtils.getResponsiveWidth(context, AppConstants.paddingMedium),
         ResponsiveUtils.getResponsiveHeight(context, AppConstants.paddingLarge),
@@ -40,7 +42,8 @@ class ResponsiveStatsCard extends StatelessWidget {
         ),
         border: Border.all(
           color: AppColors.border,
-          width: ResponsiveUtils.getResponsiveValue(context, AppConstants.borderWidthThin),
+          width: ResponsiveUtils.getResponsiveValue(
+              context, AppConstants.borderWidthThin),
         ),
         boxShadow: [
           BoxShadow(
@@ -65,19 +68,22 @@ class ResponsiveStatsCard extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: AppConstants.fontFamilySofiaSans,
                     fontWeight: FontWeight.w500,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, AppConstants.fontSizeRegular),
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(
+                        context, AppConstants.fontSizeRegular),
                     height: 1.0,
                     letterSpacing: 0,
                     color: AppColors.textSecondary,
                   ),
                 ),
-                SizedBox(height: ResponsiveUtils.getResponsiveHeight(context, 4)),
+                SizedBox(
+                    height: ResponsiveUtils.getResponsiveHeight(context, 4)),
                 Text(
                   value,
                   style: TextStyle(
                     fontFamily: AppConstants.fontFamilySofiaSans,
                     fontWeight: FontWeight.w600,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, AppConstants.fontSizeXXLarge),
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(
+                        context, AppConstants.fontSizeXXLarge),
                     height: 1.2,
                     letterSpacing: 0,
                     color: AppColors.textDark,

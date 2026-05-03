@@ -1,4 +1,4 @@
-import 'package:secure_link/features/client/data/models/compte_model.dart';
+import 'package:quick_forms/features/client/data/models/compte_model.dart';
 
 abstract class DetailBanqueState {
   const DetailBanqueState();

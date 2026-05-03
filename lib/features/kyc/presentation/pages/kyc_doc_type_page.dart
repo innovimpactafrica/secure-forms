@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/features/kyc/data/models/identity_document_model.dart';
-import 'package:secure_link/features/kyc/data/repositories/identity_document_repository.dart';
-import 'package:secure_link/features/kyc/domain/bloc/kyc_bloc.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/kyc/data/models/identity_document_model.dart';
+import 'package:quick_forms/features/kyc/data/repositories/identity_document_repository.dart';
+import 'package:quick_forms/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'kyc_step1_id_page.dart';
 
 class KycDocTypePage extends StatefulWidget {
@@ -32,9 +32,17 @@ class _KycDocTypePageState extends State<KycDocTypePage> {
     try {
       final token = UserSession.instance.accessToken;
       final types = await _repo.getKycDocumentTypes(token);
-      if (mounted) setState(() { _types = types; _loading = false; });
+      if (mounted)
+        setState(() {
+          _types = types;
+          _loading = false;
+        });
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString().replaceAll('Exception: ', ''); _loading = false; });
+      if (mounted)
+        setState(() {
+          _error = e.toString().replaceAll('Exception: ', '');
+          _loading = false;
+        });
     }
   }
 
@@ -65,17 +73,30 @@ class _KycDocTypePageState extends State<KycDocTypePage> {
                   GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
                     child: Container(
-                      width: 40, height: 40,
-                      decoration: BoxDecoration(color: AppColors.primaryDark, borderRadius: BorderRadius.circular(10)),
-                      child: const Icon(Icons.arrow_back, color: AppColors.white, size: 20),
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                          color: AppColors.primaryDark,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: const Icon(Icons.arrow_back,
+                          color: AppColors.white, size: 20),
                     ),
                   ),
                   const SizedBox(width: 14),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('kyc.title'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeLarge, color: AppColors.textBlack87)),
-                      Text('kyc.choose_doc_label'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilyInter, fontSize: AppConstants.fontSizeRegular, color: AppColors.textSecondary)),
+                      Text('kyc.title'.tr(),
+                          style: TextStyle(
+                              fontFamily: AppConstants.fontFamilySofiaSans,
+                              fontWeight: FontWeight.w600,
+                              fontSize: AppConstants.fontSizeLarge,
+                              color: AppColors.textBlack87)),
+                      Text('kyc.choose_doc_label'.tr(),
+                          style: TextStyle(
+                              fontFamily: AppConstants.fontFamilyInter,
+                              fontSize: AppConstants.fontSizeRegular,
+                              color: AppColors.textSecondary)),
                     ],
                   ),
                 ],
@@ -89,26 +110,52 @@ class _KycDocTypePageState extends State<KycDocTypePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 24),
-                    Text('kyc.choose_doc_title'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w700, fontSize: 20, color: AppColors.textBlack87)),
+                    Text('kyc.choose_doc_title'.tr(),
+                        style: TextStyle(
+                            fontFamily: AppConstants.fontFamilySofiaSans,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20,
+                            color: AppColors.textBlack87)),
                     const SizedBox(height: 6),
-                    Text('kyc.choose_doc_subtitle'.tr(), style: TextStyle(fontFamily: AppConstants.fontFamilyInter, fontSize: AppConstants.fontSizeMedium, color: AppColors.textSecondary, height: 1.5)),
+                    Text('kyc.choose_doc_subtitle'.tr(),
+                        style: TextStyle(
+                            fontFamily: AppConstants.fontFamilyInter,
+                            fontSize: AppConstants.fontSizeMedium,
+                            color: AppColors.textSecondary,
+                            height: 1.5)),
                     const SizedBox(height: 32),
-
                     if (_loading)
-                      const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                      const Center(
+                          child: CircularProgressIndicator(
+                              color: AppColors.primary))
                     else if (_error != null)
                       Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(_error!, style: const TextStyle(color: AppColors.statusRejected, fontSize: 14), textAlign: TextAlign.center),
+                            Text(_error!,
+                                style: const TextStyle(
+                                    color: AppColors.statusRejected,
+                                    fontSize: 14),
+                                textAlign: TextAlign.center),
                             const SizedBox(height: 12),
                             GestureDetector(
-                              onTap: () { setState(() { _loading = true; _error = null; }); _load(); },
+                              onTap: () {
+                                setState(() {
+                                  _loading = true;
+                                  _error = null;
+                                });
+                                _load();
+                              },
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                decoration: BoxDecoration(color: AppColors.primaryDark, borderRadius: BorderRadius.circular(20)),
-                                child: Text('archives.retry'.tr(), style: const TextStyle(color: AppColors.white, fontSize: 14)),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 10),
+                                decoration: BoxDecoration(
+                                    color: AppColors.primaryDark,
+                                    borderRadius: BorderRadius.circular(20)),
+                                child: Text('archives.retry'.tr(),
+                                    style: const TextStyle(
+                                        color: AppColors.white, fontSize: 14)),
                               ),
                             ),
                           ],
@@ -118,7 +165,8 @@ class _KycDocTypePageState extends State<KycDocTypePage> {
                       Expanded(
                         child: ListView.separated(
                           itemCount: _types.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 14),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 14),
                           itemBuilder: (_, i) => _DocTypeItem(
                             type: _types[i],
                             onTap: () => _navigate(_types[i]),
@@ -144,8 +192,10 @@ class _DocTypeItem extends StatelessWidget {
 
   IconData get _icon {
     final t = type.title.toLowerCase();
-    if (t.contains('cni') || t.contains('identit')) return Icons.credit_card_outlined;
-    if (t.contains('passeport') || t.contains('passport')) return Icons.book_outlined;
+    if (t.contains('cni') || t.contains('identit'))
+      return Icons.credit_card_outlined;
+    if (t.contains('passeport') || t.contains('passport'))
+      return Icons.book_outlined;
     if (t.contains('permis')) return Icons.drive_eta_outlined;
     return Icons.description_outlined;
   }
@@ -160,13 +210,21 @@ class _DocTypeItem extends StatelessWidget {
           color: AppColors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: AppColors.borderLight, width: 1.5),
-          boxShadow: const [BoxShadow(color: AppColors.shadowLight, blurRadius: 8, offset: Offset(0, 2))],
+          boxShadow: const [
+            BoxShadow(
+                color: AppColors.shadowLight,
+                blurRadius: 8,
+                offset: Offset(0, 2))
+          ],
         ),
         child: Row(
           children: [
             Container(
-              width: 48, height: 48,
-              decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(12)),
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                  color: AppColors.primaryLight,
+                  borderRadius: BorderRadius.circular(12)),
               child: Icon(_icon, color: AppColors.primaryDark, size: 26),
             ),
             const SizedBox(width: 16),
@@ -174,15 +232,25 @@ class _DocTypeItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(type.title, style: TextStyle(fontFamily: AppConstants.fontFamilySofiaSans, fontWeight: FontWeight.w600, fontSize: AppConstants.fontSizeMedium, color: AppColors.textBlack87)),
+                  Text(type.title,
+                      style: TextStyle(
+                          fontFamily: AppConstants.fontFamilySofiaSans,
+                          fontWeight: FontWeight.w600,
+                          fontSize: AppConstants.fontSizeMedium,
+                          color: AppColors.textBlack87)),
                   if (type.aliases.isNotEmpty) ...[
                     const SizedBox(height: 2),
-                    Text(type.aliases.join(', '), style: TextStyle(fontFamily: AppConstants.fontFamilyInter, fontSize: AppConstants.fontSizeRegular, color: AppColors.textSecondary)),
+                    Text(type.aliases.join(', '),
+                        style: TextStyle(
+                            fontFamily: AppConstants.fontFamilyInter,
+                            fontSize: AppConstants.fontSizeRegular,
+                            color: AppColors.textSecondary)),
                   ],
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 22),
+            const Icon(Icons.chevron_right,
+                color: AppColors.textSecondary, size: 22),
           ],
         ),
       ),

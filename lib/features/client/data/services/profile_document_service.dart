@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/http_client.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/http_client.dart';
 import '../models/profile_model.dart';
 
 class ProfileDocumentService {
@@ -98,15 +98,18 @@ class ProfileDocumentService {
     final url = BaseUrl.profileDocuments;
     final fileName = file.path.split(Platform.pathSeparator).last;
     final fileSize = await file.length();
-    _log('POST $url | documentTypeId=$documentTypeId | file=$fileName | size=${(fileSize / 1024).toStringAsFixed(1)}KB');
+    _log(
+        'POST $url | documentTypeId=$documentTypeId | file=$fileName | size=${(fileSize / 1024).toStringAsFixed(1)}KB');
     if (issueDate != null) _log('issueDate=$issueDate');
     if (expirationDate != null) _log('expirationDate=$expirationDate');
-    _log('token vide: ${token.isEmpty} | Authorization header: Bearer ${token.length > 20 ? token.substring(0, 20) : token}...');
+    _log(
+        'token vide: ${token.isEmpty} | Authorization header: Bearer ${token.length > 20 ? token.substring(0, 20) : token}...');
     _log('backFile présent: ${backFile != null}');
     if (backFile != null) {
       final backName = backFile.path.split(Platform.pathSeparator).last;
       final backSize = await backFile.length();
-      _log('backFile=$backName | size=${(backSize / 1024).toStringAsFixed(1)}KB');
+      _log(
+          'backFile=$backName | size=${(backSize / 1024).toStringAsFixed(1)}KB');
     }
 
     final request = http.MultipartRequest('POST', Uri.parse(url));
@@ -148,7 +151,8 @@ class ProfileDocumentService {
     request.fields.forEach((k, v) => _log('  $k = $v'));
     _log('Files envoyés:');
     for (final f in request.files) {
-      _log('  field="${f.field}" filename="${f.filename}" contentType=${f.contentType} length=${f.length}');
+      _log(
+          '  field="${f.field}" filename="${f.filename}" contentType=${f.contentType} length=${f.length}');
     }
     _log('=================================');
 
@@ -241,8 +245,10 @@ class ProfileDocumentService {
     final url = BaseUrl.deleteProfileDocument(documentId);
     _log('PATCH $url');
     final body = <String, String>{};
-    if (issueDate != null && issueDate.isNotEmpty) body['issueDate'] = issueDate;
-    if (expirationDate != null && expirationDate.isNotEmpty) body['expirationDate'] = expirationDate;
+    if (issueDate != null && issueDate.isNotEmpty)
+      body['issueDate'] = issueDate;
+    if (expirationDate != null && expirationDate.isNotEmpty)
+      body['expirationDate'] = expirationDate;
     final response = await _client.patch(
       Uri.parse(url),
       headers: {..._authHeaders(token), 'Content-Type': 'application/json'},
@@ -282,9 +288,9 @@ class ProfileDocumentService {
   Future<List<int>> getDocumentFileFromUrl(String url) async {
     _log('GET MinIO direct: $url');
     final response = await _client.get(Uri.parse(url)).timeout(
-      const Duration(seconds: 20),
-      onTimeout: () => throw Exception('MinIO timeout'),
-    );
+          const Duration(seconds: 20),
+          onTimeout: () => throw Exception('MinIO timeout'),
+        );
     _log('MinIO → ${response.statusCode} | ${response.bodyBytes.length} bytes');
     if (response.statusCode == 200) return response.bodyBytes;
     // URL expirée → extraire la objectKey et utiliser le proxy stable
@@ -321,11 +327,14 @@ class ProfileDocumentService {
   }) async {
     final url = BaseUrl.storageFile(objectKey);
     _log('GET storage proxy: $url');
-    final response = await _client.get(
-      Uri.parse(url),
-      headers: _authHeaders(token),
-    ).timeout(const Duration(seconds: 30));
-    _log('Storage proxy → ${response.statusCode} | ${response.bodyBytes.length} bytes');
+    final response = await _client
+        .get(
+          Uri.parse(url),
+          headers: _authHeaders(token),
+        )
+        .timeout(const Duration(seconds: 30));
+    _log(
+        'Storage proxy → ${response.statusCode} | ${response.bodyBytes.length} bytes');
     if (response.statusCode == 200) return response.bodyBytes;
     throw Exception('Erreur storage proxy: ${response.statusCode}');
   }
@@ -337,14 +346,17 @@ class ProfileDocumentService {
   }) async {
     final url = BaseUrl.profileDocumentFile(documentId);
     _log('GET $url');
-    final response = await _client.get(
-      Uri.parse(url),
-      headers: _authHeaders(token),
-    ).timeout(
-      const Duration(seconds: 30),
-      onTimeout: () => throw Exception('Timeout téléchargement document'),
-    );
-    _log('GET $url → ${response.statusCode} | ${response.bodyBytes.length} bytes');
+    final response = await _client
+        .get(
+          Uri.parse(url),
+          headers: _authHeaders(token),
+        )
+        .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () => throw Exception('Timeout téléchargement document'),
+        );
+    _log(
+        'GET $url → ${response.statusCode} | ${response.bodyBytes.length} bytes');
     if (response.statusCode == 200) return response.bodyBytes;
     _log('ERREUR: document $documentId non trouvé');
     throw Exception('Document non trouvé');

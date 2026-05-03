@@ -1,4 +1,4 @@
-import 'package:secure_link/features/kyc/data/models/identity_document_model.dart';
+import 'package:quick_forms/features/kyc/data/models/identity_document_model.dart';
 
 abstract class KycState {
   const KycState();

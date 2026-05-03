@@ -2,12 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/features/auth/domain/bloc/forgot_password_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/forgot_password_event.dart';
-import 'package:secure_link/features/auth/domain/bloc/forgot_password_state.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/features/auth/domain/bloc/forgot_password_bloc.dart';
+import 'package:quick_forms/features/auth/domain/bloc/forgot_password_event.dart';
+import 'package:quick_forms/features/auth/domain/bloc/forgot_password_state.dart';
 
 class ForgotPasswordOtpScreen extends StatefulWidget {
   final String email;
@@ -254,8 +254,8 @@ class _ForgotPasswordOtpScreenState extends State<ForgotPasswordOtpScreen> {
                               onPressed: isLoading ? null : _onVerify,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryDark,
-                                disabledBackgroundColor:
-                                    AppColors.primaryDark.withValues(alpha: 0.6),
+                                disabledBackgroundColor: AppColors.primaryDark
+                                    .withValues(alpha: 0.6),
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(
@@ -316,9 +316,8 @@ class _ForgotPasswordOtpScreenState extends State<ForgotPasswordOtpScreen> {
                             width: double.infinity,
                             height: AppConstants.logoutButtonHeight,
                             child: ElevatedButton(
-                              onPressed: (_canResend && !isLoading)
-                                  ? _onResend
-                                  : null,
+                              onPressed:
+                                  (_canResend && !isLoading) ? _onResend : null,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: _canResend
                                     ? AppColors.primary

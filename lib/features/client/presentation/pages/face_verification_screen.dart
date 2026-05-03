@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:camera/camera.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_state.dart';
-
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_state.dart';
 
 /// Écran de vérification d'identité par Face ID
 /// Affiché après l'upload d'un document qui nécessite une vérification faciale
@@ -99,7 +98,8 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
       builder: (_) => _SuccessDialog(
         onContinue: () {
           Navigator.of(context).pop(); // ferme dialog
-          Navigator.of(context).pop(true); // retourne true → vérification complétée
+          Navigator.of(context)
+              .pop(true); // retourne true → vérification complétée
         },
       ),
     );
@@ -121,8 +121,9 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
         if (state is ProfileFaceVerificationFailed) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                  'face_verification.verification_failed'.tr() + ' : ${state.reason}. ' + 'face_verification.please_retry'.tr()),
+              content: Text('face_verification.verification_failed'.tr() +
+                  ' : ${state.reason}. ' +
+                  'face_verification.please_retry'.tr()),
               backgroundColor: AppColors.statusRejected,
             ),
           );
@@ -135,11 +136,13 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
             children: [
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => Navigator.of(context).pop(false), // retourne false → vérification annulée
+                      onTap: () => Navigator.of(context)
+                          .pop(false), // retourne false → vérification annulée
                       child: Container(
                         width: 38,
                         height: 38,
@@ -227,7 +230,9 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _scanComplete ? 'face_verification.completed'.tr() : 'face_verification.scan_in_progress'.tr(),
+                        _scanComplete
+                            ? 'face_verification.completed'.tr()
+                            : 'face_verification.scan_in_progress'.tr(),
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilyInter,
                           fontSize: AppConstants.fontSizeMedium,
@@ -476,8 +481,7 @@ class _SuccessDialog extends StatelessWidget {
                 backgroundColor: AppColors.primaryDark,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.radiusRound),
+                  borderRadius: BorderRadius.circular(AppConstants.radiusRound),
                 ),
               ),
               child: Text(

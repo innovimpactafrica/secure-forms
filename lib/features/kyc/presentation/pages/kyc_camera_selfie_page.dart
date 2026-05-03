@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 /// Écran caméra plein écran avec ovale de scan selfie en overlay.
 /// Retourne un [File] ou null si annulé.
@@ -73,7 +73,8 @@ class _KycCameraSelfiePageState extends State<KycCameraSelfiePage>
   }
 
   Future<void> _capture() async {
-    if (_controller == null || !_controller!.value.isInitialized || _isTaking) return;
+    if (_controller == null || !_controller!.value.isInitialized || _isTaking)
+      return;
     setState(() => _isTaking = true);
     try {
       final xfile = await _controller!.takePicture();
@@ -116,7 +117,8 @@ class _KycCameraSelfiePageState extends State<KycCameraSelfiePage>
             right: 0,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 child: Column(
                   children: [
                     Text(
@@ -242,9 +244,11 @@ class _SelfieOverlayPainter extends CustomPainter {
 
     // Fond sombre avec trou ovale
     final darkPaint = Paint()..color = Colors.black.withValues(alpha: 0.55);
-    final fullPath = Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    final fullPath = Path()
+      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
     final holePath = Path()..addOval(ovalRect);
-    final overlayPath = Path.combine(PathOperation.difference, fullPath, holePath);
+    final overlayPath =
+        Path.combine(PathOperation.difference, fullPath, holePath);
     canvas.drawPath(overlayPath, darkPaint);
 
     // Bordure ovale fine blanche
@@ -266,17 +270,25 @@ class _SelfieOverlayPainter extends CustomPainter {
     final ry = ovalH / 2;
 
     // Haut-gauche
-    canvas.drawLine(Offset(cx - rx, cy - ry + cLen), Offset(cx - rx, cy - ry), cornerPaint);
-    canvas.drawLine(Offset(cx - rx, cy - ry), Offset(cx - rx + cLen, cy - ry), cornerPaint);
+    canvas.drawLine(
+        Offset(cx - rx, cy - ry + cLen), Offset(cx - rx, cy - ry), cornerPaint);
+    canvas.drawLine(
+        Offset(cx - rx, cy - ry), Offset(cx - rx + cLen, cy - ry), cornerPaint);
     // Haut-droit
-    canvas.drawLine(Offset(cx + rx - cLen, cy - ry), Offset(cx + rx, cy - ry), cornerPaint);
-    canvas.drawLine(Offset(cx + rx, cy - ry), Offset(cx + rx, cy - ry + cLen), cornerPaint);
+    canvas.drawLine(
+        Offset(cx + rx - cLen, cy - ry), Offset(cx + rx, cy - ry), cornerPaint);
+    canvas.drawLine(
+        Offset(cx + rx, cy - ry), Offset(cx + rx, cy - ry + cLen), cornerPaint);
     // Bas-gauche
-    canvas.drawLine(Offset(cx - rx, cy + ry - cLen), Offset(cx - rx, cy + ry), cornerPaint);
-    canvas.drawLine(Offset(cx - rx, cy + ry), Offset(cx - rx + cLen, cy + ry), cornerPaint);
+    canvas.drawLine(
+        Offset(cx - rx, cy + ry - cLen), Offset(cx - rx, cy + ry), cornerPaint);
+    canvas.drawLine(
+        Offset(cx - rx, cy + ry), Offset(cx - rx + cLen, cy + ry), cornerPaint);
     // Bas-droit
-    canvas.drawLine(Offset(cx + rx - cLen, cy + ry), Offset(cx + rx, cy + ry), cornerPaint);
-    canvas.drawLine(Offset(cx + rx, cy + ry), Offset(cx + rx, cy + ry - cLen), cornerPaint);
+    canvas.drawLine(
+        Offset(cx + rx - cLen, cy + ry), Offset(cx + rx, cy + ry), cornerPaint);
+    canvas.drawLine(
+        Offset(cx + rx, cy + ry), Offset(cx + rx, cy + ry - cLen), cornerPaint);
   }
 
   @override

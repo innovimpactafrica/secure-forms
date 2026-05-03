@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
-import 'package:secure_link/core/utils/base_url.dart';
-import 'package:secure_link/core/utils/http_client.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/http_client.dart';
 import '../models/identity_document_model.dart';
 
 class IdentityDocumentService {
@@ -25,11 +25,14 @@ class IdentityDocumentService {
   Future<List<KycDocTypeModel>> getKycDocumentTypes(String token) async {
     final url = BaseUrl.kycDocumentTypes;
     _log('GET $url');
-    final response = await _client.get(Uri.parse(url), headers: _authHeaders(token));
+    final response =
+        await _client.get(Uri.parse(url), headers: _authHeaders(token));
     _log('GET $url → ${response.statusCode}');
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
-      return data.map((e) => KycDocTypeModel.fromJson(e as Map<String, dynamic>)).toList();
+      return data
+          .map((e) => KycDocTypeModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
     throw Exception('Erreur types KYC: ${response.statusCode}');
   }
@@ -66,7 +69,8 @@ class IdentityDocumentService {
     final url = BaseUrl.identityDocuments;
     final fileSize = await file.length();
     final fileName = file.path.split(Platform.pathSeparator).last;
-    _log('POST $url | kind=$kind | documentTypeId=$documentTypeId | file=$fileName | size=${(fileSize / 1024).toStringAsFixed(1)}KB');
+    _log(
+        'POST $url | kind=$kind | documentTypeId=$documentTypeId | file=$fileName | size=${(fileSize / 1024).toStringAsFixed(1)}KB');
 
     final request = http.MultipartRequest('POST', Uri.parse(url));
     request.headers.addAll(_authHeaders(token));
@@ -75,9 +79,14 @@ class IdentityDocumentService {
       request.fields['documentTypeId'] = documentTypeId;
     }
     final ext = fileName.split('.').last.toLowerCase();
-    final mime = ext == 'png' ? 'image/png' : ext == 'pdf' ? 'application/pdf' : 'image/jpeg';
+    final mime = ext == 'png'
+        ? 'image/png'
+        : ext == 'pdf'
+            ? 'application/pdf'
+            : 'image/jpeg';
     request.files.add(await http.MultipartFile.fromPath(
-      'file', file.path,
+      'file',
+      file.path,
       contentType: MediaType.parse(mime),
     ));
 
@@ -108,7 +117,8 @@ class IdentityDocumentService {
       Uri.parse(url),
       headers: _authHeaders(token),
     );
-    _log('GET $url → ${response.statusCode} | ${response.bodyBytes.length} bytes');
+    _log(
+        'GET $url → ${response.statusCode} | ${response.bodyBytes.length} bytes');
     if (response.statusCode == 200) {
       return response.bodyBytes;
     }

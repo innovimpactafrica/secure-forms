@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:secure_link/core/utils/app_routes.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 class ClientMethodeScreen extends StatefulWidget {
   const ClientMethodeScreen({super.key});
@@ -37,7 +37,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                     height: AppConstants.backButtonSize,
                     decoration: BoxDecoration(
                       color: AppColors.whiteOverlay,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusMedium),
                     ),
                     child: Center(
                       child: SvgPicture.asset(
@@ -89,7 +90,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                       height: AppConstants.progressBarHeight,
                       decoration: BoxDecoration(
                         color: AppColors.progressBar,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusRound),
                       ),
                     ),
                     Container(
@@ -97,7 +99,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                       height: AppConstants.progressBarHeight,
                       decoration: BoxDecoration(
                         color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusRound),
                       ),
                     ),
                   ],
@@ -171,7 +174,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.white,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium),
                     border: Border.all(
                       color: AppColors.border,
                       width: AppConstants.borderWidthThin,
@@ -198,11 +202,18 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                           height: 244,
                           padding: const EdgeInsets.fromLTRB(17, 20, 17, 20),
                           decoration: BoxDecoration(
-                            color: selectedOption == 1 ? AppColors.primaryLight : Colors.transparent,
-                            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                            color: selectedOption == 1
+                                ? AppColors.primaryLight
+                                : Colors.transparent,
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusSmall),
                             border: Border.all(
-                              color: selectedOption == 1 ? AppColors.primary : AppColors.borderGray,
-                              width: selectedOption == 1 ? AppConstants.borderWidthMedium : AppConstants.borderWidthThin,
+                              color: selectedOption == 1
+                                  ? AppColors.primary
+                                  : AppColors.borderGray,
+                              width: selectedOption == 1
+                                  ? AppConstants.borderWidthMedium
+                                  : AppConstants.borderWidthThin,
                             ),
                           ),
                           child: Column(
@@ -214,7 +225,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                                 height: AppConstants.iconSizeHuge,
                                 decoration: BoxDecoration(
                                   color: AppColors.gray,
-                                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                                  borderRadius: BorderRadius.circular(
+                                      AppConstants.radiusSmall),
                                 ),
                                 child: Stack(
                                   children: [
@@ -270,7 +282,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                                     child: Text(
                                       'Expérience guidée',
                                       style: TextStyle(
-                                        fontFamily: AppConstants.fontFamilyInter,
+                                        fontFamily:
+                                            AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
                                         fontSize: AppConstants.fontSizeRegular,
                                         height: 16 / 12,
@@ -294,7 +307,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                                     child: Text(
                                       'Sauvegarde automatique de la progression',
                                       style: TextStyle(
-                                        fontFamily: AppConstants.fontFamilyInter,
+                                        fontFamily:
+                                            AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
                                         fontSize: AppConstants.fontSizeRegular,
                                         height: 16 / 12,
@@ -318,7 +332,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                                     child: Text(
                                       'Signature électronique instantanée',
                                       style: TextStyle(
-                                        fontFamily: AppConstants.fontFamilyInter,
+                                        fontFamily:
+                                            AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
                                         fontSize: AppConstants.fontSizeRegular,
                                         height: 16 / 12,
@@ -346,11 +361,18 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                           height: 244,
                           padding: const EdgeInsets.fromLTRB(17, 20, 17, 20),
                           decoration: BoxDecoration(
-                            color: selectedOption == 2 ? AppColors.primaryLight : Colors.transparent,
-                            borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                            color: selectedOption == 2
+                                ? AppColors.primaryLight
+                                : Colors.transparent,
+                            borderRadius:
+                                BorderRadius.circular(AppConstants.radiusSmall),
                             border: Border.all(
-                              color: selectedOption == 2 ? AppColors.primary : AppColors.borderGray,
-                              width: selectedOption == 2 ? AppConstants.borderWidthMedium : AppConstants.borderWidthThin,
+                              color: selectedOption == 2
+                                  ? AppColors.primary
+                                  : AppColors.borderGray,
+                              width: selectedOption == 2
+                                  ? AppConstants.borderWidthMedium
+                                  : AppConstants.borderWidthThin,
                             ),
                           ),
                           child: Column(
@@ -362,7 +384,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                                 height: AppConstants.iconSizeHuge,
                                 decoration: BoxDecoration(
                                   color: AppColors.gray,
-                                  borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+                                  borderRadius: BorderRadius.circular(
+                                      AppConstants.radiusSmall),
                                 ),
                                 child: Stack(
                                   children: [
@@ -418,7 +441,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                                     child: Text(
                                       'Format PDF officiel',
                                       style: TextStyle(
-                                        fontFamily: AppConstants.fontFamilyInter,
+                                        fontFamily:
+                                            AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
                                         fontSize: AppConstants.fontSizeRegular,
                                         height: 16 / 12,
@@ -442,7 +466,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                                     child: Text(
                                       'Remplir sans internet',
                                       style: TextStyle(
-                                        fontFamily: AppConstants.fontFamilyInter,
+                                        fontFamily:
+                                            AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
                                         fontSize: AppConstants.fontSizeRegular,
                                         height: 16 / 12,
@@ -466,7 +491,8 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                                     child: Text(
                                       'Vérification OTP sécurisée',
                                       style: TextStyle(
-                                        fontFamily: AppConstants.fontFamilyInter,
+                                        fontFamily:
+                                            AppConstants.fontFamilyInter,
                                         fontWeight: FontWeight.w400,
                                         fontSize: AppConstants.fontSizeRegular,
                                         height: 16 / 12,
@@ -491,30 +517,41 @@ class _ClientMethodeScreenState extends State<ClientMethodeScreen> {
                 left: AppConstants.paddingXLarge,
                 right: AppConstants.paddingXLarge,
                 child: GestureDetector(
-                  onTap: selectedOption > 0 ? () {
-                    if (selectedOption == 1) {
-                      Navigator.pushNamed(context, AppRoutes.nouvelleDemandeStep7);
-                    } else {
-                      Navigator.pushNamed(context, AppRoutes.nouvelleDemandeStep8);
-                    }
-                  } : null,
+                  onTap: selectedOption > 0
+                      ? () {
+                          if (selectedOption == 1) {
+                            Navigator.pushNamed(
+                                context, AppRoutes.nouvelleDemandeStep7);
+                          } else {
+                            Navigator.pushNamed(
+                                context, AppRoutes.nouvelleDemandeStep8);
+                          }
+                        }
+                      : null,
                   child: Container(
                     height: AppConstants.buttonHeight,
                     padding: EdgeInsets.all(AppConstants.paddingMedium),
                     decoration: BoxDecoration(
-                      color: selectedOption > 0 ? AppColors.primary : AppColors.primaryDarker,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                      color: selectedOption > 0
+                          ? AppColors.primary
+                          : AppColors.primaryDarker,
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.radiusRound),
                     ),
                     child: Center(
                       child: Text(
-                        selectedOption == 1 ? 'Continuer' : 'Télécharger et compléter plus tard',
+                        selectedOption == 1
+                            ? 'Continuer'
+                            : 'Télécharger et compléter plus tard',
                         style: TextStyle(
                           fontFamily: AppConstants.fontFamilySofiaSans,
                           fontWeight: FontWeight.w500,
                           fontSize: AppConstants.fontSizeLarge,
                           height: 1.5,
                           letterSpacing: 0,
-                          color: selectedOption > 0 ? AppColors.white : AppColors.textLightGray,
+                          color: selectedOption > 0
+                              ? AppColors.white
+                              : AppColors.textLightGray,
                         ),
                         textAlign: TextAlign.center,
                       ),

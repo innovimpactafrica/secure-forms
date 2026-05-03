@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:secure_link/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
 
 class ForgotPasswordService {
   final http.Client _client = http.Client();

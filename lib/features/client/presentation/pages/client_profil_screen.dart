@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/user_session.dart';
-import 'package:secure_link/core/utils/session_storage.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_event.dart';
-import 'package:secure_link/features/auth/domain/bloc/user_state.dart';
-import 'package:secure_link/features/client/domain/bloc/notifications_bloc.dart';
-import 'package:secure_link/features/client/domain/bloc/notifications_event.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_event.dart';
-import 'package:secure_link/core/widgets/user_avatar.dart';
-import 'package:secure_link/features/client/domain/bloc/profile_bloc.dart';
-import 'package:secure_link/features/client/presentation/pages/mes_archives_screen.dart';
-import 'package:secure_link/features/client/presentation/pages/mes_banques_screen.dart';
-import 'package:secure_link/features/client/presentation/pages/notifications_screen.dart';
+import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/core/utils/session_storage.dart';
+import 'package:quick_forms/features/auth/domain/bloc/user_bloc.dart';
+import 'package:quick_forms/features/auth/domain/bloc/user_event.dart';
+import 'package:quick_forms/features/auth/domain/bloc/user_state.dart';
+import 'package:quick_forms/features/client/domain/bloc/notifications_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/notifications_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_event.dart';
+import 'package:quick_forms/core/widgets/user_avatar.dart';
+import 'package:quick_forms/features/client/domain/bloc/profile_bloc.dart';
+import 'package:quick_forms/features/client/presentation/pages/mes_archives_screen.dart';
+import 'package:quick_forms/features/client/presentation/pages/mes_banques_screen.dart';
+import 'package:quick_forms/features/client/presentation/pages/notifications_screen.dart';
 import 'client_informations_personnelles_screen.dart';
 import 'mes_documents_screen.dart';
 import '../../../../core/utils/app_colors.dart';
@@ -62,7 +62,8 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _ProfileHeader(fromHome: widget.fromHome, onGoHome: widget.onGoHome),
+            _ProfileHeader(
+                fromHome: widget.fromHome, onGoHome: widget.onGoHome),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -103,7 +104,8 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                       onInfosTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const ClientInformationsPersonnellesScreen(),
+                          builder: (_) =>
+                              const ClientInformationsPersonnellesScreen(),
                         ),
                       ),
                       onArchivesTap: () => Navigator.push(
@@ -199,9 +201,11 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
               const SizedBox(height: 16),
               Divider(color: AppColors.borderE5, height: 1),
               const SizedBox(height: 16),
-              _buildLanguageOption(context, 'profil.french'.tr(), 'assets/images/image 2.png'),
+              _buildLanguageOption(
+                  context, 'profil.french'.tr(), 'assets/images/image 2.png'),
               const SizedBox(height: AppConstants.paddingMedium),
-              _buildLanguageOption(context, 'profil.english'.tr(), 'assets/images/image 3.png'),
+              _buildLanguageOption(
+                  context, 'profil.english'.tr(), 'assets/images/image 3.png'),
               const SizedBox(height: 16),
             ],
           ),
@@ -210,10 +214,12 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
     );
   }
 
-  Widget _buildLanguageOption(BuildContext context, String language, String flagPath) {
-    final bool isSelected =
-        (language == 'profil.french'.tr() && context.locale.languageCode == 'fr') ||
-        (language == 'profil.english'.tr() && context.locale.languageCode == 'en');
+  Widget _buildLanguageOption(
+      BuildContext context, String language, String flagPath) {
+    final bool isSelected = (language == 'profil.french'.tr() &&
+            context.locale.languageCode == 'fr') ||
+        (language == 'profil.english'.tr() &&
+            context.locale.languageCode == 'en');
 
     return GestureDetector(
       onTap: () {
@@ -346,8 +352,12 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pop();
-                        context.read<NotificationsBloc>().add(const ResetNotificationsEvent());
-                        context.read<ProfileBloc>().add(const ResetProfileEvent());
+                        context
+                            .read<NotificationsBloc>()
+                            .add(const ResetNotificationsEvent());
+                        context
+                            .read<ProfileBloc>()
+                            .add(const ResetProfileEvent());
                         context.read<UserBloc>().add(ClearUserProfile());
                         SessionStorage.instance.clear();
                         Navigator.of(context)

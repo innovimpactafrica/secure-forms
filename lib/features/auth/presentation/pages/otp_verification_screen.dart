@@ -2,12 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
-import 'package:secure_link/features/auth/domain/bloc/auth_bloc.dart';
-import 'package:secure_link/features/auth/domain/bloc/auth_event.dart';
-import 'package:secure_link/features/auth/domain/bloc/auth_state.dart';
-import 'package:secure_link/features/auth/presentation/pages/email_sent_screen.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
+import 'package:quick_forms/features/auth/domain/bloc/auth_bloc.dart';
+import 'package:quick_forms/features/auth/domain/bloc/auth_event.dart';
+import 'package:quick_forms/features/auth/domain/bloc/auth_state.dart';
+import 'package:quick_forms/features/auth/presentation/pages/email_sent_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String email;
@@ -146,12 +146,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           width: AppConstants.avatarSizeSmall,
                           height: AppConstants.avatarSizeSmall,
                           decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.backCircleColor, width: 1.26),
+                            border: Border.all(
+                                color: AppColors.backCircleColor, width: 1.26),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(Icons.arrow_back,
-                              color: AppColors.backArrowColor,
-                              size: 20.6),
+                              color: AppColors.backArrowColor, size: 20.6),
                         ),
                       ),
                       Image.asset('assets/images/qfwithtext.png',
@@ -241,7 +241,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                               ),
                               const SizedBox(height: 4),
                               GestureDetector(
-                                onTap: _canResend ? () => _onResend(context) : null,
+                                onTap: _canResend
+                                    ? () => _onResend(context)
+                                    : null,
                                 child: Text(
                                   _canResend
                                       ? 'otp.resend'.tr()
@@ -264,14 +266,16 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           width: double.infinity,
                           height: AppConstants.logoutButtonHeight,
                           child: ElevatedButton(
-                            onPressed: isLoading ? null : () => _onVerify(context),
+                            onPressed:
+                                isLoading ? null : () => _onVerify(context),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryDark,
                               disabledBackgroundColor:
                                   AppColors.primaryDark.withValues(alpha: 0.6),
                               elevation: 0,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                                borderRadius: BorderRadius.circular(
+                                    AppConstants.radiusRound),
                               ),
                             ),
                             child: isLoading
@@ -284,7 +288,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                 : Text(
                                     'otp.verify_button'.tr(),
                                     style: const TextStyle(
-                                      fontFamily: AppConstants.fontFamilySofiaSans,
+                                      fontFamily:
+                                          AppConstants.fontFamilySofiaSans,
                                       color: AppColors.white,
                                       fontWeight: FontWeight.w600,
                                       fontSize: AppConstants.fontSizeLarge,
@@ -292,7 +297,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                                   ),
                           ),
                         ),
-                        SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+                        SizedBox(
+                            height: MediaQuery.of(context).padding.bottom + 8),
                       ],
                     ),
                   ),
@@ -356,7 +362,8 @@ class _OtpBoxState extends State<_OtpBox> {
           counterText: '',
           contentPadding: EdgeInsets.zero,
           filled: true,
-          fillColor: isFocused ? AppColors.otpActiveFill : AppColors.otpEmptyFill,
+          fillColor:
+              isFocused ? AppColors.otpActiveFill : AppColors.otpEmptyFill,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
@@ -367,11 +374,11 @@ class _OtpBoxState extends State<_OtpBox> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: AppColors.otpActiveBorder, width: 1),
+            borderSide:
+                const BorderSide(color: AppColors.otpActiveBorder, width: 1),
           ),
         ),
       ),
     );
   }
 }
-

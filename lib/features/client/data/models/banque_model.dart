@@ -1,4 +1,4 @@
-import 'package:secure_link/core/utils/base_url.dart';
+import 'package:quick_forms/core/utils/base_url.dart';
 
 class BanqueModel {
   final String id;

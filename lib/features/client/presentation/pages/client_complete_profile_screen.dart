@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:secure_link/core/utils/app_colors.dart';
-import 'package:secure_link/core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 /// Page ouverte au clic sur "Commencer maintenant"
 /// Permet au client de compléter son profil
@@ -105,13 +105,21 @@ class ClientCompleteProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _ProfileField(label: 'profile.first_name'.tr(), hint: 'profile.your_first_name'.tr()),
+            _ProfileField(
+                label: 'profile.first_name'.tr(),
+                hint: 'profile.your_first_name'.tr()),
             const SizedBox(height: 14),
-            _ProfileField(label: 'profile.last_name'.tr(), hint: 'profile.your_last_name'.tr()),
+            _ProfileField(
+                label: 'profile.last_name'.tr(),
+                hint: 'profile.your_last_name'.tr()),
             const SizedBox(height: 14),
-            _ProfileField(label: 'profile.phone'.tr(), hint: 'profile.phone_placeholder'.tr()),
+            _ProfileField(
+                label: 'profile.phone'.tr(),
+                hint: 'profile.phone_placeholder'.tr()),
             const SizedBox(height: 14),
-            _ProfileField(label: 'profile.address'.tr(), hint: 'profile.full_address'.tr()),
+            _ProfileField(
+                label: 'profile.address'.tr(),
+                hint: 'profile.full_address'.tr()),
             const SizedBox(height: 32),
             // Save button
             SizedBox(
