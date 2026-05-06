@@ -109,16 +109,18 @@ class BanquesService {
       final decoded = jsonDecode(getResp.body) as Map<String, dynamic>;
       final preferences = decoded['preferences'] as List? ?? [];
       cleanedItems = preferences.map((p) {
-        final accounts = (p['bankAccounts'] as List? ?? []).map((a) {
-          final num = a['accountNumber'] as String? ?? a['number'] as String? ?? '';
-          final holder = a['accountHolder'] as String? ?? a['holder'] as String? ?? '';
-          return {'accountNumber': num, 'accountHolder': holder};
+        final pMap = Map<String, dynamic>.from(p as Map);
+        final accounts = (pMap['bankAccounts'] as List? ?? []).map((a) {
+          final aMap = Map<String, dynamic>.from(a as Map);
+          final num = aMap['accountNumber'] as String? ?? aMap['number'] as String? ?? '';
+          final holder = aMap['accountHolder'] as String? ?? aMap['holder'] as String? ?? '';
+          return <String, dynamic>{'accountNumber': num, 'accountHolder': holder};
         }).toList();
-        final numbers = (p['bankAccountNumbers'] as List? ?? [])
+        final numbers = (pMap['bankAccountNumbers'] as List? ?? [])
             .map((n) => n.toString())
             .toList();
-        return {
-          'organisationId': p['organisationId'] as String? ?? '',
+        return <String, dynamic>{
+          'organisationId': pMap['organisationId'] as String? ?? '',
           'bankAccountNumbers': numbers,
           'bankAccounts': accounts,
         };
@@ -131,20 +133,22 @@ class BanquesService {
 
     if (existingIndex >= 0) {
       final existing = cleanedItems[existingIndex];
-      final accounts = List<Map<String, dynamic>>.from(existing['bankAccounts'] as List);
+      final accounts = (existing['bankAccounts'] as List)
+          .map((a) => Map<String, dynamic>.from(a as Map))
+          .toList();
       final numbers = List<String>.from(existing['bankAccountNumbers'] as List);
-      accounts.add({'accountNumber': accountNumber, 'accountHolder': accountHolder});
+      accounts.add(<String, dynamic>{'accountNumber': accountNumber, 'accountHolder': accountHolder});
       if (!numbers.contains(accountNumber)) numbers.add(accountNumber);
-      cleanedItems[existingIndex] = {
+      cleanedItems[existingIndex] = <String, dynamic>{
         'organisationId': organisationId,
         'bankAccountNumbers': numbers,
         'bankAccounts': accounts,
       };
     } else {
-      cleanedItems.add({
+      cleanedItems.add(<String, dynamic>{
         'organisationId': organisationId,
         'bankAccountNumbers': [accountNumber],
-        'bankAccounts': [{'accountNumber': accountNumber, 'accountHolder': accountHolder}],
+        'bankAccounts': [<String, dynamic>{'accountNumber': accountNumber, 'accountHolder': accountHolder}],
       });
     }
 

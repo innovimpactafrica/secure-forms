@@ -202,55 +202,67 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   @override
-  Widget build(BuildContext context) {
-    // â† AJOUTÃ‰ : on rÃ©cupÃ¨re la largeur rÃ©elle de l'Ã©cran
-    final screenWidth = MediaQuery.of(context).size.width;
+  @override
+@override
+Widget build(BuildContext context) {
+  final screenWidth = MediaQuery.of(context).size.width;
+  final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: AnimatedBuilder(
-        animation: Listenable.merge([_logoSlide, _textOpacity, _fadeAnimation]),
-        builder: (context, child) {
-          return Opacity(
-            opacity: _fadeAnimation.value,
-            child: Stack(
-              children: [
-                // Logo seul
-                Positioned(
-                  top: MediaQuery.of(context).size.height / 2 - 75,
-                  left: (screenWidth / 2 - 65) + _logoSlide.value,
+  // Position finale du logo après glissement
+  // Logo commence au centre : screenWidth/2 - 75 (moitié de 150)
+  // Logo glisse de -55px vers la gauche
+  final double logoFinalLeft = screenWidth / 2 - 75 + (-55); // = screenWidth/2 - 130
+  final double logoWidth = 150.0;
+  final double logoHeight = 150.0;
+  final double textWidth = 170.0;
+  final double textHeight = 150.0;
+  final double topPosition = screenHeight / 2 - 75;
+
+  return Scaffold(
+    backgroundColor: AppColors.white,
+    body: AnimatedBuilder(
+      animation: Listenable.merge([_logoSlide, _textOpacity, _fadeAnimation]),
+      builder: (context, child) {
+        return Opacity(
+          opacity: _fadeAnimation.value,
+          child: Stack(
+            children: [
+              // Logo qui glisse vers la gauche
+              Positioned(
+                top: topPosition,
+                left: screenWidth / 2 - 75 + _logoSlide.value,
+                child: SizedBox(
+                  width: logoWidth,
+                  height: logoHeight,
+                  child: Image.asset(
+                    'assets/images/qf.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              // Texte fixe juste à droite de la position finale du logo
+              Positioned(
+                top: topPosition,
+                left: logoFinalLeft + logoWidth + 0, // ✅ collé au logo arrêté
+                child: Opacity(
+                  opacity: _textOpacity.value,
                   child: SizedBox(
-                    width: 150,
-                    height: 150,
+                    width: textWidth,
+                    height: textHeight,
                     child: Image.asset(
-                      'assets/images/qf.png',
+                      'assets/images/textqf.png',
                       fit: BoxFit.contain,
                     ),
                   ),
                 ),
-                // Texte positionnÃ© juste Ã  droite du logo final
-                Positioned(
-  top: MediaQuery.of(context).size.height / 2 - 75,
-  left: (screenWidth / 2 - 65) + 150 + _logoSlide.value - 10, 
-  child: Opacity(
-    opacity: _textOpacity.value,
-    child: SizedBox(
-      width: 170,  
-      height: 150, 
-      child: Image.asset(
-        'assets/images/textqf.png',
-        fit: BoxFit.contain,
-      ),
+              ),
+            ],
+          ),
+        );
+      },
     ),
-  ),
-),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
+  );
+}
 }
 
 

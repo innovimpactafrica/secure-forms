@@ -292,6 +292,11 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
           (route) => false,
         );
       });
+    } else if (uri.scheme == 'secureforms' && uri.host == 'payment-result') {
+      debugPrint('[DeepLink] secureforms://payment-result recu');
+      _navigateWhenReady(() async {
+        await _handlePostPaymentNavigation();
+      });
     }
   }
 
@@ -455,4 +460,5 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
     );
   }
 }
+
 

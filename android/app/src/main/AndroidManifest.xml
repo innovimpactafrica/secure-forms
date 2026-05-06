@@ -59,6 +59,16 @@
                     android:scheme="https"
                     android:host="secure.innovimpactdev.cloud"/>
             </intent-filter>
+            <!-- App Links HTTPS - TouchPay payment-result (ouverture directe sans selecteur) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="https"
+                    android:host="secure.innovimpactdev.cloud"
+                    android:pathPrefix="/payment-result"/>
+            </intent-filter>
             <!-- App Links HTTPS - PDF / Remote Sign -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
@@ -69,15 +79,7 @@
                     android:host="pdf.secure.innovimpactdev.cloud"/>
             </intent-filter>
             <!-- App Links HTTPS - TouchPay return -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data
-                    android:scheme="https"
-                    android:host="api.secure.innovimpactdev.cloud"/>
-            </intent-filter>
-            <!-- Fallback sans autoVerify pour TouchPay -->
+            <!-- autoVerify desactive : necessite assetlinks.json sur api.secure.innovimpactdev.cloud -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -86,6 +88,13 @@
                     android:scheme="https"
                     android:host="api.secure.innovimpactdev.cloud"
                     android:pathPrefix="/api/payments/touchpay/return"/>
+            </intent-filter>
+            <!-- Custom scheme secureforms://payment-result (fallback fiable) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="secureforms" android:host="payment-result"/>
             </intent-filter>
             <!-- Custom scheme secureforms:// pour le KYC -->
             <intent-filter>

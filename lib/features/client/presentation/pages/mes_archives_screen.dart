@@ -746,6 +746,10 @@ class _StatusBadge extends StatelessWidget {
       case 'EN_VERIFICATION':
         return _Cfg('profile.in_progress'.tr(), AppColors.statusInProgress,
             AppColors.statusInProgressLight);
+      case 'EN_ATTENTE':
+      case 'PENDING':
+        return _Cfg('demandes.pending'.tr(), AppColors.statusPending,
+            AppColors.statusPendingLight);
       case 'BROUILLON':
         return _Cfg('demandes.draft'.tr(), AppColors.statusDraft,
             AppColors.statusDraftLight);
