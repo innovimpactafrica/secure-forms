@@ -15,13 +15,14 @@ class BanquesBloc extends Bloc<BanquesEvent, BanquesState> {
     on<LoadBanquesEvent>(_onLoad);
     on<SearchBanquesEvent>(_onSearch);
     on<AjouterBanqueEvent>(_onAjouter);
+    on<LoadOrganisationsForSelectionEvent>(_onLoadForSelection);
   }
 
   Future<void> _onLoad(
       LoadBanquesEvent event, Emitter<BanquesState> emit) async {
     emit(const BanquesLoading());
     try {
-      final banques = await _service.getOrganisations(
+      final banques = await _service.getBanquesUtilisateur(
         accessToken: UserSession.instance.accessToken,
       );
       _allBanques
@@ -60,8 +61,8 @@ class BanquesBloc extends Bloc<BanquesEvent, BanquesState> {
         accountHolder: event.accountHolder,
       );
       emit(const BanqueAjouteeState());
-      // Recharger la liste
-      final banques = await _service.getOrganisations(
+      // Recharger les banques de l'utilisateur
+      final banques = await _service.getBanquesUtilisateur(
         accessToken: UserSession.instance.accessToken,
       );
       _allBanques
@@ -71,6 +72,21 @@ class BanquesBloc extends Bloc<BanquesEvent, BanquesState> {
     } catch (e) {
       emit(BanqueAjoutErreurState(e.toString()));
       emit(BanquesLoaded(List.from(_allBanques)));
+    }
+  }
+
+  Future<void> _onLoadForSelection(
+      LoadOrganisationsForSelectionEvent event,
+      Emitter<BanquesState> emit) async {
+    emit(const OrganisationsForSelectionLoading());
+    try {
+      final orgs = await _service.getOrganisations(
+        accessToken: UserSession.instance.accessToken,
+        forSelection: true,
+      );
+      emit(OrganisationsForSelectionLoaded(orgs));
+    } catch (e) {
+      emit(OrganisationsForSelectionError(e.toString()));
     }
   }
 }

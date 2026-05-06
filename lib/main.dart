@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:app_links/app_links.dart';
@@ -47,9 +47,12 @@ import 'package:quick_forms/features/kyc/presentation/pages/kyc_gate_page.dart';
 import 'features/client/presentation/pages/signature_screen.dart';
 import 'package:quick_forms/core/utils/session_storage.dart';
 import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/features/client/data/services/subscription_service.dart';
+import 'package:quick_forms/features/kyc/domain/bloc/kyc_bloc.dart';
+import 'package:quick_forms/features/kyc/presentation/pages/kyc_intro_page.dart';
+import 'package:quick_forms/core/utils/kyc_checker.dart';
 import 'firebase_options.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'dart:ui';
 
 // Handler background OBLIGATOIREMENT top-level
@@ -103,7 +106,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
   void initState() {
     super.initState();
     _initDeepLinks();
-    // Vérifier si app lancée depuis une notification (après le premier build)
+    // VÃ©rifier si app lancÃ©e depuis une notification (aprÃ¨s le premier build)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FcmService.checkInitialMessage();
     });
@@ -112,12 +115,12 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
   Future<void> _initDeepLinks() async {
     _appLinks = AppLinks();
 
-    // Cas 1 : app en arrière-plan
+    // Cas 1 : app en arriÃ¨re-plan
     _appLinks.uriLinkStream.listen((uri) {
       _handleDeepLink(uri);
     });
 
-    // Cas 2 : app fermée
+    // Cas 2 : app fermÃ©e
     final initialUri = await _appLinks.getInitialLink();
     if (initialUri != null) {
       await Future.delayed(const Duration(milliseconds: 800));
@@ -133,7 +136,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
     debugPrint('query: ${uri.queryParameters}');
     debugPrint('======================');
 
-    // ── Remote Sign : /mobile-sign?session=... ──
+    // â”€â”€ Remote Sign : /mobile-sign?session=... â”€â”€
     if (uri.host == 'pdf.secure.innovimpactdev.cloud' &&
         uri.path.contains('/mobile-sign')) {
       final sessionId = uri.queryParameters['session'] ?? '';
@@ -211,8 +214,24 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
       return;
     }
 
+    if (uri.host == 'api.secure.innovimpactdev.cloud') {
+      if (uri.path.contains('/payments/touchpay/return')) {
+        debugPrint('[DeepLink] TouchPay return | source=${uri.queryParameters["source"]} | errorCode=${uri.queryParameters["errorCode"]}');
+        _navigateWhenReady(() async {
+          await _handlePostPaymentNavigation();
+        });
+        return;
+      }
+    }
+
     if (uri.host == 'secure.innovimpactdev.cloud') {
-      if (uri.path.contains('/mobile/login')) {
+      if (uri.path.contains('/payment-result')) {
+        // Retour paiement TouchPay â†’ vÃ©rifier abonnement puis KYC
+        _navigateWhenReady(() async {
+          await _handlePostPaymentNavigation();
+        });
+        return;
+      } else if (uri.path.contains('/mobile/login')) {
         _navigateWhenReady(() {
           navigatorKey.currentState?.pushNamedAndRemoveUntil(
             AppRoutes.login,
@@ -286,6 +305,49 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
     }
   }
 
+  Future<void> _handlePostPaymentNavigation() async {
+    final token = UserSession.instance.accessToken;
+    if (token.isEmpty) {
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        AppRoutes.login,
+        (route) => false,
+      );
+      return;
+    }
+
+    // VÃ©rifier abonnement
+    final sub = await SubscriptionService()
+        .getEffectiveSubscription(accessToken: token);
+    if (sub == null || !sub.isActive) {
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        AppRoutes.activationRequise,
+        (route) => false,
+      );
+      return;
+    }
+
+    // VÃ©rifier KYC via API backend
+    final userId = UserSession.instance.userId;
+    final kycDone = await KycChecker.isKycCompleted();
+
+    if (!kycDone) {
+      navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => KycBloc(userId: userId),
+            child: const KycIntroPage(),
+          ),
+        ),
+        (route) => false,
+      );
+    } else {
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        AppRoutes.clientHome,
+        (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -298,7 +360,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
       ],
       child: MaterialApp(
         title: 'Quick Forms',
-        navigatorKey: navigatorKey, // ✅ utilise le global key
+        navigatorKey: navigatorKey, // âœ… utilise le global key
         debugShowCheckedModeBanner: false,
         localizationsDelegates: context.localizationDelegates,
         supportedLocales: context.supportedLocales,
@@ -393,3 +455,4 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
     );
   }
 }
+

@@ -21,3 +21,7 @@ class AjouterBanqueEvent extends BanquesEvent {
     required this.accountHolder,
   });
 }
+
+class LoadOrganisationsForSelectionEvent extends BanquesEvent {
+  const LoadOrganisationsForSelectionEvent();
+}

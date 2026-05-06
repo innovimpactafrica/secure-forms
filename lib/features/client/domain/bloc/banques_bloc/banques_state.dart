@@ -34,3 +34,17 @@ class BanqueAjoutErreurState extends BanquesState {
   final String message;
   const BanqueAjoutErreurState(this.message);
 }
+
+class OrganisationsForSelectionLoading extends BanquesState {
+  const OrganisationsForSelectionLoading();
+}
+
+class OrganisationsForSelectionLoaded extends BanquesState {
+  final List<BanqueModel> organisations;
+  const OrganisationsForSelectionLoaded(this.organisations);
+}
+
+class OrganisationsForSelectionError extends BanquesState {
+  final String message;
+  const OrganisationsForSelectionError(this.message);
+}

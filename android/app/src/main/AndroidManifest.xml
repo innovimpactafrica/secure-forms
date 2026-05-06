@@ -68,6 +68,25 @@
                     android:scheme="https"
                     android:host="pdf.secure.innovimpactdev.cloud"/>
             </intent-filter>
+            <!-- App Links HTTPS - TouchPay return -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="https"
+                    android:host="api.secure.innovimpactdev.cloud"/>
+            </intent-filter>
+            <!-- Fallback sans autoVerify pour TouchPay -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="https"
+                    android:host="api.secure.innovimpactdev.cloud"
+                    android:pathPrefix="/api/payments/touchpay/return"/>
+            </intent-filter>
             <!-- Custom scheme secureforms:// pour le KYC -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>

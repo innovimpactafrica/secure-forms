@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -13,6 +13,9 @@ import 'package:quick_forms/features/client/domain/bloc/notifications_event.dart
 import 'package:quick_forms/core/utils/user_session.dart';
 import 'package:quick_forms/core/services/fcm_service.dart';
 import 'package:quick_forms/features/client/data/services/subscription_service.dart';
+import 'package:quick_forms/features/kyc/domain/bloc/kyc_bloc.dart';
+import 'package:quick_forms/features/kyc/presentation/pages/kyc_intro_page.dart';
+import 'package:quick_forms/core/utils/kyc_checker.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -40,11 +43,11 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 1100),
       vsync: this,
     );
-    // ← CHANGÉ : -90 → -55 pour que le logo ne parte pas trop loin
+    // â† CHANGÃ‰ : -90 â†’ -55 pour que le logo ne parte pas trop loin
     _logoSlide = Tween<double>(begin: 0.0, end: -55.0).animate(
       CurvedAnimation(
           parent: _slideController,
-          curve: Curves.easeInOut), // ← easeInOut comme demandé
+          curve: Curves.easeInOut), // â† easeInOut comme demandÃ©
     );
 
     _textController = AnimationController(
@@ -95,23 +98,23 @@ class _SplashScreenState extends State<SplashScreen>
     if (refreshToken.isNotEmpty &&
         _isTokenExpiredOrSoon(UserSession.instance.accessToken)) {
       try {
-        print('[Splash] Token expiré ou bientôt → refresh proactif...');
+        print('[Splash] Token expirÃ© ou bientÃ´t â†’ refresh proactif...');
         final freshToken =
             await AuthenticatedHttpClient.instance.ensureFreshToken();
         if (freshToken.isEmpty) {
-          print('[Splash] Refresh échoué → reconnexion requise');
+          print('[Splash] Refresh Ã©chouÃ© â†’ reconnexion requise');
           await SessionStorage.instance.clear();
           if (mounted)
             Navigator.of(context).pushReplacementNamed(AppRoutes.login);
           return;
         }
-        print('[Splash] Token rafraîchi avec succès');
+        print('[Splash] Token rafraÃ®chi avec succÃ¨s');
       } catch (_) {
         print(
-            '[Splash] Erreur réseau lors du refresh → on continue avec le token existant');
+            '[Splash] Erreur rÃ©seau lors du refresh â†’ on continue avec le token existant');
       }
     } else {
-      print('[Splash] Token encore valide → pas de refresh nécessaire');
+      print('[Splash] Token encore valide â†’ pas de refresh nÃ©cessaire');
     }
 
     if (!mounted) return;
@@ -121,13 +124,30 @@ class _SplashScreenState extends State<SplashScreen>
     final notifBloc = context.read<NotificationsBloc>();
     final navigator = Navigator.of(context);
 
-    // Vérifier l'abonnement avant de naviguer
+    // VÃ©rifier l'abonnement avant de naviguer
     try {
       final sub = await SubscriptionService()
           .getEffectiveSubscription(accessToken: token);
       if (!mounted) return;
       if (sub == null || !sub.isActive) {
         navigator.pushReplacementNamed(AppRoutes.activationRequise);
+        return;
+      }
+
+      // Abonnement actif â†’ vÃ©rifier KYC via API backend
+      final kycDone = await KycChecker.isKycCompleted();
+      if (!mounted) return;
+
+      if (!kycDone) {
+        navigator.pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => BlocProvider(
+              create: (_) => KycBloc(userId: UserSession.instance.userId),
+              child: const KycIntroPage(),
+            ),
+          ),
+          (route) => false,
+        );
       } else {
         navigator.pushReplacementNamed(AppRoutes.clientHome);
       }
@@ -183,7 +203,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    // ← AJOUTÉ : on récupère la largeur réelle de l'écran
+    // â† AJOUTÃ‰ : on rÃ©cupÃ¨re la largeur rÃ©elle de l'Ã©cran
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
@@ -195,40 +215,35 @@ class _SplashScreenState extends State<SplashScreen>
             opacity: _fadeAnimation.value,
             child: Stack(
               children: [
-                // ← CHANGÉ : on positionne le logo seul au centre exact de l'écran
-                // puis on le déplace avec Transform.translate
+                // Logo seul
                 Positioned(
-                  // Centre vertical
-                  top: MediaQuery.of(context).size.height / 2 - 55,
-                  // Centre horizontal = milieu écran - moitié largeur logo
-                  // Le logo fait 110px de large, donc left = (screenWidth/2 - 55) + slide
-                  left: (screenWidth / 2 - 55) + _logoSlide.value,
+                  top: MediaQuery.of(context).size.height / 2 - 75,
+                  left: (screenWidth / 2 - 65) + _logoSlide.value,
                   child: SizedBox(
-                    width: 110,
-                    height: 110,
+                    width: 150,
+                    height: 150,
                     child: Image.asset(
                       'assets/images/qf.png',
                       fit: BoxFit.contain,
                     ),
                   ),
                 ),
-                // ← CHANGÉ : texte positionné juste à droite du logo, sans espace
+                // Texte positionnÃ© juste Ã  droite du logo final
                 Positioned(
-                  top: MediaQuery.of(context).size.height / 2 - 55,
-                  // left du texte = left du logo + largeur logo (110) + slide
-                  left: (screenWidth / 2 - 55) + 110 + _logoSlide.value,
-                  child: Opacity(
-                    opacity: _textOpacity.value,
-                    child: SizedBox(
-                      width: 130,
-                      height: 110,
-                      child: Image.asset(
-                        'assets/images/textqf.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ),
-                ),
+  top: MediaQuery.of(context).size.height / 2 - 75,
+  left: (screenWidth / 2 - 65) + 150 + _logoSlide.value - 10, 
+  child: Opacity(
+    opacity: _textOpacity.value,
+    child: SizedBox(
+      width: 170,  
+      height: 150, 
+      child: Image.asset(
+        'assets/images/textqf.png',
+        fit: BoxFit.contain,
+      ),
+    ),
+  ),
+),
               ],
             ),
           );
@@ -237,3 +252,5 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 }
+
+

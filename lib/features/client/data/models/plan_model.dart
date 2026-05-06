@@ -58,6 +58,8 @@ class PlanModel {
     );
   }
 
+  String get billingLabel => '/ mois';
+
   String get formattedPrice {
     final amount = monthlyPrice;
     final formatted = amount.toInt().toString().replaceAllMapped(

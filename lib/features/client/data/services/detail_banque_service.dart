@@ -10,7 +10,6 @@ class DetailBanqueService {
   DetailBanqueService({http.Client? client})
       : _client = client ?? HttpClientSingleton.instance;
 
-  /// Retourne les comptes bancaires d'une organisation spécifique
   Future<List<CompteModel>> getComptes({
     required String accessToken,
     required String organisationId,
@@ -41,29 +40,69 @@ class DetailBanqueService {
     throw Exception('Erreur chargement comptes: ${response.statusCode}');
   }
 
-  /// Ajoute un compte bancaire via POST /api/clients/me/organization-preferences
   Future<void> ajouterCompte({
     required String accessToken,
     required String organisationId,
     required String accountNumber,
     required String accountHolder,
   }) async {
-    final body = jsonEncode({
-      'skip': false,
-      'items': [
-        {
-          'organisationId': organisationId,
-          'bankAccountNumbers': [accountNumber],
-          'bankAccounts': [
-            {
-              'accountNumber': accountNumber,
-              'accountHolder': accountHolder,
-            }
-          ],
-        }
-      ],
-    });
+    // 1. Lire les préférences existantes
+    final getResp = await _client.get(
+      Uri.parse(BaseUrl.getOrgPreferences),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Accept': 'application/json',
+      },
+    );
 
+    // 2. Nettoyer et normaliser les items existants dès la lecture
+    List<Map<String, dynamic>> cleanedItems = [];
+    if (getResp.statusCode == 200) {
+      final decoded = jsonDecode(getResp.body) as Map<String, dynamic>;
+      final preferences = decoded['preferences'] as List? ?? [];
+      cleanedItems = preferences.map((p) {
+        final accounts = (p['bankAccounts'] as List? ?? []).map((a) {
+          final num = a['accountNumber'] as String? ?? a['number'] as String? ?? '';
+          final holder = a['accountHolder'] as String? ?? a['holder'] as String? ?? '';
+          return {'accountNumber': num, 'accountHolder': holder};
+        }).toList();
+        final numbers = (p['bankAccountNumbers'] as List? ?? [])
+            .map((n) => n.toString())
+            .toList();
+        return {
+          'organisationId': p['organisationId'] as String? ?? '',
+          'bankAccountNumbers': numbers,
+          'bankAccounts': accounts,
+        };
+      }).where((p) => (p['organisationId'] as String).isNotEmpty).toList();
+    }
+
+    // 3. Merger le nouveau compte
+    final existingIndex =
+        cleanedItems.indexWhere((p) => p['organisationId'] == organisationId);
+
+    if (existingIndex >= 0) {
+      final existing = cleanedItems[existingIndex];
+      final accounts = List<Map<String, dynamic>>.from(existing['bankAccounts'] as List);
+      final numbers = List<String>.from(existing['bankAccountNumbers'] as List);
+      accounts.add({'accountNumber': accountNumber, 'accountHolder': accountHolder});
+      if (!numbers.contains(accountNumber)) numbers.add(accountNumber);
+      cleanedItems[existingIndex] = {
+        'organisationId': organisationId,
+        'bankAccountNumbers': numbers,
+        'bankAccounts': accounts,
+      };
+    } else {
+      cleanedItems.add({
+        'organisationId': organisationId,
+        'bankAccountNumbers': [accountNumber],
+        'bankAccounts': [{'accountNumber': accountNumber, 'accountHolder': accountHolder}],
+      });
+    }
+
+    // 4. POST
+    final body = jsonEncode({'skip': false, 'items': cleanedItems});
+    debugPrint('[DetailBanqueService] POST body: $body');
     final response = await _client.post(
       Uri.parse(BaseUrl.getOrgPreferences),
       headers: {
@@ -75,10 +114,10 @@ class DetailBanqueService {
     );
 
     debugPrint('[DetailBanqueService] POST Status: ${response.statusCode}');
-    debugPrint('[DetailBanqueService] POST Body: ${response.body}');
+    debugPrint('[DetailBanqueService] POST Response: ${response.body}');
 
     if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception('Erreur ajout compte: ${response.statusCode}');
+      throw Exception('Erreur ajout compte: ${response.statusCode} - ${response.body}');
     }
   }
 }

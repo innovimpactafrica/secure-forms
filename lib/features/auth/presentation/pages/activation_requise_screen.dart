@@ -207,6 +207,26 @@ class ActivationRequiseScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+                    const SizedBox(height: AppConstants.paddingMedium),
+
+                    // Lien retour connexion
+                    GestureDetector(
+                      onTap: () => Navigator.of(context)
+                          .pushNamedAndRemoveUntil(
+                              AppRoutes.login, (route) => false),
+                      child: Text(
+                        'Retour à la connexion',
+                        style: TextStyle(
+                          fontFamily: AppConstants.fontFamilyInter,
+                          fontSize: AppConstants.fontSizeRegular,
+                          color: AppColors.textSecondary
+                              .withValues(alpha: 0.5),
+                          decoration: TextDecoration.underline,
+                          decorationColor: AppColors.textSecondary
+                              .withValues(alpha: 0.3),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: AppConstants.paddingXLarge),
                   ],
                 ),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -7,6 +7,10 @@ import 'package:quick_forms/core/utils/app_constants.dart';
 import 'package:quick_forms/core/utils/user_session.dart';
 import 'package:quick_forms/features/client/data/models/plan_model.dart';
 import 'package:quick_forms/features/client/data/services/subscription_service.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:quick_forms/features/client/domain/bloc/payment_bloc/payment_bloc.dart';
+import 'package:quick_forms/features/client/domain/bloc/payment_bloc/payment_event.dart';
+import 'package:quick_forms/features/client/domain/bloc/payment_bloc/payment_state.dart';
 import 'package:quick_forms/features/client/domain/bloc/plans_bloc/plans_bloc.dart';
 import 'package:quick_forms/features/client/domain/bloc/plans_bloc/plans_event.dart';
 import 'package:quick_forms/features/client/domain/bloc/plans_bloc/plans_state.dart';
@@ -172,7 +176,7 @@ class _MonAbonnementScreenState extends State<MonAbonnementScreen> {
               return Padding(
                 padding: EdgeInsets.only(
                   bottom: AppConstants.paddingLarge,
-                  top: isActive ? 22 : 0, // ✅ espace pour le badge
+                  top: isActive ? 22 : 0, // âœ… espace pour le badge
                 ),
                 child: _AbonnementCard(
                   plan: plan,
@@ -263,7 +267,7 @@ class _MonAbonnementScreenState extends State<MonAbonnementScreen> {
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(ctx).pop();
-                        // TODO: connecter à l'API pour suspendre
+                        // TODO: connecter Ã  l'API pour suspendre
                       },
                       child: Container(
                         height: 44,
@@ -298,7 +302,10 @@ class _MonAbonnementScreenState extends State<MonAbonnementScreen> {
         borderRadius: BorderRadius.vertical(
             top: Radius.circular(AppConstants.radiusXLarge)),
       ),
-      builder: (_) => _PaiementModal(plan: plan),
+      builder: (_) => BlocProvider(
+        create: (_) => PaymentBloc(),
+        child: _PaiementModal(plan: plan),
+      ),
     );
   }
 }
@@ -338,7 +345,7 @@ class _AbonnementCard extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // ✅ margin top pour laisser de la place au badge
+        // âœ… margin top pour laisser de la place au badge
         Container(
           margin: EdgeInsets.only(top: isActive ? 18 : 0),
           child: AnimatedContainer(
@@ -364,7 +371,7 @@ class _AbonnementCard extends StatelessWidget {
                     ]
                   : [],
             ),
-            // ✅ padding top plus grand quand actif pour ne pas masquer contenu sous le badge
+            // âœ… padding top plus grand quand actif pour ne pas masquer contenu sous le badge
             padding: EdgeInsets.fromLTRB(
               AppConstants.paddingLarge,
               isActive ? 32 : AppConstants.paddingLarge,
@@ -401,7 +408,7 @@ class _AbonnementCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'plans.per_month'.tr(),
+                          plan.billingLabel,
                           style: const TextStyle(
                             fontFamily: AppConstants.fontFamilyInter,
                             fontSize: AppConstants.fontSizeRegular,
@@ -486,37 +493,37 @@ class _AbonnementCard extends StatelessWidget {
           ),
         ),
 
-        // Badge ACTIF centré sur le bord supérieur
-        if (isActive)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: FractionalTranslation(
-                translation: const Offset(0, -0.5),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 40, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.planCheckGreen,
-                    borderRadius:
-                        BorderRadius.circular(AppConstants.radiusRound),
-                  ),
-                  child: Text(
-                    'plans.active_badge'.tr(),
-                    style: const TextStyle(
-                      fontFamily: AppConstants.fontFamilyInter,
-                      fontSize: AppConstants.fontSizeSmall,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.white,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                ),
-              ),
+        // Badge ACTIF centrÃ© sur le bord supÃ©rieur
+        // NOUVEAU
+if (isActive)
+  Positioned(
+    top: 18, // = mÃªme valeur que le margin top de la carte
+    left: 0,
+    right: 0,
+    child: Center(
+      child: Transform.translate(
+        offset: const Offset(0, -10), // ajuste ce chiffre pour monter/descendre
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.planCheckGreen,
+            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+          ),
+          child: Text(
+            'plans.active_badge'.tr(),
+            style: const TextStyle(
+              fontFamily: AppConstants.fontFamilyInter,
+              fontSize: AppConstants.fontSizeSmall,
+              fontWeight: FontWeight.w700,
+              color: AppColors.white,
+              letterSpacing: 1.2,
             ),
           ),
+        ),
+      ),
+    ),
+  ),
+                 
       ],
     );
   }
@@ -571,208 +578,253 @@ class _PaiementModal extends StatefulWidget {
 class _PaiementModalState extends State<_PaiementModal> {
   _PaymentMethod _selected = _PaymentMethod.wave;
 
+  String get _paymentMethodKey {
+    switch (_selected) {
+      case _PaymentMethod.wave:
+        return 'WAVE';
+      case _PaymentMethod.orangeMoney:
+        return 'ORANGE_MONEY';
+      case _PaymentMethod.card:
+        return 'CARD';
+    }
+  }
+
+  void _onConfirm(BuildContext context) {
+    context.read<PaymentBloc>().add(InitPaymentEvent(
+          planId: widget.plan.id,
+          billingPeriod: 'MONTHLY',
+          paymentMethod: _paymentMethodKey,
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).viewPadding.bottom;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: bottom),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: AppConstants.paddingMedium),
-            Center(
-              child: Container(
-                width: AppConstants.modalHandleWidth,
-                height: AppConstants.modalHandleHeight,
-                decoration: BoxDecoration(
-                  color: AppColors.paymentModalHandle,
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.radiusRound),
+    return BlocListener<PaymentBloc, PaymentState>(
+      listener: (context, state) {
+        if (state is PaymentSuccess) {
+          Navigator.of(context).pop();
+          final url = state.response.checkoutUrl;
+          if (url.isNotEmpty) launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+        } else if (state is PaymentError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: AppColors.statusRejected,
+            ),
+          );
+        }
+      },
+      child: Padding(
+        padding: EdgeInsets.only(bottom: bottom),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: AppConstants.paddingMedium),
+              Center(
+                child: Container(
+                  width: AppConstants.modalHandleWidth,
+                  height: AppConstants.modalHandleHeight,
+                  decoration: BoxDecoration(
+                    color: AppColors.paymentModalHandle,
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusRound),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppConstants.paddingLarge),
-            Text(
-              'plans.payment_title'.tr(),
-              style: const TextStyle(
-                fontFamily: AppConstants.fontFamilySofiaSans,
-                fontSize: AppConstants.fontSizeXLarge,
-                fontWeight: FontWeight.w700,
-                color: AppColors.planTitleColor,
+              const SizedBox(height: AppConstants.paddingLarge),
+              Text(
+                'plans.payment_title'.tr(),
+                style: const TextStyle(
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontSize: AppConstants.fontSizeXLarge,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.planTitleColor,
+                ),
               ),
-            ),
-            const SizedBox(height: AppConstants.paddingLarge),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingXLarge),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppConstants.paddingMedium),
-                    decoration: BoxDecoration(
-                      color: AppColors.paymentCardBg,
-                      borderRadius:
-                          BorderRadius.circular(AppConstants.radiusMedium),
-                      border: Border.all(
-                          color: AppColors.paymentCardBorder,
-                          width: AppConstants.borderWidthThin),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: AppColors.paymentIconBg,
-                            borderRadius: BorderRadius.circular(
-                                AppConstants.radiusSmall),
-                          ),
-                          child: Center(
-                            child: SvgPicture.asset(
-                              'assets/icons/badge.svg',
-                              width: AppConstants.iconSizeMedium,
-                              height: AppConstants.iconSizeMedium,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppConstants.paddingMedium),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(widget.plan.name,
-                                  style: const TextStyle(
-                                    fontFamily: AppConstants.fontFamilySofiaSans,
-                                    fontSize: AppConstants.fontSizeMedium,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.paymentCardBorder,
-                                  )),
-                              Text(
-                                widget.plan.billingPeriod == 'YEARLY'
-                                    ? 'plans.billing_yearly'.tr()
-                                    : 'plans.billing_monthly'.tr(),
-                                style: const TextStyle(
-                                  fontFamily: AppConstants.fontFamilyInter,
-                                  fontSize: AppConstants.fontSizeRegular,
-                                  color: AppColors.paymentBillingText,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(widget.plan.formattedPrice,
-                            style: const TextStyle(
-                              fontFamily: AppConstants.fontFamilySofiaSans,
-                              fontSize: AppConstants.fontSizeLarge,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.paymentCardBorder,
-                            )),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.paddingMedium),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(AppConstants.paddingMedium),
-                    decoration: BoxDecoration(
-                      color: AppColors.paymentInfoBg,
-                      borderRadius:
-                          BorderRadius.circular(AppConstants.radiusMedium),
-                    ),
-                    child: Text(
-                      'plans.payment_info'.tr(),
-                      style: const TextStyle(
-                        fontFamily: AppConstants.fontFamilyInter,
-                        fontSize: AppConstants.fontSizeMedium,
-                        color: AppColors.paymentInfoText,
-                        height: 1.5,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.paddingLarge),
-                  _PaymentMethodTile(
-                    label: 'plans.wave'.tr(),
-                    imagePath: 'assets/images/wave.png',
-                    isSelected: _selected == _PaymentMethod.wave,
-                    onTap: () =>
-                        setState(() => _selected = _PaymentMethod.wave),
-                  ),
-                  const SizedBox(height: AppConstants.paddingSmall),
-                  _PaymentMethodTile(
-                    label: 'plans.orange_money'.tr(),
-                    imagePath: 'assets/images/om.png',
-                    isSelected: _selected == _PaymentMethod.orangeMoney,
-                    onTap: () => setState(
-                        () => _selected = _PaymentMethod.orangeMoney),
-                  ),
-                  const SizedBox(height: AppConstants.paddingSmall),
-                  _PaymentMethodTile(
-                    label: 'plans.card'.tr(),
-                    imagePath: 'assets/images/cb.png',
-                    isSelected: _selected == _PaymentMethod.card,
-                    onTap: () =>
-                        setState(() => _selected = _PaymentMethod.card),
-                  ),
-                  const SizedBox(height: AppConstants.paddingXLarge),
-                  SizedBox(
-                    width: double.infinity,
-                    height: AppConstants.buttonHeight,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // TODO: connecter au paiement
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.backArrowColor,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              AppConstants.radiusRound),
-                        ),
+              const SizedBox(height: AppConstants.paddingLarge),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.paddingXLarge),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                      decoration: BoxDecoration(
+                        color: AppColors.paymentCardBg,
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusMedium),
+                        border: Border.all(
+                            color: AppColors.paymentCardBorder,
+                            width: AppConstants.borderWidthThin),
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('plans.confirm_pay'.tr(),
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: AppColors.paymentIconBg,
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusSmall),
+                            ),
+                            child: Center(
+                              child: SvgPicture.asset(
+                                'assets/icons/badge.svg',
+                                width: AppConstants.iconSizeMedium,
+                                height: AppConstants.iconSizeMedium,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: AppConstants.paddingMedium),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(widget.plan.name,
+                                    style: const TextStyle(
+                                      fontFamily: AppConstants.fontFamilySofiaSans,
+                                      fontSize: AppConstants.fontSizeMedium,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.paymentCardBorder,
+                                    )),
+                                Text(
+                                  widget.plan.billingPeriod == 'YEARLY'
+                                      ? 'plans.billing_yearly'.tr()
+                                      : 'plans.billing_monthly'.tr(),
+                                  style: const TextStyle(
+                                    fontFamily: AppConstants.fontFamilyInter,
+                                    fontSize: AppConstants.fontSizeRegular,
+                                    color: AppColors.paymentBillingText,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(widget.plan.formattedPrice,
                               style: const TextStyle(
                                 fontFamily: AppConstants.fontFamilySofiaSans,
-                                color: AppColors.white,
-                                fontWeight: FontWeight.w600,
                                 fontSize: AppConstants.fontSizeLarge,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.paymentCardBorder,
                               )),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward,
-                              color: AppColors.white,
-                              size: AppConstants.iconSizeMedium),
                         ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: AppConstants.paddingMedium),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.lock_outline,
-                          size: AppConstants.iconSizeSmall,
-                          color: AppColors.paymentSecureText),
-                      const SizedBox(width: 4),
-                      Text('plans.secure'.tr(),
-                          style: const TextStyle(
-                            fontFamily: AppConstants.fontFamilyInter,
-                            fontSize: AppConstants.fontSizeRegular,
-                            color: AppColors.paymentSecureText,
-                          )),
-                    ],
-                  ),
-                  const SizedBox(height: AppConstants.paddingXLarge),
-                ],
+                    const SizedBox(height: AppConstants.paddingMedium),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                      decoration: BoxDecoration(
+                        color: AppColors.paymentInfoBg,
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.radiusMedium),
+                      ),
+                      child: Text(
+                        'plans.payment_info'.tr(),
+                        style: const TextStyle(
+                          fontFamily: AppConstants.fontFamilyInter,
+                          fontSize: AppConstants.fontSizeMedium,
+                          color: AppColors.paymentInfoText,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.paddingLarge),
+                    _PaymentMethodTile(
+                      label: 'plans.wave'.tr(),
+                      imagePath: 'assets/images/wave.png',
+                      isSelected: _selected == _PaymentMethod.wave,
+                      onTap: () =>
+                          setState(() => _selected = _PaymentMethod.wave),
+                    ),
+                    const SizedBox(height: AppConstants.paddingSmall),
+                    _PaymentMethodTile(
+                      label: 'plans.orange_money'.tr(),
+                      imagePath: 'assets/images/om.png',
+                      isSelected: _selected == _PaymentMethod.orangeMoney,
+                      onTap: () => setState(
+                          () => _selected = _PaymentMethod.orangeMoney),
+                    ),
+                    const SizedBox(height: AppConstants.paddingSmall),
+                    _PaymentMethodTile(
+                      label: 'plans.card'.tr(),
+                      imagePath: 'assets/images/cb.png',
+                      isSelected: _selected == _PaymentMethod.card,
+                      onTap: () =>
+                          setState(() => _selected = _PaymentMethod.card),
+                    ),
+                    const SizedBox(height: AppConstants.paddingXLarge),
+                    BlocBuilder<PaymentBloc, PaymentState>(
+                      builder: (context, state) {
+                        final isLoading = state is PaymentLoading;
+                        return SizedBox(
+                          width: double.infinity,
+                          height: AppConstants.buttonHeight,
+                          child: ElevatedButton(
+                            onPressed: isLoading ? null : () => _onConfirm(context),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.backArrowColor,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    AppConstants.radiusRound),
+                              ),
+                            ),
+                            child: isLoading
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                        color: AppColors.white, strokeWidth: 2),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text('plans.confirm_pay'.tr(),
+                                          style: const TextStyle(
+                                            fontFamily:
+                                                AppConstants.fontFamilySofiaSans,
+                                            color: AppColors.white,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: AppConstants.fontSizeLarge,
+                                          )),
+                                      const SizedBox(width: 8),
+                                      const Icon(Icons.arrow_forward,
+                                          color: AppColors.white,
+                                          size: AppConstants.iconSizeMedium),
+                                    ],
+                                  ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: AppConstants.paddingMedium),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.lock_outline,
+                            size: AppConstants.iconSizeSmall,
+                            color: AppColors.paymentSecureText),
+                        const SizedBox(width: 4),
+                        Text('plans.secure'.tr(),
+                            style: const TextStyle(
+                              fontFamily: AppConstants.fontFamilyInter,
+                              fontSize: AppConstants.fontSizeRegular,
+                              color: AppColors.paymentSecureText,
+                            )),
+                      ],
+                    ),
+                    const SizedBox(height: AppConstants.paddingXLarge),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -862,3 +914,5 @@ class _PaymentMethodTile extends StatelessWidget {
     );
   }
 }
+
+

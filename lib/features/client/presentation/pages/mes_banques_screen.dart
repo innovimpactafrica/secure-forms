@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -206,6 +205,7 @@ class _MesBanquesScreenState extends State<MesBanquesScreen> {
 
   Widget _buildBody() {
     return BlocBuilder<BanquesBloc, BanquesState>(
+      buildWhen: (previous, current) => current is BanquesLoaded || current is BanquesLoading || current is BanquesError,
       builder: (context, state) {
         if (state is BanquesLoading) {
           return const Center(
@@ -368,29 +368,20 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
   String? _selectedBanqueNom;
   String? _selectedBanqueId;
   bool _showSuggestions = false;
-  List<BanqueModel> _banquesFiltrees = [];
+  List<BanqueModel> _allOrganisations = [];
+  List<BanqueModel> _organisationsFiltrees = [];
 
   @override
   void initState() {
     super.initState();
-    final state = context.read<BanquesBloc>().state;
-    if (state is BanquesLoaded) {
-      _banquesFiltrees = List.from(state.banques);
-      debugPrint(
-          '[AjouterBanqueModal] initState: ${_banquesFiltrees.length} banques disponibles');
-    } else {
-      debugPrint(
-          '[AjouterBanqueModal] initState: BLoC pas en BanquesLoaded (${state.runtimeType})');
-    }
+    context.read<BanquesBloc>().add(const LoadOrganisationsForSelectionEvent());
   }
 
-  void _filterBanques(String query) {
-    final state = context.read<BanquesBloc>().state;
-    final all = state is BanquesLoaded ? state.banques : <BanqueModel>[];
+  void _filterOrganisations(String query) {
     setState(() {
-      _banquesFiltrees = query.isEmpty
-          ? all
-          : all
+      _organisationsFiltrees = query.isEmpty
+          ? List.from(_allOrganisations)
+          : _allOrganisations
               .where((b) => b.nom.toLowerCase().contains(query.toLowerCase()))
               .toList();
     });
@@ -415,138 +406,150 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
     final bottom = MediaQuery.of(context).viewInsets.bottom;
     final safePadding = MediaQuery.of(context).viewPadding.bottom;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        AppConstants.paddingXLarge,
-        AppConstants.paddingMedium,
-        AppConstants.paddingXLarge,
-        bottom + safePadding + AppConstants.paddingXLarge,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Handle
-            Center(
-              child: Container(
-                width: AppConstants.modalHandleWidth,
-                height: AppConstants.modalHandleHeight,
-                decoration: BoxDecoration(
-                  color: AppColors.modalHandle,
-                  borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppConstants.paddingLarge),
-
-            // Titre + fermer
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'banques.add_title'.tr(),
-                  style: const TextStyle(
-                    fontFamily: AppConstants.fontFamilyInter,
-                    fontSize: AppConstants.fontSizeXXLarge,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textDark,
+    return BlocListener<BanquesBloc, BanquesState>(
+      listener: (context, state) {
+        if (state is OrganisationsForSelectionLoaded) {
+          setState(() {
+            _allOrganisations = state.organisations;
+            _organisationsFiltrees = List.from(state.organisations);
+          });
+        }
+      },
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          AppConstants.paddingXLarge,
+          AppConstants.paddingMedium,
+          AppConstants.paddingXLarge,
+          bottom + safePadding + AppConstants.paddingXLarge,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  width: AppConstants.modalHandleWidth,
+                  height: AppConstants.modalHandleHeight,
+                  decoration: BoxDecoration(
+                    color: AppColors.modalHandle,
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusRound),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const Icon(Icons.close,
-                      size: AppConstants.iconSizeLarge,
-                      color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppConstants.paddingXLarge),
+              ),
+              const SizedBox(height: AppConstants.paddingLarge),
 
-            // Champ Banque
-            _buildLabel('banques.field_banque'.tr()),
-            const SizedBox(height: AppConstants.paddingSmall),
-            _buildSearchBanqueField(),
-            // Suggestions — visibles quand le champ est focusé et aucune banque sélectionnée
-            if (_showSuggestions && _selectedBanqueNom == null)
-              _buildSuggestions(),
-            const SizedBox(height: AppConstants.paddingLarge),
-
-            // Type de compte
-            _buildLabel('banques.field_type_compte'.tr()),
-            const SizedBox(height: AppConstants.paddingSmall),
-            _buildTypeCompteDropdown(),
-            const SizedBox(height: AppConstants.paddingLarge),
-
-            // Numéro de compte
-            _buildLabel('banques.field_numero_compte'.tr()),
-            const SizedBox(height: AppConstants.paddingSmall),
-            _buildTextField(
-              controller: _numeroCompteController,
-              hint: 'banques.hint_numero_compte'.tr(),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: AppConstants.paddingLarge),
-
-            // Nom du titulaire
-            _buildLabel('banques.field_titulaire'.tr()),
-            const SizedBox(height: AppConstants.paddingSmall),
-            _buildTextField(
-              controller: _titulaireController,
-              hint: 'banques.hint_titulaire'.tr(),
-            ),
-            const SizedBox(height: AppConstants.paddingXLarge),
-
-            // Bouton Enregistrer
-            GestureDetector(
-              onTap: _onEnregistrer,
-              child: Container(
-                height: AppConstants.buttonHeight,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryDark,
-                  borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-                ),
-                child: Center(
-                  child: Text(
-                    'banques.save'.tr(),
+              // Titre + fermer
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'banques.add_title'.tr(),
                     style: const TextStyle(
                       fontFamily: AppConstants.fontFamilyInter,
-                      fontSize: AppConstants.fontSizeLarge,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.white,
+                      fontSize: AppConstants.fontSizeXXLarge,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: const Icon(Icons.close,
+                        size: AppConstants.iconSizeLarge,
+                        color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppConstants.paddingXLarge),
+
+              // Champ Banque
+              _buildLabel('banques.field_banque'.tr()),
+              const SizedBox(height: AppConstants.paddingSmall),
+              _buildSearchBanqueField(),
+              if (_showSuggestions && _selectedBanqueNom == null)
+                _buildSuggestions(),
+              const SizedBox(height: AppConstants.paddingLarge),
+
+              // Type de compte
+              _buildLabel('banques.field_type_compte'.tr()),
+              const SizedBox(height: AppConstants.paddingSmall),
+              _buildTypeCompteDropdown(),
+              const SizedBox(height: AppConstants.paddingLarge),
+
+              // Numéro de compte
+              _buildLabel('banques.field_numero_compte'.tr()),
+              const SizedBox(height: AppConstants.paddingSmall),
+              _buildTextField(
+                controller: _numeroCompteController,
+                hint: 'banques.hint_numero_compte'.tr(),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: AppConstants.paddingLarge),
+
+              // Nom du titulaire
+              _buildLabel('banques.field_titulaire'.tr()),
+              const SizedBox(height: AppConstants.paddingSmall),
+              _buildTextField(
+                controller: _titulaireController,
+                hint: 'banques.hint_titulaire'.tr(),
+              ),
+              const SizedBox(height: AppConstants.paddingXLarge),
+
+              // Bouton Enregistrer
+              GestureDetector(
+                onTap: _onEnregistrer,
+                child: Container(
+                  height: AppConstants.buttonHeight,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryDark,
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusRound),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'banques.save'.tr(),
+                      style: const TextStyle(
+                        fontFamily: AppConstants.fontFamilyInter,
+                        fontSize: AppConstants.fontSizeLarge,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.white,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppConstants.paddingMedium),
+              const SizedBox(height: AppConstants.paddingMedium),
 
-            // Bouton Annuler
-            GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: Container(
-                height: AppConstants.buttonHeight,
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-                  border: Border.all(
-                      color: AppColors.primaryDark,
-                      width: AppConstants.borderWidthThin),
-                ),
-                child: Center(
-                  child: Text(
-                    'banques.cancel'.tr(),
-                    style: const TextStyle(
-                      fontFamily: AppConstants.fontFamilyInter,
-                      fontSize: AppConstants.fontSizeLarge,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primaryDark,
+              // Bouton Annuler
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  height: AppConstants.buttonHeight,
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusRound),
+                    border: Border.all(
+                        color: AppColors.primaryDark,
+                        width: AppConstants.borderWidthThin),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'banques.cancel'.tr(),
+                      style: const TextStyle(
+                        fontFamily: AppConstants.fontFamilyInter,
+                        fontSize: AppConstants.fontSizeLarge,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryDark,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -582,17 +585,14 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
           Expanded(
             child: TextField(
               controller: _searchBanqueController,
-              onTap: () {
-                setState(() => _showSuggestions = true);
-              },
+              onTap: () => setState(() => _showSuggestions = true),
               onChanged: (q) {
                 setState(() {
                   _selectedBanqueNom = null;
                   _selectedBanqueId = null;
                   _showSuggestions = true;
                 });
-                debugPrint('[AjouterBanqueModal] Recherche banque: "$q"');
-                _filterBanques(q);
+                _filterOrganisations(q);
               },
               style: const TextStyle(
                   fontSize: AppConstants.fontSizeMedium,
@@ -608,16 +608,49 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
               ),
             ),
           ),
-          const SizedBox(width: AppConstants.paddingMedium),
+          if (_selectedBanqueNom != null)
+            GestureDetector(
+              onTap: () => setState(() {
+                _selectedBanqueNom = null;
+                _selectedBanqueId = null;
+                _searchBanqueController.clear();
+                _showSuggestions = true;
+                _organisationsFiltrees = List.from(_allOrganisations);
+              }),
+              child: const Padding(
+                padding: EdgeInsets.only(right: AppConstants.paddingMedium),
+                child: Icon(Icons.close,
+                    size: AppConstants.iconSizeSmall,
+                    color: AppColors.textSecondary),
+              ),
+            ),
+          const SizedBox(width: AppConstants.paddingSmall),
         ],
       ),
     );
   }
 
   Widget _buildSuggestions() {
-    if (_banquesFiltrees.isEmpty) return const SizedBox.shrink();
+    if (_organisationsFiltrees.isEmpty) {
+      return Container(
+        margin: const EdgeInsets.only(top: 4),
+        padding: const EdgeInsets.all(AppConstants.paddingMedium),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+          border: Border.all(color: AppColors.borderGray),
+        ),
+        child: Text(
+          'banques.no_banques'.tr(),
+          style: const TextStyle(
+              fontSize: AppConstants.fontSizeMedium,
+              color: AppColors.textSecondary),
+        ),
+      );
+    }
     return Container(
       margin: const EdgeInsets.only(top: 4),
+      constraints: const BoxConstraints(maxHeight: 220),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
@@ -629,38 +662,88 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
               offset: Offset(0, 2)),
         ],
       ),
-      child: Column(
-        children: _banquesFiltrees.map((banque) {
+      child: ListView.builder(
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        itemCount: _organisationsFiltrees.length,
+        itemBuilder: (context, index) {
+          final org = _organisationsFiltrees[index];
           return InkWell(
-            onTap: () {
-              setState(() {
-                _selectedBanqueNom = banque.nom;
-                _selectedBanqueId = banque.id;
-                _searchBanqueController.text = banque.nom;
-                _showSuggestions = false;
-              });
-            },
+            onTap: () => setState(() {
+              _selectedBanqueNom = org.nom;
+              _selectedBanqueId = org.id;
+              _searchBanqueController.text = org.nom;
+              _showSuggestions = false;
+            }),
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingLarge,
-                  vertical: AppConstants.paddingMedium),
+                  horizontal: AppConstants.paddingMedium,
+                  vertical: AppConstants.paddingSmall),
               child: Row(
                 children: [
-                  const Icon(Icons.account_balance,
-                      size: AppConstants.iconSizeSmall,
-                      color: AppColors.textSecondary),
-                  const SizedBox(width: AppConstants.paddingSmall),
-                  Text(
-                    banque.nom,
-                    style: const TextStyle(
-                        fontSize: AppConstants.fontSizeMedium,
-                        color: AppColors.textDark),
+                  // Logo organisation
+                  ClipRRect(
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusSmall),
+                    child: org.logoUrl != null
+                        ? AuthImage(
+                            url: org.logoUrl!,
+                            width: 36,
+                            height: 36,
+                            fit: BoxFit.cover,
+                            fallback: () => _buildOrgFallback(org.nom),
+                          )
+                        : _buildOrgFallback(org.nom),
+                  ),
+                  const SizedBox(width: AppConstants.paddingMedium),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          org.nom,
+                          style: const TextStyle(
+                            fontSize: AppConstants.fontSizeMedium,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                        Text(
+                          org.description,
+                          style: const TextStyle(
+                            fontSize: AppConstants.fontSizeRegular,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
           );
-        }).toList(),
+        },
+      ),
+    );
+  }
+
+  Widget _buildOrgFallback(String nom) {
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: AppColors.grayLight,
+        borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
+      ),
+      child: Center(
+        child: Text(
+          nom.isNotEmpty ? nom[0].toUpperCase() : '?',
+          style: const TextStyle(
+            fontSize: AppConstants.fontSizeMedium,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textSecondary,
+          ),
+        ),
       ),
     );
   }
@@ -728,8 +811,8 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
               color: AppColors.textSecondary),
           border: InputBorder.none,
           isDense: false,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: AppConstants.paddingLarge),
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.paddingLarge),
         ),
       ),
     );
@@ -738,40 +821,19 @@ class _AjouterBanqueModalState extends State<_AjouterBanqueModal> {
   void _onEnregistrer() {
     final numero = _numeroCompteController.text.trim();
     final titulaire = _titulaireController.text.trim();
-    final banqueNom = _selectedBanqueNom ?? _searchBanqueController.text.trim();
+    final banqueNom =
+        _selectedBanqueNom ?? _searchBanqueController.text.trim();
     var organisationId = _selectedBanqueId ?? '';
 
-    // Si pas sélectionné depuis la liste, chercher par nom dans le BLoC
     if (organisationId.isEmpty && banqueNom.isNotEmpty) {
-      final state = context.read<BanquesBloc>().state;
-      if (state is BanquesLoaded) {
-        final found = state.banques
-            .where((b) => b.nom.toLowerCase() == banqueNom.toLowerCase())
-            .firstOrNull;
-        organisationId = found?.id ?? '';
-        debugPrint(
-            '[AjouterBanqueModal] Recherche par nom "$banqueNom" -> id=$organisationId');
-      }
+      final found = _allOrganisations
+          .where((b) => b.nom.toLowerCase() == banqueNom.toLowerCase())
+          .firstOrNull;
+      organisationId = found?.id ?? '';
     }
 
-    debugPrint(
-        '[AjouterBanqueModal] banqueNom=$banqueNom | organisationId=$organisationId | numero=$numero | titulaire=$titulaire');
+    if (banqueNom.isEmpty || numero.isEmpty || organisationId.isEmpty) return;
 
-    if (banqueNom.isEmpty) {
-      debugPrint('[AjouterBanqueModal] BLOQUE: banqueNom vide');
-      return;
-    }
-    if (numero.isEmpty) {
-      debugPrint('[AjouterBanqueModal] BLOQUE: numero vide');
-      return;
-    }
-    if (organisationId.isEmpty) {
-      debugPrint(
-          '[AjouterBanqueModal] BLOQUE: organisationId vide — banque introuvable dans la liste');
-      return;
-    }
-
-    debugPrint('[AjouterBanqueModal] Dispatch AjouterBanqueEvent');
     context.read<BanquesBloc>().add(AjouterBanqueEvent(
           organisationId: organisationId,
           accountNumber: numero,
