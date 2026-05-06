@@ -24,6 +24,7 @@ import 'package:quick_forms/features/home/domain/bloc/home_event.dart';
 import 'package:quick_forms/core/services/fcm_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:convert';
+import 'package:quick_forms/features/client/data/services/subscription_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -100,17 +101,13 @@ class _LoginScreenState extends State<LoginScreen>
             userBloc.add(ResetUserEvent());
             notifBloc.add(const ResetNotificationsEvent());
             profileBloc.add(const ResetProfileEvent());
-            // Naviguer IMMEDIATEMENT
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              AppRoutes.clientHome,
-              (route) => false,
+            // Vérifier l'abonnement AVANT de naviguer
+            _checkSubscriptionAndNavigate(
+              context,
+              accessToken: state.accessToken,
+              userBloc: userBloc,
+              notifBloc: notifBloc,
             );
-            // Charger les données du nouvel utilisateur en arrière-plan
-            Future.microtask(() {
-              userBloc.add(LoadUserProfile(state.accessToken));
-              notifBloc.add(const LoadNotificationsEvent());
-              _sendFcmTokenAfterLogin();
-            });
           } else if (state is LoginIncomplete) {
             _showIncompleteDialog(context, state.email);
           } else if (state is AuthFailure) {
@@ -534,6 +531,45 @@ class _LoginScreenState extends State<LoginScreen>
         },
       ),
     );
+  }
+
+  Future<void> _checkSubscriptionAndNavigate(
+    BuildContext context, {
+    required String accessToken,
+    required UserBloc userBloc,
+    required NotificationsBloc notifBloc,
+  }) async {
+    try {
+      final sub = await SubscriptionService()
+          .getEffectiveSubscription(accessToken: accessToken);
+      debugPrint('[LoginScreen] Abonnement: isActive=${sub?.isActive} planCode=${sub?.planCode}');
+      if (!mounted) return;
+      userBloc.add(LoadUserProfile(accessToken));
+      notifBloc.add(const LoadNotificationsEvent());
+      _sendFcmTokenAfterLogin();
+      if (sub == null || !sub.isActive) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          AppRoutes.activationRequise,
+          (route) => false,
+        );
+      } else {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          AppRoutes.clientHome,
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      debugPrint('[LoginScreen] Erreur vérif abonnement: $e');
+      if (!mounted) return;
+      // En cas d'erreur réseau, on laisse passer vers l'accueil
+      userBloc.add(LoadUserProfile(accessToken));
+      notifBloc.add(const LoadNotificationsEvent());
+      _sendFcmTokenAfterLogin();
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        AppRoutes.clientHome,
+        (route) => false,
+      );
+    }
   }
 
   // 👇 NOUVEAU — Récupère le token FCM et l'envoie au backend

@@ -89,7 +89,7 @@ class _BottomNavState extends State<_BottomNav>
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 350),
+      duration: const Duration(milliseconds: 500),
     );
     _anim = Tween<double>(
       begin: widget.currentIndex.toDouble(),
@@ -161,7 +161,13 @@ class _BottomNavState extends State<_BottomNav>
                   height: _navHeight + _circleSize / 2,
                   child: Row(
                     children: List.generate(itemCount, (i) {
-                      final isActive = widget.currentIndex == i;
+                      // Le cercle suit la position animée (pas currentIndex direct)
+                      final animIndex = _anim.value.round();
+                      // Pour éviter les stops intermédiaires, on utilise
+                      // la destination finale pendant l'animation
+                      final isActive = _ctrl.isAnimating
+                          ? widget.currentIndex == i
+                          : animIndex == i;
                       final color = isActive
                           ? AppColors.primaryDark
                           : AppColors.greyShade500;

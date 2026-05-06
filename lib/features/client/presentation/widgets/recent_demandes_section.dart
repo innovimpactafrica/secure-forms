@@ -36,6 +36,7 @@ class _SearchBarSectionState extends State<SearchBarSection> {
 
   @override
   Widget build(BuildContext context) {
+    context.locale; // force rebuild on locale change
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
       child: Container(
@@ -97,6 +98,7 @@ class RecentDemandesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.locale; // force rebuild on locale change
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       child: Column(

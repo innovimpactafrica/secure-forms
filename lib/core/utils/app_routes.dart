@@ -30,6 +30,9 @@ class AppRoutes {
   // Client - Nouvelles routes (home screen)
   static const String clientCompleteProfile = '/client-complete-profile';
   static const String clientDemandeDetail = '/client-demande-detail';
+  static const String activationRequise = '/activation-requise';
+  static const String plans = '/plans';
+  static const String monAbonnement = '/mon-abonnement';
 
   // Nouvelle demande (12 étapes)
   static const String nouvelleDemandeStep1 = '/nouvelle-demande-step-1';

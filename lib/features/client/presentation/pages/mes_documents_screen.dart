@@ -2702,6 +2702,11 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
         backgroundColor: Colors.black,
         foregroundColor: AppColors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: Text(
           widget.label,
           style: const TextStyle(

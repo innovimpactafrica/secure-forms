@@ -12,6 +12,7 @@ import 'package:quick_forms/features/client/domain/bloc/notifications_event.dart
 import 'package:quick_forms/features/client/domain/bloc/profile_event.dart';
 import 'package:quick_forms/core/widgets/user_avatar.dart';
 import 'package:quick_forms/features/client/domain/bloc/profile_bloc.dart';
+import 'package:quick_forms/core/utils/app_routes.dart';
 import 'package:quick_forms/features/client/presentation/pages/mes_archives_screen.dart';
 import 'package:quick_forms/features/client/presentation/pages/mes_banques_screen.dart';
 import 'package:quick_forms/features/client/presentation/pages/notifications_screen.dart';
@@ -126,14 +127,15 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                           builder: (_) => const MesBanquesScreen(),
                         ),
                       ),
+                      onAbonnementTap: () => Navigator.of(context)
+                          .pushNamed(AppRoutes.monAbonnement),
+                      onLogoutTap: () => _showDeconnexionModal(context),
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(
+                        height: MediaQuery.of(context).viewPadding.bottom + 16),
                   ],
                 ),
               ),
-            ),
-            _LogoutButton(
-              onTap: () => _showDeconnexionModal(context),
             ),
           ],
         ),
@@ -404,29 +406,25 @@ class _ProfileHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () {
-              if (fromHome && onGoHome != null) {
-                onGoHome!();
-              } else {
-                Navigator.of(context).pop();
-              }
-            },
-            child: Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: AppColors.primaryDark,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: AppColors.white,
-                size: 18,
+          if (!fromHome) ...[
+            GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryDark,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.arrow_back,
+                  color: AppColors.white,
+                  size: 18,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 16),
+            const SizedBox(width: 16),
+          ],
           Text(
             'profil.my_account'.tr(),
             style: TextStyle(
@@ -490,6 +488,8 @@ class _MenuSection extends StatelessWidget {
   final VoidCallback onArchivesTap;
   final VoidCallback onNotifsTap;
   final VoidCallback onBanquesTap;
+  final VoidCallback onAbonnementTap;
+  final VoidCallback onLogoutTap;
 
   const _MenuSection({
     required this.selectedLanguage,
@@ -500,10 +500,13 @@ class _MenuSection extends StatelessWidget {
     required this.onArchivesTap,
     required this.onNotifsTap,
     required this.onBanquesTap,
+    required this.onAbonnementTap,
+    required this.onLogoutTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    context.locale; // force rebuild on locale change
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -524,6 +527,11 @@ class _MenuSection extends StatelessWidget {
             onTap: onBanquesTap,
           ),
           _MenuItem(
+            iconPath: 'assets/icons/subscription.svg',
+            title: 'profil.subscriptions'.tr(),
+            onTap: onAbonnementTap,
+          ),
+          _MenuItem(
             iconPath: 'assets/icons/archive.svg',
             title: 'profil.archives'.tr(),
             onTap: () => Navigator.push(
@@ -539,6 +547,34 @@ class _MenuSection extends StatelessWidget {
           _LanguageMenuItem(
             selectedLanguage: selectedLanguage,
             onTap: onLanguageTap,
+          ),
+          // Bouton Se déconnecter dans le scroll
+          GestureDetector(
+            onTap: onLogoutTap,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    'assets/icons/logout.svg',
+                    width: AppConstants.iconSizeLarge,
+                    height: AppConstants.iconSizeLarge,
+                  ),
+                  const SizedBox(width: AppConstants.paddingLarge),
+                  Text(
+                    'profil.logout'.tr(),
+                    style: const TextStyle(
+                      fontFamily: AppConstants.fontFamilySofiaSans,
+                      fontWeight: FontWeight.w500,
+                      fontSize: AppConstants.fontSizeLarge,
+                      color: AppColors.backArrowColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -666,57 +702,4 @@ class _LanguageMenuItem extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────
-// LOGOUT BUTTON
-// ─────────────────────────────────────────────────────────────────
-class _LogoutButton extends StatelessWidget {
-  final VoidCallback onTap;
 
-  const _LogoutButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        8,
-        20,
-        MediaQuery.of(context).viewPadding.bottom + 16,
-      ),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          height: AppConstants.logoutButtonHeight,
-          decoration: BoxDecoration(
-            color: AppColors.statusRejected.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(AppConstants.radiusRound),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset(
-                'assets/icons/bi_box-arrow-left.svg',
-                width: AppConstants.iconSizeLarge,
-                height: AppConstants.iconSizeLarge,
-                colorFilter: ColorFilter.mode(
-                  AppColors.statusRejected,
-                  BlendMode.srcIn,
-                ),
-              ),
-              const SizedBox(width: AppConstants.paddingMedium),
-              Text(
-                'profil.logout'.tr(),
-                style: TextStyle(
-                  fontFamily: AppConstants.fontFamilyInter,
-                  fontWeight: FontWeight.w500,
-                  fontSize: AppConstants.fontSizeLarge,
-                  color: AppColors.statusRejected,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

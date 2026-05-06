@@ -243,25 +243,21 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () {
-              if (widget.fromHome && widget.onGoHome != null) {
-                widget.onGoHome!();
-              } else {
-                Navigator.of(context).pop();
-              }
-            },
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                  color: AppColors.primaryDark,
-                  borderRadius: BorderRadius.circular(10)),
-              child: const Icon(Icons.arrow_back,
-                  color: AppColors.white, size: 20),
+          if (!widget.fromHome) ...[
+            GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                    color: AppColors.primaryDark,
+                    borderRadius: BorderRadius.circular(10)),
+                child: const Icon(Icons.arrow_back,
+                    color: AppColors.white, size: 20),
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
+            const SizedBox(width: 12),
+          ],
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -287,16 +283,16 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
-        height: 44,
+        height: 52,
         decoration: BoxDecoration(
             color: AppColors.white,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(26),
             border: Border.all(color: AppColors.borderDivider)),
         child: Row(
           children: [
-            const SizedBox(width: 12),
-            const Icon(Icons.search, size: 20, color: AppColors.textSecondary),
-            const SizedBox(width: 8),
+            const SizedBox(width: 14),
+            const Icon(Icons.search, size: 22, color: AppColors.textSecondary),
+            const SizedBox(width: 10),
             Expanded(
               child: TextField(
                 controller: _searchController,
@@ -309,6 +305,25 @@ class _MesArchivesScreenState extends State<MesArchivesScreen> {
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                FocusScope.of(context).unfocus();
+                setState(() {});
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryDark,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.arrow_forward,
+                      color: AppColors.white, size: 18),
                 ),
               ),
             ),

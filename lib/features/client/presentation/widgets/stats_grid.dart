@@ -12,6 +12,7 @@ class StatsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.locale; // force rebuild on locale change
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
         final stats = state is HomeStatisticsLoaded ? state.statistics : null;

@@ -33,6 +33,9 @@ import 'features/client/presentation/pages/detail_demande/detail_ouverture_compt
 import 'features/client/presentation/pages/client_demande_detail_screen.dart';
 import 'features/client/presentation/pages/detail_demande/detail_ouverture_compte_brouillon_screen.dart';
 import 'features/client/presentation/pages/client_profil_screen.dart';
+import 'features/auth/presentation/pages/activation_requise_screen.dart';
+import 'features/auth/presentation/pages/plans_screen.dart';
+import 'features/auth/presentation/pages/mon_abonnement_screen.dart';
 import 'features/client/presentation/pages/detail_demande/detail_ouverture_compte_continuer_screen.dart';
 import 'features/auth/presentation/pages/resume_registration_screen.dart';
 import 'features/auth/presentation/pages/resume_registration_otp_screen.dart';
@@ -378,6 +381,9 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
           AppRoutes.detailOuvertureCompteBrouillon: (context) =>
               const DetailOuvertureCompteBrouillonScreen(),
           AppRoutes.clientProfil: (context) => const ClientProfilScreen(),
+          AppRoutes.activationRequise: (context) => const ActivationRequiseScreen(),
+          AppRoutes.plans: (context) => const PlansScreen(),
+          AppRoutes.monAbonnement: (context) => const MonAbonnementScreen(),
           '/detail-ouverture-compte-continuer': (context) =>
               const DetailOuvertureCompteContinuerScreen(),
           AppRoutes.clientDemandeDetail: (context) =>

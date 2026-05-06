@@ -897,6 +897,7 @@ class _MultiDocViewerPageState extends State<_MultiDocViewerPage> {
                 label: widget.label,
                 url: url,
                 useToken: useToken,
+                showAppBar: false,
               );
             },
           ),
@@ -947,6 +948,7 @@ class _DocumentViewerPage extends StatefulWidget {
   final bool useToken;
   final String? requestId;
   final int formIndex; // index dans submittedForms pour le fallback
+  final bool showAppBar;
 
   const _DocumentViewerPage({
     required this.label,
@@ -954,6 +956,7 @@ class _DocumentViewerPage extends StatefulWidget {
     required this.useToken,
     this.requestId,
     this.formIndex = 0,
+    this.showAppBar = true,
   });
 
   @override
@@ -1150,21 +1153,23 @@ class _DocumentViewerPageState extends State<_DocumentViewerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: AppColors.white,
-        elevation: 0,
-        title: Text(
-          widget.label,
-          style: const TextStyle(
-            fontFamily: AppConstants.fontFamilySofiaSans,
-            fontWeight: FontWeight.w600,
-            fontSize: AppConstants.fontSizeLarge,
-            color: AppColors.white,
-          ),
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
+      appBar: widget.showAppBar
+          ? AppBar(
+              backgroundColor: Colors.black,
+              foregroundColor: AppColors.white,
+              elevation: 0,
+              title: Text(
+                widget.label,
+                style: const TextStyle(
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontWeight: FontWeight.w600,
+                  fontSize: AppConstants.fontSizeLarge,
+                  color: AppColors.white,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            )
+          : null,
       body: _loading
           ? const Center(
               child: CircularProgressIndicator(color: AppColors.primary))

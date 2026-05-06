@@ -12,6 +12,7 @@ import 'package:quick_forms/features/client/domain/bloc/notifications_bloc.dart'
 import 'package:quick_forms/features/client/domain/bloc/notifications_event.dart';
 import 'package:quick_forms/core/utils/user_session.dart';
 import 'package:quick_forms/core/services/fcm_service.dart';
+import 'package:quick_forms/features/client/data/services/subscription_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -120,7 +121,20 @@ class _SplashScreenState extends State<SplashScreen>
     final notifBloc = context.read<NotificationsBloc>();
     final navigator = Navigator.of(context);
 
-    navigator.pushReplacementNamed(AppRoutes.clientHome);
+    // Vérifier l'abonnement avant de naviguer
+    try {
+      final sub = await SubscriptionService()
+          .getEffectiveSubscription(accessToken: token);
+      if (!mounted) return;
+      if (sub == null || !sub.isActive) {
+        navigator.pushReplacementNamed(AppRoutes.activationRequise);
+      } else {
+        navigator.pushReplacementNamed(AppRoutes.clientHome);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      navigator.pushReplacementNamed(AppRoutes.clientHome);
+    }
 
     Future.microtask(() {
       notifBloc.add(const LoadNotificationsEvent());

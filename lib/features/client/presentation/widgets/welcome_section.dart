@@ -7,15 +7,23 @@ class WelcomeSection extends StatelessWidget {
   final String firstName;
   const WelcomeSection({super.key, required this.firstName});
 
+  String _greeting() {
+    final hour = DateTime.now().hour;
+    if (hour >= 18 || hour < 5) {
+      return 'home.good_evening'.tr();
+    }
+    return 'home.hello'.tr();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 2, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${'home.hello'.tr()} ${firstName.isNotEmpty ? firstName : ''},',
+            '${_greeting()} ${firstName.isNotEmpty ? firstName : ''},',
             style: TextStyle(
               fontFamily: AppConstants.fontFamilySofiaSans,
               fontWeight: FontWeight.w700,

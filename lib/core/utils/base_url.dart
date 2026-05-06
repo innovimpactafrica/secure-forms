@@ -47,6 +47,9 @@ class BaseUrl {
   static const String getNotifications   = '$currentBaseUrl/clients/notifications';
   static const String getOrganisations   = '$currentBaseUrl/organisations';
   static const String getOrgPreferences  = '$currentBaseUrl/clients/me/organization-preferences';
+  static const String getSubscriptionEffective = '$currentBaseUrl/subscriptions/me/effective';
+  static const String getPlans = '$currentBaseUrl/subscriptions/plans';
+  static String getPlanServices(String planId) => '$currentBaseUrl/subscriptions/plans/$planId/services';
   static const String markNotificationsRead    = '$currentBaseUrl/clients/notifications/mark-read';
   static const String markAllNotificationsRead = '$currentBaseUrl/clients/notifications/mark-all-read';
   // ========== FCM ENDPOINTS ==========  👈 NOUVEAU

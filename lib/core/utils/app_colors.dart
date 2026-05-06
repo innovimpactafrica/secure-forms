@@ -154,4 +154,22 @@ class AppColors {
   static const Color banqueFieldBorder = Color(0xFF97392D);
   static const Color banqueLockIcon = Color(0xFF90362E);
   static const Color compteVerifyBg = Color(0xFF10B981);
+
+  // Abonnements / Plans
+  static const Color planTitleColor = Color(0xFF1C1B1B);
+  static const Color planCardSelectedShadow = Color(0x1F97392D);
+  static const Color planCheckGreen = Color(0xFF22C55E);
+
+  // Paiement modal
+  static const Color paymentModalHandle = Color(0xFFE5E2E1);
+  static const Color paymentCardBg = Color(0x0D97392D);
+  static const Color paymentCardBorder = Color(0xFF97392D);
+  static const Color paymentIconBg = Color(0xFF97392D);
+  static const Color paymentInfoBg = Color(0x1AF39C12);
+  static const Color paymentInfoText = Color(0xFF333333);
+  static const Color paymentBillingText = Color(0x80000000);
+  static const Color paymentMethodSelectedBg = Color(0x0D97392D);
+  static const Color paymentMethodUnselectedBorder = Color(0x4D6B7280);
+  static const Color paymentMethodUnselectedCircle = Color(0xFFE2BFB0);
+  static const Color paymentSecureText = Color(0xFF6B7280);
 }

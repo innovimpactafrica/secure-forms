@@ -94,15 +94,9 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (widget.fromHome || !widget.fromHome) ...[
+          if (!widget.fromHome) ...[
             GestureDetector(
-              onTap: () {
-                if (widget.fromHome && widget.onGoHome != null) {
-                  widget.onGoHome!();
-                } else {
-                  Navigator.of(context).pop();
-                }
-              },
+              onTap: () => Navigator.of(context).pop(),
               child: Container(
                 width: 40,
                 height: 40,
@@ -147,7 +141,7 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
-        height: 44,
+        height: 52,
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(26),
@@ -155,9 +149,9 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
         ),
         child: Row(
           children: [
-            const SizedBox(width: 12),
-            const Icon(Icons.search, size: 20, color: AppColors.textSecondary),
-            const SizedBox(width: 8),
+            const SizedBox(width: 14),
+            const Icon(Icons.search, size: 22, color: AppColors.textSecondary),
+            const SizedBox(width: 10),
             Expanded(
               child: TextField(
                 controller: _searchController,
@@ -173,6 +167,25 @@ class _ClientDemandesScreenState extends State<ClientDemandesScreen> {
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                FocusScope.of(context).unfocus();
+                _load();
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryDark,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.arrow_forward,
+                      color: AppColors.white, size: 18),
                 ),
               ),
             ),
