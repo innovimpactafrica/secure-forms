@@ -102,12 +102,14 @@ class _DetailBanqueScreenState extends State<DetailBanqueScreen> {
               ],
             ),
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _showAjouterCompteModal(context),
-            backgroundColor: AppColors.backArrowColor,
-            shape: const CircleBorder(),
-            child: const Icon(Icons.add, color: AppColors.white),
-          ),
+          floatingActionButton: widget.banque.sector == 'BANQUE'
+              ? FloatingActionButton(
+                  onPressed: () => _showAjouterCompteModal(context),
+                  backgroundColor: AppColors.backArrowColor,
+                  shape: const CircleBorder(),
+                  child: const Icon(Icons.add, color: AppColors.white),
+                )
+              : null,
         ),
       ),
     );

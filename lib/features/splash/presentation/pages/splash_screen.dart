@@ -212,11 +212,8 @@ Widget build(BuildContext context) {
   // Logo commence au centre : screenWidth/2 - 75 (moitié de 150)
   // Logo glisse de -55px vers la gauche
   final double logoFinalLeft = screenWidth / 2 - 75 + (-55); // = screenWidth/2 - 130
-  final double logoWidth = 150.0;
-  final double logoHeight = 150.0;
-  final double textWidth = 170.0;
-  final double textHeight = 150.0;
-  final double topPosition = screenHeight / 2 - 75;
+  final double logoHeight = 180.0;
+  final double topPosition = screenHeight / 2 - 90;
 
   return Scaffold(
     backgroundColor: AppColors.white,
@@ -227,31 +224,29 @@ Widget build(BuildContext context) {
           opacity: _fadeAnimation.value,
           child: Stack(
             children: [
-              // Logo qui glisse vers la gauche
+              // Phase 2 : image combinée (logo+texte) qui apparaît en fondu
               Positioned(
                 top: topPosition,
                 left: screenWidth / 2 - 75 + _logoSlide.value,
                 child: SizedBox(
-                  width: logoWidth,
                   height: logoHeight,
                   child: Image.asset(
-                    'assets/images/qf.png',
-                    fit: BoxFit.contain,
+                    'assets/images/qfwithtext.png',
+                    fit: BoxFit.fitHeight,
                   ),
                 ),
               ),
-              // Texte fixe juste à droite de la position finale du logo
+              // Phase 1 : logo seul qui glisse (par-dessus, s'efface progressivement)
               Positioned(
                 top: topPosition,
-                left: logoFinalLeft + logoWidth + 0, // ✅ collé au logo arrêté
+                left: screenWidth / 2 - 75 + _logoSlide.value,
                 child: Opacity(
-                  opacity: _textOpacity.value,
+                  opacity: 1.0 - _textOpacity.value,
                   child: SizedBox(
-                    width: textWidth,
-                    height: textHeight,
+                    height: logoHeight,
                     child: Image.asset(
-                      'assets/images/textqf.png',
-                      fit: BoxFit.contain,
+                      'assets/images/qf.png',
+                      fit: BoxFit.fitHeight,
                     ),
                   ),
                 ),

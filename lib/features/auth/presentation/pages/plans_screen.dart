@@ -473,7 +473,21 @@ class _PaiementModalState extends State<_PaiementModal> {
           Navigator.of(context).pop();
           final url = state.response.checkoutUrl;
           debugPrint('[PaiementModal] Ouverture checkoutUrl=$url');
-          if (url.isNotEmpty) launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+          if (url.isNotEmpty) {
+            launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication).then((success) {
+              debugPrint('[PaiementModal] launchUrl success=$success');
+            }).catchError((e) {
+              debugPrint('[PaiementModal] launchUrl error=$e');
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Erreur ouverture paiement: $e'),
+                  backgroundColor: AppColors.statusRejected,
+                ),
+              );
+            });
+          } else {
+            debugPrint('[PaiementModal] checkoutUrl vide!');
+          }
         } else if (state is PaymentError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
