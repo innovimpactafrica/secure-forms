@@ -773,23 +773,37 @@ class LoginScreenDeepLink extends StatefulWidget {
   State<LoginScreenDeepLink> createState() => _LoginScreenDeepLinkState();
 }
 
-class _LoginScreenDeepLinkState extends State<LoginScreenDeepLink> {
+class _LoginScreenDeepLinkState extends State<LoginScreenDeepLink>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _phoneController = TextEditingController();
   bool _obscurePassword = true;
+  late final TabController _tabController;
+  String _fullPhone = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 1);
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _phoneController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
   void _onLogin(BuildContext context) {
     if (!_formKey.currentState!.validate()) return;
+    final isPhone = _tabController.index == 1;
     context.read<AuthBloc>().add(LoginRequested(
-          email: _emailController.text.trim(),
+          email: isPhone ? null : _emailController.text.trim(),
+          phone: isPhone ? _fullPhone : null,
           password: _passwordController.text.trim(),
         ));
   }
@@ -896,36 +910,166 @@ class _LoginScreenDeepLinkState extends State<LoginScreenDeepLink> {
                                   color: AppColors.textDark,
                                 )),
                             const SizedBox(height: 6),
-                            Text('login.login_subtitle'.tr(),
+                            Text('login.login_subtitle_new'.tr(),
                                 style: const TextStyle(
                                   fontFamily: AppConstants.fontFamilyInter,
                                   fontSize: AppConstants.fontSizeMedium,
                                   color: AppColors.textSecondary,
                                 )),
-                            const SizedBox(height: 32),
-                            _FieldLabel(label: 'login.email_label'.tr()),
-                            const SizedBox(height: 6),
-                            TextFormField(
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              validator: (v) {
-                                if (v!.isEmpty)
-                                  return 'login.required_field'.tr();
-                                if (!v.contains('@'))
-                                  return 'login.invalid_email'.tr();
-                                return null;
-                              },
-                              style: const TextStyle(
-                                fontFamily: AppConstants.fontFamilyInter,
-                                fontSize: AppConstants.fontSizeMedium,
-                                color: AppColors.textDark,
+                            const SizedBox(height: 24),
+                            Container(
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: AppColors.backgroundLight,
+                                borderRadius: BorderRadius.circular(
+                                    AppConstants.radiusRound),
                               ),
-                              decoration: _inputDecorationDL(
-                                hint: 'login.email_hint'.tr(),
-                                prefixIcon: Icons.email_outlined,
+                              padding: const EdgeInsets.all(4),
+                              child: AnimatedBuilder(
+                                animation: _tabController,
+                                builder: (_, __) => Row(
+                                  children: [
+                                    _LoginTabOption(
+                                      label: 'login.tab_email'.tr(),
+                                      isSelected: _tabController.index == 0,
+                                      onTap: () => setState(
+                                          () => _tabController.animateTo(0)),
+                                    ),
+                                    _LoginTabOption(
+                                      label: 'login.tab_phone'.tr(),
+                                      isSelected: _tabController.index == 1,
+                                      onTap: () => setState(
+                                          () => _tabController.animateTo(1)),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                            const SizedBox(height: AppConstants.paddingLarge),
+                            const SizedBox(height: 20),
+                            AnimatedBuilder(
+                              animation: _tabController,
+                              builder: (_, __) {
+                                if (_tabController.index == 0) {
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _FieldLabel(
+                                          label: 'login.email_label'.tr()),
+                                      const SizedBox(height: 6),
+                                      TextFormField(
+                                        controller: _emailController,
+                                        keyboardType:
+                                            TextInputType.emailAddress,
+                                        validator: (v) {
+                                          if (_tabController.index != 0)
+                                            return null;
+                                          if (v == null || v.isEmpty)
+                                            return 'login.required_field'.tr();
+                                          if (!v.contains('@'))
+                                            return 'login.invalid_email'.tr();
+                                          return null;
+                                        },
+                                        style: const TextStyle(
+                                          fontFamily:
+                                              AppConstants.fontFamilyInter,
+                                          fontSize: AppConstants.fontSizeMedium,
+                                          color: AppColors.textDark,
+                                        ),
+                                        decoration: _inputDecorationDL(
+                                          hint: 'login.email_hint'.tr(),
+                                          prefixIcon: Icons.email_outlined,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _FieldLabel(
+                                          label: 'login.phone_label'.tr()),
+                                      const SizedBox(height: 6),
+                                      IntlPhoneField(
+                                        controller: _phoneController,
+                                        initialCountryCode: 'SN',
+                                        keyboardType: TextInputType.phone,
+                                        style: const TextStyle(
+                                          fontFamily:
+                                              AppConstants.fontFamilyInter,
+                                          fontSize: AppConstants.fontSizeMedium,
+                                          color: AppColors.textDark,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              'login.phone_hint_field'.tr(),
+                                          hintStyle: const TextStyle(
+                                            fontFamily:
+                                                AppConstants.fontFamilyInter,
+                                            color: AppColors.hintText,
+                                            fontSize:
+                                                AppConstants.fontSizeMedium,
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                  horizontal: 16, vertical: 14),
+                                          filled: true,
+                                          fillColor: AppColors.white,
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                AppConstants.radiusRound),
+                                            borderSide: const BorderSide(
+                                                color: AppColors.borderLight),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                AppConstants.radiusRound),
+                                            borderSide: const BorderSide(
+                                                color: AppColors.borderLight),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                AppConstants.radiusRound),
+                                            borderSide: const BorderSide(
+                                                color: AppColors.primary,
+                                                width: AppConstants
+                                                    .borderWidthMedium),
+                                          ),
+                                          errorBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                AppConstants.radiusRound),
+                                            borderSide: const BorderSide(
+                                                color:
+                                                    AppColors.statusRejected),
+                                          ),
+                                          focusedErrorBorder:
+                                              OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                AppConstants.radiusRound),
+                                            borderSide: const BorderSide(
+                                                color:
+                                                    AppColors.statusRejected),
+                                          ),
+                                        ),
+                                        validator: (phone) {
+                                          if (_tabController.index != 1)
+                                            return null;
+                                          if (phone == null ||
+                                              phone.number.isEmpty)
+                                            return 'login.required_field'.tr();
+                                          return null;
+                                        },
+                                        onChanged: (phone) {
+                                          _fullPhone = phone.completeNumber;
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 16),
                             _FieldLabel(label: 'login.password_label'.tr()),
                             const SizedBox(height: 6),
                             TextFormField(

@@ -518,6 +518,11 @@
     "password_mismatch": "Les mots de passe ne correspondent pas",
     "password_too_short": "Minimum 8 caractères requis",
     "enter_4_digits": "Veuillez saisir les 4 chiffres du code"
+  },
+  "session": {
+    "expired_title": "Session expirée",
+    "expired_message": "Votre session a expiré pour des raisons de sécurité. Veuillez vous reconnecter.",
+    "reconnect": "Me reconnecter"
   }
 }
 

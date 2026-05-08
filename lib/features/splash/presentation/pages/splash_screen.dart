@@ -95,8 +95,15 @@ class _SplashScreenState extends State<SplashScreen>
     }
 
     final refreshToken = UserSession.instance.refreshToken;
-    if (refreshToken.isNotEmpty &&
-        _isTokenExpiredOrSoon(UserSession.instance.accessToken)) {
+    
+    if (refreshToken.isEmpty || _isRefreshTokenExpired(refreshToken)) {
+      print('[Splash] Refresh token expiré → reconnexion requise');
+      await SessionStorage.instance.clear();
+      if (mounted) Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+      return;
+    }
+    
+    if (_isTokenExpiredOrSoon(UserSession.instance.accessToken)) {
       try {
         print('[Splash] Token expirÃ© ou bientÃ´t â†’ refresh proactif...');
         final freshToken =
@@ -177,6 +184,23 @@ class _SplashScreenState extends State<SplashScreen>
       final expiry = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
       return DateTime.now()
           .isAfter(expiry.subtract(const Duration(minutes: 5)));
+    } catch (_) {
+      return true;
+    }
+  }
+
+  bool _isRefreshTokenExpired(String refreshToken) {
+    try {
+      final parts = refreshToken.split('.');
+      if (parts.length != 3) return true;
+      final payload = parts[1];
+      final normalized = base64Url.normalize(payload);
+      final decoded = utf8.decode(base64Url.decode(normalized));
+      final map = jsonDecode(decoded) as Map<String, dynamic>;
+      final exp = map['exp'] as int?;
+      if (exp == null) return true;
+      final expiry = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
+      return DateTime.now().isAfter(expiry);
     } catch (_) {
       return true;
     }

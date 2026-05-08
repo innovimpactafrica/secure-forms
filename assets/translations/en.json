@@ -513,6 +513,11 @@
     "password_mismatch": "Passwords do not match",
     "password_too_short": "Minimum 8 characters required",
     "enter_4_digits": "Please enter the 4 digits of the code"
+  },
+  "session": {
+    "expired_title": "Session expired",
+    "expired_message": "Your session has expired for security reasons. Please log in again.",
+    "reconnect": "Log in again"
   }
 }
 

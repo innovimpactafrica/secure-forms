@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:quick_forms/core/utils/base_url.dart';
 import 'package:quick_forms/core/utils/navigator_key.dart';
 import 'package:quick_forms/core/utils/session_storage.dart';
 import 'package:quick_forms/core/utils/user_session.dart';
+import 'package:quick_forms/core/utils/app_colors.dart';
+import 'package:quick_forms/core/utils/app_constants.dart';
 
 /// Client HTTP qui intercepte les 401 et rafraîchit automatiquement le token.
 /// Toutes les requêtes parallèles attendent le même refresh (pas de double refresh).
@@ -129,11 +132,22 @@ class AuthenticatedHttpClient extends http.BaseClient {
     SessionStorage.instance.clear();
     UserSession.instance.clear();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      navigatorKey.currentState?.pushNamedAndRemoveUntil(
-        '/login',
-        (route) => false,
-      );
+      _showSessionExpiredDialog();
     });
+  }
+
+  void _showSessionExpiredDialog() {
+    final context = navigatorKey.currentContext;
+    if (context == null) {
+      navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const _SessionExpiredDialog(),
+    );
   }
 
   Future<http.BaseRequest> _copyRequest(
@@ -166,5 +180,92 @@ class AuthenticatedHttpClient extends http.BaseClient {
     }
     original.headers['Authorization'] = 'Bearer $newToken';
     return original;
+  }
+}
+
+
+class _SessionExpiredDialog extends StatelessWidget {
+  const _SessionExpiredDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.paddingXLarge),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: AppColors.statusRejected.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.access_time,
+                size: 32,
+                color: AppColors.statusRejected,
+              ),
+            ),
+            const SizedBox(height: AppConstants.paddingLarge),
+            Text(
+              'session.expired_title'.tr(),
+              style: const TextStyle(
+                fontFamily: AppConstants.fontFamilySofiaSans,
+                fontSize: AppConstants.fontSizeXXLarge,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppConstants.paddingMedium),
+            Text(
+              'session.expired_message'.tr(),
+              style: const TextStyle(
+                fontFamily: AppConstants.fontFamilyInter,
+                fontSize: AppConstants.fontSizeMedium,
+                fontWeight: FontWeight.w400,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppConstants.paddingXLarge),
+            SizedBox(
+              width: double.infinity,
+              height: AppConstants.buttonHeight,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                    '/login',
+                    (route) => false,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.backArrowColor,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.radiusRound),
+                  ),
+                ),
+                child: Text(
+                  'session.reconnect'.tr(),
+                  style: const TextStyle(
+                    fontFamily: AppConstants.fontFamilySofiaSans,
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: AppConstants.fontSizeLarge,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

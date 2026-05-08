@@ -140,15 +140,15 @@ class DemandeZipService {
   static Future<void> _genererResumePDF(
       DemandeModel demande, Directory dossier) async {
     final pdf = pw.Document();
-    final primaryColor = PdfColor.fromHex('#0B3C5C');
-    final accentColor = PdfColor.fromHex('#23A3A6');
+    final primaryColor = PdfColor.fromHex('#F39C12');
+    final accentColor = PdfColor.fromHex('#8E342C');
     final bgLight = PdfColor.fromHex('#F5F6FA');
     final borderColor = PdfColor.fromHex('#DEE8EE');
 
     // Charger le logo
     pw.ImageProvider? logo;
     try {
-      final data = await rootBundle.load('assets/images/qf.png');
+      final data = await rootBundle.load('assets/images/qfwithtext.png');
       logo = pw.MemoryImage(data.buffer.asUint8List());
     } catch (_) {}
 
@@ -175,51 +175,10 @@ class DemandeZipService {
                 crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: [
                   // Logo + nom app
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.center,
-                    children: [
-                      if (logo != null) ...[
-                        pw.Image(logo, width: 40, height: 40),
-                        pw.SizedBox(width: 12),
-                      ],
-                      pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: [
-                          pw.Row(
-                            children: [
-                              pw.Text(
-                                'SECURE ',
-                                style: pw.TextStyle(
-                                  color: PdfColors.white,
-                                  fontSize: 18,
-                                  fontWeight: pw.FontWeight.bold,
-                                ),
-                              ),
-                              pw.Text(
-                                'FORMS',
-                                style: pw.TextStyle(
-                                  color: accentColor,
-                                  fontSize: 18,
-                                  fontWeight: pw.FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          pw.Text(
-                            'La transmission sécurisée de confiance',
-                            style: pw.TextStyle(
-                              color: PdfColors.grey400,
-                              fontSize: 9,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  if (logo != null)
+                    pw.Image(logo, width: 150, height: 60),
 
-                  pw.SizedBox(height: 28),
-                  pw.Container(height: 1, color: PdfColor.fromHex('#1E5070')),
-                  pw.SizedBox(height: 28),
+                  pw.SizedBox(height: 24),
 
                   // Titre centré
                   pw.Text(
@@ -250,7 +209,7 @@ class DemandeZipService {
                   pw.Center(
                     child: pw.Container(
                       padding: const pw.EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 7),
+                          horizontal: 24, vertical: 8),
                       decoration: pw.BoxDecoration(
                         color: accentColor,
                         borderRadius: pw.BorderRadius.circular(20),
@@ -273,18 +232,18 @@ class DemandeZipService {
             // ── CORPS ────────────────────────────────────────────────
             pw.Expanded(
               child: pw.Container(
-                color: bgLight,
+                color: PdfColors.white,
                 padding: const pw.EdgeInsets.fromLTRB(40, 32, 40, 0),
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     // Section Informations
-                    _sectionTitle('Informations de la demande', primaryColor,
-                        accentColor),
+                    _sectionTitle('Informations de la demande', accentColor,
+                        primaryColor),
                     pw.SizedBox(height: 12),
                     pw.Container(
                       decoration: pw.BoxDecoration(
-                        color: PdfColors.white,
+                        color: bgLight,
                         borderRadius: pw.BorderRadius.circular(8),
                         border: pw.Border.all(color: borderColor),
                       ),
@@ -292,25 +251,25 @@ class DemandeZipService {
                           horizontal: 20, vertical: 8),
                       child: pw.Column(children: [
                         _ligneInfo(
-                            'Référence', demande.requestNumber, primaryColor),
+                            'Référence', demande.requestNumber, accentColor),
                         _divider(borderColor),
-                        _ligneInfo('Statut', statut, accentColor),
+                        _ligneInfo('Statut', statut, primaryColor),
                         if (org.isNotEmpty) ...[
                           _divider(borderColor),
-                          _ligneInfo('Organisation', org, primaryColor),
+                          _ligneInfo('Organisation', org, accentColor),
                         ],
                         _divider(borderColor),
                         _ligneInfo(
-                            'Date soumission', demande.createdAt, primaryColor),
+                            'Date soumission', demande.createdAt, accentColor),
                         if (demande.inProgressAt != null) ...[
                           _divider(borderColor),
                           _ligneInfo('En cours depuis', demande.inProgressAt!,
-                              primaryColor),
+                              accentColor),
                         ],
                         if (demande.finalizedAt != null) ...[
                           _divider(borderColor),
                           _ligneInfo('Finalisé le', demande.finalizedAt!,
-                              primaryColor),
+                              accentColor),
                         ],
                       ]),
                     ),
@@ -320,11 +279,11 @@ class DemandeZipService {
                         demande.requiredDocuments.isNotEmpty) ...[
                       pw.SizedBox(height: 24),
                       _sectionTitle('Fichiers inclus dans ce dossier',
-                          primaryColor, accentColor),
+                          accentColor, primaryColor),
                       pw.SizedBox(height: 12),
                       pw.Container(
                         decoration: pw.BoxDecoration(
-                          color: PdfColors.white,
+                          color: bgLight,
                           borderRadius: pw.BorderRadius.circular(8),
                           border: pw.Border.all(color: borderColor),
                         ),
@@ -335,7 +294,7 @@ class DemandeZipService {
                               .where((f) => f.pdfUrl.isNotEmpty)
                               .map((f) => _ligneFichier(
                                     f.label.isNotEmpty ? f.label : 'Document',
-                                    accentColor,
+                                    primaryColor,
                                   )),
                           ...demande.requiredDocuments
                               .where((d) => d.id.isNotEmpty)
@@ -343,7 +302,7 @@ class DemandeZipService {
                                     d.label.isNotEmpty
                                         ? d.label
                                         : 'Pièce jointe',
-                                    accentColor,
+                                    primaryColor,
                                   )),
                         ]),
                       ),
@@ -362,32 +321,8 @@ class DemandeZipService {
                       child: pw.Row(
                         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
-                          pw.Row(
-                            children: [
-                              if (logo != null) ...[
-                                pw.Image(logo, width: 16, height: 16),
-                                pw.SizedBox(width: 6),
-                              ],
-                              pw.Row(children: [
-                                pw.Text(
-                                  'SECURE ',
-                                  style: pw.TextStyle(
-                                    color: primaryColor,
-                                    fontSize: 9,
-                                    fontWeight: pw.FontWeight.bold,
-                                  ),
-                                ),
-                                pw.Text(
-                                  'FORMS',
-                                  style: pw.TextStyle(
-                                    color: accentColor,
-                                    fontSize: 9,
-                                    fontWeight: pw.FontWeight.bold,
-                                  ),
-                                ),
-                              ]),
-                            ],
-                          ),
+                          if (logo != null)
+                            pw.Image(logo, width: 80, height: 32),
                           pw.Text(
                             'Généré le $dateStr',
                             style: pw.TextStyle(
@@ -456,7 +391,7 @@ class DemandeZipService {
         color: color,
       );
 
-  static pw.Widget _ligneFichier(String nom, PdfColor accentColor) =>
+  static pw.Widget _ligneFichier(String nom, PdfColor fichierColor) =>
       pw.Padding(
         padding: const pw.EdgeInsets.symmetric(vertical: 6),
         child: pw.Row(
@@ -465,7 +400,7 @@ class DemandeZipService {
               width: 30,
               height: 18,
               decoration: pw.BoxDecoration(
-                color: accentColor,
+                color: fichierColor,
                 borderRadius: pw.BorderRadius.circular(4),
               ),
               child: pw.Center(
