@@ -1,4 +1,13 @@
-environment:
+workflows:
+  ios-release:
+    name: iOS TestFlight
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'v*'
+          include: true
+  environment:
   flutter: stable
   xcode: latest
   ios_signing:
