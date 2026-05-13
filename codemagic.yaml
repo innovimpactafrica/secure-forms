@@ -7,13 +7,13 @@ workflows:
       tag_patterns:
         - pattern: 'v*'
           include: true
-  environment:
+environment:
   flutter: stable
   xcode: latest
   ios_signing:
     distribution_type: app_store
     bundle_identifier: com.innovimpactafrica.quickforms
-  app_store_connect:
+app_store_connect:
     api_key: $APP_STORE_CONNECT_PRIVATE_KEY
     key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
     issuer_id: $APP_STORE_CONNECT_ISSUER_ID
