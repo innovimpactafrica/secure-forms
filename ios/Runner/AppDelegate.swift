@@ -8,7 +8,11 @@ import Firebase
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-      FirebaseApp.configure()  // ← doit être là
+    // Firebase optionnel — ne crashe pas si GoogleService-Info.plist absent
+    if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+       let _ = NSDictionary(contentsOfFile: path) {
+      FirebaseApp.configure()
+    }
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
