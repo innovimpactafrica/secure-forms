@@ -131,3 +131,20 @@ Pour toute question ou problème, veuillez ouvrir une issue sur GitHub.
 # secure-link-mobile
 Application mobile Flutter pour la gestion sécurisée de connexions et liens
 >>>>>>> ab7394afd4035afeb12d51f52f969ffb147a5a0f
+
+
+
+
+restaurer GoogleService-Info.plist depuis variable Codemagic
+1. Encoder le fichier :
+ base64 -i ios/Runner/GoogleService-Info.plist | pbcopy
+2. Dans Codemagic → Environment variables :
+
+Nom : GOOGLE_SERVICE_INFO_PLIST
+Valeur : colle le base64
+Coche Secure ✅
+
+3. Pousser le fichier sur Git :
+   git add codemagic.yaml
+   git commit -m "ci: restaurer GoogleService-Info.plist depuis variable Codemagic"
+   git push
