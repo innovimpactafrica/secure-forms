@@ -26,10 +26,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -58,6 +55,15 @@ class DefaultFirebaseOptions {
     messagingSenderId: '49798505343',
     projectId: 'innovimpactafrica',
     storageBucket: 'innovimpactafrica.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyAxuMf07yPuqe2IXTnHxwffDtsEnsHcTvY',
+    appId: '1:49798505343:ios:a6e86d20cfc7f583af304a',
+    messagingSenderId: '49798505343',
+    projectId: 'innovimpactafrica',
+    storageBucket: 'innovimpactafrica.firebasestorage.app',
+    iosBundleId: 'com.innovimpactafrica.quickforms',
   );
 
 }
