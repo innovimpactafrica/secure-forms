@@ -55,32 +55,49 @@ import 'firebase_options.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'dart:ui';
 
-// Handler background OBLIGATOIREMENT top-level
+// Indique si Firebase a été initialisé avec succès
+bool _firebaseAvailable = false;
+
+// Handler background — ne s'enregistre que si Firebase est disponible
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  print('[FCM] Message background: ${message.messageId}');
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    debugPrint('[FCM] Message background: ${message.messageId}');
+  } catch (e) {
+    debugPrint('[FCM] Firebase indisponible en background: $e');
+  }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
 
-  // Crashlytics
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
+  // Initialisation Firebase optionnelle — l'app s'ouvre même sans GoogleService-Info.plist
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    _firebaseAvailable = true;
+    debugPrint('[Firebase] Initialisé avec succès');
 
-  // Enregistrer le handler background
-  FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
+    // Crashlytics
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
 
-  // Initialiser FCM
-  await FcmService.initialize();
+    // Handler background FCM
+    FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
+
+    // Initialiser FCM
+    await FcmService.initialize();
+
+  } catch (e) {
+    _firebaseAvailable = false;
+    debugPrint('[Firebase] Non disponible, l\'app continue sans Firebase: $e');
+  }
 
   runApp(
     EasyLocalization(
@@ -96,7 +113,7 @@ class QuickFormsApp extends StatefulWidget {
   const QuickFormsApp({super.key});
 
   @override
- State<QuickFormsApp> createState() => _QuickFormsAppState();
+  State<QuickFormsApp> createState() => _QuickFormsAppState();
 }
 
 class _QuickFormsAppState extends State<QuickFormsApp> {
@@ -106,21 +123,21 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
   void initState() {
     super.initState();
     _initDeepLinks();
-    // VÃ©rifier si app lancÃ©e depuis une notification (aprÃ¨s le premier build)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FcmService.checkInitialMessage();
-    });
+    // Vérifier si app lancée depuis une notification (après le premier build)
+    if (_firebaseAvailable) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FcmService.checkInitialMessage();
+      });
+    }
   }
 
   Future<void> _initDeepLinks() async {
     _appLinks = AppLinks();
 
-    // Cas 1 : app en arriÃ¨re-plan
     _appLinks.uriLinkStream.listen((uri) {
       _handleDeepLink(uri);
     });
 
-    // Cas 2 : app fermÃ©e
     final initialUri = await _appLinks.getInitialLink();
     if (initialUri != null) {
       await Future.delayed(const Duration(milliseconds: 800));
@@ -136,7 +153,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
     debugPrint('query: ${uri.queryParameters}');
     debugPrint('======================');
 
-    // â”€â”€ Remote Sign : /mobile-sign?session=... â”€â”€
+    // Remote Sign : /mobile-sign?session=...
     if (uri.host == 'pdf.secure.innovimpactdev.cloud' &&
         uri.path.contains('/mobile-sign')) {
       final sessionId = uri.queryParameters['session'] ?? '';
@@ -148,7 +165,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
         _navigateWhenReady(() {
           navigatorKey.currentState?.pushNamedAndRemoveUntil(
             AppRoutes.login,
-            (route) => false,
+                (route) => false,
           );
         });
         return;
@@ -165,7 +182,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
                 await SessionStorage.instance.clear();
                 navigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.login,
-                  (route) => false,
+                      (route) => false,
                 );
               },
             ),
@@ -188,7 +205,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
         _navigateWhenReady(() {
           navigatorKey.currentState?.pushNamedAndRemoveUntil(
             AppRoutes.login,
-            (route) => false,
+                (route) => false,
           );
         });
         return;
@@ -204,7 +221,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
                 await SessionStorage.instance.clear();
                 navigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.login,
-                  (route) => false,
+                      (route) => false,
                 );
               },
             ),
@@ -226,7 +243,6 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
 
     if (uri.host == 'secure.innovimpactdev.cloud') {
       if (uri.path.contains('/payment-result')) {
-        // Retour paiement TouchPay â†’ vÃ©rifier abonnement puis KYC
         _navigateWhenReady(() async {
           await _handlePostPaymentNavigation();
         });
@@ -235,7 +251,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
         _navigateWhenReady(() {
           navigatorKey.currentState?.pushNamedAndRemoveUntil(
             AppRoutes.login,
-            (route) => false,
+                (route) => false,
           );
         });
       } else if (uri.path.contains('setup-password')) {
@@ -258,7 +274,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
                 jwt: jwt,
               ),
             ),
-            (route) => false,
+                (route) => false,
           );
         });
       } else if (uri.path.contains('/sign')) {
@@ -289,7 +305,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
               jwt: jwt,
             ),
           ),
-          (route) => false,
+              (route) => false,
         );
       });
     } else if (uri.scheme == 'secureforms' && uri.host == 'payment-result') {
@@ -315,23 +331,21 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
     if (token.isEmpty) {
       navigatorKey.currentState?.pushNamedAndRemoveUntil(
         AppRoutes.login,
-        (route) => false,
+            (route) => false,
       );
       return;
     }
 
-    // VÃ©rifier abonnement
     final sub = await SubscriptionService()
         .getEffectiveSubscription(accessToken: token);
     if (sub == null || !sub.isActive) {
       navigatorKey.currentState?.pushNamedAndRemoveUntil(
         AppRoutes.activationRequise,
-        (route) => false,
+            (route) => false,
       );
       return;
     }
 
-    // VÃ©rifier KYC via API backend
     final userId = UserSession.instance.userId;
     final kycDone = await KycChecker.isKycCompleted();
 
@@ -343,12 +357,12 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
             child: const KycIntroPage(),
           ),
         ),
-        (route) => false,
+            (route) => false,
       );
     } else {
       navigatorKey.currentState?.pushNamedAndRemoveUntil(
         AppRoutes.clientHome,
-        (route) => false,
+            (route) => false,
       );
     }
   }
@@ -365,7 +379,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
       ],
       child: MaterialApp(
         title: 'Quick Forms',
-        navigatorKey: navigatorKey, // âœ… utilise le global key
+        navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         localizationsDelegates: context.localizationDelegates,
         supportedLocales: context.supportedLocales,
@@ -422,43 +436,42 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
           '/success': (context) => const SuccessScreen(),
           AppRoutes.clientHome: (context) => const MainShell(),
           AppRoutes.resumeRegistration: (context) =>
-              const ResumeRegistrationScreen(),
+          const ResumeRegistrationScreen(),
           AppRoutes.forgotPassword: (context) => const ForgotPasswordScreen(),
           AppRoutes.passwordUpdated: (context) => const PasswordUpdatedScreen(),
           AppRoutes.clientDemandes: (context) => BlocProvider(
-                create: (_) => DemandesBloc(),
-                child: const ClientDemandesScreen(),
-              ),
+            create: (_) => DemandesBloc(),
+            child: const ClientDemandesScreen(),
+          ),
           AppRoutes.clientBanques: (context) => const MesBanquesScreen(),
           AppRoutes.clientFormulaires: (context) =>
-              const ClientFormulairesScreen(),
+          const ClientFormulairesScreen(),
           AppRoutes.clientMethode: (context) => const ClientMethodeScreen(),
           AppRoutes.nouvelleDemandeStep7: (context) =>
-              const NouvelleDemandeStep7Screen(),
+          const NouvelleDemandeStep7Screen(),
           AppRoutes.nouvelleDemandeStep8: (context) =>
-              const NouvelleDemandeStep8Screen(),
+          const NouvelleDemandeStep8Screen(),
           AppRoutes.nouvelleDemandeStep9: (context) =>
-              const NouvelleDemandeStep9Screen(),
+          const NouvelleDemandeStep9Screen(),
           AppRoutes.detailDemande: (context) => const DetailDemandeScreen(),
           AppRoutes.detailVirement: (context) => const DetailVirementScreen(),
           AppRoutes.detailActeVente: (context) => const DetailActeVenteScreen(),
           AppRoutes.detailPret: (context) => const DetailPretScreen(),
           AppRoutes.detailOuvertureCompte: (context) =>
-              const DetailOuvertureCompteScreen(),
+          const DetailOuvertureCompteScreen(),
           AppRoutes.detailOuvertureCompteBrouillon: (context) =>
-              const DetailOuvertureCompteBrouillonScreen(),
+          const DetailOuvertureCompteBrouillonScreen(),
           AppRoutes.clientProfil: (context) => const ClientProfilScreen(),
-          AppRoutes.activationRequise: (context) => const ActivationRequiseScreen(),
+          AppRoutes.activationRequise: (context) =>
+          const ActivationRequiseScreen(),
           AppRoutes.plans: (context) => const PlansScreen(),
           AppRoutes.monAbonnement: (context) => const MonAbonnementScreen(),
           '/detail-ouverture-compte-continuer': (context) =>
-              const DetailOuvertureCompteContinuerScreen(),
+          const DetailOuvertureCompteContinuerScreen(),
           AppRoutes.clientDemandeDetail: (context) =>
-              const ClientDemandeDetailScreen(),
+          const ClientDemandeDetailScreen(),
         },
       ),
     );
   }
 }
-
-
