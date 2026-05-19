@@ -83,6 +83,13 @@ class FcmService {
   }
 
   static Future<void> _setupToken() async {
+    // TOKEN APNS IOS — si null, APNs n'est pas configuré
+    final apnsToken = await _messaging.getAPNSToken();
+    print('[FCM] ===== APNS TOKEN IOS =====');
+    print('[FCM] APNS: $apnsToken');
+    print('[FCM] =========================');
+
+    // TOKEN FCM
     final token = await _messaging.getToken();
     if (token != null) {
       print('[FCM] ===== TON TOKEN FCM =====');
