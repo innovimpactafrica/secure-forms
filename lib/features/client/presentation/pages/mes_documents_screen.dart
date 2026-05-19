@@ -7,6 +7,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pdfrx/pdfrx.dart';
+import 'dart:io' show Platform;
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quick_forms/core/utils/app_colors.dart';
 import 'package:quick_forms/core/utils/app_constants.dart';
@@ -1534,25 +1536,33 @@ class _DocumentImageState extends State<_DocumentImage> {
     }
     if (_isPdf && _pdfPath != null) {
       return IgnorePointer(
-        child: PdfViewer.file(
-          _pdfPath!,
-          params: PdfViewerParams(
-            backgroundColor: AppColors.documentCardBackground,
-            loadingBannerBuilder: (_, __, ___) => Container(
-              color: AppColors.documentCardBackground,
-              child: Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation(AppColors.primary),
+        child: Platform.isIOS
+            ? PDFView(
+                filePath: _pdfPath!,
+                enableSwipe: false,
+                autoSpacing: false,
+                pageFling: false,
+                backgroundColor: Colors.grey.shade100,
+              )
+            : PdfViewer.file(
+                _pdfPath!,
+                params: PdfViewerParams(
+                  backgroundColor: AppColors.documentCardBackground,
+                  loadingBannerBuilder: (_, __, ___) => Container(
+                    color: AppColors.documentCardBackground,
+                    child: Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-        ),
       );
     }
     if (_imageUrl != null) {
@@ -2838,6 +2848,16 @@ class _PdfFullViewer extends StatefulWidget {
 class _PdfFullViewerState extends State<_PdfFullViewer> {
   @override
   Widget build(BuildContext context) {
+    if (Platform.isIOS) {
+      return PDFView(
+        filePath: widget.filePath,
+        enableSwipe: true,
+        swipeHorizontal: false,
+        autoSpacing: true,
+        pageFling: true,
+        backgroundColor: Colors.black,
+      );
+    }
     return PdfViewer.file(
       widget.filePath,
       params: const PdfViewerParams(),
@@ -2881,6 +2901,15 @@ class _PdfBytesViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (Platform.isIOS) {
+      return PDFView(
+        filePath: filePath,
+        enableSwipe: true,
+        swipeHorizontal: false,
+        autoSpacing: true,
+        pageFling: true,
+      );
+    }
     return PdfViewer.file(filePath, params: const PdfViewerParams());
   }
 }
