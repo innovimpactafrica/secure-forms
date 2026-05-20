@@ -78,5 +78,12 @@
 <key>NSUserNotificationUsageDescription</key>
 <string>Nous vous envoyons des notifications pour vous tenir informé</string>
 
+<!-- Universal Links iOS -->
+<key>com.apple.developer.associated-domains</key>
+<array>
+    <string>applinks:secure.innovimpactdev.cloud</string>
+    <string>applinks:pdf.secure.innovimpactdev.cloud</string>
+    <string>applinks:api.secure.innovimpactdev.cloud</string>
+</array>
 </dict>
 </plist>

@@ -50,6 +50,7 @@ class _MainShellState extends State<MainShell> {
           ClientProfilScreen(fromHome: true, onGoHome: _goHome),
         ],
       ),
+      // ✅ Plus de SafeArea ici — géré dans _BottomNav directement
       bottomNavigationBar: _BottomNav(
         currentIndex: _currentIndex,
         onTap: _onTap,
@@ -74,8 +75,8 @@ class _BottomNavState extends State<_BottomNav>
 
   static const _navHeight = 70.0;
   static const _circleSize = 42.0;
-  static const _notchDepth = 30.0; // profondeur du creux
-  static const _notchWidth = 70.0; // largeur du creux
+  static const _notchDepth = 30.0;
+  static const _notchWidth = 70.0;
 
   static const List<String> _images = [
     'assets/images/accueil.png',
@@ -118,119 +119,110 @@ class _BottomNavState extends State<_BottomNav>
   @override
   Widget build(BuildContext context) {
     context.locale;
-    final labels = [
-      'navbar.home'.tr(),
-      'navbar.requests'.tr(),
-      'navbar.archives'.tr(),
-      'navbar.account'.tr(),
-    ];
     final itemCount = _images.length;
 
-    return SafeArea(
-      top: false,
-      child: SizedBox(
-        // hauteur totale = navbar + espace pour le cercle qui dépasse en haut
-        height: _navHeight + _circleSize / 2,
-        child: AnimatedBuilder(
-          animation: _anim,
-          builder: (context, _) {
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // ── Fond blanc avec creux en haut ──
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: _navHeight,
-                  child: CustomPaint(
-                    painter: _NotchPainter(
-                      notchPos: _anim.value,
-                      itemCount: itemCount,
-                      notchDepth: _notchDepth,
-                      notchWidth: _notchWidth,
-                    ),
+    // ✅ bottomPadding = ~34px sur iOS (home indicator), hauteur navbar sur Android (edge-to-edge), 0 sinon
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    // ✅ Plus de SafeArea — on gère le padding manuellement
+    return SizedBox(
+      height: _navHeight + _circleSize / 2 + bottomPadding,
+      child: AnimatedBuilder(
+        animation: _anim,
+        builder: (context, _) {
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // ── Fond blanc avec creux en haut ──
+              // Le fond s'étend jusqu'en bas pour couvrir la zone de padding
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: _navHeight + bottomPadding,
+                child: CustomPaint(
+                  painter: _NotchPainter(
+                    notchPos: _anim.value,
+                    itemCount: itemCount,
+                    notchDepth: _notchDepth,
+                    notchWidth: _notchWidth,
                   ),
                 ),
+              ),
 
-                // ── Items ──
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: _navHeight + _circleSize / 2,
-                  child: Row(
-                    children: List.generate(itemCount, (i) {
-                      // Le cercle suit la position animée (pas currentIndex direct)
-                      final animIndex = _anim.value.round();
-                      // Pour éviter les stops intermédiaires, on utilise
-                      // la destination finale pendant l'animation
-                      final isActive = _ctrl.isAnimating
-                          ? widget.currentIndex == i
-                          : animIndex == i;
-                      final color = isActive
-                          ? AppColors.primaryDark
-                          : AppColors.greyShade500;
+              // ── Items (positionnés au-dessus du padding) ──
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: bottomPadding, // ✅ icônes au-dessus de la zone système
+                height: _navHeight + _circleSize / 2,
+                child: Row(
+                  children: List.generate(itemCount, (i) {
+                    final animIndex = _anim.value.round();
+                    final isActive = _ctrl.isAnimating
+                        ? widget.currentIndex == i
+                        : animIndex == i;
+                    final color = isActive
+                        ? AppColors.primaryDark
+                        : AppColors.greyShade500;
 
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => widget.onTap(i),
-                          behavior: HitTestBehavior.opaque,
-                          child: SizedBox(
-                            height: _navHeight + _circleSize / 2,
-                            child: isActive
-                                ? Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      // Cercle surélevé qui sort du creux
-                                      Container(
-                                        width: _circleSize,
-                                        height: _circleSize,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primaryDark,
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: AppColors.primaryDark
-                                                  .withValues(alpha: 0.4),
-                                              blurRadius: 12,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Center(
-                                          child: Image.asset(
-                                            _images[i],
-                                            width: 20,
-                                            height: 20,
-                                            color: AppColors.white,
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () => widget.onTap(i),
+                        behavior: HitTestBehavior.opaque,
+                        child: SizedBox(
+                          height: _navHeight + _circleSize / 2,
+                          child: isActive
+                              ? Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: _circleSize,
+                                      height: _circleSize,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primaryDark,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.primaryDark
+                                                .withValues(alpha: 0.4),
+                                            blurRadius: 12,
+                                            offset: const Offset(0, 4),
                                           ),
+                                        ],
+                                      ),
+                                      child: Center(
+                                        child: Image.asset(
+                                          _images[i],
+                                          width: 20,
+                                          height: 20,
+                                          color: AppColors.white,
                                         ),
                                       ),
-                                    ],
-                                  )
-                                : Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const SizedBox(height: _circleSize / 2),
-                                      Image.asset(
-                                        _images[i],
-                                        width: 20,
-                                        height: 20,
-                                        color: color,
-                                      ),
-                                    ],
-                                  ),
-                          ),
+                                    ),
+                                  ],
+                                )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const SizedBox(height: _circleSize / 2),
+                                    Image.asset(
+                                      _images[i],
+                                      width: 20,
+                                      height: 20,
+                                      color: color,
+                                    ),
+                                  ],
+                                ),
                         ),
-                      );
-                    }),
-                  ),
+                      ),
+                    );
+                  }),
                 ),
-              ],
-            );
-          },
-        ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -238,7 +230,7 @@ class _BottomNavState extends State<_BottomNav>
 
 // ── Painter : fond blanc avec creux arrondi en haut ──
 class _NotchPainter extends CustomPainter {
-  final double notchPos; // 0.0 → itemCount-1
+  final double notchPos;
   final int itemCount;
   final double notchDepth;
   final double notchWidth;
@@ -252,7 +244,6 @@ class _NotchPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Ombre portée
     final shadow = Paint()
       ..color = Colors.black.withValues(alpha: 0.10)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
@@ -267,29 +258,10 @@ class _NotchPainter extends CustomPainter {
     const smooth = 20.0;
 
     final path = Path();
-    // Départ coin haut-gauche
     path.moveTo(0, 0);
-    // Ligne jusqu'au début du creux
     path.lineTo(cx - half - smooth, 0);
-    // Courbe d'entrée gauche
-    path.cubicTo(
-      cx - half,
-      0,
-      cx - half,
-      notchDepth,
-      cx,
-      notchDepth,
-    );
-    // Courbe de sortie droite
-    path.cubicTo(
-      cx + half,
-      notchDepth,
-      cx + half,
-      0,
-      cx + half + smooth,
-      0,
-    );
-    // Ligne jusqu'au coin haut-droit
+    path.cubicTo(cx - half, 0, cx - half, notchDepth, cx, notchDepth);
+    path.cubicTo(cx + half, notchDepth, cx + half, 0, cx + half + smooth, 0);
     path.lineTo(size.width, 0);
     path.lineTo(size.width, size.height);
     path.lineTo(0, size.height);

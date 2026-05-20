@@ -54,6 +54,7 @@ import 'package:quick_forms/core/utils/kyc_checker.dart';
 import 'firebase_options.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'dart:ui';
+import 'package:flutter/services.dart';
 
 // Indique si Firebase a été initialisé avec succès
 bool _firebaseAvailable = false;
@@ -72,6 +73,12 @@ Future<void> firebaseBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+
+   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarDividerColor: Colors.transparent,
+  ));
 
   // Initialisation Firebase optionnelle — l'app s'ouvre même sans GoogleService-Info.plist
   try {

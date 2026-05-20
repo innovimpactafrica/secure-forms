@@ -13,19 +13,18 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.innovimpactafrica.quickforms
+        provisioning_profile: quickforms_appstore_deeplink_2026
+        certificate: quickforms_distribution_cert
       vars:
-        GOOGLE_SERVICE_INFO_PLIST: $GOOGLE_SERVICE_INFO_PLIST  # variable Codemagic
+        GOOGLE_SERVICE_INFO_PLIST: $GOOGLE_SERVICE_INFO_PLIST
     scripts:
       - name: Get Flutter packages
         script: flutter pub get
-
-      - name: Restore GoogleService-Info.plist  # ← ajouté
+      - name: Restore GoogleService-Info.plist
         script: |
           echo $GOOGLE_SERVICE_INFO_PLIST | base64 --decode > ios/Runner/GoogleService-Info.plist
-
       - name: Build iOS
         script: flutter build ios --release --no-codesign
-
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
