@@ -51,6 +51,8 @@
     <string>Cette application a besoin d'accéder à la caméra pour la vérification faciale</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Cette application a besoin d'accéder au microphone</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Nous utilisons votre localisation pour améliorer votre expérience dans l'application.</string>
     <key>FlutterDeepLinkingEnabled</key>
     <true/>
 
