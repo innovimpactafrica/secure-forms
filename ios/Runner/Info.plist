@@ -85,5 +85,7 @@
     <string>applinks:pdf.secure.innovimpactdev.cloud</string>
     <string>applinks:api.secure.innovimpactdev.cloud</string>
 </array>
+<key>FirebaseAppDelegateProxyEnabled</key>
+<false/>
 </dict>
 </plist>
