@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:image/image.dart' as img;
 
 void main() {
-  final src = img.decodeImage(File('assets/images/QFF.png').readAsBytesSync())!;
+  final src = img.decodeImage(File('assets/images/Design sans titre(10).png').readAsBytesSync())!;
 
   const canvasSize = 1024;
-  final logoSize = (canvasSize * 0.50).round();
+  final logoSize = (canvasSize * 0.95).round();
 
   final canvas = img.Image(width: canvasSize, height: canvasSize);
   img.fill(canvas, color: img.ColorRgba8(255, 255, 255, 255));
