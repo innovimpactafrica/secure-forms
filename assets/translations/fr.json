@@ -372,7 +372,9 @@
     "estimated": "Estimé",
     "version": "Version",
     "complete": "Complet",
-    "required_documents": "Documents requis"
+    "required_documents": "Documents requis",
+    "rejection_reason": "Motif du rejet",
+    "rejected_on": "Rejeté le"
   },
   "resume_registration": {
     "title": "Continuer mon inscription",

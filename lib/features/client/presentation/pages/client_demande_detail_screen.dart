@@ -161,6 +161,16 @@ class _ClientDemandeDetailScreenState extends State<ClientDemandeDetailScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
+                    // ── Motif du rejet ───────────────────────────────────
+                    if (status == _DemandeStatus.rejete &&
+                        d.rejectionReason != null &&
+                        d.rejectionReason!.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _buildRejectionCard(d),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     // ── PDFs soumis ──────────────────────────────────────
                     if (d.submittedForms.isNotEmpty) ...[
                       Padding(
@@ -391,6 +401,67 @@ class _ClientDemandeDetailScreenState extends State<ClientDemandeDetailScreen> {
               lineActive: false),
         ];
     }
+  }
+
+  // ── Card motif du rejet ────────────────────────────────────────────────────
+
+  Widget _buildRejectionCard(DemandeModel d) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.statusRejected.withValues(alpha: 0.3)),
+        boxShadow: const [
+          BoxShadow(
+              color: AppColors.shadowDark, blurRadius: 8, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.info_outline,
+                  color: AppColors.statusRejected, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'demande_detail.rejection_reason'.tr(),
+                style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.statusRejected),
+              ),
+            ],
+          ),
+          if (d.rejectedAt != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              '${'demande_detail.rejected_on'.tr()} ${d.rejectedAt}',
+              style: const TextStyle(
+                  fontSize: 12, color: AppColors.textSecondary),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.statusRejected.withValues(alpha: 0.07),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              d.rejectionReason!,
+              style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textDark),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // ── Card PDFs soumis ──────────────────────────────────────────────────────

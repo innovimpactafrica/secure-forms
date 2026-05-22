@@ -48,6 +48,8 @@ class DemandeModel {
   final String? pdfUrl;
   final List<SubmittedFormItem> submittedForms;
   final List<RequiredDocumentItem> requiredDocuments;
+  final String? rejectionReason;
+  final String? rejectedAt;
 
   const DemandeModel({
     required this.id,
@@ -63,6 +65,8 @@ class DemandeModel {
     this.pdfUrl,
     this.submittedForms = const [],
     this.requiredDocuments = const [],
+    this.rejectionReason,
+    this.rejectedAt,
   });
 
   factory DemandeModel.fromJson(Map<String, dynamic> json) {
@@ -98,6 +102,10 @@ class DemandeModel {
       if (s == 'VALIDATION_FINALE' || s == 'VALIDEE') finalizedAt = _parseDateOrNull(d);
     }
 
+    final formData = json['formData'] as Map<String, dynamic>?;
+    final rejectionReason = formData?['rejectionReason']?.toString();
+    final rejectedAt = _parseDateOrNull(formData?['rejectedAt']);
+
     return DemandeModel(
       id: json['id']?.toString() ?? '',
       requestNumber: json['requestNumber']?.toString() ?? json['id']?.toString() ?? '',
@@ -121,6 +129,8 @@ class DemandeModel {
       pdfUrl: submitted?['pdfUrl']?.toString() ?? json['pdfUrl']?.toString(),
       submittedForms: submittedFormsList,
       requiredDocuments: requiredDocsList,
+      rejectionReason: rejectionReason,
+      rejectedAt: rejectedAt,
     );
   }
 

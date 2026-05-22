@@ -355,7 +355,9 @@
     "estimated": "Estimated",
     "version": "Version",
     "complete": "Complete",
-    "required_documents": "Required documents"
+    "required_documents": "Required documents",
+    "rejection_reason": "Rejection reason",
+    "rejected_on": "Rejected on"
   },
   "resume_registration": {
     "title": "Continue my registration",
