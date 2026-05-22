@@ -357,7 +357,8 @@
     "complete": "Complete",
     "required_documents": "Required documents",
     "rejection_reason": "Rejection reason",
-    "rejected_on": "Rejected on"
+    "rejected_on": "Rejected on",
+    "bank_account": "Bank account"
   },
   "resume_registration": {
     "title": "Continue my registration",

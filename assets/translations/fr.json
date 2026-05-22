@@ -374,7 +374,8 @@
     "complete": "Complet",
     "required_documents": "Documents requis",
     "rejection_reason": "Motif du rejet",
-    "rejected_on": "Rejeté le"
+    "rejected_on": "Rejeté le",
+    "bank_account": "Compte bancaire"
   },
   "resume_registration": {
     "title": "Continuer mon inscription",

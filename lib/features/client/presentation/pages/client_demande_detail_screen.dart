@@ -256,6 +256,8 @@ class _ClientDemandeDetailScreenState extends State<ClientDemandeDetailScreen> {
   // ── Référence + date ──────────────────────────────────────────────────────
 
   Widget _buildRefRow(String reference, String date) {
+    final d = _demande!;
+    final timeStr = d.submittedTime != null ? ', ${d.submittedTime}' : '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -265,9 +267,17 @@ class _ClientDemandeDetailScreenState extends State<ClientDemandeDetailScreen> {
                 fontWeight: FontWeight.w700,
                 color: AppColors.textDark)),
         const SizedBox(height: 3),
-        Text('${'demande_detail.submitted_on'.tr()} $date',
+        Text('${'demande_detail.submitted_on'.tr()} $date$timeStr',
             style:
                 const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+        if (d.clientBankAccountNumber != null &&
+            d.clientBankAccountNumber!.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Text(
+            '${'demande_detail.bank_account'.tr()} : ${d.clientBankAccountNumber}',
+            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+        ],
       ],
     );
   }

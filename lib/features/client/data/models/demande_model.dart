@@ -50,6 +50,8 @@ class DemandeModel {
   final List<RequiredDocumentItem> requiredDocuments;
   final String? rejectionReason;
   final String? rejectedAt;
+  final String? submittedTime;
+  final String? clientBankAccountNumber;
 
   const DemandeModel({
     required this.id,
@@ -67,6 +69,8 @@ class DemandeModel {
     this.requiredDocuments = const [],
     this.rejectionReason,
     this.rejectedAt,
+    this.submittedTime,
+    this.clientBankAccountNumber,
   });
 
   factory DemandeModel.fromJson(Map<String, dynamic> json) {
@@ -92,12 +96,16 @@ class DemandeModel {
     final tracking = (json['tracking'] as List?) ?? [];
 
     String? submittedAt;
+    String? submittedTime;
     String? inProgressAt;
     String? finalizedAt;
     for (final t in tracking) {
       final s = t['status']?.toString().toUpperCase() ?? '';
       final d = t['date']?.toString();
-      if (s == 'SOUMISE') submittedAt = _parseDateOrNull(d);
+      if (s == 'SOUMISE') {
+        submittedAt = _parseDateOrNull(d);
+        submittedTime = _parseTimeOrNull(d);
+      }
       if (s == 'EN_COURS') inProgressAt = _parseDateOrNull(d);
       if (s == 'VALIDATION_FINALE' || s == 'VALIDEE') finalizedAt = _parseDateOrNull(d);
     }
@@ -131,6 +139,8 @@ class DemandeModel {
       requiredDocuments: requiredDocsList,
       rejectionReason: rejectionReason,
       rejectedAt: rejectedAt,
+      submittedTime: submittedTime,
+      clientBankAccountNumber: json['clientBankAccountNumber']?.toString(),
     );
   }
 
@@ -141,6 +151,18 @@ class DemandeModel {
     try {
       final dt = DateTime.parse(s);
       return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static String? _parseTimeOrNull(dynamic raw) {
+    if (raw == null) return null;
+    final s = raw.toString();
+    if (s.isEmpty || s == 'null') return null;
+    try {
+      final dt = DateTime.parse(s).toLocal();
+      return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
     } catch (_) {
       return null;
     }
