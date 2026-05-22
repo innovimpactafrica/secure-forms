@@ -308,7 +308,10 @@
     "english": "Anglais",
     "logout_title": "Déconnexion",
     "logout_message": "etes-vous sur de vouloir vous déconnecter ?",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "delete_account": "Supprimer mon compte",
+    "delete_account_title": "Supprimer mon compte",
+    "delete_account_message": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible."
   },
   "banques": {
     "title": "Mes banques",

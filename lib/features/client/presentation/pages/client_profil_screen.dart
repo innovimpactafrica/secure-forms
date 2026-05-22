@@ -130,6 +130,8 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
                       onAbonnementTap: () => Navigator.of(context)
                           .pushNamed(AppRoutes.monAbonnement),
                       onLogoutTap: () => _showDeconnexionModal(context),
+                      onDeleteAccountTap: () =>
+                          _showDeleteAccountModal(context),
                     ),
                     SizedBox(
                         height: MediaQuery.of(context).viewPadding.bottom + 16),
@@ -389,6 +391,112 @@ class _ClientProfilScreenState extends State<ClientProfilScreen> {
       },
     );
   }
+
+  void _showDeleteAccountModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.white,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        final bottom = MediaQuery.of(context).viewPadding.bottom;
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            AppConstants.paddingXLarge,
+            AppConstants.paddingXLarge,
+            AppConstants.paddingXLarge,
+            bottom + AppConstants.paddingXLarge,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'profil.delete_account_title'.tr(),
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontWeight: FontWeight.w600,
+                  fontSize: AppConstants.fontSizeTitle,
+                  color: AppColors.textDark,
+                ),
+              ),
+              const SizedBox(height: AppConstants.paddingMedium),
+              Text(
+                'profil.delete_account_message'.tr(),
+                style: TextStyle(
+                  fontFamily: AppConstants.fontFamilyInter,
+                  fontWeight: FontWeight.w400,
+                  fontSize: AppConstants.fontSizeXLarge,
+                  color: AppColors.textGray,
+                ),
+              ),
+              const SizedBox(height: AppConstants.fontSizeXXLarge),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        height: 44,
+                        alignment: Alignment.center,
+                        child: Text(
+                          'profil.cancel'.tr(),
+                          style: TextStyle(
+                            fontFamily: AppConstants.fontFamilyInter,
+                            fontWeight: FontWeight.w500,
+                            fontSize: AppConstants.fontSizeLarge,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: AppConstants.fontSizeXXLarge,
+                    color: AppColors.divider,
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        context
+                            .read<NotificationsBloc>()
+                            .add(const ResetNotificationsEvent());
+                        context
+                            .read<ProfileBloc>()
+                            .add(const ResetProfileEvent());
+                        context.read<UserBloc>().add(ClearUserProfile());
+                        SessionStorage.instance.clear();
+                        Navigator.of(context)
+                            .pushNamedAndRemoveUntil('/login', (r) => false);
+                      },
+                      child: Container(
+                        height: 44,
+                        alignment: Alignment.center,
+                        child: Text(
+                          'profil.delete_account'.tr(),
+                          style: const TextStyle(
+                            fontFamily: AppConstants.fontFamilyInter,
+                            fontWeight: FontWeight.w500,
+                            fontSize: AppConstants.fontSizeLarge,
+                            color: AppColors.deleteAccountButton,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -490,6 +598,7 @@ class _MenuSection extends StatelessWidget {
   final VoidCallback onBanquesTap;
   final VoidCallback onAbonnementTap;
   final VoidCallback onLogoutTap;
+  final VoidCallback onDeleteAccountTap;
 
   const _MenuSection({
     required this.selectedLanguage,
@@ -502,6 +611,7 @@ class _MenuSection extends StatelessWidget {
     required this.onBanquesTap,
     required this.onAbonnementTap,
     required this.onLogoutTap,
+    required this.onDeleteAccountTap,
   });
 
   @override
@@ -573,6 +683,23 @@ class _MenuSection extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+          // Bouton Supprimer mon compte
+          GestureDetector(
+            onTap: onDeleteAccountTap,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Text(
+                'profil.delete_account'.tr(),
+                style: const TextStyle(
+                  fontFamily: AppConstants.fontFamilySofiaSans,
+                  fontWeight: FontWeight.w500,
+                  fontSize: AppConstants.fontSizeLarge,
+                  color: AppColors.deleteAccountButton,
+                ),
               ),
             ),
           ),
@@ -701,5 +828,3 @@ class _LanguageMenuItem extends StatelessWidget {
     );
   }
 }
-
-

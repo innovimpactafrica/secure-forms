@@ -172,4 +172,7 @@ class AppColors {
   static const Color paymentMethodUnselectedBorder = Color(0x4D6B7280);
   static const Color paymentMethodUnselectedCircle = Color(0xFFE2BFB0);
   static const Color paymentSecureText = Color(0xFF6B7280);
+
+  // Bouton supprimer mon compte
+  static const Color deleteAccountButton = Color(0xFF9E9E9E);
 }
