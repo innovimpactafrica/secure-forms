@@ -20,6 +20,7 @@ import 'client_informations_personnelles_screen.dart';
 import 'mes_documents_screen.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_constants.dart';
+import 'package:quick_forms/core/utils/feature_flags.dart';
 
 class ClientProfilScreen extends StatefulWidget {
   final bool fromHome;
@@ -636,11 +637,14 @@ class _MenuSection extends StatelessWidget {
             title: 'profil.my_banks'.tr(),
             onTap: onBanquesTap,
           ),
-          _MenuItem(
-            iconPath: 'assets/icons/subscription.svg',
-            title: 'profil.subscriptions'.tr(),
-            onTap: onAbonnementTap,
-          ),
+          if (FeatureFlags.isSubscriptionVisible(
+  WidgetsBinding.instance.platformDispatcher.locale.countryCode,
+))
+  _MenuItem(
+    iconPath: 'assets/icons/subscription.svg',
+    title: 'profil.subscriptions'.tr(),
+    onTap: onAbonnementTap,
+  ),
           _MenuItem(
             iconPath: 'assets/icons/archive.svg',
             title: 'profil.archives'.tr(),

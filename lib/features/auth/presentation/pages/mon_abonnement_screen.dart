@@ -497,7 +497,7 @@ class _AbonnementCard extends StatelessWidget {
         // NOUVEAU
 if (isActive)
   Positioned(
-    top: 18, // = mÃªme valeur que le margin top de la carte
+    top: 18, // = meme valeur que le margin top de la carte
     left: 0,
     right: 0,
     child: Center(
