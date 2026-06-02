@@ -4,9 +4,8 @@ class FeatureFlags {
   /// - OU si la locale de l'appareil est Sénégal (fr_SN)
   static bool isSubscriptionVisible(String? countryCode) {
     final now = DateTime.now();
-    final releaseDate = DateTime(2026, 6, 5);
+    final releaseDate = DateTime(2026, 6, 7);
     final afterReleaseDate = now.isAfter(releaseDate);
-    final isSenegal = countryCode == 'SN';
-    return afterReleaseDate || isSenegal;
+    return afterReleaseDate ;
   }
 }
