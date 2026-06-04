@@ -73,6 +73,8 @@ class BaseUrl {
   static String pkiVerify(String requestId)       => '$currentBaseUrl/pki/verify/$requestId';
   static const String signedDocumentDeposit       = '$currentBaseUrl/clients/documents/signed';
 
+  static String checkBlacklist(String version) => '$currentBaseUrl/blacklist/check/$version';
+
   static String buildUrl(String endpoint, {Map<String, dynamic>? params}) {
     if (params == null || params.isEmpty) return endpoint;
     final queryString = params.entries.map((e) => '${e.key}=${e.value}').join('&');

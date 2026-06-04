@@ -51,6 +51,8 @@ import 'package:quick_forms/features/client/data/services/subscription_service.d
 import 'package:quick_forms/features/kyc/domain/bloc/kyc_bloc.dart';
 import 'package:quick_forms/features/kyc/presentation/pages/kyc_intro_page.dart';
 import 'package:quick_forms/core/utils/kyc_checker.dart';
+import 'package:quick_forms/core/utils/blacklist_service.dart';
+import 'package:quick_forms/core/utils/feature_flags.dart';
 import 'firebase_options.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'dart:ui';
@@ -105,6 +107,10 @@ void main() async {
     _firebaseAvailable = false;
     debugPrint('[Firebase] Non disponible, l\'app continue sans Firebase: $e');
   }
+
+  // Vérifier la blacklist avant le démarrage
+  await BlacklistService.instance.checkCurrentVersion();
+  debugPrint('[FeatureFlags] isSubscriptionVisible=${FeatureFlags.isSubscriptionVisible}');
 
   runApp(
     EasyLocalization(

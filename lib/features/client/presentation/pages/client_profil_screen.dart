@@ -637,9 +637,7 @@ class _MenuSection extends StatelessWidget {
             title: 'profil.my_banks'.tr(),
             onTap: onBanquesTap,
           ),
-          if (FeatureFlags.isSubscriptionVisible(
-  WidgetsBinding.instance.platformDispatcher.locale.countryCode,
-))
+          if (FeatureFlags.isSubscriptionVisible)
   _MenuItem(
     iconPath: 'assets/icons/subscription.svg',
     title: 'profil.subscriptions'.tr(),
