@@ -334,15 +334,22 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
     }
   }
 
-  void _navigateWhenReady(VoidCallback action) {
+ void _navigateWhenReady(VoidCallback action) {
+  if (navigatorKey.currentState != null) {
+    action();
+    return;
+  }
+  int attempts = 0;
+  Future.doWhile(() async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    attempts++;
     if (navigatorKey.currentState != null) {
       action();
-    } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        action();
-      });
+      return false;
     }
-  }
+    return attempts < 20;
+  });
+}
 
   Future<void> _handlePostPaymentNavigation() async {
     final token = UserSession.instance.accessToken;
