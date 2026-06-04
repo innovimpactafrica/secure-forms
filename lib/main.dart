@@ -138,19 +138,24 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
     }
   }
 
-  Future<void> _initDeepLinks() async {
-    _appLinks = AppLinks();
+ Future<void> _initDeepLinks() async {
+  _appLinks = AppLinks();
 
-    _appLinks.uriLinkStream.listen((uri) {
-      _handleDeepLink(uri);
-    });
+  // Liens reçus quand l'app est déjà ouverte
+  _appLinks.uriLinkStream.listen((uri) {
+    _handleDeepLink(uri);
+  });
 
-    final initialUri = await _appLinks.getInitialLink();
-    if (initialUri != null) {
-      await Future.delayed(const Duration(milliseconds: 800));
+  // Lien reçu quand l'app était fermée (cold start)
+  final initialUri = await _appLinks.getInitialLink();
+  if (initialUri != null) {
+    // Attendre que le SplashScreen finisse et que le navigator soit prêt
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 3000)); // > durée du splash (2.3s)
       _handleDeepLink(initialUri);
-    }
+    });
   }
+}
 
   void _handleDeepLink(Uri uri) {
     debugPrint('=== DEEP LINK RECU ===');
