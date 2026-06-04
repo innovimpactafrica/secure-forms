@@ -4,9 +4,9 @@
 <dict>
     <key>com.apple.developer.associated-domains</key>
     <array>
-        <string>applinks:secure.innovimpactdev.cloud?mode=developer</string>
-        <string>applinks:pdf.secure.innovimpactdev.cloud?mode=developer</string>
-        <string>applinks:api.secure.innovimpactdev.cloud?mode=developer</string>
+        <string>applinks:secure.innovimpactdev.cloud</string>
+        <string>applinks:pdf.secure.innovimpactdev.cloud</string>
+        <string>applinks:api.secure.innovimpactdev.cloud</string>
     </array>
 </dict>
 </plist>
