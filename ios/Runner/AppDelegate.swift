@@ -4,7 +4,7 @@ import Firebase
 import FirebaseMessaging
 import UserNotifications
 
-@main
+@UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
 
   override func application(
@@ -21,10 +21,10 @@ import UserNotifications
       FirebaseApp.configure()
     }
 
-    // 3. Delegate Messaging (obligatoire car FirebaseAppDelegateProxyEnabled = false)
+    // 3. Messaging delegate
     Messaging.messaging().delegate = self
 
-    // 4. Delegate notifications
+    // 4. Notifications delegate
     UNUserNotificationCenter.current().delegate = self
 
     // 5. Enregistrement APNs
@@ -38,7 +38,7 @@ import UserNotifications
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
   ) {
     Messaging.messaging().apnsToken = deviceToken
-    print("[APNs] ✅ Token APNs reçu et transmis à Firebase")
+    print("[APNs]  Token APNs reçu et transmis à Firebase")
     super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
   }
 
@@ -46,13 +46,13 @@ import UserNotifications
     _ application: UIApplication,
     didFailToRegisterForRemoteNotificationsWithError error: Error
   ) {
-    print("[APNs] ❌ ERREUR: \(error.localizedDescription)")
+    print("[APNs]  ERREUR: \(error.localizedDescription)")
   }
 }
 
 // MARK: - MessagingDelegate
 extension AppDelegate: MessagingDelegate {
   func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-    print("[FCM] ✅ Token FCM reçu: \(fcmToken ?? "nil")")
+    print("[FCM]  Token FCM reçu: \(fcmToken ?? "nil")")
   }
 }
