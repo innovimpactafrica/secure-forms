@@ -83,32 +83,22 @@ class FcmService {
   }
 
   static Future<void> _setupToken() async {
-  // iOS : le token APNs peut prendre quelques secondes
-  String? apnsToken;
-  for (int i = 0; i < 5; i++) {
-    apnsToken = await _messaging.getAPNSToken();
-    if (apnsToken != null) break;
-    await Future.delayed(const Duration(seconds: 1));
-  }
+    // TOKEN APNS IOS — si null, APNs n'est pas configuré
+    final apnsToken = await _messaging.getAPNSToken();
+    print('[FCM] ===== APNS TOKEN IOS =====');
+    print('[FCM] APNS: $apnsToken');
+    print('[FCM] =========================');
 
-  print('[FCM] ===== APNS TOKEN =====');
-  print('[FCM] APNS: $apnsToken');
-  print('[FCM] =======================');
-
-  if (apnsToken == null) {
-    print('[FCM] ⚠️ Token APNs null — notifications iOS bloquées');
-    return;
+    // TOKEN FCM
+    final token = await _messaging.getToken();
+    if (token != null) {
+      print('[FCM] ===== TON TOKEN FCM =====');
+      print('[FCM] $token');
+      print('[FCM] ===========================');
+      await sendTokenToBackend(token);
+    }
+    _messaging.onTokenRefresh.listen(sendTokenToBackend);
   }
-
-  final token = await _messaging.getToken();
-  if (token != null) {
-    print('[FCM] ===== FCM TOKEN =====');
-    print('[FCM] $token');
-    print('[FCM] ======================');
-    await sendTokenToBackend(token);
-  }
-  _messaging.onTokenRefresh.listen(sendTokenToBackend);
-}
 
   //  Envoi du token FCM au backend + abonnement au topic utilisateur
   static Future<void> sendTokenToBackend(String fcmToken) async {
