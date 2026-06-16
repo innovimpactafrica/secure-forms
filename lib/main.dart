@@ -58,10 +58,8 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'dart:ui';
 import 'package:flutter/services.dart';
 
-// Indique si Firebase a été initialisé avec succès
 bool _firebaseAvailable = false;
 
-// Handler background — ne s'enregistre que si Firebase est disponible
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundHandler(RemoteMessage message) async {
   try {
@@ -76,13 +74,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
-   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     systemNavigationBarColor: Colors.transparent,
     systemNavigationBarDividerColor: Colors.transparent,
   ));
 
-  // Initialisation Firebase optionnelle — l'app s'ouvre même sans GoogleService-Info.plist
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -90,17 +87,13 @@ void main() async {
     _firebaseAvailable = true;
     debugPrint('[Firebase] Initialisé avec succès');
 
-    // Crashlytics
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
     PlatformDispatcher.instance.onError = (error, stack) {
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
       return true;
     };
 
-    // Handler background FCM
     FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
-
-    // Initialiser FCM
     await FcmService.initialize();
 
   } catch (e) {
@@ -108,7 +101,6 @@ void main() async {
     debugPrint('[Firebase] Non disponible, l\'app continue sans Firebase: $e');
   }
 
-  // Vérifier la blacklist avant le démarrage
   await BlacklistService.instance.checkCurrentVersion();
   debugPrint('[FeatureFlags] isSubscriptionVisible=${FeatureFlags.isSubscriptionVisible}');
 
@@ -136,7 +128,6 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
   void initState() {
     super.initState();
     _initDeepLinks();
-    // Vérifier si app lancée depuis une notification (après le premier build)
     if (_firebaseAvailable) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         FcmService.checkInitialMessage();
@@ -144,24 +135,21 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
     }
   }
 
- Future<void> _initDeepLinks() async {
-  _appLinks = AppLinks();
+  Future<void> _initDeepLinks() async {
+    _appLinks = AppLinks();
 
-  // Liens reçus quand l'app est déjà ouverte
-  _appLinks.uriLinkStream.listen((uri) {
-    _handleDeepLink(uri);
-  });
-
-  // Lien reçu quand l'app était fermée (cold start)
-  final initialUri = await _appLinks.getInitialLink();
-  if (initialUri != null) {
-    // Attendre que le SplashScreen finisse et que le navigator soit prêt
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 3000)); // > durée du splash (2.3s)
-      _handleDeepLink(initialUri);
+    _appLinks.uriLinkStream.listen((uri) {
+      _handleDeepLink(uri);
     });
+
+    final initialUri = await _appLinks.getInitialLink();
+    if (initialUri != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await Future.delayed(const Duration(milliseconds: 3000));
+        _handleDeepLink(initialUri);
+      });
+    }
   }
-}
 
   void _handleDeepLink(Uri uri) {
     debugPrint('=== DEEP LINK RECU ===');
@@ -171,24 +159,23 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
     debugPrint('query: ${uri.queryParameters}');
     debugPrint('======================');
 
-    // Remote Sign : /mobile-sign?session=...
+    // ─────────────────────────────────────────────
+    // HTTPS : pdf.secure.innovimpactdev.cloud
+    // ─────────────────────────────────────────────
+
     if (uri.host == 'pdf.secure.innovimpactdev.cloud' &&
         uri.path.contains('/mobile-sign')) {
       final sessionId = uri.queryParameters['session'] ?? '';
       final isLoggedIn = UserSession.instance.accessToken.isNotEmpty;
-
       debugPrint('[SIGN] sessionId=$sessionId isLoggedIn=$isLoggedIn');
-
       if (!isLoggedIn) {
         _navigateWhenReady(() {
           navigatorKey.currentState?.pushNamedAndRemoveUntil(
-            AppRoutes.login,
-                (route) => false,
+            AppRoutes.login, (route) => false,
           );
         });
         return;
       }
-
       _navigateWhenReady(() {
         navigatorKey.currentState?.push(
           MaterialPageRoute(
@@ -199,8 +186,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
               onUserMismatch: () async {
                 await SessionStorage.instance.clear();
                 navigatorKey.currentState?.pushNamedAndRemoveUntil(
-                  AppRoutes.login,
-                      (route) => false,
+                  AppRoutes.login, (route) => false,
                 );
               },
             ),
@@ -210,7 +196,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
       return;
     }
 
-    // Ancien format remoteSign=1 (fallback)
+    // Ancien format remoteSign=1 (fallback Android)
     if (uri.host == 'pdf.secure.innovimpactdev.cloud' &&
         uri.queryParameters['remoteSign'] == '1') {
       String sessionId = uri.queryParameters['session'] ?? '';
@@ -222,8 +208,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
       if (!isLoggedIn) {
         _navigateWhenReady(() {
           navigatorKey.currentState?.pushNamedAndRemoveUntil(
-            AppRoutes.login,
-                (route) => false,
+            AppRoutes.login, (route) => false,
           );
         });
         return;
@@ -238,8 +223,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
               onUserMismatch: () async {
                 await SessionStorage.instance.clear();
                 navigatorKey.currentState?.pushNamedAndRemoveUntil(
-                  AppRoutes.login,
-                      (route) => false,
+                  AppRoutes.login, (route) => false,
                 );
               },
             ),
@@ -249,27 +233,33 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
       return;
     }
 
+    // ─────────────────────────────────────────────
+    // HTTPS : api.secure.innovimpactdev.cloud
+    // ─────────────────────────────────────────────
+
     if (uri.host == 'api.secure.innovimpactdev.cloud') {
       if (uri.path.contains('/payments/touchpay/return')) {
         debugPrint('[DeepLink] TouchPay return | source=${uri.queryParameters["source"]} | errorCode=${uri.queryParameters["errorCode"]}');
         _navigateWhenReady(() async {
           await _handlePostPaymentNavigation();
         });
-        return;
       }
+      return;
     }
+
+    // ─────────────────────────────────────────────
+    // HTTPS : secure.innovimpactdev.cloud
+    // ─────────────────────────────────────────────
 
     if (uri.host == 'secure.innovimpactdev.cloud') {
       if (uri.path.contains('/payment-result')) {
         _navigateWhenReady(() async {
           await _handlePostPaymentNavigation();
         });
-        return;
       } else if (uri.path.contains('/mobile/login')) {
         _navigateWhenReady(() {
           navigatorKey.currentState?.pushNamedAndRemoveUntil(
-            AppRoutes.login,
-                (route) => false,
+            AppRoutes.login, (route) => false,
           );
         });
       } else if (uri.path.contains('setup-password')) {
@@ -292,7 +282,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
                 jwt: jwt,
               ),
             ),
-                (route) => false,
+            (route) => false,
           );
         });
       } else if (uri.path.contains('/sign')) {
@@ -313,50 +303,105 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
           });
         }
       }
-    } else if (uri.scheme == 'secureforms' && uri.host == 'kyc') {
-      final jwt = uri.queryParameters['jwt'] ?? '';
-      _navigateWhenReady(() {
-        navigatorKey.currentState?.pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (_) => KycGatePage(
-              fromDeepLink: true,
-              jwt: jwt,
-            ),
-          ),
+      return;
+    }
+
+    // ─────────────────────────────────────────────
+    // CUSTOM SCHEME : secureforms://
+    // ─────────────────────────────────────────────
+
+    if (uri.scheme == 'secureforms') {
+      switch (uri.host) {
+
+        case 'sign':
+          final sessionId = uri.queryParameters['session'] ?? '';
+          final isLoggedIn = UserSession.instance.accessToken.isNotEmpty;
+          if (!isLoggedIn) {
+            _navigateWhenReady(() {
+              navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                AppRoutes.login, (route) => false,
+              );
+            });
+            return;
+          }
+          _navigateWhenReady(() {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (_) => SignatureScreen(
+                  requestId: sessionId.isNotEmpty ? sessionId : 'session-inconnue',
+                  sessionId: sessionId.isNotEmpty ? sessionId : null,
+                  checkUserMatch: true,
+                  onUserMismatch: () async {
+                    await SessionStorage.instance.clear();
+                    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                      AppRoutes.login, (route) => false,
+                    );
+                  },
+                ),
+              ),
+            );
+          });
+          break;
+
+        case 'setup-password':
+          final token = uri.queryParameters['token'] ?? '';
+          if (token.isNotEmpty) {
+            _navigateWhenReady(() {
+              navigatorKey.currentState?.pushNamed(
+                AppRoutes.createPassword,
+                arguments: token,
+              );
+            });
+          }
+          break;
+
+        case 'kyc':
+          final jwt = uri.queryParameters['jwt'] ?? '';
+          _navigateWhenReady(() {
+            navigatorKey.currentState?.pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => KycGatePage(
+                  fromDeepLink: true,
+                  jwt: jwt,
+                ),
+              ),
               (route) => false,
-        );
-      });
-    } else if (uri.scheme == 'secureforms' && uri.host == 'payment-result') {
-      debugPrint('[DeepLink] secureforms://payment-result recu');
-      _navigateWhenReady(() async {
-        await _handlePostPaymentNavigation();
-      });
+            );
+          });
+          break;
+
+        case 'payment-result':
+          debugPrint('[DeepLink] secureforms://payment-result recu');
+          _navigateWhenReady(() async {
+            await _handlePostPaymentNavigation();
+          });
+          break;
+      }
     }
   }
 
- void _navigateWhenReady(VoidCallback action) {
-  if (navigatorKey.currentState != null) {
-    action();
-    return;
-  }
-  int attempts = 0;
-  Future.doWhile(() async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    attempts++;
+  void _navigateWhenReady(VoidCallback action) {
     if (navigatorKey.currentState != null) {
       action();
-      return false;
+      return;
     }
-    return attempts < 20;
-  });
-}
+    int attempts = 0;
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(milliseconds: 200));
+      attempts++;
+      if (navigatorKey.currentState != null) {
+        action();
+        return false;
+      }
+      return attempts < 20;
+    });
+  }
 
   Future<void> _handlePostPaymentNavigation() async {
     final token = UserSession.instance.accessToken;
     if (token.isEmpty) {
       navigatorKey.currentState?.pushNamedAndRemoveUntil(
-        AppRoutes.login,
-            (route) => false,
+        AppRoutes.login, (route) => false,
       );
       return;
     }
@@ -365,8 +410,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
         .getEffectiveSubscription(accessToken: token);
     if (sub == null || !sub.isActive) {
       navigatorKey.currentState?.pushNamedAndRemoveUntil(
-        AppRoutes.activationRequise,
-            (route) => false,
+        AppRoutes.activationRequise, (route) => false,
       );
       return;
     }
@@ -382,12 +426,11 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
             child: const KycIntroPage(),
           ),
         ),
-            (route) => false,
+        (route) => false,
       );
     } else {
       navigatorKey.currentState?.pushNamedAndRemoveUntil(
-        AppRoutes.clientHome,
-            (route) => false,
+        AppRoutes.clientHome, (route) => false,
       );
     }
   }
@@ -460,8 +503,7 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
           AppRoutes.login: (context) => const LoginScreen(),
           '/success': (context) => const SuccessScreen(),
           AppRoutes.clientHome: (context) => const MainShell(),
-          AppRoutes.resumeRegistration: (context) =>
-          const ResumeRegistrationScreen(),
+          AppRoutes.resumeRegistration: (context) => const ResumeRegistrationScreen(),
           AppRoutes.forgotPassword: (context) => const ForgotPasswordScreen(),
           AppRoutes.passwordUpdated: (context) => const PasswordUpdatedScreen(),
           AppRoutes.clientDemandes: (context) => BlocProvider(
@@ -469,32 +511,23 @@ class _QuickFormsAppState extends State<QuickFormsApp> {
             child: const ClientDemandesScreen(),
           ),
           AppRoutes.clientBanques: (context) => const MesBanquesScreen(),
-          AppRoutes.clientFormulaires: (context) =>
-          const ClientFormulairesScreen(),
+          AppRoutes.clientFormulaires: (context) => const ClientFormulairesScreen(),
           AppRoutes.clientMethode: (context) => const ClientMethodeScreen(),
-          AppRoutes.nouvelleDemandeStep7: (context) =>
-          const NouvelleDemandeStep7Screen(),
-          AppRoutes.nouvelleDemandeStep8: (context) =>
-          const NouvelleDemandeStep8Screen(),
-          AppRoutes.nouvelleDemandeStep9: (context) =>
-          const NouvelleDemandeStep9Screen(),
+          AppRoutes.nouvelleDemandeStep7: (context) => const NouvelleDemandeStep7Screen(),
+          AppRoutes.nouvelleDemandeStep8: (context) => const NouvelleDemandeStep8Screen(),
+          AppRoutes.nouvelleDemandeStep9: (context) => const NouvelleDemandeStep9Screen(),
           AppRoutes.detailDemande: (context) => const DetailDemandeScreen(),
           AppRoutes.detailVirement: (context) => const DetailVirementScreen(),
           AppRoutes.detailActeVente: (context) => const DetailActeVenteScreen(),
           AppRoutes.detailPret: (context) => const DetailPretScreen(),
-          AppRoutes.detailOuvertureCompte: (context) =>
-          const DetailOuvertureCompteScreen(),
-          AppRoutes.detailOuvertureCompteBrouillon: (context) =>
-          const DetailOuvertureCompteBrouillonScreen(),
+          AppRoutes.detailOuvertureCompte: (context) => const DetailOuvertureCompteScreen(),
+          AppRoutes.detailOuvertureCompteBrouillon: (context) => const DetailOuvertureCompteBrouillonScreen(),
           AppRoutes.clientProfil: (context) => const ClientProfilScreen(),
-          AppRoutes.activationRequise: (context) =>
-          const ActivationRequiseScreen(),
+          AppRoutes.activationRequise: (context) => const ActivationRequiseScreen(),
           AppRoutes.plans: (context) => const PlansScreen(),
           AppRoutes.monAbonnement: (context) => const MonAbonnementScreen(),
-          '/detail-ouverture-compte-continuer': (context) =>
-          const DetailOuvertureCompteContinuerScreen(),
-          AppRoutes.clientDemandeDetail: (context) =>
-          const ClientDemandeDetailScreen(),
+          '/detail-ouverture-compte-continuer': (context) => const DetailOuvertureCompteContinuerScreen(),
+          AppRoutes.clientDemandeDetail: (context) => const ClientDemandeDetailScreen(),
         },
       ),
     );
