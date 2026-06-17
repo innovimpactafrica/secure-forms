@@ -62,8 +62,6 @@ PODS:
   - nanopb/encode (3.30910.0)
   - open_filex (0.0.2):
     - Flutter
-  - permission_handler_apple (9.3.0):
-    - Flutter
   - PromisesObjC (2.4.1)
 
 DEPENDENCIES:
@@ -73,7 +71,6 @@ DEPENDENCIES:
   - google_mlkit_commons (from `.symlinks/plugins/google_mlkit_commons/ios`)
   - google_mlkit_text_recognition (from `.symlinks/plugins/google_mlkit_text_recognition/ios`)
   - open_filex (from `.symlinks/plugins/open_filex/ios`)
-  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
 
 SPEC REPOS:
   trunk:
@@ -103,8 +100,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/google_mlkit_text_recognition/ios"
   open_filex:
     :path: ".symlinks/plugins/open_filex/ios"
-  permission_handler_apple:
-    :path: ".symlinks/plugins/permission_handler_apple/ios"
 
 SPEC CHECKSUMS:
   device_info_plus: 71ffc6ab7634ade6267c7a93088ed7e4f74e5896
@@ -124,7 +119,6 @@ SPEC CHECKSUMS:
   MLKitVision: 39a5a812db83c4a0794445088e567f3631c11961
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   open_filex: 432f3cd11432da3e39f47fcc0df2b1603854eff1
-  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
 
 PODFILE CHECKSUM: ca20a0c487468742b76435457f71b0c291816f8b
