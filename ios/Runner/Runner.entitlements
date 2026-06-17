@@ -8,5 +8,7 @@
         <string>applinks:pdf.secure.innovimpactdev.cloud</string>
         <string>applinks:api.secure.innovimpactdev.cloud</string>
     </array>
+    <key>aps-environment</key>
+    <string>development</string>
 </dict>
 </plist>

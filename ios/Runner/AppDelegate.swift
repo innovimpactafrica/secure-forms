@@ -4,18 +4,17 @@ import Firebase
 import FirebaseMessaging
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, MessagingDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    // Firebase optionnel — ne crashe pas si GoogleService-Info.plist absent
     if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
        let _ = NSDictionary(contentsOfFile: path) {
       FirebaseApp.configure()
     }
 
-    // IMPORTANT iOS : connecter APNs à Firebase
+    Messaging.messaging().delegate = self
     UNUserNotificationCenter.current().delegate = self
     application.registerForRemoteNotifications()
 
@@ -23,7 +22,6 @@ import FirebaseMessaging
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  // iOS envoie le token APNs à Firebase
   override func application(
     _ application: UIApplication,
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
@@ -33,11 +31,14 @@ import FirebaseMessaging
     super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
   }
 
-  // Si APNs échoue — affiche la raison
   override func application(
     _ application: UIApplication,
     didFailToRegisterForRemoteNotificationsWithError error: Error
   ) {
     print("[APNs] ERREUR enregistrement APNs: \(error.localizedDescription)")
+  }
+
+  func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+    print("[FCM] Token FCM reçu: \(fcmToken ?? "nil")")
   }
 }
